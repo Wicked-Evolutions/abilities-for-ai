@@ -2,12 +2,14 @@
 .DS_Store
 .AppleDouble
 .LSOverride
+Thumbs.db
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-*
 *~
 
 # Node
