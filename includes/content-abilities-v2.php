@@ -78,7 +78,8 @@ function wp_abilities_suite_register_content_abilities() {
                 'destructive' => false,
                 'idempotent' => true
             ),
-            'show_in_rest' => true
+            'show_in_rest' => true,
+            'mcp' => array( 'public' => true, 'type' => 'tool' ),
         )
     ));
 
@@ -108,7 +109,8 @@ function wp_abilities_suite_register_content_abilities() {
                 'destructive' => false,
                 'idempotent' => true
             ),
-            'show_in_rest' => true
+            'show_in_rest' => true,
+            'mcp' => array( 'public' => true, 'type' => 'tool' ),
         )
     ));
 

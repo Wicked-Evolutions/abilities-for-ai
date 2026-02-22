@@ -1,18 +1,21 @@
 <?php
 /**
  * Plugin Name: WordPress Abilities Suite
- * Description: Comprehensive WordPress management abilities for MCP - Content, Taxonomies, Plugins, Media, Users, and Comments
- * Version: 1.0.5
+ * Description: Comprehensive WordPress management abilities for MCP - Content, Taxonomies, Plugins, Media, Users, Comments, and Menus
+ * Version: 2.0.0
  * Author: Influencentricity
+ * Author URI: https://influencentricity.com
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Requires PHP: 7.4
- * Requires at least: 6.0
+ * Requires at least: 6.9
  * Network: true
  */
 
 defined( 'ABSPATH' ) || exit;
 
 // Define plugin constants
-define( 'WP_ABILITIES_SUITE_VERSION', '1.0.5' );
+define( 'WP_ABILITIES_SUITE_VERSION', '2.0.0' );
 define( 'WP_ABILITIES_SUITE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WP_ABILITIES_SUITE_URL', plugin_dir_url( __FILE__ ) );
 
@@ -26,6 +29,7 @@ require_once WP_ABILITIES_SUITE_PATH . 'includes/plugin-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/media-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/user-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/comment-abilities.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/menu-abilities.php';
 
 // Load admin dashboard
 if ( is_admin() ) {

@@ -108,7 +108,8 @@ add_action( 'wp_abilities_api_init', function() {
                 'destructive' => false,
                 'idempotent' => true
             ),
-            'show_in_rest' => true
+            'show_in_rest' => true,
+            'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
 
@@ -179,7 +180,8 @@ add_action( 'wp_abilities_api_init', function() {
                 'destructive' => false,
                 'idempotent' => true
             ),
-            'show_in_rest' => true
+            'show_in_rest' => true,
+            'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
 
@@ -286,7 +288,8 @@ add_action( 'wp_abilities_api_init', function() {
                 'destructive' => false,
                 'idempotent' => false
             ),
-            'show_in_rest' => true
+            'show_in_rest' => true,
+            'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
 
@@ -398,7 +401,8 @@ add_action( 'wp_abilities_api_init', function() {
                 'destructive' => false,
                 'idempotent' => true
             ),
-            'show_in_rest' => true
+            'show_in_rest' => true,
+            'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
 
@@ -466,7 +470,8 @@ add_action( 'wp_abilities_api_init', function() {
                 'destructive' => true,
                 'idempotent' => true
             ),
-            'show_in_rest' => true
+            'show_in_rest' => true,
+            'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
 

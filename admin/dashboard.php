@@ -1,345 +1,494 @@
 <?php
 /**
  * WordPress Abilities Suite Dashboard
- * Admin interface for viewing and managing abilities
+ *
+ * Filterable explorer for ALL registered WordPress abilities across all plugins.
+ * Replaces the flat listing with multi-level Source → Category → Type filtering.
+ *
+ * @package WordPress_Abilities_Suite
  */
 
 defined( 'ABSPATH' ) || exit;
 
 class WP_Abilities_Suite_Dashboard {
 
-    public function __construct() {
-        add_action( 'network_admin_menu', array( $this, 'add_menu_pages' ) );
-        add_action( 'admin_menu', array( $this, 'add_menu_pages' ) );
-        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-    }
+	/**
+	 * Source detection map: category slug → human-readable source.
+	 *
+	 * Each abilities plugin uses unique category slugs, so mapping is deterministic.
+	 */
+	private static $source_map = array(
+		// WordPress Core (wordpress-abilities-suite).
+		'content'     => 'WordPress Core',
+		'taxonomies'  => 'WordPress Core',
+		'plugins'     => 'WordPress Core',
+		'media'       => 'WordPress Core',
+		'users'       => 'WordPress Core',
+		'comments'    => 'WordPress Core',
+		'menus'       => 'WordPress Core',
+		'site'        => 'WordPress Core',
+		'user'        => 'WordPress Core',
+		// MCP Adapter (wp-mcp-adapter).
+		'mcp-adapter' => 'MCP Adapter',
+		// Fluent Suite (fluent-abilities).
+		'fluent-crm'       => 'FluentCRM',
+		'fluent-community' => 'Fluent Community',
+		'fluent-forms'     => 'Fluent Forms',
+		'fluent-support'   => 'Fluent Support',
+		'fluent-boards'    => 'Fluent Boards',
+		'fluent-booking'   => 'FluentBooking',
+		'fluent-smtp'      => 'FluentSMTP',
+		'fluent-auth'      => 'FluentAuth',
+		'fluent-snippets'  => 'Fluent Snippets',
+		'fluent-messaging' => 'Fluent Messaging',
+		'fluent'           => 'Fluent Suite',
+		// Theme & Blocks.
+		'astra'   => 'Astra',
+		'spectra' => 'Spectra',
+	);
 
-    public function add_menu_pages() {
-        // Main menu page
-        add_menu_page(
-            'WordPress Abilities Suite',
-            'Abilities Suite',
-            'manage_options',
-            'wp-abilities-suite',
-            array( $this, 'render_dashboard' ),
-            'dashicons-admin-tools',
-            30
-        );
+	/**
+	 * Source CSS class map.
+	 */
+	private static $source_css = array(
+		'WordPress Core'  => 'source-wp-core',
+		'FluentCRM'       => 'source-fluent',
+		'Fluent Community' => 'source-fluent',
+		'Fluent Forms'    => 'source-fluent',
+		'Fluent Support'  => 'source-fluent',
+		'Fluent Boards'   => 'source-fluent',
+		'FluentBooking'   => 'source-fluent',
+		'FluentSMTP'      => 'source-fluent',
+		'FluentAuth'      => 'source-fluent',
+		'Fluent Snippets'  => 'source-fluent',
+		'Fluent Messaging' => 'source-fluent',
+		'Fluent Suite'    => 'source-fluent',
+		'Astra'           => 'source-astra',
+		'Spectra'         => 'source-spectra',
+		'MCP Adapter'     => 'source-mcp',
+	);
 
-        // Submenu pages
-        add_submenu_page(
-            'wp-abilities-suite',
-            'All Abilities',
-            'All Abilities',
-            'manage_options',
-            'wp-abilities-suite',
-            array( $this, 'render_dashboard' )
-        );
+	public function __construct() {
+		add_action( 'network_admin_menu', array( $this, 'add_menu_pages' ) );
+		add_action( 'admin_menu', array( $this, 'add_menu_pages' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+	}
 
-        add_submenu_page(
-            'wp-abilities-suite',
-            'Test Abilities',
-            'Test Abilities',
-            'manage_options',
-            'wp-abilities-test',
-            array( $this, 'render_test_page' )
-        );
+	public function add_menu_pages() {
+		add_menu_page(
+			'WordPress Abilities Suite',
+			'Abilities Suite',
+			'manage_options',
+			'wp-abilities-suite',
+			array( $this, 'render_explorer' ),
+			'dashicons-admin-tools',
+			30
+		);
 
-        add_submenu_page(
-            'wp-abilities-suite',
-            'Settings',
-            'Settings',
-            'manage_options',
-            'wp-abilities-settings',
-            array( $this, 'render_settings' )
-        );
-    }
+		add_submenu_page(
+			'wp-abilities-suite',
+			'All Abilities',
+			'All Abilities',
+			'manage_options',
+			'wp-abilities-suite',
+			array( $this, 'render_explorer' )
+		);
 
-    public function enqueue_assets( $hook ) {
-        if ( strpos( $hook, 'wp-abilities' ) === false ) {
-            return;
-        }
+		add_submenu_page(
+			'wp-abilities-suite',
+			'Settings',
+			'Settings',
+			'manage_options',
+			'wp-abilities-settings',
+			array( $this, 'render_settings' )
+		);
+	}
 
-        wp_enqueue_style(
-            'wp-abilities-suite-admin',
-            WP_ABILITIES_SUITE_URL . 'admin/css/dashboard.css',
-            array(),
-            WP_ABILITIES_SUITE_VERSION
-        );
-    }
+	public function enqueue_assets( $hook ) {
+		if ( strpos( $hook, 'wp-abilities' ) === false ) {
+			return;
+		}
 
-    public function render_dashboard() {
-        ?>
-        <div class="wrap">
-            <h1>WordPress Abilities Suite</h1>
-            <p>Manage and monitor all registered WordPress abilities for MCP integration.</p>
+		wp_enqueue_style(
+			'wp-abilities-suite-admin',
+			WP_ABILITIES_SUITE_URL . 'admin/css/dashboard.css',
+			array(),
+			WP_ABILITIES_SUITE_VERSION
+		);
+	}
 
-            <?php $this->render_stats_cards(); ?>
-            <?php $this->render_abilities_table(); ?>
-        </div>
-        <?php
-    }
+	/**
+	 * Get the source label for a category slug.
+	 */
+	public static function get_source( $category ) {
+		return self::$source_map[ $category ] ?? 'Other';
+	}
 
-    private function render_stats_cards() {
-        $abilities = function_exists( 'wp_get_abilities' ) ? wp_get_abilities() : array();
+	/**
+	 * Get the CSS class for a source label.
+	 */
+	public static function get_source_css( $source ) {
+		return self::$source_css[ $source ] ?? 'source-other';
+	}
 
-        // Convert WP_Ability objects to arrays for display
-        $abilities_array = array();
-        foreach ( $abilities as $name => $ability ) {
-            if ( is_object( $ability ) && method_exists( $ability, 'get_label' ) ) {
-                $abilities_array[$name] = array(
-                    'label' => $ability->get_label(),
-                    'description' => $ability->get_description(),
-                    'category' => $ability->get_category(),
-                    'meta' => $ability->get_meta(),
-                );
-            }
-        }
-        $abilities = $abilities_array;
+	/**
+	 * Load and convert all abilities to arrays.
+	 */
+	private function get_abilities_array() {
+		$abilities = function_exists( 'wp_get_abilities' ) ? wp_get_abilities() : array();
+		$result = array();
 
-        $categories = array();
-        foreach ( $abilities as $ability ) {
-            $cat = $ability['category'] ?? 'uncategorized';
-            if ( ! isset( $categories[$cat] ) ) {
-                $categories[$cat] = 0;
-            }
-            $categories[$cat]++;
-        }
+		foreach ( $abilities as $name => $ability ) {
+			if ( ! is_object( $ability ) || ! method_exists( $ability, 'get_label' ) ) {
+				continue;
+			}
 
-        ?>
-        <div class="wp-abilities-stats">
-            <div class="stats-card">
-                <h3><?php echo count( $abilities ); ?></h3>
-                <p>Total Abilities</p>
-            </div>
-            <div class="stats-card">
-                <h3><?php echo count( $categories ); ?></h3>
-                <p>Categories</p>
-            </div>
-            <div class="stats-card">
-                <h3><?php echo WP_ABILITIES_SUITE_VERSION; ?></h3>
-                <p>Plugin Version</p>
-            </div>
-        </div>
+			$category = $ability->get_category();
+			$meta     = $ability->get_meta();
+			$source   = self::get_source( $category );
+			$readonly = ! empty( $meta['annotations']['readonly'] );
 
-        <div class="wp-abilities-categories">
-            <h2>Abilities by Category</h2>
-            <table class="wp-list-table widefat fixed striped">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Count</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ( $categories as $category => $count ) : ?>
-                        <tr>
-                            <td><strong><?php echo esc_html( ucfirst( $category ) ); ?></strong></td>
-                            <td><?php echo esc_html( $count ); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php
-    }
+			$result[ $name ] = array(
+				'label'         => $ability->get_label(),
+				'description'   => $ability->get_description(),
+				'category'      => $category,
+				'source'        => $source,
+				'readonly'      => $readonly,
+				'destructive'   => ! empty( $meta['annotations']['destructive'] ),
+				'idempotent'    => ! empty( $meta['annotations']['idempotent'] ),
+				'input_schema'  => $ability->get_input_schema(),
+				'output_schema' => $ability->get_output_schema(),
+				'meta'          => $meta,
+			);
+		}
 
-    private function render_abilities_table() {
-        $abilities = function_exists( 'wp_get_abilities' ) ? wp_get_abilities() : array();
+		// Sort by source → category → name.
+		uasort( $result, function( $a, $b ) {
+			$cmp = strcmp( $a['source'], $b['source'] );
+			if ( $cmp !== 0 ) return $cmp;
+			$cmp = strcmp( $a['category'], $b['category'] );
+			if ( $cmp !== 0 ) return $cmp;
+			return 0; // Keep original key order within same category.
+		});
 
-        // Convert WP_Ability objects to arrays for display
-        $abilities_array = array();
-        foreach ( $abilities as $name => $ability ) {
-            if ( is_object( $ability ) && method_exists( $ability, 'get_label' ) ) {
-                $abilities_array[$name] = array(
-                    'label' => $ability->get_label(),
-                    'description' => $ability->get_description(),
-                    'category' => $ability->get_category(),
-                    'meta' => $ability->get_meta(),
-                );
-            }
-        }
-        $abilities = $abilities_array;
+		return $result;
+	}
 
-        // Filter by category if requested
-        $category_filter = isset( $_GET['category'] ) ? sanitize_text_field( $_GET['category'] ) : '';
-        if ( $category_filter ) {
-            $abilities = array_filter( $abilities, function( $ability ) use ( $category_filter ) {
-                return ( $ability['category'] ?? '' ) === $category_filter;
-            });
-        }
+	/**
+	 * Render the main explorer page.
+	 */
+	public function render_explorer() {
+		$abilities = $this->get_abilities_array();
 
-        ?>
-        <div class="wp-abilities-list">
-            <h2>All Registered Abilities</h2>
+		// Collect unique sources and categories.
+		$all_sources    = array();
+		$all_categories = array();
+		foreach ( $abilities as $a ) {
+			$all_sources[ $a['source'] ] = ( $all_sources[ $a['source'] ] ?? 0 ) + 1;
+			$all_categories[ $a['category'] ] = ( $all_categories[ $a['category'] ] ?? 0 ) + 1;
+		}
+		ksort( $all_sources );
+		ksort( $all_categories );
 
-            <?php if ( empty( $abilities ) ) : ?>
-                <div class="notice notice-warning">
-                    <p>No abilities registered yet. Make sure the WordPress Abilities API plugin is active.</p>
-                </div>
-            <?php else : ?>
-                <table class="wp-list-table widefat fixed striped">
-                    <thead>
-                        <tr>
-                            <th style="width: 30%;">Ability Name</th>
-                            <th style="width: 20%;">Category</th>
-                            <th style="width: 35%;">Description</th>
-                            <th style="width: 15%;">Annotations</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ( $abilities as $name => $ability ) : ?>
-                            <tr>
-                                <td>
-                                    <strong><?php echo esc_html( $name ); ?></strong>
-                                    <div class="row-actions">
-                                        <a href="<?php echo admin_url( 'admin.php?page=wp-abilities-test&ability=' . urlencode( $name ) ); ?>">Test</a>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="ability-category">
-                                        <?php echo esc_html( ucfirst( $ability['category'] ?? 'uncategorized' ) ); ?>
-                                    </span>
-                                </td>
-                                <td><?php echo esc_html( $ability['description'] ?? 'No description' ); ?></td>
-                                <td>
-                                    <?php
-                                    $annotations = $ability['meta']['annotations'] ?? array();
-                                    $badges = array();
+		// Read filters.
+		$source_filter   = isset( $_GET['source'] ) ? sanitize_text_field( $_GET['source'] ) : '';
+		$category_filter = isset( $_GET['category'] ) ? sanitize_text_field( $_GET['category'] ) : '';
+		$type_filter     = isset( $_GET['type'] ) ? sanitize_text_field( $_GET['type'] ) : '';
 
-                                    if ( ! empty( $annotations['readonly'] ) ) {
-                                        $badges[] = '<span class="badge badge-readonly">Read-only</span>';
-                                    }
-                                    if ( ! empty( $annotations['destructive'] ) ) {
-                                        $badges[] = '<span class="badge badge-destructive">Destructive</span>';
-                                    }
-                                    if ( ! empty( $annotations['idempotent'] ) ) {
-                                        $badges[] = '<span class="badge badge-idempotent">Idempotent</span>';
-                                    }
+		// Apply filters.
+		$filtered = $abilities;
+		if ( $source_filter ) {
+			$filtered = array_filter( $filtered, function( $a ) use ( $source_filter ) {
+				return $a['source'] === $source_filter;
+			});
+		}
+		if ( $category_filter ) {
+			$filtered = array_filter( $filtered, function( $a ) use ( $category_filter ) {
+				return $a['category'] === $category_filter;
+			});
+		}
+		if ( $type_filter === 'read' ) {
+			$filtered = array_filter( $filtered, function( $a ) { return $a['readonly']; });
+		} elseif ( $type_filter === 'write' ) {
+			$filtered = array_filter( $filtered, function( $a ) { return ! $a['readonly']; });
+		}
 
-                                    echo implode( ' ', $badges );
-                                    ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endif; ?>
-        </div>
-        <?php
-    }
+		// Categories available for current source filter.
+		$available_categories = $all_categories;
+		if ( $source_filter ) {
+			$available_categories = array();
+			foreach ( $abilities as $a ) {
+				if ( $a['source'] === $source_filter ) {
+					$available_categories[ $a['category'] ] = ( $available_categories[ $a['category'] ] ?? 0 ) + 1;
+				}
+			}
+			ksort( $available_categories );
+		}
 
-    public function render_test_page() {
-        $ability_name = isset( $_GET['ability'] ) ? sanitize_text_field( $_GET['ability'] ) : '';
-        $abilities = function_exists( 'wp_get_abilities' ) ? wp_get_abilities() : array();
+		?>
+		<div class="wrap">
+			<h1>Abilities Explorer</h1>
+			<p>Browse and inspect all <?php echo count( $abilities ); ?> registered WordPress abilities across all plugins.</p>
 
-        // Convert WP_Ability objects to arrays for display
-        $abilities_array = array();
-        foreach ( $abilities as $name => $ability ) {
-            if ( is_object( $ability ) && method_exists( $ability, 'get_label' ) ) {
-                $abilities_array[$name] = array(
-                    'label' => $ability->get_label(),
-                    'description' => $ability->get_description(),
-                    'category' => $ability->get_category(),
-                    'input_schema' => $ability->get_input_schema(),
-                    'output_schema' => $ability->get_output_schema(),
-                    'meta' => $ability->get_meta(),
-                );
-            }
-        }
-        $abilities = $abilities_array;
+			<?php $this->render_stats( $abilities, $all_sources, $all_categories ); ?>
+			<?php $this->render_filter_bar( $all_sources, $available_categories, $source_filter, $category_filter, $type_filter ); ?>
+			<?php $this->render_table( $filtered, $source_filter, $category_filter, $type_filter ); ?>
+		</div>
 
-        ?>
-        <div class="wrap">
-            <h1>Test Abilities</h1>
+		<script>
+		function toggleAbilityDetail(id) {
+			var row = document.getElementById(id);
+			if (row) {
+				row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+			}
+		}
+		</script>
+		<?php
+	}
 
-            <div class="wp-abilities-test">
-                <form method="get">
-                    <input type="hidden" name="page" value="wp-abilities-test">
-                    <label for="ability-select">Select Ability:</label>
-                    <select name="ability" id="ability-select" onchange="this.form.submit()">
-                        <option value="">-- Choose an ability --</option>
-                        <?php foreach ( $abilities as $name => $ability ) : ?>
-                            <option value="<?php echo esc_attr( $name ); ?>" <?php selected( $ability_name, $name ); ?>>
-                                <?php echo esc_html( $name ); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </form>
+	/**
+	 * Stats cards.
+	 */
+	private function render_stats( $abilities, $sources, $categories ) {
+		?>
+		<div class="wp-abilities-stats">
+			<div class="stats-card">
+				<h3><?php echo count( $abilities ); ?></h3>
+				<p>Total Abilities</p>
+			</div>
+			<div class="stats-card">
+				<h3><?php echo count( $categories ); ?></h3>
+				<p>Categories</p>
+			</div>
+			<div class="stats-card">
+				<h3><?php echo count( $sources ); ?></h3>
+				<p>Sources</p>
+			</div>
+			<div class="stats-card">
+				<h3><?php echo esc_html( WP_ABILITIES_SUITE_VERSION ); ?></h3>
+				<p>Suite Version</p>
+			</div>
+		</div>
+		<?php
+	}
 
-                <?php if ( $ability_name && isset( $abilities[$ability_name] ) ) : ?>
-                    <?php $ability = $abilities[$ability_name]; ?>
+	/**
+	 * Filter bar with three dropdowns.
+	 */
+	private function render_filter_bar( $sources, $categories, $source_filter, $category_filter, $type_filter ) {
+		?>
+		<div class="abilities-filter-bar">
+			<form method="get">
+				<input type="hidden" name="page" value="wp-abilities-suite">
 
-                    <div class="ability-details">
-                        <h2><?php echo esc_html( $ability_name ); ?></h2>
-                        <p><strong>Description:</strong> <?php echo esc_html( $ability['description'] ?? 'No description' ); ?></p>
-                        <p><strong>Category:</strong> <?php echo esc_html( $ability['category'] ?? 'uncategorized' ); ?></p>
+				<label for="filter-source">Source:</label>
+				<select name="source" id="filter-source">
+					<option value="">All Sources</option>
+					<?php foreach ( $sources as $source => $count ) : ?>
+						<option value="<?php echo esc_attr( $source ); ?>" <?php selected( $source_filter, $source ); ?>>
+							<?php echo esc_html( $source ); ?> (<?php echo $count; ?>)
+						</option>
+					<?php endforeach; ?>
+				</select>
 
-                        <h3>Input Schema</h3>
-                        <pre><?php echo esc_html( json_encode( $ability['input_schema'] ?? array(), JSON_PRETTY_PRINT ) ); ?></pre>
+				<label for="filter-category">Category:</label>
+				<select name="category" id="filter-category">
+					<option value="">All Categories</option>
+					<?php foreach ( $categories as $cat => $count ) : ?>
+						<option value="<?php echo esc_attr( $cat ); ?>" <?php selected( $category_filter, $cat ); ?>>
+							<?php echo esc_html( $cat ); ?> (<?php echo $count; ?>)
+						</option>
+					<?php endforeach; ?>
+				</select>
 
-                        <h3>Output Schema</h3>
-                        <pre><?php echo esc_html( json_encode( $ability['output_schema'] ?? array(), JSON_PRETTY_PRINT ) ); ?></pre>
+				<label for="filter-type">Type:</label>
+				<select name="type" id="filter-type">
+					<option value="">All Types</option>
+					<option value="read" <?php selected( $type_filter, 'read' ); ?>>Read-only</option>
+					<option value="write" <?php selected( $type_filter, 'write' ); ?>>Write</option>
+				</select>
 
-                        <div class="notice notice-info">
-                            <p><strong>Note:</strong> To test this ability, use the MCP client or WordPress REST API endpoint.</p>
-                            <p>Endpoint: <code>/wp-json/mcp/v1/abilities/<?php echo esc_html( $ability_name ); ?></code></p>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-        <?php
-    }
+				<button type="submit" class="button button-primary">Filter</button>
+				<?php if ( $source_filter || $category_filter || $type_filter ) : ?>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-abilities-suite' ) ); ?>" class="button">Clear</a>
+				<?php endif; ?>
+			</form>
+		</div>
+		<?php
+	}
 
-    public function render_settings() {
-        ?>
-        <div class="wrap">
-            <h1>Abilities Suite Settings</h1>
+	/**
+	 * Abilities table with inline test panels.
+	 */
+	private function render_table( $abilities, $source_filter, $category_filter, $type_filter ) {
+		$has_filters = $source_filter || $category_filter || $type_filter;
+		?>
+		<div class="wp-abilities-list">
+			<p class="abilities-count">
+				Showing <strong><?php echo count( $abilities ); ?></strong> abilities<?php
+				if ( $has_filters ) echo ' (filtered)';
+				?>
+			</p>
 
-            <div class="wp-abilities-settings">
-                <table class="form-table">
-                    <tr>
-                        <th scope="row">Plugin Version</th>
-                        <td><?php echo esc_html( WP_ABILITIES_SUITE_VERSION ); ?></td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Multisite Network</th>
-                        <td><?php echo is_multisite() ? 'Yes' : 'No'; ?></td>
-                    </tr>
-                    <tr>
-                        <th scope="row">WordPress Version</th>
-                        <td><?php echo esc_html( get_bloginfo( 'version' ) ); ?></td>
-                    </tr>
-                    <tr>
-                        <th scope="row">PHP Version</th>
-                        <td><?php echo esc_html( PHP_VERSION ); ?></td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Abilities API Active</th>
-                        <td>
-                            <?php if ( function_exists( 'wp_register_ability' ) ) : ?>
-                                <span style="color: green;">✓ Yes</span>
-                            <?php else : ?>
-                                <span style="color: red;">✗ No - Please activate the WordPress Abilities API plugin</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row">MCP Adapter Active</th>
-                        <td>
-                            <?php if ( is_plugin_active( 'wp-mcp-adapter/wp-mcp-adapter.php' ) || is_plugin_active_for_network( 'wp-mcp-adapter/wp-mcp-adapter.php' ) ) : ?>
-                                <span style="color: green;">✓ Yes</span>
-                            <?php else : ?>
-                                <span style="color: orange;">⚠ Not detected</span>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                </table>
+			<?php if ( empty( $abilities ) ) : ?>
+				<div class="notice notice-warning inline">
+					<p>No abilities match the current filters.</p>
+				</div>
+			<?php else : ?>
+				<table class="wp-list-table widefat fixed striped">
+					<thead>
+						<tr>
+							<th style="width: 25%;">Name</th>
+							<th style="width: 13%;">Source</th>
+							<th style="width: 13%;">Category</th>
+							<th style="width: 34%;">Description</th>
+							<th style="width: 15%;">Type</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $abilities as $name => $ability ) :
+							$detail_id = 'detail-' . sanitize_html_class( str_replace( '/', '-', $name ) );
+							$source_css = self::get_source_css( $ability['source'] );
+						?>
+							<tr>
+								<td>
+									<strong><?php echo esc_html( $name ); ?></strong>
+									<div class="row-actions">
+										<a href="#" onclick="toggleAbilityDetail('<?php echo esc_attr( $detail_id ); ?>'); return false;">Test</a>
+									</div>
+								</td>
+								<td>
+									<span class="source-badge <?php echo esc_attr( $source_css ); ?>">
+										<?php echo esc_html( $ability['source'] ); ?>
+									</span>
+								</td>
+								<td>
+									<span class="ability-category">
+										<?php echo esc_html( $ability['category'] ); ?>
+									</span>
+								</td>
+								<td class="description-cell">
+									<?php echo esc_html( $ability['description'] ?: 'No description' ); ?>
+								</td>
+								<td>
+									<?php if ( $ability['readonly'] ) : ?>
+										<span class="badge badge-readonly">Read</span>
+									<?php else : ?>
+										<span class="badge badge-write">Write</span>
+									<?php endif; ?>
+									<?php if ( $ability['destructive'] ) : ?>
+										<span class="badge badge-destructive">Destructive</span>
+									<?php endif; ?>
+								</td>
+							</tr>
+							<tr id="<?php echo esc_attr( $detail_id ); ?>" class="ability-detail-row" style="display: none;">
+								<td colspan="5">
+									<div class="ability-detail-panel">
+										<h3><?php echo esc_html( $name ); ?></h3>
+										<p><strong>Description:</strong> <?php echo esc_html( $ability['description'] ); ?></p>
+										<p>
+											<strong>Source:</strong> <?php echo esc_html( $ability['source'] ); ?> &nbsp;|&nbsp;
+											<strong>Category:</strong> <?php echo esc_html( $ability['category'] ); ?> &nbsp;|&nbsp;
+											<?php if ( $ability['readonly'] ) : ?>
+												<span class="badge badge-readonly">Read-only</span>
+											<?php else : ?>
+												<span class="badge badge-write">Write</span>
+											<?php endif; ?>
+											<?php if ( $ability['idempotent'] ) : ?>
+												<span class="badge badge-idempotent">Idempotent</span>
+											<?php endif; ?>
+											<?php if ( $ability['destructive'] ) : ?>
+												<span class="badge badge-destructive">Destructive</span>
+											<?php endif; ?>
+										</p>
 
-                <h2>Debug Information</h2>
-                <p>If you're experiencing issues, copy this information when reporting bugs:</p>
-                <textarea readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px;">
+										<div class="schema-columns">
+											<div class="schema-column">
+												<h4>Input Schema</h4>
+												<pre><?php echo esc_html( json_encode( $ability['input_schema'] ?? array(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></pre>
+											</div>
+											<div class="schema-column">
+												<h4>Output Schema</h4>
+												<pre><?php echo esc_html( json_encode( $ability['output_schema'] ?? array(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></pre>
+											</div>
+										</div>
+
+										<p class="endpoint-hint">
+											<strong>MCP Tool:</strong> <code><?php echo esc_html( $name ); ?></code>
+										</p>
+									</div>
+								</td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Settings page.
+	 */
+	public function render_settings() {
+		$abilities = function_exists( 'wp_get_abilities' ) ? wp_get_abilities() : array();
+
+		// Source breakdown for debug info.
+		$source_counts = array();
+		foreach ( $abilities as $ability ) {
+			if ( is_object( $ability ) && method_exists( $ability, 'get_category' ) ) {
+				$source = self::get_source( $ability->get_category() );
+				$source_counts[ $source ] = ( $source_counts[ $source ] ?? 0 ) + 1;
+			}
+		}
+		ksort( $source_counts );
+
+		?>
+		<div class="wrap">
+			<h1>Abilities Suite Settings</h1>
+
+			<div class="wp-abilities-settings">
+				<table class="form-table">
+					<tr>
+						<th scope="row">Plugin Version</th>
+						<td><?php echo esc_html( WP_ABILITIES_SUITE_VERSION ); ?></td>
+					</tr>
+					<tr>
+						<th scope="row">WordPress Version</th>
+						<td><?php echo esc_html( get_bloginfo( 'version' ) ); ?></td>
+					</tr>
+					<tr>
+						<th scope="row">PHP Version</th>
+						<td><?php echo esc_html( PHP_VERSION ); ?></td>
+					</tr>
+					<tr>
+						<th scope="row">Multisite Network</th>
+						<td><?php echo is_multisite() ? 'Yes' : 'No'; ?></td>
+					</tr>
+					<tr>
+						<th scope="row">MCP Adapter</th>
+						<td>
+							<?php if ( is_plugin_active( 'wp-mcp-adapter/wp-mcp-adapter.php' ) || is_plugin_active_for_network( 'wp-mcp-adapter/wp-mcp-adapter.php' ) ) : ?>
+								<span style="color: #00a32a;">Active</span>
+							<?php else : ?>
+								<span style="color: #dba617;">Not detected</span>
+							<?php endif; ?>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">Abilities by Source</th>
+						<td>
+							<?php foreach ( $source_counts as $source => $count ) : ?>
+								<strong><?php echo esc_html( $source ); ?>:</strong> <?php echo $count; ?><br>
+							<?php endforeach; ?>
+							<strong>Total:</strong> <?php echo count( $abilities ); ?>
+						</td>
+					</tr>
+				</table>
+
+				<h2>Debug Information</h2>
+				<p>Copy this when reporting issues:</p>
+				<textarea readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px;">
 Plugin: WordPress Abilities Suite v<?php echo WP_ABILITIES_SUITE_VERSION; ?>
 
 WordPress: <?php echo get_bloginfo( 'version' ); ?>
@@ -348,17 +497,18 @@ PHP: <?php echo PHP_VERSION; ?>
 
 Multisite: <?php echo is_multisite() ? 'Yes' : 'No'; ?>
 
-Abilities API: <?php echo function_exists( 'wp_register_ability' ) ? 'Active' : 'Inactive'; ?>
+Total Abilities: <?php echo count( $abilities ); ?>
 
-Total Abilities: <?php echo count( function_exists( 'wp_get_abilities' ) ? wp_get_abilities() : array() ); ?>
+<?php foreach ( $source_counts as $source => $count ) : ?>
+<?php echo $source; ?>: <?php echo $count; ?>
 
+<?php endforeach; ?>
 Active Plugins: <?php echo count( get_option( 'active_plugins', array() ) ); ?>
 </textarea>
-            </div>
-        </div>
-        <?php
-    }
+			</div>
+		</div>
+		<?php
+	}
 }
 
-// Initialize dashboard
 new WP_Abilities_Suite_Dashboard();

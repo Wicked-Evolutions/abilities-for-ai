@@ -53,5 +53,11 @@ function wp_abilities_suite_register_categories() {
         'description' => __( 'Abilities for managing WordPress comments and discussions.', 'wordpress-abilities-suite' ),
     ));
 
-    error_log( 'WordPress Abilities Suite: Registered 6 ability categories' );
+    // Menus category
+    wp_register_ability_category( 'menus', array(
+        'label' => __( 'Menu Management', 'wordpress-abilities-suite' ),
+        'description' => __( 'WordPress navigation menu management — menus, items, and location assignments.', 'wordpress-abilities-suite' ),
+    ));
+
+    error_log( 'WordPress Abilities Suite: Registered 7 ability categories' );
 }
