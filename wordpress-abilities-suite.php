@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WordPress Abilities Suite
  * Description: Complete native WordPress AI control through the Abilities API — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more.
- * Version: 3.0.0
+ * Version: 3.1.0
  * Author: Influencentricity
  * Author URI: https://influencentricity.com
  * License: GPL-2.0-or-later
@@ -15,12 +15,15 @@
 defined( 'ABSPATH' ) || exit;
 
 // Define plugin constants
-define( 'WP_ABILITIES_SUITE_VERSION', '3.0.0' );
+define( 'WP_ABILITIES_SUITE_VERSION', '3.1.0' );
 define( 'WP_ABILITIES_SUITE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WP_ABILITIES_SUITE_URL', plugin_dir_url( __FILE__ ) );
 
 // Load shared helpers.
 require_once WP_ABILITIES_SUITE_PATH . 'includes/helpers.php';
+
+// Load permission toggles system.
+require_once WP_ABILITIES_SUITE_PATH . 'includes/permissions.php';
 
 // Load ability categories FIRST (required before abilities).
 require_once WP_ABILITIES_SUITE_PATH . 'includes/ability-categories.php';
@@ -58,6 +61,11 @@ register_activation_hook( __FILE__, function() {
         update_site_option( 'wp_abilities_suite_version', WP_ABILITIES_SUITE_VERSION );
     } else {
         update_option( 'wp_abilities_suite_version', WP_ABILITIES_SUITE_VERSION );
+    }
+
+    // Set default permissions if not already set.
+    if ( false === get_option( 'wp_abilities_suite_permissions' ) ) {
+        update_option( 'wp_abilities_suite_permissions', wp_abilities_suite_permission_defaults() );
     }
 
     // Flush cache

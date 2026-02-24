@@ -5,7 +5,10 @@ defined( 'ABSPATH' ) || exit;
 // Register all WordPress user management abilities
 add_action( 'wp_abilities_api_init', function() {
 
-    // ===== USER ABILITIES =====
+    $perms = wp_abilities_suite_get_permissions( 'users' );
+
+    // ===== USERS — READ =====
+    if ( $perms['read'] ) {
 
     // List users
     wp_register_ability( 'users/list', array(
@@ -184,6 +187,11 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end read
+
+    // ===== USERS — WRITE =====
+    if ( ! empty( $perms['write'] ) ) {
 
     // Create user
     wp_register_ability( 'users/create', array(
@@ -406,6 +414,11 @@ add_action( 'wp_abilities_api_init', function() {
                     )
     ));
 
+    } // end write
+
+    // ===== USERS — DELETE =====
+    if ( ! empty( $perms['delete'] ) ) {
+
     // Delete user
     wp_register_ability( 'users/delete', array(
         'label' => 'Delete User',
@@ -474,6 +487,8 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end delete
 
     error_log( 'WordPress User Abilities: Registered 5 user management abilities' );
 

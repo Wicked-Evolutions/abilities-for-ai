@@ -5,7 +5,10 @@ defined( 'ABSPATH' ) || exit;
 // Register all WordPress content management abilities
 add_action( 'wp_abilities_api_init', function() {
 
-    // ===== CONTENT ABILITIES =====
+    $perms = wp_abilities_suite_get_permissions( 'content' );
+
+    // ===== CONTENT ABILITIES — READ =====
+    if ( $perms['read'] ) {
 
     // List content
     wp_register_ability( 'content/list', array(
@@ -169,6 +172,11 @@ add_action( 'wp_abilities_api_init', function() {
                     )
     ));
 
+    } // end read
+
+    // ===== CONTENT ABILITIES — WRITE =====
+    if ( ! empty( $perms['write'] ) ) {
+
     // Create content
     wp_register_ability( 'content/create', array(
         'label' => 'Create Content',
@@ -317,6 +325,11 @@ add_action( 'wp_abilities_api_init', function() {
                     )
     ));
 
+    } // end write
+
+    // ===== CONTENT ABILITIES — DELETE =====
+    if ( ! empty( $perms['delete'] ) ) {
+
     // Delete content
     wp_register_ability( 'content/delete', array(
         'label' => 'Delete Content',
@@ -369,6 +382,11 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end delete
+
+    // ===== CONTENT ABILITIES — READ (continued) =====
+    if ( $perms['read'] ) {
 
     // Discover content types
     wp_register_ability( 'content/discover-types', array(
@@ -553,6 +571,8 @@ add_action( 'wp_abilities_api_init', function() {
                     )
     ));
 
-    error_log( 'WordPress Content Abilities: Registered 8 content management abilities' );
+    } // end read (continued)
+
+    error_log( 'WordPress Content Abilities: Registered content management abilities' );
 
 }, 100 );

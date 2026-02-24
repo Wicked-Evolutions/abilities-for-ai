@@ -135,3 +135,95 @@ function menu_abilities_format_item( $item ) {
 function menu_abilities_get_location_assignments() {
 	return get_nav_menu_locations();
 }
+
+// ============================================================
+// Permission Toggles
+// ============================================================
+
+/**
+ * Default permission settings per module.
+ *
+ * Read = ON, Write = ON, Delete = OFF by default.
+ * Modules with only read abilities omit write/delete keys.
+ * Blocks and cache have delete ON (flush is safe).
+ *
+ * @return array Module permission defaults.
+ */
+function wp_abilities_suite_permission_defaults() {
+	return array(
+		'content'    => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'taxonomies' => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'plugins'    => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'media'      => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'users'      => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'comments'   => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'menus'      => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'blocks'     => array( 'read' => true, 'write' => true, 'delete' => true ),
+		'patterns'   => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'meta'       => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'settings'   => array( 'read' => true, 'write' => false ),
+		'site-health' => array( 'read' => true ),
+		'cache'      => array( 'read' => true, 'write' => true, 'delete' => true ),
+		'cron'       => array( 'read' => true ),
+		'themes'     => array( 'read' => true ),
+		'rest'       => array( 'read' => true ),
+		'rewrite'    => array( 'read' => true, 'write' => true ),
+	);
+}
+
+/**
+ * Human-readable labels for each module.
+ *
+ * @return array Module slug => label.
+ */
+function wp_abilities_suite_module_labels() {
+	return array(
+		'content'    => 'Content',
+		'taxonomies' => 'Taxonomies',
+		'plugins'    => 'Plugins',
+		'media'      => 'Media',
+		'users'      => 'Users',
+		'comments'   => 'Comments',
+		'menus'      => 'Menus',
+		'blocks'     => 'Block Editor',
+		'patterns'   => 'Block Patterns',
+		'meta'       => 'Meta Fields',
+		'settings'   => 'Settings',
+		'site-health' => 'Site Health',
+		'cache'      => 'Cache / Transients',
+		'cron'       => 'Cron / Scheduling',
+		'themes'     => 'Themes',
+		'rest'       => 'REST Discovery',
+		'rewrite'    => 'Rewrite Rules',
+	);
+}
+
+/**
+ * Get resolved permissions for a module, merging saved values with defaults.
+ *
+ * @param string $module Module slug (e.g. 'meta', 'content').
+ * @return array Associative array with 'read', 'write', 'delete' keys (booleans).
+ */
+function wp_abilities_suite_get_permissions( $module ) {
+	static $perms = null;
+	if ( $perms === null ) {
+		$perms = get_option( 'wp_abilities_suite_permissions', array() );
+	}
+	$defaults = wp_abilities_suite_permission_defaults();
+	$module_defaults = $defaults[ $module ] ?? array( 'read' => true );
+	$module_saved    = $perms[ $module ] ?? array();
+
+	return wp_parse_args( $module_saved, $module_defaults );
+}
+
+/**
+ * Check if a specific operation type is allowed for a module.
+ *
+ * @param string $module Module slug.
+ * @param string $op     Operation type: 'read', 'write', or 'delete'.
+ * @return bool Whether the operation is permitted.
+ */
+function wp_abilities_suite_can( $module, $op ) {
+	$perms = wp_abilities_suite_get_permissions( $module );
+	return ! empty( $perms[ $op ] );
+}

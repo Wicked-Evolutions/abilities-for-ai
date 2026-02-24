@@ -2,7 +2,10 @@
 
 add_action( 'wp_abilities_api_init', function() {
 
-    // ===== TAXONOMY ABILITIES =====
+    $perms = wp_abilities_suite_get_permissions( 'taxonomies' );
+
+    // ===== TAXONOMIES — READ =====
+    if ( $perms['read'] ) {
 
     // Discover taxonomies
     wp_register_ability( 'taxonomies/discover', array(
@@ -221,6 +224,11 @@ add_action( 'wp_abilities_api_init', function() {
                     )
     ));
 
+    } // end read
+
+    // ===== TAXONOMIES — WRITE =====
+    if ( ! empty( $perms['write'] ) ) {
+
     // Create term
     wp_register_ability( 'taxonomies/create-term', array(
         'label' => 'Create Term',
@@ -374,6 +382,11 @@ add_action( 'wp_abilities_api_init', function() {
                     )
     ));
 
+    } // end write
+
+    // ===== TAXONOMIES — DELETE =====
+    if ( ! empty( $perms['delete'] ) ) {
+
     // Delete term
     wp_register_ability( 'taxonomies/delete-term', array(
         'label' => 'Delete Term',
@@ -423,6 +436,11 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end delete
+
+    // ===== TAXONOMIES — WRITE (continued) =====
+    if ( ! empty( $perms['write'] ) ) {
 
     // Assign terms to content
     wp_register_ability( 'taxonomies/assign-to-content', array(
@@ -495,6 +513,11 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end write
+
+    // ===== TAXONOMIES — READ (continued) =====
+    if ( $perms['read'] ) {
 
     // Get content terms
     wp_register_ability( 'taxonomies/get-content-terms', array(
@@ -585,6 +608,8 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end read
 
     error_log( 'WordPress Abilities Suite: Registered 8 taxonomy management abilities' );
 

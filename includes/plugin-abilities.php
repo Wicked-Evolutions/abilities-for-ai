@@ -5,7 +5,10 @@ defined( 'ABSPATH' ) || exit;
 // Register all WordPress plugin management abilities
 add_action( 'wp_abilities_api_init', function() {
 
-    // ===== PLUGIN ABILITIES =====
+    $perms = wp_abilities_suite_get_permissions( 'plugins' );
+
+    // ===== PLUGINS — READ =====
+    if ( $perms['read'] ) {
 
     // List plugins
     wp_register_ability( 'plugins/list', array(
@@ -201,6 +204,11 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end read
+
+    // ===== PLUGINS — WRITE =====
+    if ( ! empty( $perms['write'] ) ) {
 
     // Activate plugin
     wp_register_ability( 'plugins/activate', array(
@@ -486,6 +494,11 @@ add_action( 'wp_abilities_api_init', function() {
                     )
     ));
 
+    } // end write
+
+    // ===== PLUGINS — READ (continued) =====
+    if ( $perms['read'] ) {
+
     // Search repository
     wp_register_ability( 'plugins/search-repository', array(
         'label' => 'Search Plugin Repository',
@@ -637,6 +650,8 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end read
 
     error_log( 'WordPress Plugin Abilities: Registered 6 plugin management abilities' );
 

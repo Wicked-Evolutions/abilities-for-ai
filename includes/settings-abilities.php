@@ -35,6 +35,11 @@ function wp_native_register_settings_abilities() {
 		'category_base', 'tag_base',
 	);
 
+	$perms = wp_abilities_suite_get_permissions( 'settings' );
+
+	// ===== SETTINGS — READ =====
+	if ( $perms['read'] ) {
+
 	// ---- settings/list ----
 	wp_register_ability( 'settings/list', array(
 		'label'       => 'List Settings',
@@ -110,6 +115,34 @@ function wp_native_register_settings_abilities() {
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
+	// ---- settings/get-permalink-structure ----
+	wp_register_ability( 'settings/get-permalink-structure', array(
+		'label'       => 'Get Permalink Structure',
+		'description' => 'Get the current permalink configuration.',
+		'category'    => 'settings',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => (object) array(),
+		),
+		'execute_callback' => function() {
+			global $wp_rewrite;
+			return array(
+				'structure'     => get_option( 'permalink_structure' ),
+				'category_base' => get_option( 'category_base' ),
+				'tag_base'      => get_option( 'tag_base' ),
+				'using_permalinks' => $wp_rewrite->using_permalinks(),
+				'using_index_permalinks' => $wp_rewrite->using_index_permalinks(),
+			);
+		},
+		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
+		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+	));
+
+	} // end read
+
+	// ===== SETTINGS — WRITE =====
+	if ( ! empty( $perms['write'] ) ) {
+
 	// ---- settings/update ----
 	wp_register_ability( 'settings/update', array(
 		'label'       => 'Update Setting',
@@ -136,26 +169,5 @@ function wp_native_register_settings_abilities() {
 		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
-	// ---- settings/get-permalink-structure ----
-	wp_register_ability( 'settings/get-permalink-structure', array(
-		'label'       => 'Get Permalink Structure',
-		'description' => 'Get the current permalink configuration.',
-		'category'    => 'settings',
-		'input_schema' => array(
-			'type'       => 'object',
-			'properties' => (object) array(),
-		),
-		'execute_callback' => function() {
-			global $wp_rewrite;
-			return array(
-				'structure'     => get_option( 'permalink_structure' ),
-				'category_base' => get_option( 'category_base' ),
-				'tag_base'      => get_option( 'tag_base' ),
-				'using_permalinks' => $wp_rewrite->using_permalinks(),
-				'using_index_permalinks' => $wp_rewrite->using_index_permalinks(),
-			);
-		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
-	));
+	} // end write
 }

@@ -13,6 +13,11 @@ add_action( 'wp_abilities_api_init', 'wp_native_register_themes_abilities' );
 
 function wp_native_register_themes_abilities() {
 
+	$perms = wp_abilities_suite_get_permissions( 'themes' );
+
+	// ===== THEMES — READ =====
+	if ( $perms['read'] ) {
+
 	// ---- themes/list ----
 	wp_register_ability( 'themes/list', array(
 		'label'       => 'List Themes',
@@ -173,4 +178,6 @@ function wp_native_register_themes_abilities() {
 		'permission_callback' => function() { return current_user_can( 'edit_theme_options' ); },
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
+
+	} // end read
 }

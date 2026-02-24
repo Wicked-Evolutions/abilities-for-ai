@@ -428,12 +428,163 @@ class WP_Abilities_Suite_Dashboard {
 	}
 
 	/**
-	 * Settings page.
+	 * Settings page with permission toggles.
 	 */
 	public function render_settings() {
+		$defaults     = wp_abilities_suite_permission_defaults();
+		$labels       = wp_abilities_suite_module_labels();
+		$counts       = wp_abilities_suite_get_ability_counts();
+		$enabled_info = wp_abilities_suite_enabled_count();
+		$saved        = isset( $_GET['settings-updated'] ) && $_GET['settings-updated'] === 'true';
+
+		?>
+		<div class="wrap">
+			<h1>Abilities Suite — Permissions</h1>
+			<p>Control what AI clients can do on your site. Abilities that are disabled won't appear in the MCP tool list.</p>
+
+			<?php if ( $saved ) : ?>
+				<div class="notice notice-success is-dismissible"><p>Permissions saved.</p></div>
+			<?php endif; ?>
+
+			<div class="wp-abilities-stats" style="margin-bottom: 24px;">
+				<div class="stats-card">
+					<h3 id="enabled-count"><?php echo $enabled_info['enabled']; ?></h3>
+					<p>Enabled</p>
+				</div>
+				<div class="stats-card">
+					<h3><?php echo $enabled_info['total']; ?></h3>
+					<p>Total Abilities</p>
+				</div>
+				<div class="stats-card">
+					<h3><?php echo count( $defaults ); ?></h3>
+					<p>Modules</p>
+				</div>
+				<div class="stats-card">
+					<h3><?php echo esc_html( WP_ABILITIES_SUITE_VERSION ); ?></h3>
+					<p>Suite Version</p>
+				</div>
+			</div>
+
+			<form method="post" action="options.php">
+				<?php settings_fields( 'wp_abilities_suite_permissions_group' ); ?>
+
+				<div class="wp-abilities-permissions-grid">
+					<table class="wp-list-table widefat fixed">
+						<thead>
+							<tr>
+								<th style="width: 25%;">Module</th>
+								<th style="width: 15%; text-align: center;">Read</th>
+								<th style="width: 15%; text-align: center;">Write</th>
+								<th style="width: 15%; text-align: center;">Delete</th>
+								<th style="width: 30%;">Abilities</th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php foreach ( $defaults as $module => $ops ) :
+								$perms        = wp_abilities_suite_get_permissions( $module );
+								$label        = $labels[ $module ] ?? $module;
+								$module_count = $counts[ $module ] ?? array( 'read' => 0, 'write' => 0, 'delete' => 0, 'total' => 0 );
+								$has_write    = array_key_exists( 'write', $ops );
+								$has_delete   = array_key_exists( 'delete', $ops );
+							?>
+								<tr>
+									<td>
+										<strong><?php echo esc_html( $label ); ?></strong>
+									</td>
+									<td class="perm-cell">
+										<label class="perm-toggle">
+											<input type="hidden" name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][read]" value="0">
+											<input type="checkbox"
+												name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][read]"
+												value="1"
+												class="perm-checkbox"
+												data-module="<?php echo esc_attr( $module ); ?>"
+												data-op="read"
+												data-count="<?php echo $module_count['read']; ?>"
+												<?php checked( ! empty( $perms['read'] ) ); ?>>
+											<span class="perm-count"><?php echo $module_count['read']; ?></span>
+										</label>
+									</td>
+									<td class="perm-cell">
+										<?php if ( $has_write ) : ?>
+											<label class="perm-toggle">
+												<input type="hidden" name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][write]" value="0">
+												<input type="checkbox"
+													name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][write]"
+													value="1"
+													class="perm-checkbox"
+													data-module="<?php echo esc_attr( $module ); ?>"
+													data-op="write"
+													data-count="<?php echo $module_count['write']; ?>"
+													<?php checked( ! empty( $perms['write'] ) ); ?>>
+												<span class="perm-count"><?php echo $module_count['write']; ?></span>
+											</label>
+										<?php else : ?>
+											<span class="perm-na">&mdash;</span>
+										<?php endif; ?>
+									</td>
+									<td class="perm-cell">
+										<?php if ( $has_delete ) : ?>
+											<label class="perm-toggle <?php echo empty( $perms['delete'] ) ? '' : 'perm-delete-on'; ?>">
+												<input type="hidden" name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][delete]" value="0">
+												<input type="checkbox"
+													name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][delete]"
+													value="1"
+													class="perm-checkbox perm-delete"
+													data-module="<?php echo esc_attr( $module ); ?>"
+													data-op="delete"
+													data-count="<?php echo $module_count['delete']; ?>"
+													<?php checked( ! empty( $perms['delete'] ) ); ?>>
+												<span class="perm-count"><?php echo $module_count['delete']; ?></span>
+											</label>
+										<?php else : ?>
+											<span class="perm-na">&mdash;</span>
+										<?php endif; ?>
+									</td>
+									<td class="module-total">
+										<?php echo $module_count['total']; ?> total
+									</td>
+								</tr>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
+				</div>
+
+				<?php submit_button( 'Save Permissions' ); ?>
+			</form>
+
+			<?php $this->render_debug_info(); ?>
+		</div>
+
+		<script>
+		(function() {
+			var checkboxes = document.querySelectorAll('.perm-checkbox');
+			var enabledEl  = document.getElementById('enabled-count');
+
+			function recalc() {
+				var total = 0;
+				checkboxes.forEach(function(cb) {
+					if (cb.checked) {
+						total += parseInt(cb.getAttribute('data-count') || 0);
+					}
+				});
+				if (enabledEl) enabledEl.textContent = total;
+			}
+
+			checkboxes.forEach(function(cb) {
+				cb.addEventListener('change', recalc);
+			});
+		})();
+		</script>
+		<?php
+	}
+
+	/**
+	 * Debug information section (moved from old settings page).
+	 */
+	private function render_debug_info() {
 		$abilities = function_exists( 'wp_get_abilities' ) ? wp_get_abilities() : array();
 
-		// Source breakdown for debug info.
 		$source_counts = array();
 		foreach ( $abilities as $ability ) {
 			if ( is_object( $ability ) && method_exists( $ability, 'get_category' ) ) {
@@ -444,51 +595,10 @@ class WP_Abilities_Suite_Dashboard {
 		ksort( $source_counts );
 
 		?>
-		<div class="wrap">
-			<h1>Abilities Suite Settings</h1>
-
-			<div class="wp-abilities-settings">
-				<table class="form-table">
-					<tr>
-						<th scope="row">Plugin Version</th>
-						<td><?php echo esc_html( WP_ABILITIES_SUITE_VERSION ); ?></td>
-					</tr>
-					<tr>
-						<th scope="row">WordPress Version</th>
-						<td><?php echo esc_html( get_bloginfo( 'version' ) ); ?></td>
-					</tr>
-					<tr>
-						<th scope="row">PHP Version</th>
-						<td><?php echo esc_html( PHP_VERSION ); ?></td>
-					</tr>
-					<tr>
-						<th scope="row">Multisite Network</th>
-						<td><?php echo is_multisite() ? 'Yes' : 'No'; ?></td>
-					</tr>
-					<tr>
-						<th scope="row">MCP Adapter</th>
-						<td>
-							<?php if ( is_plugin_active( 'wp-mcp-adapter/wp-mcp-adapter.php' ) || is_plugin_active_for_network( 'wp-mcp-adapter/wp-mcp-adapter.php' ) ) : ?>
-								<span style="color: #00a32a;">Active</span>
-							<?php else : ?>
-								<span style="color: #dba617;">Not detected</span>
-							<?php endif; ?>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row">Abilities by Source</th>
-						<td>
-							<?php foreach ( $source_counts as $source => $count ) : ?>
-								<strong><?php echo esc_html( $source ); ?>:</strong> <?php echo $count; ?><br>
-							<?php endforeach; ?>
-							<strong>Total:</strong> <?php echo count( $abilities ); ?>
-						</td>
-					</tr>
-				</table>
-
-				<h2>Debug Information</h2>
-				<p>Copy this when reporting issues:</p>
-				<textarea readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px;">
+		<div class="wp-abilities-settings" style="margin-top: 30px;">
+			<h2 style="margin-top: 0; padding-top: 0; border-top: none;">Debug Information</h2>
+			<p>Copy this when reporting issues:</p>
+			<textarea readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px;">
 Plugin: WordPress Abilities Suite v<?php echo WP_ABILITIES_SUITE_VERSION; ?>
 
 WordPress: <?php echo get_bloginfo( 'version' ); ?>
@@ -505,7 +615,6 @@ Total Abilities: <?php echo count( $abilities ); ?>
 <?php endforeach; ?>
 Active Plugins: <?php echo count( get_option( 'active_plugins', array() ) ); ?>
 </textarea>
-			</div>
 		</div>
 		<?php
 	}

@@ -13,6 +13,11 @@ add_action( 'wp_abilities_api_init', 'wp_native_register_meta_abilities' );
 
 function wp_native_register_meta_abilities() {
 
+	$perms = wp_abilities_suite_get_permissions( 'meta' );
+
+	// ===== META — READ =====
+	if ( $perms['read'] ) {
+
 	// ---- meta/list-post-meta ----
 	wp_register_ability( 'meta/list-post-meta', array(
 		'label'       => 'List Post Meta',
@@ -73,60 +78,6 @@ function wp_native_register_meta_abilities() {
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
-	// ---- meta/update-post-meta ----
-	wp_register_ability( 'meta/update-post-meta', array(
-		'label'       => 'Update Post Meta',
-		'description' => 'Set or update a meta value for a post.',
-		'category'    => 'meta',
-		'input_schema' => array(
-			'type'       => 'object',
-			'properties' => array(
-				'post_id'    => array( 'type' => 'integer', 'description' => 'Post ID' ),
-				'meta_key'   => array( 'type' => 'string', 'description' => 'Meta key' ),
-				'meta_value' => array( 'type' => 'string', 'description' => 'Meta value to set' ),
-			),
-			'required' => array( 'post_id', 'meta_key', 'meta_value' ),
-		),
-		'execute_callback' => function( $params ) {
-			$post_id = intval( $params['post_id'] ?? 0 );
-			if ( ! get_post( $post_id ) ) {
-				return wp_native_error( 'not_found', 'Post not found.' );
-			}
-			$key    = sanitize_text_field( $params['meta_key'] );
-			$value  = sanitize_text_field( $params['meta_value'] );
-			$result = update_post_meta( $post_id, $key, $value );
-			return array( 'post_id' => $post_id, 'key' => $key, 'updated' => (bool) $result );
-		},
-		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
-	));
-
-	// ---- meta/delete-post-meta ----
-	wp_register_ability( 'meta/delete-post-meta', array(
-		'label'       => 'Delete Post Meta',
-		'description' => 'Delete a meta key from a post.',
-		'category'    => 'meta',
-		'input_schema' => array(
-			'type'       => 'object',
-			'properties' => array(
-				'post_id'  => array( 'type' => 'integer', 'description' => 'Post ID' ),
-				'meta_key' => array( 'type' => 'string', 'description' => 'Meta key to delete' ),
-			),
-			'required' => array( 'post_id', 'meta_key' ),
-		),
-		'execute_callback' => function( $params ) {
-			$post_id = intval( $params['post_id'] ?? 0 );
-			if ( ! get_post( $post_id ) ) {
-				return wp_native_error( 'not_found', 'Post not found.' );
-			}
-			$key    = sanitize_text_field( $params['meta_key'] );
-			$result = delete_post_meta( $post_id, $key );
-			return array( 'post_id' => $post_id, 'key' => $key, 'deleted' => (bool) $result );
-		},
-		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) ),
-	));
-
 	// ---- meta/list-term-meta ----
 	wp_register_ability( 'meta/list-term-meta', array(
 		'label'       => 'List Term Meta',
@@ -182,35 +133,6 @@ function wp_native_register_meta_abilities() {
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
-	));
-
-	// ---- meta/update-term-meta ----
-	wp_register_ability( 'meta/update-term-meta', array(
-		'label'       => 'Update Term Meta',
-		'description' => 'Set or update a meta value for a taxonomy term.',
-		'category'    => 'meta',
-		'input_schema' => array(
-			'type'       => 'object',
-			'properties' => array(
-				'term_id'    => array( 'type' => 'integer', 'description' => 'Term ID' ),
-				'meta_key'   => array( 'type' => 'string', 'description' => 'Meta key' ),
-				'meta_value' => array( 'type' => 'string', 'description' => 'Meta value' ),
-			),
-			'required' => array( 'term_id', 'meta_key', 'meta_value' ),
-		),
-		'execute_callback' => function( $params ) {
-			$term_id = intval( $params['term_id'] ?? 0 );
-			$term    = get_term( $term_id );
-			if ( ! $term || is_wp_error( $term ) ) {
-				return wp_native_error( 'not_found', 'Term not found.' );
-			}
-			$key    = sanitize_text_field( $params['meta_key'] );
-			$value  = sanitize_text_field( $params['meta_value'] );
-			$result = update_term_meta( $term_id, $key, $value );
-			return array( 'term_id' => $term_id, 'key' => $key, 'updated' => ! is_wp_error( $result ) );
-		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- meta/list-user-meta ----
@@ -269,34 +191,6 @@ function wp_native_register_meta_abilities() {
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
-	// ---- meta/update-user-meta ----
-	wp_register_ability( 'meta/update-user-meta', array(
-		'label'       => 'Update User Meta',
-		'description' => 'Set or update a meta value for a user.',
-		'category'    => 'meta',
-		'input_schema' => array(
-			'type'       => 'object',
-			'properties' => array(
-				'user_id'    => array( 'type' => 'integer', 'description' => 'User ID' ),
-				'meta_key'   => array( 'type' => 'string', 'description' => 'Meta key' ),
-				'meta_value' => array( 'type' => 'string', 'description' => 'Meta value' ),
-			),
-			'required' => array( 'user_id', 'meta_key', 'meta_value' ),
-		),
-		'execute_callback' => function( $params ) {
-			$user_id = intval( $params['user_id'] ?? 0 );
-			if ( ! get_userdata( $user_id ) ) {
-				return wp_native_error( 'not_found', 'User not found.' );
-			}
-			$key    = sanitize_text_field( $params['meta_key'] );
-			$value  = sanitize_text_field( $params['meta_value'] );
-			$result = update_user_meta( $user_id, $key, $value );
-			return array( 'user_id' => $user_id, 'key' => $key, 'updated' => (bool) $result );
-		},
-		'permission_callback' => function() { return current_user_can( 'edit_users' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
-	));
-
 	// ---- meta/list-registered ----
 	wp_register_ability( 'meta/list-registered', array(
 		'label'       => 'List Registered Meta Keys',
@@ -341,4 +235,127 @@ function wp_native_register_meta_abilities() {
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
+
+	} // end read
+
+	// ===== META — WRITE =====
+	if ( ! empty( $perms['write'] ) ) {
+
+	// ---- meta/update-post-meta ----
+	wp_register_ability( 'meta/update-post-meta', array(
+		'label'       => 'Update Post Meta',
+		'description' => 'Set or update a meta value for a post.',
+		'category'    => 'meta',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'post_id'    => array( 'type' => 'integer', 'description' => 'Post ID' ),
+				'meta_key'   => array( 'type' => 'string', 'description' => 'Meta key' ),
+				'meta_value' => array( 'type' => 'string', 'description' => 'Meta value to set' ),
+			),
+			'required' => array( 'post_id', 'meta_key', 'meta_value' ),
+		),
+		'execute_callback' => function( $params ) {
+			$post_id = intval( $params['post_id'] ?? 0 );
+			if ( ! get_post( $post_id ) ) {
+				return wp_native_error( 'not_found', 'Post not found.' );
+			}
+			$key    = sanitize_text_field( $params['meta_key'] );
+			$value  = sanitize_text_field( $params['meta_value'] );
+			$result = update_post_meta( $post_id, $key, $value );
+			return array( 'post_id' => $post_id, 'key' => $key, 'updated' => (bool) $result );
+		},
+		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
+		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+	));
+
+	// ---- meta/update-term-meta ----
+	wp_register_ability( 'meta/update-term-meta', array(
+		'label'       => 'Update Term Meta',
+		'description' => 'Set or update a meta value for a taxonomy term.',
+		'category'    => 'meta',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'term_id'    => array( 'type' => 'integer', 'description' => 'Term ID' ),
+				'meta_key'   => array( 'type' => 'string', 'description' => 'Meta key' ),
+				'meta_value' => array( 'type' => 'string', 'description' => 'Meta value' ),
+			),
+			'required' => array( 'term_id', 'meta_key', 'meta_value' ),
+		),
+		'execute_callback' => function( $params ) {
+			$term_id = intval( $params['term_id'] ?? 0 );
+			$term    = get_term( $term_id );
+			if ( ! $term || is_wp_error( $term ) ) {
+				return wp_native_error( 'not_found', 'Term not found.' );
+			}
+			$key    = sanitize_text_field( $params['meta_key'] );
+			$value  = sanitize_text_field( $params['meta_value'] );
+			$result = update_term_meta( $term_id, $key, $value );
+			return array( 'term_id' => $term_id, 'key' => $key, 'updated' => ! is_wp_error( $result ) );
+		},
+		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
+		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+	));
+
+	// ---- meta/update-user-meta ----
+	wp_register_ability( 'meta/update-user-meta', array(
+		'label'       => 'Update User Meta',
+		'description' => 'Set or update a meta value for a user.',
+		'category'    => 'meta',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'user_id'    => array( 'type' => 'integer', 'description' => 'User ID' ),
+				'meta_key'   => array( 'type' => 'string', 'description' => 'Meta key' ),
+				'meta_value' => array( 'type' => 'string', 'description' => 'Meta value' ),
+			),
+			'required' => array( 'user_id', 'meta_key', 'meta_value' ),
+		),
+		'execute_callback' => function( $params ) {
+			$user_id = intval( $params['user_id'] ?? 0 );
+			if ( ! get_userdata( $user_id ) ) {
+				return wp_native_error( 'not_found', 'User not found.' );
+			}
+			$key    = sanitize_text_field( $params['meta_key'] );
+			$value  = sanitize_text_field( $params['meta_value'] );
+			$result = update_user_meta( $user_id, $key, $value );
+			return array( 'user_id' => $user_id, 'key' => $key, 'updated' => (bool) $result );
+		},
+		'permission_callback' => function() { return current_user_can( 'edit_users' ); },
+		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+	));
+
+	} // end write
+
+	// ===== META — DELETE =====
+	if ( ! empty( $perms['delete'] ) ) {
+
+	// ---- meta/delete-post-meta ----
+	wp_register_ability( 'meta/delete-post-meta', array(
+		'label'       => 'Delete Post Meta',
+		'description' => 'Delete a meta key from a post.',
+		'category'    => 'meta',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'post_id'  => array( 'type' => 'integer', 'description' => 'Post ID' ),
+				'meta_key' => array( 'type' => 'string', 'description' => 'Meta key to delete' ),
+			),
+			'required' => array( 'post_id', 'meta_key' ),
+		),
+		'execute_callback' => function( $params ) {
+			$post_id = intval( $params['post_id'] ?? 0 );
+			if ( ! get_post( $post_id ) ) {
+				return wp_native_error( 'not_found', 'Post not found.' );
+			}
+			$key    = sanitize_text_field( $params['meta_key'] );
+			$result = delete_post_meta( $post_id, $key );
+			return array( 'post_id' => $post_id, 'key' => $key, 'deleted' => (bool) $result );
+		},
+		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
+		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) ),
+	));
+
+	} // end delete
 }

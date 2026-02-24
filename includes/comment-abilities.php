@@ -5,7 +5,10 @@ defined( 'ABSPATH' ) || exit;
 // Register all WordPress comment management abilities
 add_action( 'wp_abilities_api_init', function() {
 
-    // ===== COMMENT ABILITIES =====
+    $perms = wp_abilities_suite_get_permissions( 'comments' );
+
+    // ===== COMMENTS — READ =====
+    if ( $perms['read'] ) {
 
     // List comments
     wp_register_ability( 'comments/list', array(
@@ -188,6 +191,11 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end read
+
+    // ===== COMMENTS — WRITE =====
+    if ( ! empty( $perms['write'] ) ) {
 
     // Create comment
     wp_register_ability( 'comments/create', array(
@@ -384,6 +392,11 @@ add_action( 'wp_abilities_api_init', function() {
                     )
     ));
 
+    } // end write
+
+    // ===== COMMENTS — DELETE =====
+    if ( ! empty( $perms['delete'] ) ) {
+
     // Delete comment
     wp_register_ability( 'comments/delete', array(
         'label' => 'Delete Comment',
@@ -444,6 +457,8 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end delete
 
     error_log( 'WordPress Comment Abilities: Registered 5 comment management abilities' );
 

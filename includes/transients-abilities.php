@@ -13,6 +13,11 @@ add_action( 'wp_abilities_api_init', 'wp_native_register_transients_abilities' )
 
 function wp_native_register_transients_abilities() {
 
+	$perms = wp_abilities_suite_get_permissions( 'cache' );
+
+	// ===== CACHE — READ =====
+	if ( $perms['read'] ) {
+
 	// ---- cache/list-transients ----
 	wp_register_ability( 'cache/list-transients', array(
 		'label'       => 'List Transients',
@@ -103,6 +108,11 @@ function wp_native_register_transients_abilities() {
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
+	} // end read
+
+	// ===== CACHE — WRITE =====
+	if ( ! empty( $perms['write'] ) ) {
+
 	// ---- cache/set-transient ----
 	wp_register_ability( 'cache/set-transient', array(
 		'label'       => 'Set Transient',
@@ -127,6 +137,11 @@ function wp_native_register_transients_abilities() {
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
 		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
 	));
+
+	} // end write
+
+	// ===== CACHE — DELETE =====
+	if ( ! empty( $perms['delete'] ) ) {
 
 	// ---- cache/delete-transient ----
 	wp_register_ability( 'cache/delete-transient', array(
@@ -188,6 +203,11 @@ function wp_native_register_transients_abilities() {
 		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ) ),
 	));
 
+	} // end delete
+
+	// ===== CACHE — READ (continued) =====
+	if ( $perms['read'] ) {
+
 	// ---- cache/object-cache-status ----
 	wp_register_ability( 'cache/object-cache-status', array(
 		'label'       => 'Object Cache Status',
@@ -217,4 +237,6 @@ function wp_native_register_transients_abilities() {
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
+
+	} // end read
 }

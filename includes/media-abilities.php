@@ -5,7 +5,10 @@ defined( 'ABSPATH' ) || exit;
 // Register all WordPress media management abilities
 add_action( 'wp_abilities_api_init', function() {
 
-    // ===== MEDIA ABILITIES =====
+    $perms = wp_abilities_suite_get_permissions( 'media' );
+
+    // ===== MEDIA — READ =====
+    if ( $perms['read'] ) {
 
     // List media
     wp_register_ability( 'media/list', array(
@@ -122,6 +125,11 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end read
+
+    // ===== MEDIA — WRITE =====
+    if ( ! empty( $perms['write'] ) ) {
 
     // Create (upload) media
     wp_register_ability( 'media/create', array(
@@ -497,6 +505,11 @@ add_action( 'wp_abilities_api_init', function() {
                     )
     ));
 
+    } // end write
+
+    // ===== MEDIA — DELETE =====
+    if ( ! empty( $perms['delete'] ) ) {
+
     // Delete media
     wp_register_ability( 'media/delete', array(
         'label' => 'Delete Media',
@@ -557,6 +570,8 @@ add_action( 'wp_abilities_api_init', function() {
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
                     )
     ));
+
+    } // end delete
 
     error_log( 'WordPress Media Abilities: Registered 5 media management abilities' );
 

@@ -13,6 +13,11 @@ add_action( 'wp_abilities_api_init', 'wp_native_register_site_health_abilities' 
 
 function wp_native_register_site_health_abilities() {
 
+	$perms = wp_abilities_suite_get_permissions( 'site-health' );
+
+	// ===== SITE-HEALTH — READ =====
+	if ( $perms['read'] ) {
+
 	// ---- site-health/status ----
 	wp_register_ability( 'site-health/status', array(
 		'label'       => 'Site Health Status',
@@ -178,4 +183,6 @@ function wp_native_register_site_health_abilities() {
 		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
+
+	} // end read
 }

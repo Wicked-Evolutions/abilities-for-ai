@@ -13,6 +13,11 @@ add_action( 'wp_abilities_api_init', 'wp_native_register_rewrite_abilities' );
 
 function wp_native_register_rewrite_abilities() {
 
+	$perms = wp_abilities_suite_get_permissions( 'rewrite' );
+
+	// ===== REWRITE — READ =====
+	if ( $perms['read'] ) {
+
 	// ---- rewrite/get-structure ----
 	wp_register_ability( 'rewrite/get-structure', array(
 		'label'       => 'Get Permalink Structure',
@@ -89,6 +94,11 @@ function wp_native_register_rewrite_abilities() {
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
+	} // end read
+
+	// ===== REWRITE — WRITE =====
+	if ( ! empty( $perms['write'] ) ) {
+
 	// ---- rewrite/flush ----
 	wp_register_ability( 'rewrite/flush', array(
 		'label'       => 'Flush Rewrite Rules',
@@ -114,4 +124,6 @@ function wp_native_register_rewrite_abilities() {
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
 		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
 	));
+
+	} // end write
 }

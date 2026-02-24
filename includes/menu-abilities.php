@@ -88,6 +88,11 @@ function wp_abilities_suite_menu_format_item( $item ) {
 
 add_action( 'wp_abilities_api_init', function() {
 
+	$perms = wp_abilities_suite_get_permissions( 'menus' );
+
+	// ===== MENUS — READ =====
+	if ( $perms['read'] ) {
+
 	// ===== LIST MENUS =====
 
 	wp_register_ability( 'menus/list-menus', array(
@@ -171,6 +176,11 @@ add_action( 'wp_abilities_api_init', function() {
 		),
 	));
 
+	} // end read
+
+	// ===== MENUS — WRITE =====
+	if ( ! empty( $perms['write'] ) ) {
+
 	// ===== CREATE MENU =====
 
 	wp_register_ability( 'menus/create-menu', array(
@@ -209,6 +219,11 @@ add_action( 'wp_abilities_api_init', function() {
 		),
 	));
 
+	} // end write
+
+	// ===== MENUS — DELETE =====
+	if ( ! empty( $perms['delete'] ) ) {
+
 	// ===== DELETE MENU =====
 
 	wp_register_ability( 'menus/delete-menu', array(
@@ -245,6 +260,11 @@ add_action( 'wp_abilities_api_init', function() {
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
 		),
 	));
+
+	} // end delete
+
+	// ===== MENUS — READ (continued) =====
+	if ( $perms['read'] ) {
 
 	// ===== LIST MENU ITEMS =====
 
@@ -283,6 +303,11 @@ add_action( 'wp_abilities_api_init', function() {
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
 		),
 	));
+
+	} // end read
+
+	// ===== MENUS — WRITE (continued) =====
+	if ( ! empty( $perms['write'] ) ) {
 
 	// ===== ADD MENU ITEM =====
 
@@ -444,6 +469,11 @@ add_action( 'wp_abilities_api_init', function() {
 		),
 	));
 
+	} // end write
+
+	// ===== MENUS — DELETE (continued) =====
+	if ( ! empty( $perms['delete'] ) ) {
+
 	// ===== DELETE MENU ITEM =====
 
 	wp_register_ability( 'menus/delete-menu-item', array(
@@ -478,6 +508,11 @@ add_action( 'wp_abilities_api_init', function() {
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
 		),
 	));
+
+	} // end delete
+
+	// ===== MENUS — WRITE (continued) =====
+	if ( ! empty( $perms['write'] ) ) {
 
 	// ===== REORDER MENU ITEMS =====
 
@@ -521,6 +556,11 @@ add_action( 'wp_abilities_api_init', function() {
 		),
 	));
 
+	} // end write
+
+	// ===== MENUS — READ (continued) =====
+	if ( $perms['read'] ) {
+
 	// ===== LIST LOCATIONS =====
 
 	wp_register_ability( 'menus/list-locations', array(
@@ -555,6 +595,11 @@ add_action( 'wp_abilities_api_init', function() {
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
 		),
 	));
+
+	} // end read
+
+	// ===== MENUS — WRITE (continued) =====
+	if ( ! empty( $perms['write'] ) ) {
 
 	// ===== ASSIGN LOCATION =====
 
@@ -629,5 +674,7 @@ add_action( 'wp_abilities_api_init', function() {
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
 		),
 	));
+
+	} // end write
 
 }, 100 );

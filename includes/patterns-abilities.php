@@ -13,6 +13,11 @@ add_action( 'wp_abilities_api_init', 'wp_native_register_patterns_abilities' );
 
 function wp_native_register_patterns_abilities() {
 
+	$perms = wp_abilities_suite_get_permissions( 'patterns' );
+
+	// ===== PATTERNS — READ =====
+	if ( $perms['read'] ) {
+
 	// ---- patterns/list ----
 	wp_register_ability( 'patterns/list', array(
 		'label'       => 'List Block Patterns',
@@ -144,6 +149,11 @@ function wp_native_register_patterns_abilities() {
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
+	} // end read
+
+	// ===== PATTERNS — WRITE =====
+	if ( ! empty( $perms['write'] ) ) {
+
 	// ---- patterns/register ----
 	wp_register_ability( 'patterns/register', array(
 		'label'       => 'Register Block Pattern',
@@ -188,6 +198,11 @@ function wp_native_register_patterns_abilities() {
 		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
+	} // end write
+
+	// ===== PATTERNS — DELETE =====
+	if ( ! empty( $perms['delete'] ) ) {
+
 	// ---- patterns/unregister ----
 	wp_register_ability( 'patterns/unregister', array(
 		'label'       => 'Unregister Block Pattern',
@@ -214,4 +229,6 @@ function wp_native_register_patterns_abilities() {
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
 		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) ),
 	));
+
+	} // end delete
 }

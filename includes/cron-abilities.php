@@ -13,6 +13,11 @@ add_action( 'wp_abilities_api_init', 'wp_native_register_cron_abilities' );
 
 function wp_native_register_cron_abilities() {
 
+	$perms = wp_abilities_suite_get_permissions( 'cron' );
+
+	// ===== CRON — READ =====
+	if ( $perms['read'] ) {
+
 	// ---- cron/list-events ----
 	wp_register_ability( 'cron/list-events', array(
 		'label'       => 'List Cron Events',
@@ -134,4 +139,6 @@ function wp_native_register_cron_abilities() {
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
 		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
+
+	} // end read
 }

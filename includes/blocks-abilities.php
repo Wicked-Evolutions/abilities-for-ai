@@ -13,6 +13,11 @@ add_action( 'wp_abilities_api_init', 'wp_native_register_blocks_abilities' );
 
 function wp_native_register_blocks_abilities() {
 
+	$perms = wp_abilities_suite_get_permissions( 'blocks' );
+
+	// ===== BLOCKS — READ =====
+	if ( $perms['read'] ) {
+
 	// ---- blocks/parse ----
 	wp_register_ability( 'blocks/parse', array(
 		'label'       => 'Parse Blocks',
@@ -313,6 +318,11 @@ function wp_native_register_blocks_abilities() {
 		),
 	));
 
+	} // end read
+
+	// ===== BLOCKS — WRITE =====
+	if ( ! empty( $perms['write'] ) ) {
+
 	// ---- blocks/insert ----
 	wp_register_ability( 'blocks/insert', array(
 		'label'       => 'Insert Block',
@@ -452,6 +462,11 @@ function wp_native_register_blocks_abilities() {
 		),
 	));
 
+	} // end write
+
+	// ===== BLOCKS — DELETE =====
+	if ( ! empty( $perms['delete'] ) ) {
+
 	// ---- blocks/remove ----
 	wp_register_ability( 'blocks/remove', array(
 		'label'       => 'Remove Block',
@@ -514,4 +529,6 @@ function wp_native_register_blocks_abilities() {
 			),
 		),
 	));
+
+	} // end delete
 }
