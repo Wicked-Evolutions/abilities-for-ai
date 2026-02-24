@@ -25,7 +25,6 @@ function wp_native_register_rewrite_abilities() {
 		'category'    => 'rewrite',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			global $wp_rewrite;

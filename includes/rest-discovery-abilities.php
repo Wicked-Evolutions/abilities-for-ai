@@ -25,7 +25,6 @@ function wp_native_register_rest_discovery_abilities() {
 		'category'    => 'rest',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			$server     = rest_get_server();
@@ -133,7 +132,6 @@ function wp_native_register_rest_discovery_abilities() {
 		'category'    => 'rest',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			$request  = new WP_REST_Request( 'GET', '/' );

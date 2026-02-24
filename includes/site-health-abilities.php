@@ -25,7 +25,6 @@ function wp_native_register_site_health_abilities() {
 		'category'    => 'site-health',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			if ( ! class_exists( 'WP_Site_Health' ) ) {
@@ -65,7 +64,6 @@ function wp_native_register_site_health_abilities() {
 		'category'    => 'site-health',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			if ( ! class_exists( 'WP_Site_Health' ) ) {

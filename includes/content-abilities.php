@@ -172,6 +172,169 @@ add_action( 'wp_abilities_api_init', function() {
                     )
     ));
 
+    // Get content snapshot — complete post data in one optimized call
+    wp_register_ability( 'content/get-snapshot', array(
+        'label' => 'Get Content Snapshot',
+        'description' => 'Get complete post data in a single call: post fields, all meta, taxonomy terms, featured image URL, and author details. Use include/exclude arrays to control which sections are returned. Much more efficient than calling content/get + separate meta/taxonomy lookups.',
+        'category' => 'content',
+        'input_schema' => array(
+            'type' => 'object',
+            'required' => array('id'),
+            'properties' => array(
+                'id' => array(
+                    'type' => 'integer',
+                    'description' => 'Post ID'
+                ),
+                'include' => array(
+                    'type' => 'array',
+                    'items' => array('type' => 'string'),
+                    'description' => 'Sections to include. Options: meta, terms, thumbnail, author, content. If omitted, all sections are included.'
+                ),
+                'exclude' => array(
+                    'type' => 'array',
+                    'items' => array('type' => 'string'),
+                    'description' => 'Sections to exclude. Options: meta, terms, thumbnail, author, content. Ignored if include is set.'
+                ),
+                'meta_keys' => array(
+                    'type' => 'array',
+                    'items' => array('type' => 'string'),
+                    'description' => 'Specific meta keys to return. If omitted, all non-internal meta is returned. Internal keys (starting with _) are excluded by default unless listed here.'
+                )
+            )
+        ),
+        'output_schema' => array(
+            'type' => 'object'
+        ),
+        'execute_callback' => function( $input ) {
+            $post = get_post( $input['id'] );
+
+            if ( ! $post ) {
+                return new WP_Error( 'not_found', 'Post not found' );
+            }
+
+            // Determine which sections to include.
+            $all_sections = array( 'meta', 'terms', 'thumbnail', 'author', 'content' );
+            if ( ! empty( $input['include'] ) ) {
+                $sections = array_intersect( $input['include'], $all_sections );
+            } elseif ( ! empty( $input['exclude'] ) ) {
+                $sections = array_diff( $all_sections, $input['exclude'] );
+            } else {
+                $sections = $all_sections;
+            }
+            $sections = array_flip( $sections );
+
+            // Base post data (always included).
+            $result = array(
+                'id'       => $post->ID,
+                'title'    => $post->post_title,
+                'status'   => $post->post_status,
+                'type'     => $post->post_type,
+                'date'     => $post->post_date,
+                'modified' => $post->post_modified,
+                'slug'     => $post->post_name,
+                'link'     => get_permalink( $post->ID ),
+                'excerpt'  => $post->post_excerpt,
+            );
+
+            // Content (can be large, so it's opt-out).
+            if ( isset( $sections['content'] ) ) {
+                $result['content'] = $post->post_content;
+            }
+
+            // Post meta — flattened, internal keys excluded by default.
+            if ( isset( $sections['meta'] ) ) {
+                $raw_meta  = get_post_meta( $post->ID );
+                $meta_keys = ! empty( $input['meta_keys'] ) ? $input['meta_keys'] : null;
+                $meta      = array();
+
+                foreach ( $raw_meta as $key => $values ) {
+                    // If specific keys requested, only include those.
+                    if ( $meta_keys !== null ) {
+                        if ( ! in_array( $key, $meta_keys, true ) ) {
+                            continue;
+                        }
+                    } else {
+                        // Skip internal meta keys by default.
+                        if ( substr( $key, 0, 1 ) === '_' ) {
+                            continue;
+                        }
+                    }
+                    // Flatten single-value meta.
+                    $meta[ $key ] = count( $values ) === 1 ? $values[0] : $values;
+                }
+
+                $result['meta'] = $meta;
+            }
+
+            // Taxonomy terms — grouped by taxonomy.
+            if ( isset( $sections['terms'] ) ) {
+                $taxonomies = get_object_taxonomies( $post->post_type, 'names' );
+                $terms      = array();
+
+                foreach ( $taxonomies as $taxonomy ) {
+                    $post_terms = wp_get_object_terms( $post->ID, $taxonomy, array( 'fields' => 'all' ) );
+                    if ( ! is_wp_error( $post_terms ) && ! empty( $post_terms ) ) {
+                        $terms[ $taxonomy ] = array_map( function( $term ) {
+                            return array(
+                                'id'   => $term->term_id,
+                                'name' => $term->name,
+                                'slug' => $term->slug,
+                            );
+                        }, $post_terms );
+                    }
+                }
+
+                $result['terms'] = $terms;
+            }
+
+            // Featured image — full URL + dimensions.
+            if ( isset( $sections['thumbnail'] ) ) {
+                $thumb_id = get_post_thumbnail_id( $post->ID );
+                if ( $thumb_id ) {
+                    $image_data = wp_get_attachment_image_src( $thumb_id, 'full' );
+                    $result['thumbnail'] = array(
+                        'id'     => $thumb_id,
+                        'url'    => $image_data ? $image_data[0] : wp_get_attachment_url( $thumb_id ),
+                        'width'  => $image_data ? $image_data[1] : null,
+                        'height' => $image_data ? $image_data[2] : null,
+                        'alt'    => get_post_meta( $thumb_id, '_wp_attachment_image_alt', true ),
+                    );
+                } else {
+                    $result['thumbnail'] = null;
+                }
+            }
+
+            // Author details.
+            if ( isset( $sections['author'] ) ) {
+                $author = get_userdata( (int) $post->post_author );
+                if ( $author ) {
+                    $result['author'] = array(
+                        'id'           => $author->ID,
+                        'display_name' => $author->display_name,
+                        'email'        => $author->user_email,
+                        'url'          => $author->user_url,
+                    );
+                } else {
+                    $result['author'] = null;
+                }
+            }
+
+            return $result;
+        },
+        'permission_callback' => function() {
+            return current_user_can( 'edit_posts' );
+        },
+        'meta' => array(
+            'annotations' => array(
+                'readonly' => true,
+                'destructive' => false,
+                'idempotent' => true
+            ),
+            'show_in_rest' => true,
+            'mcp' => array( 'public' => true, 'type' => 'tool' ),
+                    )
+    ));
+
     } // end read
 
     // ===== CONTENT ABILITIES — WRITE =====

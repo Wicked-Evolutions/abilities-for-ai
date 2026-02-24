@@ -25,7 +25,6 @@ function wp_native_register_themes_abilities() {
 		'category'    => 'themes',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			$themes = wp_get_themes();
@@ -58,7 +57,6 @@ function wp_native_register_themes_abilities() {
 		'category'    => 'themes',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			$theme = wp_get_theme();
@@ -90,7 +88,6 @@ function wp_native_register_themes_abilities() {
 		'category'    => 'themes',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			$mods = get_theme_mods();

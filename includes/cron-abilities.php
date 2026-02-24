@@ -71,7 +71,6 @@ function wp_native_register_cron_abilities() {
 		'category'    => 'cron',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			$schedules = wp_get_schedules();

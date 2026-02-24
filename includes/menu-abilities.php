@@ -100,8 +100,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'description' => 'List all navigation menus with item counts and assigned theme locations.',
 		'category'    => 'menus',
 		'input_schema' => array(
-			'type'       => 'object',
-			'properties' => new \stdClass(),
+			'type' => 'object',
 		),
 		'output_schema' => array(
 			'type'       => 'object',
@@ -568,8 +567,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'description' => 'List all registered theme menu locations with their current menu assignments.',
 		'category'    => 'menus',
 		'input_schema' => array(
-			'type'       => 'object',
-			'properties' => new \stdClass(),
+			'type' => 'object',
 		),
 		'execute_callback' => function( $input ) {
 			$registered = get_registered_nav_menus();

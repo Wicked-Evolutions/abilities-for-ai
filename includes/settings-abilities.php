@@ -47,7 +47,6 @@ function wp_native_register_settings_abilities() {
 		'category'    => 'settings',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() use ( $settings_groups ) {
 			$result = array();
@@ -122,7 +121,6 @@ function wp_native_register_settings_abilities() {
 		'category'    => 'settings',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			global $wp_rewrite;

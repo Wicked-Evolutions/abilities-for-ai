@@ -130,7 +130,6 @@ function wp_native_register_patterns_abilities() {
 		'category'    => 'patterns',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			$registry   = WP_Block_Pattern_Categories_Registry::get_instance();

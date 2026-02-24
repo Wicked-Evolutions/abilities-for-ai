@@ -215,7 +215,6 @@ function wp_native_register_transients_abilities() {
 		'category'    => 'cache',
 		'input_schema' => array(
 			'type'       => 'object',
-			'properties' => (object) array(),
 		),
 		'execute_callback' => function() {
 			global $wp_object_cache;
