@@ -101,7 +101,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'output_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'menus' => array( 'type' => 'array' ),
+				'menus' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 			),
 		),
 		'execute_callback' => function( $input ) {

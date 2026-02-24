@@ -53,7 +53,7 @@ add_action( 'wp_abilities_api_init', function() {
         'output_schema' => array(
             'type' => 'object',
             'properties' => array(
-                'media' => array('type' => 'array'),
+                'media' => array('type' => 'array', 'items' => array('type' => 'object')),
                 'total' => array('type' => 'integer'),
                 'pages' => array('type' => 'integer')
             )

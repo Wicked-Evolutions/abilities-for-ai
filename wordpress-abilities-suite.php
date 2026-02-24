@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: WordPress Abilities Suite
- * Description: Comprehensive WordPress management abilities for MCP - Content, Taxonomies, Plugins, Media, Users, Comments, and Menus
- * Version: 2.0.0
+ * Description: Complete native WordPress AI control through the Abilities API — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more.
+ * Version: 3.0.0
  * Author: Influencentricity
  * Author URI: https://influencentricity.com
  * License: GPL-2.0-or-later
@@ -15,14 +15,17 @@
 defined( 'ABSPATH' ) || exit;
 
 // Define plugin constants
-define( 'WP_ABILITIES_SUITE_VERSION', '2.0.0' );
+define( 'WP_ABILITIES_SUITE_VERSION', '3.0.0' );
 define( 'WP_ABILITIES_SUITE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WP_ABILITIES_SUITE_URL', plugin_dir_url( __FILE__ ) );
 
-// Load ability categories FIRST (required before abilities)
+// Load shared helpers.
+require_once WP_ABILITIES_SUITE_PATH . 'includes/helpers.php';
+
+// Load ability categories FIRST (required before abilities).
 require_once WP_ABILITIES_SUITE_PATH . 'includes/ability-categories.php';
 
-// Load ability modules
+// Original v2.0 ability modules.
 require_once WP_ABILITIES_SUITE_PATH . 'includes/content-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/taxonomy-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/plugin-abilities.php';
@@ -30,6 +33,18 @@ require_once WP_ABILITIES_SUITE_PATH . 'includes/media-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/user-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/comment-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/menu-abilities.php';
+
+// New v3.0 ability modules.
+require_once WP_ABILITIES_SUITE_PATH . 'includes/blocks-abilities.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/patterns-abilities.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/meta-abilities.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/settings-abilities.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/site-health-abilities.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/transients-abilities.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/cron-abilities.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/themes-abilities.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/rest-discovery-abilities.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/rewrite-abilities.php';
 
 // Load admin dashboard
 if ( is_admin() ) {

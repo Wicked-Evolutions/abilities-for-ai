@@ -1,6 +1,6 @@
 # WordPress Abilities Suite
 
-Comprehensive WordPress management abilities for the Model Context Protocol (MCP). Content, Taxonomies, Plugins, Media, Users, Comments, and Menus — 51 abilities across 7 categories.
+Complete native WordPress AI control through the Abilities API — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more. **103 abilities across 17 categories.**
 
 ## Requirements
 
@@ -8,7 +8,7 @@ Comprehensive WordPress management abilities for the Model Context Protocol (MCP
 - PHP 7.4+
 - [WP MCP Adapter](https://github.com/Influencentricity/wp-mcp-adapter) (for MCP integration)
 
-## 51 Abilities
+## 103 Abilities
 
 ### Content Management (10)
 
@@ -96,6 +96,110 @@ Comprehensive WordPress management abilities for the Model Context Protocol (MCP
 | `menus/assign-location` | write | Assign a menu to a location |
 | `menus/unassign-location` | write | Unassign a menu from a location |
 
+### Block Editor (8) — *New in v3.0*
+
+| Ability | Type | Description |
+|---------|------|-------------|
+| `blocks/parse` | read | Parse post content into structured block array |
+| `blocks/serialize` | read | Convert block array back to HTML |
+| `blocks/list-types` | read | List all registered block types |
+| `blocks/get-type` | read | Get single block type details |
+| `blocks/find-in-post` | read | Find blocks by name or attribute in a post |
+| `blocks/insert` | write | Insert blocks at position in post content |
+| `blocks/replace` | write | Replace block at index in post content |
+| `blocks/remove` | write | Remove block at index from post content |
+
+### Block Patterns (5) — *New in v3.0*
+
+| Ability | Type | Description |
+|---------|------|-------------|
+| `patterns/list` | read | List all registered block patterns |
+| `patterns/get` | read | Get a specific block pattern |
+| `patterns/list-categories` | read | List pattern categories |
+| `patterns/register` | write | Register a new block pattern |
+| `patterns/unregister` | write | Unregister a block pattern |
+
+### Meta Fields (11) — *New in v3.0*
+
+| Ability | Type | Description |
+|---------|------|-------------|
+| `meta/list-post-meta` | read | List all meta for a post |
+| `meta/get-post-meta` | read | Get specific post meta value |
+| `meta/update-post-meta` | write | Update post meta value |
+| `meta/delete-post-meta` | write | Delete post meta key |
+| `meta/list-term-meta` | read | List all meta for a term |
+| `meta/get-term-meta` | read | Get specific term meta value |
+| `meta/update-term-meta` | write | Update term meta value |
+| `meta/list-user-meta` | read | List all meta for a user |
+| `meta/get-user-meta` | read | Get specific user meta value |
+| `meta/update-user-meta` | write | Update user meta value |
+| `meta/list-registered` | read | List all registered meta keys |
+
+### Settings (5) — *New in v3.0*
+
+| Ability | Type | Description |
+|---------|------|-------------|
+| `settings/list` | read | List WordPress settings (allowlisted) |
+| `settings/get` | read | Get a specific setting value |
+| `settings/get-group` | read | Get multiple settings at once |
+| `settings/update` | write | Update a setting value |
+| `settings/get-permalink-structure` | read | Get permalink structure |
+
+### Site Health (4) — *New in v3.0*
+
+| Ability | Type | Description |
+|---------|------|-------------|
+| `site-health/status` | read | Get site health status summary |
+| `site-health/list-tests` | read | List available health tests |
+| `site-health/run-test` | read | Run a specific health test |
+| `site-health/info` | read | Get detailed site health info |
+
+### Cache & Transients (6) — *New in v3.0*
+
+| Ability | Type | Description |
+|---------|------|-------------|
+| `cache/list-transients` | read | List stored transients |
+| `cache/get-transient` | read | Get a transient value |
+| `cache/set-transient` | write | Set a transient with expiration |
+| `cache/delete-transient` | write | Delete a transient |
+| `cache/flush` | write | Flush the object cache |
+| `cache/object-cache-status` | read | Get object cache status |
+
+### Cron (3) — *New in v3.0*
+
+| Ability | Type | Description |
+|---------|------|-------------|
+| `cron/list-events` | read | List all scheduled cron events |
+| `cron/list-schedules` | read | List cron schedule intervals |
+| `cron/get-event` | read | Get details of a specific cron event |
+
+### Themes (5) — *New in v3.0*
+
+| Ability | Type | Description |
+|---------|------|-------------|
+| `themes/list` | read | List installed themes |
+| `themes/get-active` | read | Get active theme details |
+| `themes/list-mods` | read | List theme modifications |
+| `themes/get-mod` | read | Get a specific theme mod value |
+| `themes/get-theme-json` | read | Get resolved theme.json data |
+
+### REST Discovery (4) — *New in v3.0*
+
+| Ability | Type | Description |
+|---------|------|-------------|
+| `rest/list-namespaces` | read | List all REST API namespaces |
+| `rest/list-routes` | read | List routes in a namespace |
+| `rest/get-route-schema` | read | Get schema for a specific route |
+| `rest/get-index` | read | Get the full REST API index |
+
+### Rewrite Rules (3) — *New in v3.0*
+
+| Ability | Type | Description |
+|---------|------|-------------|
+| `rewrite/get-structure` | read | Get current permalink structure |
+| `rewrite/list-rules` | read | List all rewrite rules |
+| `rewrite/flush` | write | Flush rewrite rules |
+
 ## Installation
 
 1. Upload to `wp-content/plugins/wordpress-abilities-suite/`
@@ -104,6 +208,14 @@ Comprehensive WordPress management abilities for the Model Context Protocol (MCP
 
 No Composer dependencies required.
 
+## Admin Dashboard
+
+The plugin includes a built-in admin dashboard at **Settings → Abilities Suite** with:
+- Ability browser showing all registered abilities
+- Category breakdown with counts
+- Test interface for individual abilities
+- System diagnostics
+
 ## Multisite Support
 
 Network activation supported. Plugin management is multisite-aware.
@@ -111,16 +223,17 @@ Network activation supported. Plugin management is multisite-aware.
 ## Security
 
 All abilities include WordPress capability checks:
-- `edit_posts` — content and taxonomy operations
+- `edit_posts` — content, taxonomy, block, pattern, and meta operations
 - `activate_plugins` — plugin management
 - `upload_files` — media operations
 - `create_users` — user management
 - `moderate_comments` — comment operations
 - `edit_theme_options` — menu operations
+- `manage_options` — settings, cache, cron, themes, site health, REST, rewrite
 
 ## Version
 
-**Current:** 2.0.0
+**Current:** 3.0.0
 
 ## Author
 

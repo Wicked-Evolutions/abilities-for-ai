@@ -59,5 +59,56 @@ function wp_abilities_suite_register_categories() {
         'description' => __( 'WordPress navigation menu management — menus, items, and location assignments.', 'wordpress-abilities-suite' ),
     ));
 
-    error_log( 'WordPress Abilities Suite: Registered 7 ability categories' );
+    // V3.0 categories.
+    wp_register_ability_category( 'blocks', array(
+        'label'       => __( 'Block Editor', 'wordpress-abilities-suite' ),
+        'description' => __( 'WordPress Gutenberg block parsing, serialization, and manipulation.', 'wordpress-abilities-suite' ),
+    ));
+
+    wp_register_ability_category( 'patterns', array(
+        'label'       => __( 'Block Patterns', 'wordpress-abilities-suite' ),
+        'description' => __( 'WordPress block pattern registration and management.', 'wordpress-abilities-suite' ),
+    ));
+
+    wp_register_ability_category( 'meta', array(
+        'label'       => __( 'Meta Fields', 'wordpress-abilities-suite' ),
+        'description' => __( 'Post, term, and user meta field management.', 'wordpress-abilities-suite' ),
+    ));
+
+    wp_register_ability_category( 'settings', array(
+        'label'       => __( 'Settings', 'wordpress-abilities-suite' ),
+        'description' => __( 'WordPress core settings and options.', 'wordpress-abilities-suite' ),
+    ));
+
+    wp_register_ability_category( 'site-health', array(
+        'label'       => __( 'Site Health', 'wordpress-abilities-suite' ),
+        'description' => __( 'WordPress site health diagnostics and debug information.', 'wordpress-abilities-suite' ),
+    ));
+
+    wp_register_ability_category( 'cache', array(
+        'label'       => __( 'Cache & Transients', 'wordpress-abilities-suite' ),
+        'description' => __( 'WordPress transient and object cache management.', 'wordpress-abilities-suite' ),
+    ));
+
+    wp_register_ability_category( 'cron', array(
+        'label'       => __( 'Cron', 'wordpress-abilities-suite' ),
+        'description' => __( 'WordPress scheduled event and cron management.', 'wordpress-abilities-suite' ),
+    ));
+
+    wp_register_ability_category( 'themes', array(
+        'label'       => __( 'Themes', 'wordpress-abilities-suite' ),
+        'description' => __( 'WordPress theme listing, mods, and theme.json access.', 'wordpress-abilities-suite' ),
+    ));
+
+    wp_register_ability_category( 'rest', array(
+        'label'       => __( 'REST Discovery', 'wordpress-abilities-suite' ),
+        'description' => __( 'WordPress REST API namespace, route, and schema introspection.', 'wordpress-abilities-suite' ),
+    ));
+
+    wp_register_ability_category( 'rewrite', array(
+        'label'       => __( 'Rewrite Rules', 'wordpress-abilities-suite' ),
+        'description' => __( 'WordPress permalink structure and rewrite rule management.', 'wordpress-abilities-suite' ),
+    ));
+
+    error_log( 'WordPress Abilities Suite: Registered 17 ability categories' );
 }

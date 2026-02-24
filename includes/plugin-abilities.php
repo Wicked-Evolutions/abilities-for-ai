@@ -24,7 +24,8 @@ add_action( 'wp_abilities_api_init', function() {
             )
         ),
         'output_schema' => array(
-            'type' => 'array'
+            'type' => 'array',
+            'items' => array('type' => 'object')
         ),
         'execute_callback' => function( $input ) {
             if ( ! function_exists( 'get_plugins' ) ) {
@@ -529,7 +530,7 @@ add_action( 'wp_abilities_api_init', function() {
         'output_schema' => array(
             'type' => 'object',
             'properties' => array(
-                'plugins' => array('type' => 'array'),
+                'plugins' => array('type' => 'array', 'items' => array('type' => 'object')),
                 'info' => array('type' => 'object')
             )
         ),

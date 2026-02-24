@@ -59,7 +59,7 @@ add_action( 'wp_abilities_api_init', function() {
         'output_schema' => array(
             'type' => 'object',
             'properties' => array(
-                'comments' => array('type' => 'array'),
+                'comments' => array('type' => 'array', 'items' => array('type' => 'object')),
                 'total' => array('type' => 'integer')
             )
         ),

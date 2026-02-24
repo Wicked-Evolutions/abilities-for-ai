@@ -58,7 +58,7 @@ add_action( 'wp_abilities_api_init', function() {
         'output_schema' => array(
             'type' => 'object',
             'properties' => array(
-                'posts' => array('type' => 'array'),
+                'posts' => array('type' => 'array', 'items' => array('type' => 'object')),
                 'total' => array('type' => 'integer'),
                 'pages' => array('type' => 'integer')
             )
@@ -386,7 +386,8 @@ add_action( 'wp_abilities_api_init', function() {
             )
         ),
         'output_schema' => array(
-            'type' => 'array'
+            'type' => 'array',
+            'items' => array('type' => 'object')
         ),
         'execute_callback' => function( $input ) {
             $args = array();
