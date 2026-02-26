@@ -38,11 +38,9 @@ function wp_native_register_blocks_abilities() {
 		),
 		'execute_callback' => function( $params ) {
 			if ( ! empty( $params['post_id'] ) ) {
-				$post = get_post( intval( $params['post_id'] ) );
-				if ( ! $post ) {
-					return wp_native_error( 'not_found', 'Post not found.' );
-				}
-				$content = $post->post_content;
+				$check = wp_abilities_suite_require_editable_post( $params['post_id'] );
+				if ( is_wp_error( $check ) ) return $check;
+				$content = $check->post_content;
 			} elseif ( isset( $params['content'] ) ) {
 				$content = $params['content'];
 			} else {
@@ -50,9 +48,13 @@ function wp_native_register_blocks_abilities() {
 			}
 
 			$blocks = parse_blocks( $content );
-			$cleaned = array_values( array_filter( $blocks, function( $b ) {
-				return ! empty( $b['blockName'] );
-			}));
+			$cleaned = array();
+			foreach ( $blocks as $index => $b ) {
+				if ( ! empty( $b['blockName'] ) ) {
+					$b['original_index'] = $index;
+					$cleaned[] = $b;
+				}
+			}
 
 			return array(
 				'block_count' => count( $cleaned ),
@@ -63,7 +65,9 @@ function wp_native_register_blocks_abilities() {
 			return current_user_can( 'edit_posts' );
 		},
 		'meta' => array(
-			'annotations' => array(
+			'show_in_rest' => true,
+			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
+			'annotations'  => array(
 				'readonly'    => true,
 				'destructive' => false,
 				'idempotent'  => true,
@@ -101,7 +105,9 @@ function wp_native_register_blocks_abilities() {
 			return current_user_can( 'edit_posts' );
 		},
 		'meta' => array(
-			'annotations' => array(
+			'show_in_rest' => true,
+			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
+			'annotations'  => array(
 				'readonly'    => true,
 				'destructive' => false,
 				'idempotent'  => true,
@@ -170,7 +176,9 @@ function wp_native_register_blocks_abilities() {
 			return current_user_can( 'edit_posts' );
 		},
 		'meta' => array(
-			'annotations' => array(
+			'show_in_rest' => true,
+			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
+			'annotations'  => array(
 				'readonly'    => true,
 				'destructive' => false,
 				'idempotent'  => true,
@@ -225,7 +233,9 @@ function wp_native_register_blocks_abilities() {
 			return current_user_can( 'edit_posts' );
 		},
 		'meta' => array(
-			'annotations' => array(
+			'show_in_rest' => true,
+			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
+			'annotations'  => array(
 				'readonly'    => true,
 				'destructive' => false,
 				'idempotent'  => true,
@@ -261,12 +271,10 @@ function wp_native_register_blocks_abilities() {
 			'required' => array( 'post_id' ),
 		),
 		'execute_callback' => function( $params ) {
-			$post = get_post( intval( $params['post_id'] ?? 0 ) );
-			if ( ! $post ) {
-				return wp_native_error( 'not_found', 'Post not found.' );
-			}
+			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
 
-			$blocks  = parse_blocks( $post->post_content );
+			$blocks  = parse_blocks( $check->post_content );
 			$matches = array();
 			$index   = 0;
 
@@ -310,7 +318,9 @@ function wp_native_register_blocks_abilities() {
 			return current_user_can( 'edit_posts' );
 		},
 		'meta' => array(
-			'annotations' => array(
+			'show_in_rest' => true,
+			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
+			'annotations'  => array(
 				'readonly'    => true,
 				'destructive' => false,
 				'idempotent'  => true,
@@ -349,13 +359,11 @@ function wp_native_register_blocks_abilities() {
 			'required' => array( 'post_id', 'blocks' ),
 		),
 		'execute_callback' => function( $params ) {
-			$post_id = intval( $params['post_id'] ?? 0 );
-			$post    = get_post( $post_id );
-			if ( ! $post ) {
-				return wp_native_error( 'not_found', 'Post not found.' );
-			}
+			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+			$post_id = $check->ID;
 
-			$existing    = parse_blocks( $post->post_content );
+			$existing    = parse_blocks( $check->post_content );
 			$new_blocks  = $params['blocks'];
 			$position    = intval( $params['position'] ?? -1 );
 
@@ -386,7 +394,9 @@ function wp_native_register_blocks_abilities() {
 			return current_user_can( 'edit_posts' );
 		},
 		'meta' => array(
-			'annotations' => array(
+			'show_in_rest' => true,
+			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
+			'annotations'  => array(
 				'readonly'    => false,
 				'destructive' => false,
 				'idempotent'  => false,
@@ -418,13 +428,11 @@ function wp_native_register_blocks_abilities() {
 			'required' => array( 'post_id', 'index', 'block' ),
 		),
 		'execute_callback' => function( $params ) {
-			$post_id = intval( $params['post_id'] ?? 0 );
-			$post    = get_post( $post_id );
-			if ( ! $post ) {
-				return wp_native_error( 'not_found', 'Post not found.' );
-			}
+			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+			$post_id = $check->ID;
 
-			$blocks = parse_blocks( $post->post_content );
+			$blocks = parse_blocks( $check->post_content );
 			$index  = intval( $params['index'] ?? -1 );
 
 			if ( $index < 0 || $index >= count( $blocks ) ) {
@@ -454,7 +462,9 @@ function wp_native_register_blocks_abilities() {
 			return current_user_can( 'edit_posts' );
 		},
 		'meta' => array(
-			'annotations' => array(
+			'show_in_rest' => true,
+			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
+			'annotations'  => array(
 				'readonly'    => false,
 				'destructive' => false,
 				'idempotent'  => true,
@@ -487,13 +497,11 @@ function wp_native_register_blocks_abilities() {
 			'required' => array( 'post_id', 'index' ),
 		),
 		'execute_callback' => function( $params ) {
-			$post_id = intval( $params['post_id'] ?? 0 );
-			$post    = get_post( $post_id );
-			if ( ! $post ) {
-				return wp_native_error( 'not_found', 'Post not found.' );
-			}
+			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+			$post_id = $check->ID;
 
-			$blocks = parse_blocks( $post->post_content );
+			$blocks = parse_blocks( $check->post_content );
 			$index  = intval( $params['index'] ?? -1 );
 
 			if ( $index < 0 || $index >= count( $blocks ) ) {
@@ -522,7 +530,9 @@ function wp_native_register_blocks_abilities() {
 			return current_user_can( 'edit_posts' );
 		},
 		'meta' => array(
-			'annotations' => array(
+			'show_in_rest' => true,
+			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
+			'annotations'  => array(
 				'readonly'    => false,
 				'destructive' => true,
 				'idempotent'  => false,

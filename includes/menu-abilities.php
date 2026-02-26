@@ -133,7 +133,7 @@ add_action( 'wp_abilities_api_init', function() {
 			return array( 'menus' => $result );
 		},
 		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
+			return current_user_can( 'edit_theme_options' );
 		},
 		'meta' => array(
 			'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ),
@@ -166,7 +166,7 @@ add_action( 'wp_abilities_api_init', function() {
 			return array( 'id' => (int) $menu->term_id, 'name' => $menu->name, 'slug' => $menu->slug, 'items' => $tree );
 		},
 		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
+			return current_user_can( 'edit_theme_options' );
 		},
 		'meta' => array(
 			'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ),
@@ -294,7 +294,7 @@ add_action( 'wp_abilities_api_init', function() {
 			return array( 'items' => $result );
 		},
 		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
+			return current_user_can( 'edit_theme_options' );
 		},
 		'meta' => array(
 			'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ),
@@ -585,7 +585,7 @@ add_action( 'wp_abilities_api_init', function() {
 			return array( 'locations' => $result );
 		},
 		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
+			return current_user_can( 'edit_theme_options' );
 		},
 		'meta' => array(
 			'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ),

@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 add_action( 'wp_abilities_api_init', function() {
 
     $perms = wp_abilities_suite_get_permissions( 'taxonomies' );
@@ -484,6 +486,8 @@ add_action( 'wp_abilities_api_init', function() {
             )
         ),
         'execute_callback' => function( $input ) {
+            $check = wp_abilities_suite_require_editable_post( $input['post_id'] );
+            if ( is_wp_error( $check ) ) return $check;
             $result = wp_set_object_terms(
                 $input['post_id'],
                 $input['terms'],
@@ -542,6 +546,8 @@ add_action( 'wp_abilities_api_init', function() {
             'type' => 'object'
         ),
         'execute_callback' => function( $input ) {
+            $check = wp_abilities_suite_require_editable_post( $input['post_id'] );
+            if ( is_wp_error( $check ) ) return $check;
             $post_id = $input['post_id'];
 
             if ( isset( $input['taxonomy'] ) ) {

@@ -19,95 +19,95 @@ function wp_abilities_suite_register_categories() {
 
     // Content category
     wp_register_ability_category( 'content', array(
-        'label' => __( 'Content Management', 'wordpress-abilities-suite' ),
-        'description' => __( 'Abilities for managing WordPress content including posts, pages, and custom post types.', 'wordpress-abilities-suite' ),
+        'label' => __( 'Content Management', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'Abilities for managing WordPress content including posts, pages, and custom post types.', 'abilities-suite-for-wordpress' ),
     ));
 
     // Taxonomies category
     wp_register_ability_category( 'taxonomies', array(
-        'label' => __( 'Taxonomy Management', 'wordpress-abilities-suite' ),
-        'description' => __( 'Abilities for managing WordPress taxonomies, categories, tags, and terms.', 'wordpress-abilities-suite' ),
+        'label' => __( 'Taxonomy Management', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'Abilities for managing WordPress taxonomies, categories, tags, and terms.', 'abilities-suite-for-wordpress' ),
     ));
 
     // Plugins category
     wp_register_ability_category( 'plugins', array(
-        'label' => __( 'Plugin Management', 'wordpress-abilities-suite' ),
-        'description' => __( 'Abilities for managing WordPress plugins including installation, activation, and updates.', 'wordpress-abilities-suite' ),
+        'label' => __( 'Plugin Management', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'Abilities for managing WordPress plugins including installation, activation, and updates.', 'abilities-suite-for-wordpress' ),
     ));
 
     // Media category
     wp_register_ability_category( 'media', array(
-        'label' => __( 'Media Management', 'wordpress-abilities-suite' ),
-        'description' => __( 'Abilities for managing WordPress media library including uploads, attachments, and files.', 'wordpress-abilities-suite' ),
+        'label' => __( 'Media Management', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'Abilities for managing WordPress media library including uploads, attachments, and files.', 'abilities-suite-for-wordpress' ),
     ));
 
     // Users category
     wp_register_ability_category( 'users', array(
-        'label' => __( 'User Management', 'wordpress-abilities-suite' ),
-        'description' => __( 'Abilities for managing WordPress users, roles, and permissions.', 'wordpress-abilities-suite' ),
+        'label' => __( 'User Management', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'Abilities for managing WordPress users, roles, and permissions.', 'abilities-suite-for-wordpress' ),
     ));
 
     // Comments category
     wp_register_ability_category( 'comments', array(
-        'label' => __( 'Comment Management', 'wordpress-abilities-suite' ),
-        'description' => __( 'Abilities for managing WordPress comments and discussions.', 'wordpress-abilities-suite' ),
+        'label' => __( 'Comment Management', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'Abilities for managing WordPress comments and discussions.', 'abilities-suite-for-wordpress' ),
     ));
 
     // Menus category
     wp_register_ability_category( 'menus', array(
-        'label' => __( 'Menu Management', 'wordpress-abilities-suite' ),
-        'description' => __( 'WordPress navigation menu management — menus, items, and location assignments.', 'wordpress-abilities-suite' ),
+        'label' => __( 'Menu Management', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'WordPress navigation menu management — menus, items, and location assignments.', 'abilities-suite-for-wordpress' ),
     ));
 
     // V3.0 categories.
     wp_register_ability_category( 'blocks', array(
-        'label'       => __( 'Block Editor', 'wordpress-abilities-suite' ),
-        'description' => __( 'WordPress Gutenberg block parsing, serialization, and manipulation.', 'wordpress-abilities-suite' ),
+        'label'       => __( 'Block Editor', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'WordPress Gutenberg block parsing, serialization, and manipulation.', 'abilities-suite-for-wordpress' ),
     ));
 
     wp_register_ability_category( 'patterns', array(
-        'label'       => __( 'Block Patterns', 'wordpress-abilities-suite' ),
-        'description' => __( 'WordPress block pattern registration and management.', 'wordpress-abilities-suite' ),
+        'label'       => __( 'Block Patterns', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'WordPress block pattern registration and management.', 'abilities-suite-for-wordpress' ),
     ));
 
     wp_register_ability_category( 'meta', array(
-        'label'       => __( 'Meta Fields', 'wordpress-abilities-suite' ),
-        'description' => __( 'Post, term, and user meta field management.', 'wordpress-abilities-suite' ),
+        'label'       => __( 'Meta Fields', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'Post, term, and user meta field management.', 'abilities-suite-for-wordpress' ),
     ));
 
     wp_register_ability_category( 'settings', array(
-        'label'       => __( 'Settings', 'wordpress-abilities-suite' ),
-        'description' => __( 'WordPress core settings and options.', 'wordpress-abilities-suite' ),
+        'label'       => __( 'Settings', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'WordPress core settings and options.', 'abilities-suite-for-wordpress' ),
     ));
 
     wp_register_ability_category( 'site-health', array(
-        'label'       => __( 'Site Health', 'wordpress-abilities-suite' ),
-        'description' => __( 'WordPress site health diagnostics and debug information.', 'wordpress-abilities-suite' ),
+        'label'       => __( 'Site Health', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'WordPress site health diagnostics and debug information.', 'abilities-suite-for-wordpress' ),
     ));
 
     wp_register_ability_category( 'cache', array(
-        'label'       => __( 'Cache & Transients', 'wordpress-abilities-suite' ),
-        'description' => __( 'WordPress transient and object cache management.', 'wordpress-abilities-suite' ),
+        'label'       => __( 'Cache & Transients', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'WordPress transient and object cache management.', 'abilities-suite-for-wordpress' ),
     ));
 
     wp_register_ability_category( 'cron', array(
-        'label'       => __( 'Cron', 'wordpress-abilities-suite' ),
-        'description' => __( 'WordPress scheduled event and cron management.', 'wordpress-abilities-suite' ),
+        'label'       => __( 'Cron', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'WordPress scheduled event and cron management.', 'abilities-suite-for-wordpress' ),
     ));
 
     wp_register_ability_category( 'themes', array(
-        'label'       => __( 'Themes', 'wordpress-abilities-suite' ),
-        'description' => __( 'WordPress theme listing, mods, and theme.json access.', 'wordpress-abilities-suite' ),
+        'label'       => __( 'Themes', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'WordPress theme listing, mods, and theme.json access.', 'abilities-suite-for-wordpress' ),
     ));
 
     wp_register_ability_category( 'rest', array(
-        'label'       => __( 'REST Discovery', 'wordpress-abilities-suite' ),
-        'description' => __( 'WordPress REST API namespace, route, and schema introspection.', 'wordpress-abilities-suite' ),
+        'label'       => __( 'REST Discovery', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'WordPress REST API namespace, route, and schema introspection.', 'abilities-suite-for-wordpress' ),
     ));
 
     wp_register_ability_category( 'rewrite', array(
-        'label'       => __( 'Rewrite Rules', 'wordpress-abilities-suite' ),
-        'description' => __( 'WordPress permalink structure and rewrite rule management.', 'wordpress-abilities-suite' ),
+        'label'       => __( 'Rewrite Rules', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'WordPress permalink structure and rewrite rule management.', 'abilities-suite-for-wordpress' ),
     ));
 
     error_log( 'WordPress Abilities Suite: Registered 17 ability categories' );

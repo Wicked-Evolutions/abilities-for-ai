@@ -1,10 +1,10 @@
-=== WordPress Abilities Suite ===
+=== Abilities Suite for WordPress ===
 Contributors: influencentricity
 Tags: ai, mcp, abilities, api, automation
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 3.1.0
+Stable tag: 3.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Complete native WordPress AI control through the Abilities API — content, bloc
 
 == Description ==
 
-WordPress Abilities Suite gives AI clients full control over native WordPress functionality through the [WordPress Abilities API](https://developer.wordpress.org/abilities/). 93 abilities across 17 modules — from content management to block editing, metadata to cron scheduling.
+Abilities Suite for WordPress gives AI clients full control over native WordPress functionality through the [WordPress Abilities API](https://developer.wordpress.org/abilities/). 93 abilities across 17 modules — from content management to block editing, metadata to cron scheduling.
 
 **Works with any MCP-compatible AI client** — Claude Code, Claude Desktop, Cursor, and more.
 
@@ -75,7 +75,7 @@ The Abilities API is a standardized way for WordPress to expose functionality to
 
 = What AI clients work with this? =
 
-Any client that speaks the Model Context Protocol (MCP) — Claude Code, Claude Desktop, Cursor, and others. You need the WP MCP Adapter plugin to bridge between MCP and the Abilities API.
+Any client that speaks the Model Context Protocol (MCP) — Claude Code, Claude Desktop, Cursor, and others. You need the MCP Adapter for WordPress plugin to bridge between MCP and the Abilities API.
 
 = Is this safe? =
 

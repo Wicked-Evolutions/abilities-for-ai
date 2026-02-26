@@ -72,7 +72,7 @@ function wp_native_register_patterns_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- patterns/get ----
@@ -120,7 +120,7 @@ function wp_native_register_patterns_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- patterns/list-categories ----
@@ -145,7 +145,7 @@ function wp_native_register_patterns_abilities() {
 			return array( 'count' => count( $result ), 'categories' => $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	} // end read
@@ -194,7 +194,7 @@ function wp_native_register_patterns_abilities() {
 			return array( 'name' => $name, 'registered' => true );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	} // end write
@@ -226,7 +226,7 @@ function wp_native_register_patterns_abilities() {
 			return array( 'name' => $name, 'unregistered' => (bool) $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) ),
 	));
 
 	} // end delete

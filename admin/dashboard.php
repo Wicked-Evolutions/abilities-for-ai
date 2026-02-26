@@ -18,7 +18,7 @@ class WP_Abilities_Suite_Dashboard {
 	 * Each abilities plugin uses unique category slugs, so mapping is deterministic.
 	 */
 	private static $source_map = array(
-		// WordPress Core (wordpress-abilities-suite).
+		// WordPress Core (abilities-suite-for-wordpress).
 		'content'     => 'WordPress Core',
 		'taxonomies'  => 'WordPress Core',
 		'plugins'     => 'WordPress Core',
@@ -28,7 +28,7 @@ class WP_Abilities_Suite_Dashboard {
 		'menus'       => 'WordPress Core',
 		'site'        => 'WordPress Core',
 		'user'        => 'WordPress Core',
-		// MCP Adapter (wp-mcp-adapter).
+		// MCP Adapter (mcp-adapter-for-wordpress).
 		'mcp-adapter' => 'MCP Adapter',
 		// Fluent Suite (fluent-abilities).
 		'fluent-crm'       => 'FluentCRM',

@@ -1,8 +1,9 @@
 <?php
 /**
- * Plugin Name: WordPress Abilities Suite
- * Description: Complete native WordPress AI control through the Abilities API — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more.
- * Version: 3.1.0
+ * Plugin Name: Abilities Suite for WordPress
+ * Plugin URI:  https://github.com/Influencentricity/abilities-suite-for-wordpress
+ * Description: 93 native WordPress abilities across 17 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more. Powers AI control through the official Abilities API.
+ * Version: 3.3.0
  * Author: Influencentricity
  * Author URI: https://influencentricity.com
  * License: GPL-2.0-or-later
@@ -15,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Define plugin constants
-define( 'WP_ABILITIES_SUITE_VERSION', '3.1.0' );
+define( 'WP_ABILITIES_SUITE_VERSION', '3.3.0' );
 define( 'WP_ABILITIES_SUITE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WP_ABILITIES_SUITE_URL', plugin_dir_url( __FILE__ ) );
 
@@ -55,17 +56,27 @@ if ( is_admin() ) {
 }
 
 // Activation hook
-register_activation_hook( __FILE__, function() {
+register_activation_hook( __FILE__, function( $network_wide = false ) {
     // Set default options
-    if ( is_multisite() ) {
+    if ( is_multisite() && $network_wide ) {
         update_site_option( 'wp_abilities_suite_version', WP_ABILITIES_SUITE_VERSION );
+
+        // Iterate all sites to set per-site permissions.
+        $site_ids = get_sites( array( 'fields' => 'ids', 'number' => 0 ) );
+        foreach ( $site_ids as $site_id ) {
+            switch_to_blog( $site_id );
+            if ( false === get_option( 'wp_abilities_suite_permissions' ) ) {
+                update_option( 'wp_abilities_suite_permissions', wp_abilities_suite_permission_defaults() );
+            }
+            restore_current_blog();
+        }
     } else {
         update_option( 'wp_abilities_suite_version', WP_ABILITIES_SUITE_VERSION );
-    }
 
-    // Set default permissions if not already set.
-    if ( false === get_option( 'wp_abilities_suite_permissions' ) ) {
-        update_option( 'wp_abilities_suite_permissions', wp_abilities_suite_permission_defaults() );
+        // Set default permissions if not already set.
+        if ( false === get_option( 'wp_abilities_suite_permissions' ) ) {
+            update_option( 'wp_abilities_suite_permissions', wp_abilities_suite_permission_defaults() );
+        }
     }
 
     // Flush cache

@@ -188,11 +188,30 @@ add_action( 'wp_abilities_api_init', function() {
 
             $url = esc_url_raw( $input['url'] );
 
+            // Validate URL scheme
+            $parsed = wp_parse_url( $url );
+            if ( ! $parsed || ! in_array( $parsed['scheme'] ?? '', array( 'http', 'https' ), true ) ) {
+                return new WP_Error( 'invalid_url', 'Only http and https URLs are allowed.' );
+            }
+
+            // Block private/internal IPs
+            $host = $parsed['host'] ?? '';
+            $resolved_ip = gethostbyname( $host );
+            if ( wp_abilities_suite_is_private_ip( $resolved_ip ) ) {
+                return new WP_Error( 'blocked_url', 'URLs pointing to private/internal IP addresses are not allowed.' );
+            }
+
             // Download file to temp location
             $tmp = download_url( $url );
 
             if ( is_wp_error( $tmp ) ) {
                 return $tmp;
+            }
+
+            $max_size = 10 * MB_IN_BYTES;
+            if ( filesize( $tmp ) > $max_size ) {
+                @unlink( $tmp );
+                return new WP_Error( 'file_too_large', 'Downloaded file exceeds maximum allowed size of ' . size_format( $max_size ) . '.' );
             }
 
             // Get file info
@@ -320,6 +339,13 @@ add_action( 'wp_abilities_api_init', function() {
             }
             if ( ! function_exists( 'wp_read_image_metadata' ) ) {
                 require_once ABSPATH . 'wp-admin/includes/image.php';
+            }
+
+            // Check estimated size before decoding
+            $max_size = 10 * MB_IN_BYTES;
+            $estimated_size = (int) ( strlen( $input['file_data'] ) * 0.75 );
+            if ( $estimated_size > $max_size ) {
+                return new WP_Error( 'file_too_large', 'Base64 data exceeds maximum allowed size of ' . size_format( $max_size ) . '.' );
             }
 
             // Decode base64 data
@@ -461,6 +487,10 @@ add_action( 'wp_abilities_api_init', function() {
                 return new WP_Error( 'not_found', 'Attachment not found' );
             }
 
+            if ( ! current_user_can( 'edit_post', $attachment_id ) ) {
+                return new WP_Error( 'forbidden', 'You do not have permission to edit this attachment.' );
+            }
+
             $update_data = array( 'ID' => $attachment_id );
 
             if ( isset( $input['title'] ) ) {
@@ -544,6 +574,10 @@ add_action( 'wp_abilities_api_init', function() {
             $attachment = get_post( $attachment_id );
             if ( ! $attachment || $attachment->post_type !== 'attachment' ) {
                 return new WP_Error( 'not_found', 'Attachment not found' );
+            }
+
+            if ( ! current_user_can( 'delete_post', $attachment_id ) ) {
+                return new WP_Error( 'forbidden', 'You do not have permission to delete this attachment.' );
             }
 
             $result = wp_delete_attachment( $attachment_id, $force );

@@ -49,6 +49,7 @@ add_action( 'wp_abilities_api_init', function() {
 
             $plugins = array();
 
+            if ( ! in_array( $status_filter, array( 'mustuse', 'dropins' ), true ) ) {
             foreach ( $all_plugins as $plugin_file => $plugin_data ) {
                 $is_active = in_array( $plugin_file, $active_plugins );
                 $is_network_active = isset( $network_active[$plugin_file] );
@@ -76,6 +77,7 @@ add_action( 'wp_abilities_api_init', function() {
                     'is_network_active' => $is_network_active
                 );
             }
+            } // end normal plugins loop guard
 
             // Add must-use plugins if requested
             if ( $status_filter === 'all' || $status_filter === 'mustuse' ) {

@@ -163,11 +163,10 @@ function wp_abilities_suite_content_list( $input ) {
  * Callback: Get content by ID
  */
 function wp_abilities_suite_content_get( $input ) {
-    $post = get_post( $input['id'] );
+    $check = wp_abilities_suite_require_editable_post( $input['id'] );
+    if ( is_wp_error( $check ) ) return $check;
 
-    if ( !$post ) {
-        return new WP_Error( 'not_found', 'Post not found' );
-    }
+    $post = $check;
 
     return array(
         'id' => $post->ID,

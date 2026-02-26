@@ -31,11 +31,9 @@ function wp_native_register_meta_abilities() {
 			'required' => array( 'post_id' ),
 		),
 		'execute_callback' => function( $params ) {
-			$post_id = intval( $params['post_id'] ?? 0 );
-			$post    = get_post( $post_id );
-			if ( ! $post ) {
-				return wp_native_error( 'not_found', 'Post not found.' );
-			}
+			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+			$post_id = $check->ID;
 			$meta = get_post_meta( $post_id );
 			$result = array();
 			foreach ( $meta as $key => $values ) {
@@ -48,7 +46,7 @@ function wp_native_register_meta_abilities() {
 			return array( 'post_id' => $post_id, 'meta_count' => count( $result ), 'meta' => $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- meta/get-post-meta ----
@@ -66,16 +64,15 @@ function wp_native_register_meta_abilities() {
 			'required' => array( 'post_id', 'meta_key' ),
 		),
 		'execute_callback' => function( $params ) {
-			$post_id = intval( $params['post_id'] ?? 0 );
-			if ( ! get_post( $post_id ) ) {
-				return wp_native_error( 'not_found', 'Post not found.' );
-			}
+			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+			$post_id = $check->ID;
 			$single = $params['single'] ?? true;
 			$value  = get_post_meta( $post_id, sanitize_text_field( $params['meta_key'] ), $single );
 			return array( 'post_id' => $post_id, 'key' => $params['meta_key'], 'value' => $value );
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- meta/list-term-meta ----
@@ -104,7 +101,7 @@ function wp_native_register_meta_abilities() {
 			return array( 'term_id' => $term_id, 'meta_count' => count( $result ), 'meta' => $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- meta/get-term-meta ----
@@ -132,7 +129,7 @@ function wp_native_register_meta_abilities() {
 			return array( 'term_id' => $term_id, 'key' => $params['meta_key'], 'value' => $value );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- meta/list-user-meta ----
@@ -161,7 +158,7 @@ function wp_native_register_meta_abilities() {
 			return array( 'user_id' => $user_id, 'meta_count' => count( $result ), 'meta' => $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'list_users' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- meta/get-user-meta ----
@@ -188,7 +185,7 @@ function wp_native_register_meta_abilities() {
 			return array( 'user_id' => $user_id, 'key' => $params['meta_key'], 'value' => $value );
 		},
 		'permission_callback' => function() { return current_user_can( 'list_users' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- meta/list-registered ----
@@ -233,7 +230,7 @@ function wp_native_register_meta_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	} // end read
@@ -256,17 +253,16 @@ function wp_native_register_meta_abilities() {
 			'required' => array( 'post_id', 'meta_key', 'meta_value' ),
 		),
 		'execute_callback' => function( $params ) {
-			$post_id = intval( $params['post_id'] ?? 0 );
-			if ( ! get_post( $post_id ) ) {
-				return wp_native_error( 'not_found', 'Post not found.' );
-			}
+			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+			$post_id = $check->ID;
 			$key    = sanitize_text_field( $params['meta_key'] );
 			$value  = sanitize_text_field( $params['meta_value'] );
 			$result = update_post_meta( $post_id, $key, $value );
 			return array( 'post_id' => $post_id, 'key' => $key, 'updated' => (bool) $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- meta/update-term-meta ----
@@ -295,7 +291,7 @@ function wp_native_register_meta_abilities() {
 			return array( 'term_id' => $term_id, 'key' => $key, 'updated' => ! is_wp_error( $result ) );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- meta/update-user-meta ----
@@ -323,7 +319,7 @@ function wp_native_register_meta_abilities() {
 			return array( 'user_id' => $user_id, 'key' => $key, 'updated' => (bool) $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_users' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	} // end write
@@ -345,16 +341,15 @@ function wp_native_register_meta_abilities() {
 			'required' => array( 'post_id', 'meta_key' ),
 		),
 		'execute_callback' => function( $params ) {
-			$post_id = intval( $params['post_id'] ?? 0 );
-			if ( ! get_post( $post_id ) ) {
-				return wp_native_error( 'not_found', 'Post not found.' );
-			}
+			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+			$post_id = $check->ID;
 			$key    = sanitize_text_field( $params['meta_key'] );
 			$result = delete_post_meta( $post_id, $key );
 			return array( 'post_id' => $post_id, 'key' => $key, 'deleted' => (bool) $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) ),
 	));
 
 	} // end delete

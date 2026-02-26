@@ -59,6 +59,20 @@ function wp_native_error( $code, $message ) {
 	return new WP_Error( $code, $message );
 }
 
+/**
+ * Validate that a post exists and the current user can edit it.
+ */
+function wp_abilities_suite_require_editable_post( $post_id, $capability = 'edit_post' ) {
+    $post = get_post( absint( $post_id ) );
+    if ( ! $post ) {
+        return new WP_Error( 'not_found', 'Post not found.' );
+    }
+    if ( ! current_user_can( $capability, $post->ID ) ) {
+        return new WP_Error( 'forbidden', 'You do not have permission to perform this action on this post.' );
+    }
+    return $post;
+}
+
 // ============================================================
 // Menu helpers (absorbed from menu-abilities v1.0.0)
 // ============================================================
@@ -158,12 +172,12 @@ function wp_abilities_suite_permission_defaults() {
 		'users'      => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'comments'   => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'menus'      => array( 'read' => true, 'write' => true, 'delete' => false ),
-		'blocks'     => array( 'read' => true, 'write' => true, 'delete' => true ),
+		'blocks'     => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'patterns'   => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'meta'       => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'settings'   => array( 'read' => true, 'write' => false ),
 		'site-health' => array( 'read' => true ),
-		'cache'      => array( 'read' => true, 'write' => true, 'delete' => true ),
+		'cache'      => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'cron'       => array( 'read' => true ),
 		'themes'     => array( 'read' => true ),
 		'rest'       => array( 'read' => true ),
@@ -226,4 +240,36 @@ function wp_abilities_suite_get_permissions( $module ) {
 function wp_abilities_suite_can( $module, $op ) {
 	$perms = wp_abilities_suite_get_permissions( $module );
 	return ! empty( $perms[ $op ] );
+}
+
+/**
+ * Check if an IP address is in a private/internal range.
+ */
+function wp_abilities_suite_is_private_ip( $ip ) {
+    if ( $ip === '::1' ) return true;
+
+    $private_ranges = array(
+        '127.0.0.0/8',
+        '10.0.0.0/8',
+        '172.16.0.0/12',
+        '192.168.0.0/16',
+        '169.254.0.0/16',
+        '0.0.0.0/8',
+    );
+
+    $ip_long = ip2long( $ip );
+    if ( $ip_long === false ) {
+        if ( stripos( $ip, 'fc' ) === 0 || stripos( $ip, 'fd' ) === 0 ) return true;
+        return false;
+    }
+
+    foreach ( $private_ranges as $range ) {
+        list( $net, $mask ) = explode( '/', $range );
+        $net_long  = ip2long( $net );
+        $mask_long = ~( ( 1 << ( 32 - (int) $mask ) ) - 1 );
+        if ( ( $ip_long & $mask_long ) === ( $net_long & $mask_long ) ) {
+            return true;
+        }
+    }
+    return false;
 }

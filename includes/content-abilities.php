@@ -137,11 +137,10 @@ add_action( 'wp_abilities_api_init', function() {
             'type' => 'object'
         ),
         'execute_callback' => function( $input ) {
-            $post = get_post( $input['id'] );
+            $check = wp_abilities_suite_require_editable_post( $input['id'] );
+            if ( is_wp_error( $check ) ) return $check;
 
-            if ( !$post ) {
-                return new WP_Error( 'not_found', 'Post not found' );
-            }
+            $post = $check;
 
             return array(
                 'id' => $post->ID,
@@ -206,11 +205,10 @@ add_action( 'wp_abilities_api_init', function() {
             'type' => 'object'
         ),
         'execute_callback' => function( $input ) {
-            $post = get_post( $input['id'] );
+            $check = wp_abilities_suite_require_editable_post( $input['id'] );
+            if ( is_wp_error( $check ) ) return $check;
 
-            if ( ! $post ) {
-                return new WP_Error( 'not_found', 'Post not found' );
-            }
+            $post = $check;
 
             // Determine which sections to include.
             $all_sections = array( 'meta', 'terms', 'thumbnail', 'author', 'content' );
@@ -454,6 +452,9 @@ add_action( 'wp_abilities_api_init', function() {
             )
         ),
         'execute_callback' => function( $input ) {
+            $check = wp_abilities_suite_require_editable_post( $input['id'] );
+            if ( is_wp_error( $check ) ) return $check;
+
             $post_data = array(
                 'ID' => $input['id']
             );
@@ -521,6 +522,9 @@ add_action( 'wp_abilities_api_init', function() {
             )
         ),
         'execute_callback' => function( $input ) {
+            $check = wp_abilities_suite_require_editable_post( $input['id'], 'delete_post' );
+            if ( is_wp_error( $check ) ) return $check;
+
             $result = wp_delete_post( $input['id'], $input['force'] ?? false );
 
             if ( !$result ) {
@@ -632,11 +636,10 @@ add_action( 'wp_abilities_api_init', function() {
                 return new WP_Error( 'not_found', 'No content found for this URL' );
             }
 
-            $post = get_post( $post_id );
+            $check = wp_abilities_suite_require_editable_post( $post_id );
+            if ( is_wp_error( $check ) ) return $check;
 
-            if ( !$post ) {
-                return new WP_Error( 'not_found', 'Post not found' );
-            }
+            $post = $check;
 
             return array(
                 'id' => $post->ID,
@@ -703,7 +706,10 @@ add_action( 'wp_abilities_api_init', function() {
                 return new WP_Error( 'not_found', 'No content found with this slug' );
             }
 
-            $post = $query->posts[0];
+            $check = wp_abilities_suite_require_editable_post( $query->posts[0]->ID );
+            if ( is_wp_error( $check ) ) return $check;
+
+            $post = $check;
 
             return array(
                 'id' => $post->ID,

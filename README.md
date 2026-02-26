@@ -1,12 +1,12 @@
-# WordPress Abilities Suite
+# Abilities Suite for WordPress
 
-Complete native WordPress AI control through the Abilities API — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more. **103 abilities across 17 categories.**
+93 native WordPress abilities across 17 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more. Powers AI control through the official Abilities API.
 
 ## Requirements
 
 - WordPress 6.9+ (Abilities API in core)
 - PHP 7.4+
-- [WP MCP Adapter](https://github.com/Influencentricity/wp-mcp-adapter) (for MCP integration)
+- [MCP Adapter for WordPress](https://github.com/Influencentricity/mcp-adapter-for-wordpress) (for MCP integration)
 
 ## 103 Abilities
 
@@ -202,7 +202,7 @@ Complete native WordPress AI control through the Abilities API — content, bloc
 
 ## Installation
 
-1. Upload to `wp-content/plugins/wordpress-abilities-suite/`
+1. Upload to `wp-content/plugins/abilities-suite-for-wordpress/`
 2. Activate the plugin
 3. All abilities are auto-discovered by the MCP Adapter
 

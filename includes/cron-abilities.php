@@ -48,7 +48,7 @@ function wp_native_register_cron_abilities() {
 							'timestamp'  => $timestamp,
 							'schedule'   => $data['schedule'] ?? false,
 							'interval'   => $data['interval'] ?? null,
-							'args'       => $data['args'] ?? array(),
+							'args'       => '[stripped for security]',
 						);
 					}
 				}
@@ -61,7 +61,7 @@ function wp_native_register_cron_abilities() {
 			return array( 'events' => $events, 'total' => count( $events ) );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- cron/list-schedules ----
@@ -88,7 +88,7 @@ function wp_native_register_cron_abilities() {
 			return array( 'schedules' => $result, 'count' => count( $result ) );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- cron/get-event ----
@@ -119,7 +119,7 @@ function wp_native_register_cron_abilities() {
 							'timestamp' => $timestamp,
 							'schedule'  => $data['schedule'] ?? false,
 							'interval'  => $data['interval'] ?? null,
-							'args'      => $data['args'] ?? array(),
+							'args'      => '[stripped for security]',
 						);
 					}
 				}
@@ -136,7 +136,7 @@ function wp_native_register_cron_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	} // end read

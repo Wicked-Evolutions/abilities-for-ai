@@ -2,6 +2,31 @@
 
 All notable changes to WordPress Abilities Suite will be documented in this file.
 
+## [3.3.0] - 2026-02-26
+
+### Security (GPT-5.2 Pro review via Oracle CLI — 10 findings, all fixed)
+- **Object-level authorization** on all single-post abilities (content, blocks, meta, taxonomy, media) — `require_editable_post()` helper validates post exists + user can edit it
+- **SSRF protection** on `media/create` — scheme whitelist (http/https only), private IP blocking (127/10/172.16/192.168/169.254/::1), 10 MB file size limit
+- **Base64 upload size limit** on `media/upload` — 10 MB estimated decode size cap
+- **Media object-level auth** — `media/update` checks `edit_post`, `media/delete` checks `delete_post`
+- **Destructive ops default OFF** — `blocks.delete` and `cache.delete` now default to `false`
+- **Menu read permissions** — 4 read abilities changed from `edit_posts` to `edit_theme_options`
+- **Sensitive data redaction** — site-health secrets redacted, cron event args stripped, transient values capped at 1 MB
+
+### Fixed
+- **blocks/parse index misalignment** — returns `original_index` field so replace/remove target the correct raw block
+- **plugins/list mustuse filter** — no longer includes normal plugins when filtering for mustuse/dropins
+- **Missing ABSPATH guard** in `taxonomy-abilities.php`
+- **Multisite activation** — hook now accepts `$network_wide`, iterates all sites for permission defaults
+
+### Changed
+- **MCP metadata normalized** — 54 abilities across 10 v3 modules now include `show_in_rest` and `mcp.public` metadata (were silently missing)
+- Plugin renamed from "WordPress Abilities Suite" to "Abilities Suite for WordPress"
+- Main file renamed from `wordpress-abilities-suite.php` to `abilities-suite-for-wordpress.php`
+- Schema audit script path updated for new plugin directory name
+
+---
+
 ## [3.0.0] - 2026-02-24
 
 ### Added
@@ -85,6 +110,7 @@ All notable changes to WordPress Abilities Suite will be documented in this file
 
 | Version | Date | Abilities | Categories | Key Changes |
 |---------|------|-----------|------------|-------------|
+| 3.3.0 | 2026-02-26 | 103 | 17 | Security hardening (10 fixes), MCP metadata normalization, plugin rename |
 | 3.0.0 | 2026-02-24 | 103 | 17 | 10 new modules, JSON Schema fixes |
 | 2.0.0 | 2025-12-21 | 51 | 7 | Menu management, Content v2 |
 | 1.0.5 | 2025-12-12 | 40 | 6 | Base64 media upload |

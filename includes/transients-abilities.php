@@ -76,7 +76,7 @@ function wp_native_register_transients_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- cache/get-transient ----
@@ -97,6 +97,14 @@ function wp_native_register_transients_abilities() {
 			if ( $value === false ) {
 				return wp_native_error( 'not_found', "Transient '{$name}' not found or expired." );
 			}
+			$serialized = maybe_serialize( $value );
+			if ( strlen( $serialized ) > MB_IN_BYTES ) {
+				return array(
+					'name'    => $name,
+					'value'   => '[VALUE TOO LARGE: ' . size_format( strlen( $serialized ) ) . ']',
+					'exists'  => true,
+				);
+			}
 			$timeout = get_option( '_transient_timeout_' . $name );
 			return array(
 				'name'    => $name,
@@ -105,7 +113,7 @@ function wp_native_register_transients_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	} // end read
@@ -135,7 +143,7 @@ function wp_native_register_transients_abilities() {
 			return array( 'name' => $name, 'set' => (bool) $result, 'expiration' => $expiration );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	} // end write
@@ -161,7 +169,7 @@ function wp_native_register_transients_abilities() {
 			return array( 'name' => $name, 'deleted' => (bool) $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) ),
 	));
 
 	// ---- cache/flush ----
@@ -200,7 +208,7 @@ function wp_native_register_transients_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ) ),
 	));
 
 	} // end delete
@@ -234,7 +242,7 @@ function wp_native_register_transients_abilities() {
 			return $info;
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	} // end read

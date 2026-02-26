@@ -54,7 +54,7 @@ function wp_native_register_site_health_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- site-health/list-tests ----
@@ -83,7 +83,7 @@ function wp_native_register_site_health_abilities() {
 			return array( 'direct' => $direct, 'async' => $async );
 		},
 		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- site-health/run-test ----
@@ -136,7 +136,7 @@ function wp_native_register_site_health_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	// ---- site-health/info ----
@@ -160,6 +160,26 @@ function wp_native_register_site_health_abilities() {
 			WP_Debug_Data::check_for_updates();
 			$info = WP_Debug_Data::debug_data();
 
+			// Redact sensitive fields from debug data.
+			$sensitive_keys = array(
+				'DB_PASSWORD', 'AUTH_KEY', 'SECURE_AUTH_KEY', 'LOGGED_IN_KEY',
+				'NONCE_KEY', 'AUTH_SALT', 'SECURE_AUTH_SALT', 'LOGGED_IN_SALT',
+				'NONCE_SALT', 'db_password',
+			);
+			foreach ( $info as $section_key => &$section ) {
+				if ( ! isset( $section['fields'] ) ) continue;
+				foreach ( $section['fields'] as $field_key => &$field ) {
+					foreach ( $sensitive_keys as $sensitive ) {
+						if ( stripos( $field_key, $sensitive ) !== false ||
+							 ( isset( $field['label'] ) && stripos( $field['label'], $sensitive ) !== false ) ) {
+							$field['value'] = '[REDACTED]';
+							break;
+						}
+					}
+				}
+			}
+			unset( $section, $field );
+
 			if ( ! empty( $params['section'] ) ) {
 				$section = sanitize_text_field( $params['section'] );
 				if ( ! isset( $info[ $section ] ) ) {
@@ -179,7 +199,7 @@ function wp_native_register_site_health_abilities() {
 			return array( 'sections' => $summary, 'available_sections' => array_keys( $info ) );
 		},
 		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
 	} // end read
