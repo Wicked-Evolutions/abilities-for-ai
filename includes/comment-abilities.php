@@ -160,6 +160,11 @@ add_action( 'wp_abilities_api_init', function() {
                 return new WP_Error( 'not_found', 'Comment not found' );
             }
 
+            // Object-level check.
+            if ( ! current_user_can( 'edit_comment', $comment->comment_ID ) ) {
+                return new WP_Error( 'forbidden', 'You do not have permission to view this comment.' );
+            }
+
             return array(
                 'id' => $comment->comment_ID,
                 'post_id' => $comment->comment_post_ID,
@@ -167,14 +172,12 @@ add_action( 'wp_abilities_api_init', function() {
                 'author' => $comment->comment_author,
                 'author_email' => $comment->comment_author_email,
                 'author_url' => $comment->comment_author_url,
-                'author_ip' => $comment->comment_author_IP,
                 'content' => $comment->comment_content,
                 'date' => $comment->comment_date,
                 'date_gmt' => $comment->comment_date_gmt,
                 'status' => wp_get_comment_status( $comment ),
                 'parent' => $comment->comment_parent,
                 'user_id' => $comment->user_id,
-                'agent' => $comment->comment_agent,
                 'type' => $comment->comment_type ?: 'comment'
             );
         },
@@ -339,6 +342,10 @@ add_action( 'wp_abilities_api_init', function() {
                 return new WP_Error( 'not_found', 'Comment not found' );
             }
 
+            if ( ! current_user_can( 'edit_comment', $comment->comment_ID ) ) {
+                return new WP_Error( 'forbidden', 'You do not have permission to edit this comment.' );
+            }
+
             $commentarr = array( 'comment_ID' => $input['id'] );
 
             if ( isset( $input['content'] ) ) {
@@ -429,6 +436,10 @@ add_action( 'wp_abilities_api_init', function() {
 
             if ( ! $comment ) {
                 return new WP_Error( 'not_found', 'Comment not found' );
+            }
+
+            if ( ! current_user_can( 'delete_comment', $comment->comment_ID ) ) {
+                return new WP_Error( 'forbidden', 'You do not have permission to delete this comment.' );
             }
 
             $force = $input['force'] ?? false;

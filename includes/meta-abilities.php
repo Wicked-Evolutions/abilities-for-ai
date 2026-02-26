@@ -135,7 +135,7 @@ function wp_native_register_meta_abilities() {
 	// ---- meta/list-user-meta ----
 	wp_register_ability( 'meta/list-user-meta', array(
 		'label'       => 'List User Meta',
-		'description' => 'List all meta fields for a user.',
+		'description' => 'List all meta fields for a user (sensitive security keys are redacted).',
 		'category'    => 'meta',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -150,10 +150,26 @@ function wp_native_register_meta_abilities() {
 			if ( ! $user ) {
 				return wp_native_error( 'not_found', 'User not found.' );
 			}
+			// Require edit_user on the target (not just list_users).
+			if ( ! current_user_can( 'edit_user', $user_id ) ) {
+				return wp_native_error( 'forbidden', 'You do not have permission to view meta for this user.' );
+			}
+			$sensitive_keys = array(
+				'session_tokens',
+				'wp_capabilities',
+				'wp_user_level',
+				'user_pass',
+				'wp_dashboard_quick_press_last_post_id',
+				'auth_cookie',
+			);
 			$meta = get_user_meta( $user_id );
 			$result = array();
 			foreach ( $meta as $key => $values ) {
-				$result[] = array( 'key' => $key, 'values' => $values, 'count' => count( $values ) );
+				if ( in_array( $key, $sensitive_keys, true ) ) {
+					$result[] = array( 'key' => $key, 'values' => array( '[REDACTED]' ), 'count' => 1 );
+				} else {
+					$result[] = array( 'key' => $key, 'values' => $values, 'count' => count( $values ) );
+				}
 			}
 			return array( 'user_id' => $user_id, 'meta_count' => count( $result ), 'meta' => $result );
 		},
@@ -164,7 +180,7 @@ function wp_native_register_meta_abilities() {
 	// ---- meta/get-user-meta ----
 	wp_register_ability( 'meta/get-user-meta', array(
 		'label'       => 'Get User Meta',
-		'description' => 'Get a specific meta value for a user.',
+		'description' => 'Get a specific meta value for a user (sensitive security keys are blocked).',
 		'category'    => 'meta',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -180,9 +196,17 @@ function wp_native_register_meta_abilities() {
 			if ( ! get_userdata( $user_id ) ) {
 				return wp_native_error( 'not_found', 'User not found.' );
 			}
+			if ( ! current_user_can( 'edit_user', $user_id ) ) {
+				return wp_native_error( 'forbidden', 'You do not have permission to view meta for this user.' );
+			}
+			$key = sanitize_text_field( $params['meta_key'] );
+			$sensitive_keys = array( 'session_tokens', 'wp_capabilities', 'wp_user_level', 'user_pass', 'auth_cookie' );
+			if ( in_array( $key, $sensitive_keys, true ) ) {
+				return wp_native_error( 'forbidden', 'This meta key is protected and cannot be read via this ability.' );
+			}
 			$single = $params['single'] ?? true;
-			$value  = get_user_meta( $user_id, sanitize_text_field( $params['meta_key'] ), $single );
-			return array( 'user_id' => $user_id, 'key' => $params['meta_key'], 'value' => $value );
+			$value  = get_user_meta( $user_id, $key, $single );
+			return array( 'user_id' => $user_id, 'key' => $key, 'value' => $value );
 		},
 		'permission_callback' => function() { return current_user_can( 'list_users' ); },
 		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
@@ -297,7 +321,7 @@ function wp_native_register_meta_abilities() {
 	// ---- meta/update-user-meta ----
 	wp_register_ability( 'meta/update-user-meta', array(
 		'label'       => 'Update User Meta',
-		'description' => 'Set or update a meta value for a user.',
+		'description' => 'Set or update a meta value for a user. Security-sensitive keys are blocked.',
 		'category'    => 'meta',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -313,7 +337,22 @@ function wp_native_register_meta_abilities() {
 			if ( ! get_userdata( $user_id ) ) {
 				return wp_native_error( 'not_found', 'User not found.' );
 			}
-			$key    = sanitize_text_field( $params['meta_key'] );
+			// Object-level check: can the current user edit this specific user?
+			if ( ! current_user_can( 'edit_user', $user_id ) ) {
+				return wp_native_error( 'forbidden', 'You do not have permission to edit meta for this user.' );
+			}
+			$key = sanitize_text_field( $params['meta_key'] );
+			// Denylist: block keys that could lead to privilege escalation or session hijacking.
+			$denied_keys = array(
+				'wp_capabilities',
+				'wp_user_level',
+				'session_tokens',
+				'user_pass',
+				'auth_cookie',
+			);
+			if ( in_array( $key, $denied_keys, true ) ) {
+				return wp_native_error( 'forbidden', 'This meta key is protected and cannot be modified via this ability.' );
+			}
 			$value  = sanitize_text_field( $params['meta_value'] );
 			$result = update_user_meta( $user_id, $key, $value );
 			return array( 'user_id' => $user_id, 'key' => $key, 'updated' => (bool) $result );

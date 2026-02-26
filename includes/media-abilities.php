@@ -194,15 +194,46 @@ add_action( 'wp_abilities_api_init', function() {
                 return new WP_Error( 'invalid_url', 'Only http and https URLs are allowed.' );
             }
 
-            // Block private/internal IPs
+            // Resolve hostname and block private/internal IPs.
             $host = $parsed['host'] ?? '';
             $resolved_ip = gethostbyname( $host );
+            if ( $resolved_ip === $host ) {
+                return new WP_Error( 'dns_failed', 'Could not resolve hostname.' );
+            }
             if ( wp_abilities_suite_is_private_ip( $resolved_ip ) ) {
                 return new WP_Error( 'blocked_url', 'URLs pointing to private/internal IP addresses are not allowed.' );
             }
 
+            // Pin the resolved IP into the HTTP request to prevent DNS rebinding.
+            // This ensures download_url() connects to the IP we validated above
+            // instead of re-resolving the hostname (TOCTOU mitigation).
+            $pin_dns = function( $args ) use ( $host, $resolved_ip, &$pin_dns ) {
+                // Remove ourselves immediately — single use only.
+                remove_filter( 'http_request_args', $pin_dns, 1 );
+
+                // Inject curl option to pin DNS resolution.
+                if ( ! isset( $args['curl'] ) || ! is_array( $args['curl'] ) ) {
+                    $args['curl'] = array();
+                }
+                $port = 443; // Default HTTPS.
+                $args['curl'][ CURLOPT_RESOLVE ] = array(
+                    "{$host}:443:{$resolved_ip}",
+                    "{$host}:80:{$resolved_ip}",
+                );
+
+                // Also add a safety check: reject redirects to different hosts.
+                $args['reject_unsafe_urls'] = true;
+                $args['redirection'] = 3; // Limit redirect count.
+
+                return $args;
+            };
+            add_filter( 'http_request_args', $pin_dns, 1 );
+
             // Download file to temp location
             $tmp = download_url( $url );
+
+            // Ensure the filter is cleaned up even if download_url didn't fire it.
+            remove_filter( 'http_request_args', $pin_dns, 1 );
 
             if ( is_wp_error( $tmp ) ) {
                 return $tmp;
@@ -353,6 +384,11 @@ add_action( 'wp_abilities_api_init', function() {
 
             if ( $file_data === false ) {
                 return new WP_Error( 'invalid_base64', 'Invalid base64 data provided' );
+            }
+
+            // Verify actual decoded size (estimated size can be gamed with padding)
+            if ( strlen( $file_data ) > $max_size ) {
+                return new WP_Error( 'file_too_large', 'Decoded file exceeds maximum allowed size of ' . size_format( $max_size ) . '.' );
             }
 
             // Validate filename

@@ -165,6 +165,15 @@ function wp_native_register_site_health_abilities() {
 				'DB_PASSWORD', 'AUTH_KEY', 'SECURE_AUTH_KEY', 'LOGGED_IN_KEY',
 				'NONCE_KEY', 'AUTH_SALT', 'SECURE_AUTH_SALT', 'LOGGED_IN_SALT',
 				'NONCE_SALT', 'db_password',
+				// SMTP & mail credentials
+				'SMTP_PASSWORD', 'smtp_pass', 'mail_password',
+				// API keys & tokens
+				'API_KEY', 'api_secret', 'SECRET_KEY', 'ACCESS_TOKEN',
+				'PRIVATE_KEY', 'client_secret',
+				// OAuth
+				'OAUTH', 'oauth_token', 'refresh_token',
+				// Generic sensitive patterns
+				'password', 'secret', 'token', 'credential',
 			);
 			foreach ( $info as $section_key => &$section ) {
 				if ( ! isset( $section['fields'] ) ) continue;

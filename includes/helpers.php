@@ -246,9 +246,8 @@ function wp_abilities_suite_can( $module, $op ) {
  * Check if an IP address is in a private/internal range.
  */
 function wp_abilities_suite_is_private_ip( $ip ) {
-    if ( $ip === '::1' ) return true;
-
-    $private_ranges = array(
+    // IPv4 private/reserved ranges.
+    $ipv4_ranges = array(
         '127.0.0.0/8',
         '10.0.0.0/8',
         '172.16.0.0/12',
@@ -258,18 +257,64 @@ function wp_abilities_suite_is_private_ip( $ip ) {
     );
 
     $ip_long = ip2long( $ip );
-    if ( $ip_long === false ) {
-        if ( stripos( $ip, 'fc' ) === 0 || stripos( $ip, 'fd' ) === 0 ) return true;
+    if ( $ip_long !== false ) {
+        foreach ( $ipv4_ranges as $range ) {
+            list( $net, $mask ) = explode( '/', $range );
+            $net_long  = ip2long( $net );
+            $mask_long = ~( ( 1 << ( 32 - (int) $mask ) ) - 1 );
+            if ( ( $ip_long & $mask_long ) === ( $net_long & $mask_long ) ) {
+                return true;
+            }
+        }
         return false;
     }
 
-    foreach ( $private_ranges as $range ) {
-        list( $net, $mask ) = explode( '/', $range );
-        $net_long  = ip2long( $net );
-        $mask_long = ~( ( 1 << ( 32 - (int) $mask ) ) - 1 );
-        if ( ( $ip_long & $mask_long ) === ( $net_long & $mask_long ) ) {
+    // IPv6 — use inet_pton for proper binary comparison.
+    $ip_bin = @inet_pton( $ip );
+    if ( $ip_bin === false ) {
+        return false; // Unparseable address — treat as not-private but caller should reject.
+    }
+
+    $ipv6_ranges = array(
+        '::1/128',       // Loopback
+        'fc00::/7',      // Unique Local (fc00::/7 covers both fc and fd)
+        'fe80::/10',     // Link-Local
+        '::ffff:0:0/96', // IPv4-mapped (re-check the mapped v4 address)
+        '::/128',        // Unspecified
+    );
+
+    foreach ( $ipv6_ranges as $range ) {
+        list( $net, $prefix_len ) = explode( '/', $range );
+        $net_bin = @inet_pton( $net );
+        if ( $net_bin === false ) {
+            continue;
+        }
+        // Build bitmask: $prefix_len leading 1-bits, rest 0.
+        $mask = str_repeat( "\xff", intdiv( (int) $prefix_len, 8 ) );
+        $remainder = (int) $prefix_len % 8;
+        if ( $remainder ) {
+            $mask .= chr( 0xff << ( 8 - $remainder ) & 0xff );
+        }
+        $mask = str_pad( $mask, 16, "\x00" );
+
+        if ( ( $ip_bin & $mask ) === ( $net_bin & $mask ) ) {
+            // For IPv4-mapped addresses (::ffff:x.x.x.x), also check the embedded v4.
+            if ( $net === '::ffff:0:0' ) {
+                $mapped_v4 = substr( $ip_bin, 12, 4 );
+                $mapped_long = unpack( 'N', $mapped_v4 )[1];
+                foreach ( $ipv4_ranges as $v4_range ) {
+                    list( $v4_net, $v4_mask ) = explode( '/', $v4_range );
+                    $v4_net_long  = ip2long( $v4_net );
+                    $v4_mask_long = ~( ( 1 << ( 32 - (int) $v4_mask ) ) - 1 );
+                    if ( ( $mapped_long & $v4_mask_long ) === ( $v4_net_long & $v4_mask_long ) ) {
+                        return true;
+                    }
+                }
+                continue; // Mapped to a public v4 — not private.
+            }
             return true;
         }
     }
+
     return false;
 }

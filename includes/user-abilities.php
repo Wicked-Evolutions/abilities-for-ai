@@ -248,11 +248,22 @@ add_action( 'wp_abilities_api_init', function() {
             )
         ),
         'execute_callback' => function( $input ) {
+            $role = $input['role'] ?? 'subscriber';
+
+            // Enforce editable_roles: prevent assigning roles the current user can't assign.
+            if ( ! function_exists( 'get_editable_roles' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/user.php';
+            }
+            $editable_roles = get_editable_roles();
+            if ( ! isset( $editable_roles[ $role ] ) ) {
+                return new WP_Error( 'forbidden', "You cannot assign the role \"{$role}\"." );
+            }
+
             $userdata = array(
                 'user_login' => sanitize_user( $input['username'] ),
                 'user_email' => sanitize_email( $input['email'] ),
                 'user_pass' => $input['password'] ?? wp_generate_password(),
-                'role' => $input['role'] ?? 'subscriber'
+                'role' => $role
             );
 
             if ( ! empty( $input['first_name'] ) ) {
@@ -358,8 +369,29 @@ add_action( 'wp_abilities_api_init', function() {
         'execute_callback' => function( $input ) {
             $user_id = (int) $input['id'];
 
-            if ( ! get_user_by( 'ID', $user_id ) ) {
+            $target_user = get_user_by( 'ID', $user_id );
+            if ( ! $target_user ) {
                 return new WP_Error( 'not_found', 'User not found' );
+            }
+
+            // Object-level check: can current user edit this specific user?
+            if ( ! current_user_can( 'edit_user', $user_id ) ) {
+                return new WP_Error( 'forbidden', 'You do not have permission to edit this user.' );
+            }
+
+            // Role assignment requires promote_users + editable_roles enforcement.
+            if ( isset( $input['role'] ) ) {
+                if ( ! current_user_can( 'promote_user', $user_id ) ) {
+                    return new WP_Error( 'forbidden', 'You do not have permission to change roles for this user.' );
+                }
+                if ( ! function_exists( 'get_editable_roles' ) ) {
+                    require_once ABSPATH . 'wp-admin/includes/user.php';
+                }
+                $editable_roles = get_editable_roles();
+                $new_role = sanitize_text_field( $input['role'] );
+                if ( ! isset( $editable_roles[ $new_role ] ) ) {
+                    return new WP_Error( 'forbidden', "You cannot assign the role \"{$new_role}\"." );
+                }
             }
 
             $userdata = array( 'ID' => $user_id );

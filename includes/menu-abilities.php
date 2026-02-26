@@ -537,11 +537,26 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( ! is_array( $item_order ) || empty( $item_order ) ) {
 				return new WP_Error( 'invalid_order', 'item_order must be a non-empty array of item IDs.' );
 			}
+
+			// Build a set of valid item IDs that actually belong to this menu.
+			$existing_items = wp_get_nav_menu_items( $menu_id );
+			$valid_ids = array();
+			if ( $existing_items ) {
+				foreach ( $existing_items as $existing_item ) {
+					$valid_ids[ (int) $existing_item->ID ] = true;
+				}
+			}
+
 			$result = array();
 			foreach ( $item_order as $position => $item_id ) {
+				$item_id = (int) $item_id;
+				// Skip any ID that isn't a real nav_menu_item belonging to this menu.
+				if ( ! isset( $valid_ids[ $item_id ] ) ) {
+					continue;
+				}
 				$order = $position + 1;
-				wp_update_post( array( 'ID' => (int) $item_id, 'menu_order' => $order ) );
-				$result[] = array( 'id' => (int) $item_id, 'position' => $order );
+				wp_update_post( array( 'ID' => $item_id, 'menu_order' => $order ) );
+				$result[] = array( 'id' => $item_id, 'position' => $order );
 			}
 			return array( 'success' => true, 'items' => $result );
 		},

@@ -270,6 +270,15 @@ add_action( 'wp_abilities_api_init', function() {
             )
         ),
         'execute_callback' => function( $input ) {
+            $taxonomy = $input['taxonomy'];
+            $tax_obj  = get_taxonomy( $taxonomy );
+            if ( ! $tax_obj ) {
+                return new WP_Error( 'invalid_taxonomy', 'Invalid taxonomy.' );
+            }
+            if ( ! current_user_can( $tax_obj->cap->manage_terms ) ) {
+                return new WP_Error( 'forbidden', "You do not have permission to manage terms in \"{$taxonomy}\"." );
+            }
+
             $args = array();
 
             if ( !empty( $input['slug'] ) ) {
@@ -284,7 +293,7 @@ add_action( 'wp_abilities_api_init', function() {
                 $args['parent'] = $input['parent'];
             }
 
-            $result = wp_insert_term( $input['name'], $input['taxonomy'], $args );
+            $result = wp_insert_term( $input['name'], $taxonomy, $args );
 
             if ( is_wp_error( $result ) ) {
                 return $result;
@@ -352,6 +361,15 @@ add_action( 'wp_abilities_api_init', function() {
             )
         ),
         'execute_callback' => function( $input ) {
+            $taxonomy = $input['taxonomy'];
+            $tax_obj  = get_taxonomy( $taxonomy );
+            if ( ! $tax_obj ) {
+                return new WP_Error( 'invalid_taxonomy', 'Invalid taxonomy.' );
+            }
+            if ( ! current_user_can( $tax_obj->cap->edit_terms ) ) {
+                return new WP_Error( 'forbidden', "You do not have permission to edit terms in \"{$taxonomy}\"." );
+            }
+
             $args = array();
 
             if ( isset( $input['name'] ) ) $args['name'] = $input['name'];
@@ -359,7 +377,7 @@ add_action( 'wp_abilities_api_init', function() {
             if ( isset( $input['description'] ) ) $args['description'] = $input['description'];
             if ( isset( $input['parent'] ) ) $args['parent'] = $input['parent'];
 
-            $result = wp_update_term( $input['term_id'], $input['taxonomy'], $args );
+            $result = wp_update_term( $input['term_id'], $taxonomy, $args );
 
             if ( is_wp_error( $result ) ) {
                 return $result;
@@ -415,7 +433,16 @@ add_action( 'wp_abilities_api_init', function() {
             )
         ),
         'execute_callback' => function( $input ) {
-            $result = wp_delete_term( $input['term_id'], $input['taxonomy'] );
+            $taxonomy = $input['taxonomy'];
+            $tax_obj  = get_taxonomy( $taxonomy );
+            if ( ! $tax_obj ) {
+                return new WP_Error( 'invalid_taxonomy', 'Invalid taxonomy.' );
+            }
+            if ( ! current_user_can( $tax_obj->cap->delete_terms ) ) {
+                return new WP_Error( 'forbidden', "You do not have permission to delete terms in \"{$taxonomy}\"." );
+            }
+
+            $result = wp_delete_term( $input['term_id'], $taxonomy );
 
             if ( is_wp_error( $result ) ) {
                 return $result;
@@ -488,10 +515,20 @@ add_action( 'wp_abilities_api_init', function() {
         'execute_callback' => function( $input ) {
             $check = wp_abilities_suite_require_editable_post( $input['post_id'] );
             if ( is_wp_error( $check ) ) return $check;
+
+            $taxonomy = $input['taxonomy'];
+            $tax_obj  = get_taxonomy( $taxonomy );
+            if ( ! $tax_obj ) {
+                return new WP_Error( 'invalid_taxonomy', 'Invalid taxonomy.' );
+            }
+            if ( ! current_user_can( $tax_obj->cap->assign_terms ) ) {
+                return new WP_Error( 'forbidden', "You do not have permission to assign terms in \"{$taxonomy}\"." );
+            }
+
             $result = wp_set_object_terms(
                 $input['post_id'],
                 $input['terms'],
-                $input['taxonomy'],
+                $taxonomy,
                 $input['append'] ?? false
             );
 

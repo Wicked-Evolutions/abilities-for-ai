@@ -67,8 +67,18 @@ add_action( 'wp_abilities_api_init', function() {
             )
         ),
         'execute_callback' => function( $input ) {
+            $post_type = sanitize_key( $input['post_type'] ?? 'post' );
+            $post_type_obj = get_post_type_object( $post_type );
+            if ( ! $post_type_obj ) {
+                return new WP_Error( 'invalid_post_type', 'Invalid post type.' );
+            }
+            // Require the type-specific cap to read posts of this type.
+            if ( ! current_user_can( $post_type_obj->cap->edit_posts ) ) {
+                return new WP_Error( 'forbidden', 'You do not have permission to list this post type.' );
+            }
+
             $args = array(
-                'post_type' => $input['post_type'] ?? 'post',
+                'post_type' => $post_type,
                 'posts_per_page' => $input['posts_per_page'] ?? 10,
                 'paged' => $input['paged'] ?? 1,
                 'post_status' => $input['post_status'] ?? 'publish',
@@ -82,8 +92,13 @@ add_action( 'wp_abilities_api_init', function() {
 
             $query = new WP_Query( $args );
 
-            $posts = array_map( function( $post ) {
-                return array(
+            // Filter to only posts the current user can actually edit.
+            $posts = array();
+            foreach ( $query->posts as $post ) {
+                if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+                    continue;
+                }
+                $posts[] = array(
                     'id' => $post->ID,
                     'title' => $post->post_title,
                     'content' => $post->post_content,
@@ -96,12 +111,13 @@ add_action( 'wp_abilities_api_init', function() {
                     'slug' => $post->post_name,
                     'link' => get_permalink( $post->ID )
                 );
-            }, $query->posts );
+            }
 
+            $filtered_total = count( $posts );
             return array(
                 'posts' => $posts,
-                'total' => $query->found_posts,
-                'pages' => $query->max_num_pages
+                'total' => $filtered_total,
+                'pages' => max( 1, ceil( $filtered_total / $per_page ) ),
             );
         },
         'permission_callback' => function() {
@@ -302,14 +318,13 @@ add_action( 'wp_abilities_api_init', function() {
                 }
             }
 
-            // Author details.
+            // Author details (email omitted — use users/get for privileged lookups).
             if ( isset( $sections['author'] ) ) {
                 $author = get_userdata( (int) $post->post_author );
                 if ( $author ) {
                     $result['author'] = array(
                         'id'           => $author->ID,
                         'display_name' => $author->display_name,
-                        'email'        => $author->user_email,
                         'url'          => $author->user_url,
                     );
                 } else {
@@ -380,11 +395,29 @@ add_action( 'wp_abilities_api_init', function() {
             )
         ),
         'execute_callback' => function( $input ) {
+            $post_type = sanitize_key( $input['post_type'] ?? 'post' );
+            $post_type_obj = get_post_type_object( $post_type );
+            if ( ! $post_type_obj ) {
+                return new WP_Error( 'invalid_post_type', 'Invalid post type.' );
+            }
+            // Require the type-specific create cap.
+            if ( ! current_user_can( $post_type_obj->cap->create_posts ) ) {
+                return new WP_Error( 'forbidden', 'You do not have permission to create this post type.' );
+            }
+
+            $status = $input['status'] ?? 'draft';
+            // Require publish cap for any published or future status.
+            if ( in_array( $status, array( 'publish', 'future' ), true ) ) {
+                if ( ! current_user_can( $post_type_obj->cap->publish_posts ) ) {
+                    return new WP_Error( 'forbidden', 'You do not have permission to publish this post type.' );
+                }
+            }
+
             $post_data = array(
                 'post_title' => $input['title'],
                 'post_content' => $input['content'] ?? '',
-                'post_type' => $input['post_type'] ?? 'post',
-                'post_status' => $input['status'] ?? 'draft',
+                'post_type' => $post_type,
+                'post_status' => $status,
                 'post_excerpt' => $input['excerpt'] ?? ''
             );
 
@@ -455,8 +488,18 @@ add_action( 'wp_abilities_api_init', function() {
             $check = wp_abilities_suite_require_editable_post( $input['id'] );
             if ( is_wp_error( $check ) ) return $check;
 
+            $post = $check;
+            $post_type_obj = get_post_type_object( $post->post_type );
+
+            // If updating status, enforce publish cap.
+            if ( isset( $input['status'] ) && in_array( $input['status'], array( 'publish', 'future' ), true ) ) {
+                if ( $post->post_status !== $input['status'] && ! current_user_can( $post_type_obj->cap->publish_posts ) ) {
+                    return new WP_Error( 'forbidden', 'You do not have permission to publish this post type.' );
+                }
+            }
+
             $post_data = array(
-                'ID' => $input['id']
+                'ID' => $post->ID
             );
 
             if ( isset( $input['title'] ) ) $post_data['post_title'] = $input['title'];
