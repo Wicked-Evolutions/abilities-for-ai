@@ -162,8 +162,8 @@ function wp_native_register_transients_abilities() {
 			$purged  = array();
 
 			// LiteSpeed Cache.
-			if ( $post_id && class_exists( 'LiteSpeed\Purge' ) && method_exists( 'LiteSpeed\Purge', 'purge_post' ) ) {
-				LiteSpeed\Purge::purge_post( $post_id );
+			if ( $post_id && defined( 'LSCWP_V' ) ) {
+				do_action( 'litespeed_purge_post', $post_id );
 				$purged[] = 'litespeed (single post)';
 			} elseif ( class_exists( 'LiteSpeed\Purge' ) && method_exists( 'LiteSpeed\Purge', 'purge_all' ) ) {
 				LiteSpeed\Purge::purge_all();

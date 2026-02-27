@@ -117,7 +117,7 @@ add_action( 'wp_abilities_api_init', function() {
             return array(
                 'posts' => $posts,
                 'total' => $filtered_total,
-                'pages' => max( 1, ceil( $filtered_total / $per_page ) ),
+                'pages' => max( 1, ceil( $filtered_total / $args['posts_per_page'] ) ),
             );
         },
         'permission_callback' => function() {
