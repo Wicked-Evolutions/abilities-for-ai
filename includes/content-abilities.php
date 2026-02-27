@@ -785,6 +785,277 @@ add_action( 'wp_abilities_api_init', function() {
 
     } // end read (continued)
 
+    // ===== CONTENT ABILITIES — WRITE (continued) =====
+    if ( ! empty( $perms['write'] ) ) {
+
+    // Change post type
+    wp_register_ability( 'content/change-type', array(
+        'label' => 'Change Content Type',
+        'description' => 'Convert a post between post types (e.g. page to post, post to page). Returns the new permalink and warns about taxonomy/template side effects. Use this instead of content/update when you need to change post_type — content/update does not support type changes.',
+        'category' => 'content',
+        'input_schema' => array(
+            'type' => 'object',
+            'required' => array( 'id', 'new_type' ),
+            'properties' => array(
+                'id' => array(
+                    'type' => 'integer',
+                    'description' => 'Post ID to convert'
+                ),
+                'new_type' => array(
+                    'type' => 'string',
+                    'description' => 'Target post type (e.g. post, page, or any registered custom post type)'
+                )
+            )
+        ),
+        'output_schema' => array(
+            'type' => 'object',
+            'properties' => array(
+                'id' => array( 'type' => 'integer' ),
+                'success' => array( 'type' => 'boolean' ),
+                'old_type' => array( 'type' => 'string' ),
+                'new_type' => array( 'type' => 'string' ),
+                'old_permalink' => array( 'type' => 'string' ),
+                'new_permalink' => array( 'type' => 'string' ),
+                'warnings' => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) )
+            )
+        ),
+        'execute_callback' => function( $input ) {
+            $check = wp_abilities_suite_require_editable_post( $input['id'] );
+            if ( is_wp_error( $check ) ) return $check;
+
+            $post     = $check;
+            $old_type = $post->post_type;
+            $new_type = sanitize_key( $input['new_type'] );
+
+            // Validate target type exists.
+            $new_type_obj = get_post_type_object( $new_type );
+            if ( ! $new_type_obj ) {
+                return new WP_Error( 'invalid_post_type', "Post type '{$new_type}' does not exist." );
+            }
+
+            // Require create capability on target type.
+            if ( ! current_user_can( $new_type_obj->cap->create_posts ) ) {
+                return new WP_Error( 'forbidden', "You do not have permission to create {$new_type} posts." );
+            }
+
+            // No-op check.
+            if ( $old_type === $new_type ) {
+                return new WP_Error( 'no_change', "Post is already of type '{$new_type}'." );
+            }
+
+            $old_permalink = get_permalink( $post->ID );
+
+            // Collect warnings about side effects.
+            $warnings = array();
+
+            // Check for taxonomy incompatibility.
+            $old_taxonomies = get_object_taxonomies( $old_type );
+            $new_taxonomies = get_object_taxonomies( $new_type );
+            $lost_taxonomies = array_diff( $old_taxonomies, $new_taxonomies );
+
+            if ( ! empty( $lost_taxonomies ) ) {
+                // Check which lost taxonomies actually have terms assigned.
+                $orphaned = array();
+                foreach ( $lost_taxonomies as $tax ) {
+                    $terms = wp_get_object_terms( $post->ID, $tax, array( 'fields' => 'names' ) );
+                    if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+                        $orphaned[ $tax ] = $terms;
+                    }
+                }
+                if ( ! empty( $orphaned ) ) {
+                    foreach ( $orphaned as $tax => $term_names ) {
+                        $warnings[] = "Taxonomy '{$tax}' is not supported by '{$new_type}'. Assigned terms (" . implode( ', ', $term_names ) . ") will become orphaned — they remain in the database but won't display.";
+                    }
+                }
+            }
+
+            // Check for gained taxonomies (informational).
+            $gained_taxonomies = array_diff( $new_taxonomies, $old_taxonomies );
+            if ( ! empty( $gained_taxonomies ) ) {
+                $warnings[] = "New type '{$new_type}' supports additional taxonomies: " . implode( ', ', $gained_taxonomies ) . ". You may want to assign terms.";
+            }
+
+            // Warn about template change.
+            if ( $old_type !== $new_type ) {
+                $warnings[] = "Permalink structure will change. Old: {$old_permalink}. Update any internal links that reference the old URL.";
+            }
+
+            // Perform the conversion.
+            $result = wp_update_post( array(
+                'ID'        => $post->ID,
+                'post_type' => $new_type,
+            ) );
+
+            if ( is_wp_error( $result ) ) {
+                return $result;
+            }
+
+            $new_permalink = get_permalink( $post->ID );
+
+            return array(
+                'id'            => $post->ID,
+                'success'       => true,
+                'old_type'      => $old_type,
+                'new_type'      => $new_type,
+                'old_permalink' => $old_permalink,
+                'new_permalink' => $new_permalink,
+                'warnings'      => $warnings,
+            );
+        },
+        'permission_callback' => function() {
+            return current_user_can( 'edit_posts' );
+        },
+        'meta' => array(
+            'annotations' => array(
+                'readonly' => false,
+                'destructive' => false,
+                'idempotent' => true
+            ),
+            'show_in_rest' => true,
+            'mcp' => array( 'public' => true, 'type' => 'tool' ),
+        )
+    ));
+
+    // Search and replace in content
+    wp_register_ability( 'content/search-replace', array(
+        'label' => 'Search and Replace in Content',
+        'description' => 'Find and replace text across multiple posts. Operates on post_content only. Returns a list of affected post IDs with match counts. Supports plain text matching (not regex). Use dry_run=true to preview changes without saving.',
+        'category' => 'content',
+        'input_schema' => array(
+            'type' => 'object',
+            'required' => array( 'search', 'replace' ),
+            'properties' => array(
+                'search' => array(
+                    'type' => 'string',
+                    'description' => 'The text to search for (exact match, case-sensitive)'
+                ),
+                'replace' => array(
+                    'type' => 'string',
+                    'description' => 'The replacement text'
+                ),
+                'post_type' => array(
+                    'type' => 'string',
+                    'description' => 'Limit to a specific post type (default: all public types)'
+                ),
+                'post_ids' => array(
+                    'type' => 'array',
+                    'items' => array( 'type' => 'integer' ),
+                    'description' => 'Limit to specific post IDs. If provided, post_type is ignored.'
+                ),
+                'dry_run' => array(
+                    'type' => 'boolean',
+                    'description' => 'Preview changes without saving (default: false)',
+                    'default' => false
+                )
+            )
+        ),
+        'output_schema' => array(
+            'type' => 'object',
+            'properties' => array(
+                'dry_run' => array( 'type' => 'boolean' ),
+                'search' => array( 'type' => 'string' ),
+                'replace' => array( 'type' => 'string' ),
+                'posts_scanned' => array( 'type' => 'integer' ),
+                'posts_affected' => array( 'type' => 'integer' ),
+                'total_replacements' => array( 'type' => 'integer' ),
+                'details' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) )
+            )
+        ),
+        'execute_callback' => function( $input ) {
+            $search  = $input['search'];
+            $replace = $input['replace'];
+            $dry_run = ! empty( $input['dry_run'] );
+
+            if ( empty( $search ) ) {
+                return new WP_Error( 'empty_search', 'Search string cannot be empty.' );
+            }
+
+            if ( $search === $replace ) {
+                return new WP_Error( 'no_change', 'Search and replace strings are identical.' );
+            }
+
+            // Build the query.
+            $query_args = array(
+                'posts_per_page' => 500,
+                'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+                'fields'         => 'ids',
+                's'              => $search,
+            );
+
+            if ( ! empty( $input['post_ids'] ) ) {
+                $query_args['post__in'] = array_map( 'absint', $input['post_ids'] );
+                $query_args['post_type'] = 'any';
+                unset( $query_args['s'] ); // post__in is precise enough.
+            } elseif ( ! empty( $input['post_type'] ) ) {
+                $query_args['post_type'] = sanitize_key( $input['post_type'] );
+            } else {
+                $query_args['post_type'] = 'any';
+            }
+
+            $query = new WP_Query( $query_args );
+
+            $details       = array();
+            $total_replaced = 0;
+            $posts_affected = 0;
+
+            foreach ( $query->posts as $post_id ) {
+                if ( ! current_user_can( 'edit_post', $post_id ) ) {
+                    continue;
+                }
+
+                $post    = get_post( $post_id );
+                $content = $post->post_content;
+                $count   = substr_count( $content, $search );
+
+                if ( $count === 0 ) {
+                    continue;
+                }
+
+                $posts_affected++;
+                $total_replaced += $count;
+
+                if ( ! $dry_run ) {
+                    $new_content = str_replace( $search, $replace, $content );
+                    wp_update_post( array(
+                        'ID'           => $post_id,
+                        'post_content' => $new_content,
+                    ) );
+                }
+
+                $details[] = array(
+                    'id'            => $post_id,
+                    'title'         => $post->post_title,
+                    'type'          => $post->post_type,
+                    'replacements'  => $count,
+                );
+            }
+
+            return array(
+                'dry_run'            => $dry_run,
+                'search'             => $search,
+                'replace'            => $replace,
+                'posts_scanned'      => count( $query->posts ),
+                'posts_affected'     => $posts_affected,
+                'total_replacements' => $total_replaced,
+                'details'            => $details,
+            );
+        },
+        'permission_callback' => function() {
+            return current_user_can( 'edit_posts' );
+        },
+        'meta' => array(
+            'annotations' => array(
+                'readonly' => false,
+                'destructive' => false,
+                'idempotent' => true
+            ),
+            'show_in_rest' => true,
+            'mcp' => array( 'public' => true, 'type' => 'tool' ),
+        )
+    ));
+
+    } // end write (continued)
+
     error_log( 'WordPress Content Abilities: Registered content management abilities' );
 
 }, 100 );

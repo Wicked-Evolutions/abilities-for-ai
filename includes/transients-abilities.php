@@ -146,6 +146,73 @@ function wp_native_register_transients_abilities() {
 		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
 	));
 
+	// ---- cache/flush-page-cache ----
+	wp_register_ability( 'cache/flush-page-cache', array(
+		'label'       => 'Flush Page Cache',
+		'description' => 'Purge the full-page cache (LiteSpeed, WP Super Cache, W3 Total Cache, WP Fastest Cache, or wp_cache_flush fallback). Use after content changes, theme updates, or permalink changes when cached pages show stale content. Returns which cache system was detected and purged.',
+		'category'    => 'cache',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'post_id' => array( 'type' => 'integer', 'description' => 'Purge cache for a specific post only (if supported by the cache plugin). Omit to purge all.' ),
+			),
+		),
+		'execute_callback' => function( $params ) {
+			$post_id = ! empty( $params['post_id'] ) ? absint( $params['post_id'] ) : 0;
+			$purged  = array();
+
+			// LiteSpeed Cache.
+			if ( $post_id && class_exists( 'LiteSpeed\Purge' ) && method_exists( 'LiteSpeed\Purge', 'purge_post' ) ) {
+				LiteSpeed\Purge::purge_post( $post_id );
+				$purged[] = 'litespeed (single post)';
+			} elseif ( class_exists( 'LiteSpeed\Purge' ) && method_exists( 'LiteSpeed\Purge', 'purge_all' ) ) {
+				LiteSpeed\Purge::purge_all();
+				$purged[] = 'litespeed';
+			} elseif ( defined( 'LSCWP_V' ) ) {
+				do_action( 'litespeed_purge_all' );
+				$purged[] = 'litespeed (via action)';
+			}
+
+			// WP Super Cache.
+			if ( function_exists( 'wp_cache_clear_cache' ) ) {
+				if ( $post_id && function_exists( 'wp_cache_post_change' ) ) {
+					wp_cache_post_change( $post_id );
+				} else {
+					wp_cache_clear_cache();
+				}
+				$purged[] = 'wp-super-cache';
+			}
+
+			// W3 Total Cache.
+			if ( function_exists( 'w3tc_flush_all' ) ) {
+				if ( $post_id && function_exists( 'w3tc_flush_post' ) ) {
+					w3tc_flush_post( $post_id );
+				} else {
+					w3tc_flush_all();
+				}
+				$purged[] = 'w3-total-cache';
+			}
+
+			// WP Fastest Cache.
+			if ( function_exists( 'wpfc_clear_all_cache' ) ) {
+				wpfc_clear_all_cache( true );
+				$purged[] = 'wp-fastest-cache';
+			}
+
+			// WordPress object cache (always flush as baseline).
+			wp_cache_flush();
+			$purged[] = 'wp-object-cache';
+
+			return array(
+				'flushed'    => true,
+				'post_id'    => $post_id ?: null,
+				'systems'    => $purged,
+			);
+		},
+		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+	));
+
 	} // end write
 
 	// ===== CACHE — DELETE =====
