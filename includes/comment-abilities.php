@@ -132,7 +132,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     // Get comment
@@ -192,7 +193,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     } // end read
@@ -289,7 +291,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     // Update comment
@@ -335,7 +338,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'id' => array('type' => 'integer')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('comments/update', function( $input ) {
             $comment = get_comment( $input['id'] );
 
             if ( ! $comment ) {
@@ -384,7 +387,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'success' => true,
                 'id' => (int) $input['id']
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'moderate_comments' );
         },
@@ -396,7 +399,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     } // end write
@@ -431,7 +435,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'message' => array('type' => 'string')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('comments/delete', function( $input ) {
             $comment = get_comment( $input['id'] );
 
             if ( ! $comment ) {
@@ -454,7 +458,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'success' => true,
                 'message' => $force ? 'Comment permanently deleted' : 'Comment moved to trash'
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'moderate_comments' );
         },
@@ -466,7 +470,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     } // end delete

@@ -47,7 +47,7 @@ function wp_native_register_themes_abilities() {
 			return array( 'themes' => $result, 'count' => count( $result ), 'active' => $active );
 		},
 		'permission_callback' => function() { return current_user_can( 'switch_themes' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- themes/get-active ----
@@ -78,7 +78,7 @@ function wp_native_register_themes_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'switch_themes' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- themes/list-mods ----
@@ -105,7 +105,7 @@ function wp_native_register_themes_abilities() {
 			return array( 'theme' => get_stylesheet(), 'mod_count' => count( $result ), 'mods' => $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_theme_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- themes/get-mod ----
@@ -129,7 +129,7 @@ function wp_native_register_themes_abilities() {
 			return array( 'name' => $name, 'value' => $value );
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_theme_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- themes/get-theme-json ----
@@ -173,7 +173,7 @@ function wp_native_register_themes_abilities() {
 			return array( 'theme' => $theme->get( 'Name' ), 'data' => $data );
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_theme_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	} // end read

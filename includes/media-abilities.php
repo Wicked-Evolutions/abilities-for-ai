@@ -123,7 +123,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     } // end read
@@ -175,7 +176,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'mime_type' => array('type' => 'string')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('media/create', function( $input ) {
             if ( ! function_exists( 'download_url' ) ) {
                 require_once ABSPATH . 'wp-admin/includes/file.php';
             }
@@ -298,7 +299,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'title' => $attachment->post_title,
                 'mime_type' => $attachment->post_mime_type
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'upload_files' );
         },
@@ -310,7 +311,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     // Upload media from base64
@@ -361,7 +363,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'mime_type' => array('type' => 'string')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('media/upload', function( $input ) {
             if ( ! function_exists( 'wp_handle_sideload' ) ) {
                 require_once ABSPATH . 'wp-admin/includes/file.php';
             }
@@ -462,7 +464,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'title' => $attachment->post_title,
                 'mime_type' => $attachment->post_mime_type
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'upload_files' );
         },
@@ -474,7 +476,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-        )
+        
+        'tier' => 'pro',)
     ));
 
     // Update media
@@ -515,7 +518,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'id' => array('type' => 'integer')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('media/update', function( $input ) {
             $attachment_id = (int) $input['id'];
 
             $attachment = get_post( $attachment_id );
@@ -556,7 +559,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'success' => true,
                 'id' => $attachment_id
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'upload_files' );
         },
@@ -568,7 +571,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     } // end write
@@ -603,7 +607,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'message' => array('type' => 'string')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('media/delete', function( $input ) {
             $attachment_id = (int) $input['id'];
             $force = $input['force'] ?? false;
 
@@ -626,7 +630,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'success' => true,
                 'message' => $force ? 'Attachment permanently deleted' : 'Attachment moved to trash'
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'delete_posts' );
         },
@@ -638,7 +642,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     } // end delete

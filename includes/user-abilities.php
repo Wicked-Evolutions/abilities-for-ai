@@ -113,7 +113,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     // Get user
@@ -185,7 +186,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     } // end read
@@ -247,7 +249,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'role' => array('type' => 'string')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('users/create', function( $input ) {
             $role = $input['role'] ?? 'subscriber';
 
             // Enforce editable_roles: prevent assigning roles the current user can't assign.
@@ -297,7 +299,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'email' => $user->user_email,
                 'role' => $user->roles[0] ?? ''
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'create_users' );
         },
@@ -309,7 +311,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     // Update user
@@ -366,7 +369,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'id' => array('type' => 'integer')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('users/update', function( $input ) {
             $user_id = (int) $input['id'];
 
             $target_user = get_user_by( 'ID', $user_id );
@@ -431,7 +434,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'success' => true,
                 'id' => $user_id
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'edit_users' );
         },
@@ -443,7 +446,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     } // end write
@@ -477,7 +481,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'message' => array('type' => 'string')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('users/delete', function( $input ) {
             if ( ! function_exists( 'wp_delete_user' ) ) {
                 require_once ABSPATH . 'wp-admin/includes/user.php';
             }
@@ -505,7 +509,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'success' => true,
                 'message' => 'User deleted successfully'
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'delete_users' );
         },
@@ -517,7 +521,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     } // end delete

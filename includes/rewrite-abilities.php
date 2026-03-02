@@ -42,7 +42,7 @@ function wp_native_register_rewrite_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- rewrite/list-rules ----
@@ -90,7 +90,7 @@ function wp_native_register_rewrite_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	} // end read
@@ -109,7 +109,7 @@ function wp_native_register_rewrite_abilities() {
 				'hard' => array( 'type' => 'boolean', 'description' => 'Hard flush — also update .htaccess (default: false)', 'default' => false ),
 			),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('rewrite/flush', function( $params ) {
 			$hard = ! empty( $params['hard'] );
 			flush_rewrite_rules( $hard );
 			global $wp_rewrite;
@@ -119,9 +119,9 @@ function wp_native_register_rewrite_abilities() {
 				'hard_flush' => $hard,
 				'rule_count' => is_array( $rules ) ? count( $rules ) : 0,
 			);
-		},
+		}),
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'pro',),
 	));
 
 	} // end write

@@ -72,7 +72,7 @@ function wp_native_register_patterns_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- patterns/get ----
@@ -120,7 +120,7 @@ function wp_native_register_patterns_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- patterns/list-categories ----
@@ -145,7 +145,7 @@ function wp_native_register_patterns_abilities() {
 			return array( 'count' => count( $result ), 'categories' => $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	} // end read
@@ -170,7 +170,7 @@ function wp_native_register_patterns_abilities() {
 			),
 			'required' => array( 'name', 'title', 'content' ),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('patterns/register', function( $params ) {
 			$name = sanitize_text_field( $params['name'] ?? '' );
 			$args = array(
 				'title'   => sanitize_text_field( $params['title'] ),
@@ -192,9 +192,9 @@ function wp_native_register_patterns_abilities() {
 			}
 
 			return array( 'name' => $name, 'registered' => true );
-		},
+		}),
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'pro',),
 	));
 
 	} // end write
@@ -214,7 +214,7 @@ function wp_native_register_patterns_abilities() {
 			),
 			'required' => array( 'name' ),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('patterns/unregister', function( $params ) {
 			$name = sanitize_text_field( $params['name'] ?? '' );
 			$registry = WP_Block_Patterns_Registry::get_instance();
 
@@ -224,9 +224,9 @@ function wp_native_register_patterns_abilities() {
 
 			$result = unregister_block_pattern( $name );
 			return array( 'name' => $name, 'unregistered' => (bool) $result );
-		},
+		}),
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) , 'tier' => 'pro',),
 	));
 
 	} // end delete

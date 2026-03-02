@@ -80,7 +80,8 @@ function wp_abilities_suite_register_content_abilities() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-        )
+        
+        'tier' => 'free',)
     ));
 
     // Get content
@@ -111,7 +112,8 @@ function wp_abilities_suite_register_content_abilities() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-        )
+        
+        'tier' => 'free',)
     ));
 
     error_log( 'WordPress Content Abilities V2: Registered 2 content management abilities using named functions' );

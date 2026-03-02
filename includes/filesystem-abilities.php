@@ -152,7 +152,7 @@ function wp_abilities_suite_register_filesystem_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- filesystem/read-file ----
@@ -197,7 +197,7 @@ function wp_abilities_suite_register_filesystem_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	} // end read
@@ -219,7 +219,7 @@ function wp_abilities_suite_register_filesystem_abilities() {
 			),
 			'required' => array( 'path', 'content' ),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('filesystem/write-file', function( $params ) {
 			$path    = $params['path'] ?? '';
 			$content = $params['content'] ?? '';
 			$append  = ! empty( $params['append'] );
@@ -249,9 +249,9 @@ function wp_abilities_suite_register_filesystem_abilities() {
 				'path'          => $path,
 				'mode'          => $append ? 'append' : 'overwrite',
 			);
-		},
+		}),
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'pro',),
 	));
 
 	// ---- theme/update-asset ----
@@ -268,7 +268,7 @@ function wp_abilities_suite_register_filesystem_abilities() {
 			),
 			'required' => array( 'asset_type', 'filename', 'content' ),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('theme/update-asset', function( $params ) {
 			$asset_type = sanitize_text_field( $params['asset_type'] ?? '' );
 			$filename   = sanitize_file_name( $params['filename'] ?? '' );
 			$content    = $params['content'] ?? '';
@@ -313,9 +313,9 @@ function wp_abilities_suite_register_filesystem_abilities() {
 				'theme'   => wp_get_theme()->get( 'Name' ),
 				'path'    => "assets/{$asset_type}/{$filename}",
 			);
-		},
+		}),
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'pro',),
 	));
 
 	} // end write

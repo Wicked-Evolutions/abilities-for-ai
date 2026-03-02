@@ -76,7 +76,7 @@ function wp_native_register_transients_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- cache/get-transient ----
@@ -113,7 +113,7 @@ function wp_native_register_transients_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	} // end read
@@ -135,15 +135,15 @@ function wp_native_register_transients_abilities() {
 			),
 			'required' => array( 'name', 'value' ),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('cache/set-transient', function( $params ) {
 			$name       = sanitize_text_field( $params['name'] ?? '' );
 			$value      = $params['value'] ?? '';
 			$expiration = intval( $params['expiration'] ?? 3600 );
 			$result = set_transient( $name, $value, $expiration );
 			return array( 'name' => $name, 'set' => (bool) $result, 'expiration' => $expiration );
-		},
+		}),
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'pro',),
 	));
 
 	// ---- cache/flush-page-cache ----
@@ -157,7 +157,7 @@ function wp_native_register_transients_abilities() {
 				'post_id' => array( 'type' => 'integer', 'description' => 'Purge cache for a specific post only (if supported by the cache plugin). Omit to purge all.' ),
 			),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('cache/flush-page-cache', function( $params ) {
 			$post_id = ! empty( $params['post_id'] ) ? absint( $params['post_id'] ) : 0;
 			$purged  = array();
 
@@ -208,9 +208,9 @@ function wp_native_register_transients_abilities() {
 				'post_id'    => $post_id ?: null,
 				'systems'    => $purged,
 			);
-		},
+		}),
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'pro',),
 	));
 
 	} // end write
@@ -230,13 +230,13 @@ function wp_native_register_transients_abilities() {
 			),
 			'required' => array( 'name' ),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('cache/delete-transient', function( $params ) {
 			$name   = sanitize_text_field( $params['name'] ?? '' );
 			$result = delete_transient( $name );
 			return array( 'name' => $name, 'deleted' => (bool) $result );
-		},
+		}),
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) , 'tier' => 'pro',),
 	));
 
 	// ---- cache/flush ----
@@ -250,7 +250,7 @@ function wp_native_register_transients_abilities() {
 				'all' => array( 'type' => 'boolean', 'description' => 'Flush ALL transients, not just expired (default: false)', 'default' => false ),
 			),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('cache/flush', function( $params ) {
 			global $wpdb;
 
 			$flush_all = ! empty( $params['all'] );
@@ -273,9 +273,9 @@ function wp_native_register_transients_abilities() {
 				'flushed' => $flush_all ? 'all' : 'expired_only',
 				'rows_deleted' => intval( $deleted ),
 			);
-		},
+		}),
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ) , 'tier' => 'pro',),
 	));
 
 	} // end delete
@@ -309,7 +309,7 @@ function wp_native_register_transients_abilities() {
 			return $info;
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	} // end read

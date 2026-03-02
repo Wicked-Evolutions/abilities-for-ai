@@ -139,7 +139,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'free',),
 	));
 
 	// ===== GET MENU =====
@@ -172,7 +173,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'free',),
 	));
 
 	} // end read
@@ -194,7 +196,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'location' => array( 'type' => 'string', 'description' => 'Optional theme location slug to assign.' ),
 			),
 		),
-		'execute_callback' => function( $input ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('menus/create-menu', function( $input ) {
 			$name    = sanitize_text_field( $input['name'] );
 			$menu_id = wp_create_nav_menu( $name );
 			if ( is_wp_error( $menu_id ) ) {
@@ -207,7 +209,7 @@ add_action( 'wp_abilities_api_init', function() {
 			}
 			$menu = wp_get_nav_menu_object( $menu_id );
 			return array( 'success' => true, 'menu' => array( 'id' => (int) $menu->term_id, 'name' => $menu->name, 'slug' => $menu->slug ) );
-		},
+		}),
 		'permission_callback' => function() {
 			return current_user_can( 'edit_theme_options' );
 		},
@@ -215,7 +217,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'pro',),
 	));
 
 	} // end write
@@ -236,7 +239,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'menu_id' => array( 'type' => 'integer', 'description' => 'The menu term ID to delete.' ),
 			),
 		),
-		'execute_callback' => function( $input ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('menus/delete-menu', function( $input ) {
 			$menu_id = (int) $input['menu_id'];
 			$menu    = wp_get_nav_menu_object( $menu_id );
 			if ( ! $menu ) {
@@ -249,7 +252,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return $result;
 			}
 			return array( 'success' => true, 'deleted_items' => $item_count );
-		},
+		}),
 		'permission_callback' => function() {
 			return current_user_can( 'edit_theme_options' );
 		},
@@ -257,7 +260,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'pro',),
 	));
 
 	} // end delete
@@ -300,7 +304,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'free',),
 	));
 
 	} // end read
@@ -329,7 +334,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'target'    => array( 'type' => 'string', 'description' => 'Link target: "" or "_blank".', 'default' => '' ),
 			),
 		),
-		'execute_callback' => function( $input ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('menus/add-menu-item', function( $input ) {
 			$menu_id = (int) $input['menu_id'];
 			$menu    = wp_get_nav_menu_object( $menu_id );
 			if ( ! $menu ) {
@@ -391,7 +396,7 @@ add_action( 'wp_abilities_api_init', function() {
 			}
 
 			return array( 'success' => true, 'item' => array( 'id' => $item_id, 'title' => $title, 'url' => $url, 'position' => $position ) );
-		},
+		}),
 		'permission_callback' => function() {
 			return current_user_can( 'edit_theme_options' );
 		},
@@ -399,7 +404,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'pro',),
 	));
 
 	// ===== UPDATE MENU ITEM =====
@@ -422,7 +428,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'attr_title' => array( 'type' => 'string', 'description' => 'Title attribute (tooltip).' ),
 			),
 		),
-		'execute_callback' => function( $input ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('menus/update-menu-item', function( $input ) {
 			$item_id = (int) $input['item_id'];
 			$post    = get_post( $item_id );
 			if ( ! $post || 'nav_menu_item' !== $post->post_type ) {
@@ -457,7 +463,7 @@ add_action( 'wp_abilities_api_init', function() {
 
 			$updated = wp_setup_nav_menu_item( get_post( $item_id ) );
 			return array( 'success' => true, 'item' => array( 'id' => (int) $updated->ID, 'title' => $updated->title, 'url' => $updated->url, 'position' => (int) $updated->menu_order, 'parent' => (int) $updated->menu_item_parent ) );
-		},
+		}),
 		'permission_callback' => function() {
 			return current_user_can( 'edit_theme_options' );
 		},
@@ -465,7 +471,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'pro',),
 	));
 
 	} // end write
@@ -486,7 +493,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'item_id' => array( 'type' => 'integer', 'description' => 'The menu item post ID to delete.' ),
 			),
 		),
-		'execute_callback' => function( $input ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('menus/delete-menu-item', function( $input ) {
 			$item_id = (int) $input['item_id'];
 			$post    = get_post( $item_id );
 			if ( ! $post || 'nav_menu_item' !== $post->post_type ) {
@@ -497,7 +504,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'delete_failed', "Failed to delete menu item {$item_id}." );
 			}
 			return array( 'success' => true );
-		},
+		}),
 		'permission_callback' => function() {
 			return current_user_can( 'edit_theme_options' );
 		},
@@ -505,7 +512,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'pro',),
 	));
 
 	} // end delete
@@ -527,7 +535,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'item_order' => array( 'type' => 'array', 'items' => array( 'type' => 'integer' ), 'description' => 'Array of menu item IDs in desired order.' ),
 			),
 		),
-		'execute_callback' => function( $input ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('menus/reorder-menu-items', function( $input ) {
 			$menu_id    = (int) $input['menu_id'];
 			$item_order = $input['item_order'];
 			$menu = wp_get_nav_menu_object( $menu_id );
@@ -559,7 +567,7 @@ add_action( 'wp_abilities_api_init', function() {
 				$result[] = array( 'id' => $item_id, 'position' => $order );
 			}
 			return array( 'success' => true, 'items' => $result );
-		},
+		}),
 		'permission_callback' => function() {
 			return current_user_can( 'edit_theme_options' );
 		},
@@ -567,7 +575,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'pro',),
 	));
 
 	} // end write
@@ -606,7 +615,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'free',),
 	));
 
 	} // end read
@@ -628,7 +638,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'menu_id'  => array( 'type' => 'integer', 'description' => 'The menu term ID to assign.' ),
 			),
 		),
-		'execute_callback' => function( $input ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('menus/assign-location', function( $input ) {
 			$location = sanitize_key( $input['location'] );
 			$menu_id  = (int) $input['menu_id'];
 			$registered = get_registered_nav_menus();
@@ -643,7 +653,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$locations[ $location ] = $menu_id;
 			set_theme_mod( 'nav_menu_locations', $locations );
 			return array( 'success' => true, 'location' => $location, 'menu_id' => $menu_id, 'menu_name' => $menu->name );
-		},
+		}),
 		'permission_callback' => function() {
 			return current_user_can( 'edit_theme_options' );
 		},
@@ -651,7 +661,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'pro',),
 	));
 
 	// ===== UNASSIGN LOCATION =====
@@ -667,7 +678,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'location' => array( 'type' => 'string', 'description' => 'Theme location slug to clear.' ),
 			),
 		),
-		'execute_callback' => function( $input ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('menus/unassign-location', function( $input ) {
 			$location = sanitize_key( $input['location'] );
 			$registered = get_registered_nav_menus();
 			if ( ! isset( $registered[ $location ] ) ) {
@@ -677,7 +688,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$locations[ $location ] = 0;
 			set_theme_mod( 'nav_menu_locations', $locations );
 			return array( 'success' => true, 'location' => $location );
-		},
+		}),
 		'permission_callback' => function() {
 			return current_user_can( 'edit_theme_options' );
 		},
@@ -685,7 +696,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ),
 			'show_in_rest' => true,
 			'mcp' => array( 'public' => true, 'type' => 'tool' ),
-		),
+		
+		'tier' => 'pro',),
 	));
 
 	} // end write

@@ -26,6 +26,10 @@ require_once WP_ABILITIES_SUITE_PATH . 'includes/helpers.php';
 // Load permission toggles system.
 require_once WP_ABILITIES_SUITE_PATH . 'includes/permissions.php';
 
+// Load Pro tier infrastructure.
+require_once WP_ABILITIES_SUITE_PATH . 'includes/license-manager.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/tier-gate.php';
+
 // Load ability categories FIRST (required before abilities).
 require_once WP_ABILITIES_SUITE_PATH . 'includes/ability-categories.php';
 

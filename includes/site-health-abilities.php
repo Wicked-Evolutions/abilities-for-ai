@@ -54,7 +54,7 @@ function wp_native_register_site_health_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- site-health/list-tests ----
@@ -83,7 +83,7 @@ function wp_native_register_site_health_abilities() {
 			return array( 'direct' => $direct, 'async' => $async );
 		},
 		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- site-health/run-test ----
@@ -136,7 +136,7 @@ function wp_native_register_site_health_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- site-health/info ----
@@ -208,7 +208,7 @@ function wp_native_register_site_health_abilities() {
 			return array( 'sections' => $summary, 'available_sections' => array_keys( $info ) );
 		},
 		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	} // end read

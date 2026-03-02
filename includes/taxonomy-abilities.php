@@ -60,7 +60,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     // List terms
@@ -168,7 +169,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     // Get term
@@ -223,7 +225,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     } // end read
@@ -315,7 +318,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     // Update term
@@ -360,7 +364,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'success' => array('type' => 'boolean')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('taxonomies/update-term', function( $input ) {
             $taxonomy = $input['taxonomy'];
             $tax_obj  = get_taxonomy( $taxonomy );
             if ( ! $tax_obj ) {
@@ -387,7 +391,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'term_id' => $result['term_id'],
                 'success' => true
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'manage_categories' );
         },
@@ -399,7 +403,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     } // end write
@@ -432,7 +437,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'success' => array('type' => 'boolean')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('taxonomies/delete-term', function( $input ) {
             $taxonomy = $input['taxonomy'];
             $tax_obj  = get_taxonomy( $taxonomy );
             if ( ! $tax_obj ) {
@@ -451,7 +456,7 @@ add_action( 'wp_abilities_api_init', function() {
             return array(
                 'success' => (bool) $result
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'manage_categories' );
         },
@@ -463,7 +468,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     } // end delete
@@ -512,7 +518,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'term_taxonomy_ids' => array('type' => 'array', 'items' => array('type' => 'integer'))
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('taxonomies/assign-to-content', function( $input ) {
             $check = wp_abilities_suite_require_editable_post( $input['post_id'] );
             if ( is_wp_error( $check ) ) return $check;
 
@@ -540,7 +546,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'success' => true,
                 'term_taxonomy_ids' => $result
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'edit_posts' );
         },
@@ -552,7 +558,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     } // end write
@@ -649,7 +656,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     } // end read

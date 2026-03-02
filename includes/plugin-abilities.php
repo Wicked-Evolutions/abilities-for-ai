@@ -128,7 +128,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     // Get plugin details
@@ -204,7 +205,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     } // end read
@@ -244,7 +246,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'message' => array('type' => 'string')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('plugins/activate', function( $input ) {
             if ( ! function_exists( 'activate_plugin' ) ) {
                 require_once ABSPATH . 'wp-admin/includes/plugin.php';
             }
@@ -287,7 +289,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'success' => true,
                 'message' => 'Plugin activated successfully'
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'activate_plugins' );
         },
@@ -299,7 +301,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     // Deactivate plugin
@@ -334,7 +337,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'message' => array('type' => 'string')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('plugins/deactivate', function( $input ) {
             if ( ! function_exists( 'deactivate_plugins' ) ) {
                 require_once ABSPATH . 'wp-admin/includes/plugin.php';
             }
@@ -359,7 +362,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'success' => true,
                 'message' => 'Plugin deactivated successfully'
             );
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'activate_plugins' );
         },
@@ -371,7 +374,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     // Install plugin
@@ -407,7 +411,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'plugin_file' => array('type' => 'string')
             )
         ),
-        'execute_callback' => function( $input ) {
+        'execute_callback' => wp_abilities_suite_pro_gate('plugins/install', function( $input ) {
             if ( ! function_exists( 'plugins_api' ) ) {
                 require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
             }
@@ -481,7 +485,7 @@ add_action( 'wp_abilities_api_init', function() {
             }
 
             return $response;
-        },
+        }),
         'permission_callback' => function() {
             return current_user_can( 'install_plugins' );
         },
@@ -493,7 +497,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'pro',)
     ));
 
     } // end write
@@ -650,7 +655,8 @@ add_action( 'wp_abilities_api_init', function() {
             ),
             'show_in_rest' => true,
             'mcp' => array( 'public' => true, 'type' => 'tool' ),
-                    )
+                    
+                    'tier' => 'free',)
     ));
 
     } // end read

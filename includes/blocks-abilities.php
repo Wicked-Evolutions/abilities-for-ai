@@ -72,7 +72,8 @@ function wp_native_register_blocks_abilities() {
 				'destructive' => false,
 				'idempotent'  => true,
 			),
-		),
+		
+		'tier' => 'free',),
 	));
 
 	// ---- blocks/serialize ----
@@ -112,7 +113,8 @@ function wp_native_register_blocks_abilities() {
 				'destructive' => false,
 				'idempotent'  => true,
 			),
-		),
+		
+		'tier' => 'free',),
 	));
 
 	// ---- blocks/list-types ----
@@ -183,7 +185,8 @@ function wp_native_register_blocks_abilities() {
 				'destructive' => false,
 				'idempotent'  => true,
 			),
-		),
+		
+		'tier' => 'free',),
 	));
 
 	// ---- blocks/get-type ----
@@ -240,7 +243,8 @@ function wp_native_register_blocks_abilities() {
 				'destructive' => false,
 				'idempotent'  => true,
 			),
-		),
+		
+		'tier' => 'free',),
 	));
 
 	// ---- blocks/find-in-post ----
@@ -325,7 +329,8 @@ function wp_native_register_blocks_abilities() {
 				'destructive' => false,
 				'idempotent'  => true,
 			),
-		),
+		
+		'tier' => 'free',),
 	));
 
 	} // end read
@@ -358,7 +363,7 @@ function wp_native_register_blocks_abilities() {
 			),
 			'required' => array( 'post_id', 'blocks' ),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('blocks/insert', function( $params ) {
 			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id = $check->ID;
@@ -389,7 +394,7 @@ function wp_native_register_blocks_abilities() {
 				'inserted'    => count( $new_blocks ),
 				'total_blocks' => count( array_filter( $existing, function( $b ) { return ! empty( $b['blockName'] ); } ) ),
 			);
-		},
+		}),
 		'permission_callback' => function() {
 			return current_user_can( 'edit_posts' );
 		},
@@ -401,7 +406,8 @@ function wp_native_register_blocks_abilities() {
 				'destructive' => false,
 				'idempotent'  => false,
 			),
-		),
+		
+		'tier' => 'pro',),
 	));
 
 	// ---- blocks/replace ----
@@ -427,7 +433,7 @@ function wp_native_register_blocks_abilities() {
 			),
 			'required' => array( 'post_id', 'index', 'block' ),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('blocks/replace', function( $params ) {
 			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id = $check->ID;
@@ -457,7 +463,7 @@ function wp_native_register_blocks_abilities() {
 				'new_block'    => $params['block']['blockName'] ?? 'unknown',
 				'index'        => $index,
 			);
-		},
+		}),
 		'permission_callback' => function() {
 			return current_user_can( 'edit_posts' );
 		},
@@ -469,7 +475,8 @@ function wp_native_register_blocks_abilities() {
 				'destructive' => false,
 				'idempotent'  => true,
 			),
-		),
+		
+		'tier' => 'pro',),
 	));
 
 	} // end write
@@ -496,7 +503,7 @@ function wp_native_register_blocks_abilities() {
 			),
 			'required' => array( 'post_id', 'index' ),
 		),
-		'execute_callback' => function( $params ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('blocks/remove', function( $params ) {
 			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id = $check->ID;
@@ -525,7 +532,7 @@ function wp_native_register_blocks_abilities() {
 				'removed'       => $removed,
 				'remaining_blocks' => count( array_filter( $blocks, function( $b ) { return ! empty( $b['blockName'] ); } ) ),
 			);
-		},
+		}),
 		'permission_callback' => function() {
 			return current_user_can( 'edit_posts' );
 		},
@@ -537,7 +544,8 @@ function wp_native_register_blocks_abilities() {
 				'destructive' => true,
 				'idempotent'  => false,
 			),
-		),
+		
+		'tier' => 'pro',),
 	));
 
 	} // end delete

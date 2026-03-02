@@ -60,7 +60,7 @@ function wp_native_register_settings_abilities() {
 			return array( 'groups' => $result );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- settings/get ----
@@ -84,7 +84,7 @@ function wp_native_register_settings_abilities() {
 			return array( 'option_name' => $name, 'value' => $value );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- settings/get-group ----
@@ -111,7 +111,7 @@ function wp_native_register_settings_abilities() {
 			return array( 'group' => $group, 'settings' => $values );
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	// ---- settings/get-permalink-structure ----
@@ -133,7 +133,7 @@ function wp_native_register_settings_abilities() {
 			);
 		},
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
 	} // end read
@@ -154,7 +154,7 @@ function wp_native_register_settings_abilities() {
 			),
 			'required' => array( 'option_name', 'option_value' ),
 		),
-		'execute_callback' => function( $params ) use ( $writable_settings ) {
+		'execute_callback' => wp_abilities_suite_pro_gate('settings/update', function( $params ) use ( $writable_settings ) {
 			$name = sanitize_text_field( $params['option_name'] ?? '' );
 			if ( ! in_array( $name, $writable_settings, true ) ) {
 				return wp_native_error( 'not_allowed', "Setting '{$name}' is not in the V1.0 writable allowlist." );
@@ -162,9 +162,9 @@ function wp_native_register_settings_abilities() {
 			$value  = sanitize_text_field( $params['option_value'] );
 			$result = update_option( $name, $value );
 			return array( 'option_name' => $name, 'updated' => (bool) $result, 'new_value' => get_option( $name ) );
-		},
+		}),
 		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) ),
+		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'pro',),
 	));
 
 	} // end write
