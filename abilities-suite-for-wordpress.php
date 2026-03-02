@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Abilities Suite for WordPress
  * Plugin URI:  https://github.com/Influencentricity/abilities-suite-for-wordpress
- * Description: 96 native WordPress abilities across 17 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more. Powers AI control through the official Abilities API.
- * Version: 3.5.1
+ * Description: 113 native WordPress abilities across 18 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more. Powers AI control through the official Abilities API.
+ * Version: 3.6.0
  * Author: Influencentricity
  * Author URI: https://influencentricity.com
  * License: GPL-2.0-or-later
@@ -16,7 +16,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Define plugin constants
-define( 'WP_ABILITIES_SUITE_VERSION', '3.5.1' );
+define( 'WP_ABILITIES_SUITE_VERSION', '3.6.0' );
 define( 'WP_ABILITIES_SUITE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WP_ABILITIES_SUITE_URL', plugin_dir_url( __FILE__ ) );
 
@@ -49,6 +49,7 @@ require_once WP_ABILITIES_SUITE_PATH . 'includes/cron-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/themes-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/rest-discovery-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/rewrite-abilities.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/filesystem-abilities.php';
 
 // Load admin dashboard
 if ( is_admin() ) {

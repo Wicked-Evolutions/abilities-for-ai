@@ -4,7 +4,7 @@ Tags: ai, mcp, abilities, api, automation
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 3.3.0
+Stable tag: 3.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,11 +12,11 @@ Complete native WordPress AI control through the Abilities API — content, bloc
 
 == Description ==
 
-Abilities Suite for WordPress gives AI clients full control over native WordPress functionality through the [WordPress Abilities API](https://developer.wordpress.org/abilities/). 93 abilities across 17 modules — from content management to block editing, metadata to cron scheduling.
+Abilities Suite for WordPress gives AI clients full control over native WordPress functionality through the [WordPress Abilities API](https://developer.wordpress.org/abilities/). 113 abilities across 18 modules — from content management to block editing, metadata to cron scheduling.
 
 **Works with any MCP-compatible AI client** — Claude Code, Claude Desktop, Cursor, and more.
 
-= 17 Modules =
+= 18 Modules =
 
 * **Content** — List, get, create, update, delete posts/pages/CPTs
 * **Taxonomies** — Categories, tags, custom taxonomies CRUD
@@ -35,6 +35,7 @@ Abilities Suite for WordPress gives AI clients full control over native WordPres
 * **Themes** — List themes, read theme mods, inspect theme.json
 * **REST Discovery** — Introspect REST API namespaces, routes, schemas
 * **Rewrite Rules** — Permalink structure inspection and flush
+* **Filesystem** — List directories, read/write files within WordPress installation (extension whitelist, ABSPATH containment)
 
 = Permission Toggles =
 
@@ -87,18 +88,39 @@ Yes. The plugin is network-compatible and can be activated network-wide or per-s
 
 == Changelog ==
 
+= 3.6.0 =
+* Added Filesystem abilities module (4 abilities): list-directory, read-file, write-file, theme/update-asset
+* 18th ability category: filesystem
+* Native PHP filesystem functions (CageFS/CloudLinux compatible)
+* Extension whitelist security and ABSPATH containment
+* Total abilities: 113 across 18 modules
+
+= 3.5.1 =
+* Fixed content/list division by zero on multisite subsites
+* Fixed cache/flush-page-cache single-post purge crash on LiteSpeed
+
+= 3.5.0 =
+* Added content/change-type — convert posts between post types
+* Added content/search-replace — bulk find/replace with dry_run preview
+* Added cache/flush-page-cache — purge page cache with auto-detection
+
+= 3.3.0 =
+* Security hardening: 10 findings from GPT-5.2 Pro review, all fixed
+* Object-level authorization, SSRF protection, destructive ops default OFF
+* MCP metadata normalized across 54 abilities
+
 = 3.1.0 =
 * Added per-module Read/Write/Delete permission toggles
 * Added permission settings page in admin dashboard
 * Added live ability count in admin UI
-* All 17 modules wrapped in conditional registration based on permissions
+* All 18 modules wrapped in conditional registration based on permissions
 * Delete abilities default to OFF for safety
 
 = 3.0.0 =
 * Added 10 new modules: blocks, patterns, meta, settings, site-health, cache, cron, themes, REST discovery, rewrite
 * Added admin dashboard with abilities explorer
 * Absorbed menu-abilities into core suite
-* 93 total abilities across 17 categories
+* 93 abilities across 17 categories (initial v3 release)
 
 = 2.0.0 =
 * Initial release with content, taxonomies, plugins, media, users, comments, menus

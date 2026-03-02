@@ -182,6 +182,7 @@ function wp_abilities_suite_permission_defaults() {
 		'themes'     => array( 'read' => true ),
 		'rest'       => array( 'read' => true ),
 		'rewrite'    => array( 'read' => true, 'write' => true ),
+		'filesystem' => array( 'read' => true, 'write' => false ),
 	);
 }
 
@@ -209,6 +210,7 @@ function wp_abilities_suite_module_labels() {
 		'themes'     => 'Themes',
 		'rest'       => 'REST Discovery',
 		'rewrite'    => 'Rewrite Rules',
+		'filesystem' => 'Filesystem',
 	);
 }
 

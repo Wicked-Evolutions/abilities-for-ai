@@ -110,5 +110,10 @@ function wp_abilities_suite_register_categories() {
         'description' => __( 'WordPress permalink structure and rewrite rule management.', 'abilities-suite-for-wordpress' ),
     ));
 
-    error_log( 'WordPress Abilities Suite: Registered 17 ability categories' );
+    wp_register_ability_category( 'filesystem', array(
+        'label'       => __( 'Filesystem', 'abilities-suite-for-wordpress' ),
+        'description' => __( 'Read and write files within the WordPress installation directory.', 'abilities-suite-for-wordpress' ),
+    ));
+
+    error_log( 'WordPress Abilities Suite: Registered 18 ability categories' );
 }

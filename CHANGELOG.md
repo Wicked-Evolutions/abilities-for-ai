@@ -2,6 +2,42 @@
 
 All notable changes to WordPress Abilities Suite will be documented in this file.
 
+## [3.6.0] - 2026-03-02
+
+### Added
+- **Filesystem abilities module** (4 abilities): list-directory, read-file, write-file, theme/update-asset
+- 18th ability category: filesystem
+- Native PHP filesystem functions (CageFS/CloudLinux compatible — no WP_Filesystem overhead)
+- Extension whitelist security (css, js, json, md, txt, html allowed; php blocked)
+- ABSPATH containment with realpath() validation and traversal rejection
+- Write permissions default OFF — admin must explicitly enable
+
+### Changed
+- Total abilities: 103 → 113
+- Total categories: 17 → 18
+
+---
+
+## [3.5.1] - 2026-02-28
+
+### Fixed
+- `content/list` division by zero on multisite subsites — undefined `$per_page` → `$args['posts_per_page']`
+- `cache/flush-page-cache` single-post purge crash on LiteSpeed — static call → `do_action('litespeed_purge_post', $post_id)`
+
+---
+
+## [3.5.0] - 2026-02-27
+
+### Added
+- `content/change-type` — convert posts between post types with taxonomy/permalink warnings
+- `content/search-replace` — bulk find/replace across post content with dry_run preview
+- `cache/flush-page-cache` — purge page cache with auto-detection (LiteSpeed, WP Super Cache, W3TC, WPFC)
+
+### Changed
+- Total abilities: 103 → 106 (note: filesystem was added but not counted until 3.6.0 release)
+
+---
+
 ## [3.3.0] - 2026-02-26
 
 ### Security (GPT-5.2 Pro review via Oracle CLI — 10 findings, all fixed)
@@ -110,6 +146,9 @@ All notable changes to WordPress Abilities Suite will be documented in this file
 
 | Version | Date | Abilities | Categories | Key Changes |
 |---------|------|-----------|------------|-------------|
+| 3.6.0 | 2026-03-02 | 113 | 18 | Filesystem abilities module (4 abilities) |
+| 3.5.1 | 2026-02-28 | 106 | 17 | Division by zero fix, LiteSpeed purge fix |
+| 3.5.0 | 2026-02-27 | 106 | 17 | content/change-type, content/search-replace, cache/flush-page-cache |
 | 3.3.0 | 2026-02-26 | 103 | 17 | Security hardening (10 fixes), MCP metadata normalization, plugin rename |
 | 3.0.0 | 2026-02-24 | 103 | 17 | 10 new modules, JSON Schema fixes |
 | 2.0.0 | 2025-12-21 | 51 | 7 | Menu management, Content v2 |

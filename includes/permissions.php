@@ -77,6 +77,7 @@ function wp_abilities_suite_get_ability_counts() {
 		'themes'     => 'themes',
 		'rest'       => 'rest',
 		'rewrite'    => 'rewrite',
+		'filesystem' => 'filesystem',
 	);
 
 	$counts = array();

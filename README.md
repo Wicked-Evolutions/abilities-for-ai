@@ -1,6 +1,6 @@
 # Abilities Suite for WordPress
 
-93 native WordPress abilities across 17 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more. Powers AI control through the official Abilities API.
+113 native WordPress abilities across 18 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more. Powers AI control through the official Abilities API.
 
 ## Requirements
 
@@ -8,7 +8,7 @@
 - PHP 7.4+
 - [MCP Adapter for WordPress](https://github.com/Influencentricity/mcp-adapter-for-wordpress) (for MCP integration)
 
-## 103 Abilities
+## 113 Abilities
 
 ### Content Management (10)
 
@@ -200,6 +200,15 @@
 | `rewrite/list-rules` | read | List all rewrite rules |
 | `rewrite/flush` | write | Flush rewrite rules |
 
+### Filesystem (4) — *New in v3.6.0*
+
+| Ability | Type | Description |
+|---------|------|-------------|
+| `filesystem/list-directory` | read | List files and folders in a directory within the WordPress installation |
+| `filesystem/read-file` | read | Read the content of a file within the WordPress installation (1MB limit) |
+| `filesystem/write-file` | write | Write or append content to a file (extension whitelist: css, js, json, md, txt, html) |
+| `theme/update-asset` | write | Write a file to the active theme's assets/ directory |
+
 ## Installation
 
 1. Upload to `wp-content/plugins/abilities-suite-for-wordpress/`
@@ -229,11 +238,11 @@ All abilities include WordPress capability checks:
 - `create_users` — user management
 - `moderate_comments` — comment operations
 - `edit_theme_options` — menu operations
-- `manage_options` — settings, cache, cron, themes, site health, REST, rewrite
+- `manage_options` — settings, cache, cron, themes, site health, REST, rewrite, filesystem operations
 
 ## Version
 
-**Current:** 3.0.0
+**Current:** 3.6.0
 
 ## Author
 
