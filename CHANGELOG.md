@@ -11,9 +11,13 @@ All notable changes to WordPress Abilities Suite will be documented in this file
 - Extension whitelist security (css, js, json, md, txt, html allowed; php blocked)
 - ABSPATH containment with realpath() validation and traversal rejection
 - Write permissions default OFF — admin must explicitly enable
+- **Free/Pro tier gate** (Phase 1): 69 free abilities (read) + 44 pro abilities (write)
+- `license-manager.php` stub — any non-empty key activates Pro
+- `tier-gate.php` — `wp_abilities_suite_pro_gate()` closure wrapper for pro abilities
+- Execution-time blocking: all 113 abilities registered and visible; pro abilities return 403 without license
 
 ### Changed
-- Total abilities: 103 → 113
+- Total abilities: 103 → 113 (69 free + 44 pro)
 - Total categories: 17 → 18
 
 ---
@@ -34,7 +38,7 @@ All notable changes to WordPress Abilities Suite will be documented in this file
 - `cache/flush-page-cache` — purge page cache with auto-detection (LiteSpeed, WP Super Cache, W3TC, WPFC)
 
 ### Changed
-- Total abilities: 103 → 106 (note: filesystem was added but not counted until 3.6.0 release)
+- Total abilities: 103 → 106
 
 ---
 

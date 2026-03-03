@@ -1,6 +1,11 @@
 # Abilities Suite for WordPress
 
-113 native WordPress abilities across 18 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, and more. Powers AI control through the official Abilities API.
+113 native WordPress abilities across 18 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, filesystem, and more. Powers AI control through the official Abilities API.
+
+**Free tier:** 69 read abilities — browse content, inspect settings, discover capabilities.
+**Pro tier:** 44 write abilities — create, update, delete, and manage your WordPress site.
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ## Requirements
 
@@ -208,6 +213,23 @@
 | `filesystem/read-file` | read | Read the content of a file within the WordPress installation (1MB limit) |
 | `filesystem/write-file` | write | Write or append content to a file (extension whitelist: css, js, json, md, txt, html) |
 | `theme/update-asset` | write | Write a file to the active theme's assets/ directory |
+
+## Filesystem Security
+
+The filesystem module (v3.6.0) uses native PHP filesystem functions with a layered security model:
+
+- **ABSPATH containment** — all paths validated with `realpath()` to prevent traversal
+- **Extension whitelist** — only `.css`, `.js`, `.json`, `.md`, `.txt`, `.html` can be written; `.php` is blocked
+- **Write permissions default OFF** — admin must explicitly enable filesystem writes
+- **Dual gate system** — both permission toggle AND Pro license must pass for write operations
+
+## Free/Pro Tier System
+
+All 113 abilities are registered and visible to AI agents regardless of license. Pro abilities return a clear 403 response at execution time without a valid license, creating natural discovery of available capabilities.
+
+- **Permission toggle** — per-module write ON/OFF control in admin dashboard
+- **License gate** — Pro abilities require a valid license key (Phase 1: any non-empty key activates)
+- Both gates must pass — neither alone is sufficient
 
 ## Installation
 
