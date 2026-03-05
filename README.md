@@ -1,8 +1,8 @@
 # Abilities Suite for WordPress
 
-113 native WordPress abilities across 18 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, filesystem, and more. Powers AI control through the official Abilities API.
+111 native WordPress abilities across 18 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, filesystem, and more. Powers AI control through the official Abilities API.
 
-**Free tier:** 69 read abilities — browse content, inspect settings, discover capabilities.
+**Free tier:** 67 read abilities — browse content, inspect settings, discover capabilities.
 **Pro tier:** 44 write abilities — create, update, delete, and manage your WordPress site.
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
@@ -13,22 +13,23 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 - PHP 7.4+
 - [MCP Adapter for WordPress](https://github.com/Influencentricity/mcp-adapter-for-wordpress) (for MCP integration)
 
-## 113 Abilities
+## 111 Abilities
 
-### Content Management (10)
+### Content Management (11)
 
 | Ability | Type | Description |
 |---------|------|-------------|
 | `content/list` | read | List posts, pages, or custom post types with filtering |
 | `content/get` | read | Get a specific post by ID |
+| `content/get-snapshot` | read | Get content snapshot with metadata |
 | `content/create` | write | Create new content |
 | `content/update` | write | Update existing content |
 | `content/delete` | write | Delete content |
 | `content/discover-types` | read | Discover all available post types |
 | `content/find-by-url` | read | Find content by URL |
 | `content/get-by-slug` | read | Get content by slug |
-| `content/list-v2` | read | List content with extended filtering |
-| `content/get-v2` | read | Get content with raw/rendered output |
+| `content/change-type` | write | Convert post between types |
+| `content/search-replace` | write | Bulk find/replace in post content |
 
 ### Taxonomy Management (8)
 
@@ -159,13 +160,14 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 | `site-health/run-test` | read | Run a specific health test |
 | `site-health/info` | read | Get detailed site health info |
 
-### Cache & Transients (6) — *New in v3.0*
+### Cache & Transients (7) — *New in v3.0, expanded in v3.5*
 
 | Ability | Type | Description |
 |---------|------|-------------|
 | `cache/list-transients` | read | List stored transients |
 | `cache/get-transient` | read | Get a transient value |
 | `cache/set-transient` | write | Set a transient with expiration |
+| `cache/flush-page-cache` | write | Purge full-page cache (LiteSpeed, WP Super Cache, W3TC, WPFC) |
 | `cache/delete-transient` | write | Delete a transient |
 | `cache/flush` | write | Flush the object cache |
 | `cache/object-cache-status` | read | Get object cache status |
@@ -225,7 +227,7 @@ The filesystem module (v3.6.0) uses native PHP filesystem functions with a layer
 
 ## Free/Pro Tier System
 
-All 113 abilities are registered and visible to AI agents regardless of license. Pro abilities return a clear 403 response at execution time without a valid license, creating natural discovery of available capabilities.
+All 111 abilities are registered and visible to AI agents regardless of license. Pro abilities return a clear 403 response at execution time without a valid license, creating natural discovery of available capabilities.
 
 - **Permission toggle** — per-module write ON/OFF control in admin dashboard
 - **License gate** — Pro abilities require a valid license key (Phase 1: any non-empty key activates)
