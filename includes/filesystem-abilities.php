@@ -220,6 +220,13 @@ function wp_abilities_suite_register_filesystem_abilities() {
 			'required' => array( 'path', 'content' ),
 		),
 		'execute_callback' => wp_abilities_suite_pro_gate('filesystem/write-file', function( $params ) {
+			if ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) {
+				return wp_native_error( 'file_mods_disabled', 'File modifications are disabled (DISALLOW_FILE_MODS is set in wp-config.php).' );
+			}
+			if ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT ) {
+				return wp_native_error( 'file_edit_disabled', 'File editing is disabled (DISALLOW_FILE_EDIT is set in wp-config.php).' );
+			}
+
 			$path    = $params['path'] ?? '';
 			$content = $params['content'] ?? '';
 			$append  = ! empty( $params['append'] );
@@ -269,6 +276,13 @@ function wp_abilities_suite_register_filesystem_abilities() {
 			'required' => array( 'asset_type', 'filename', 'content' ),
 		),
 		'execute_callback' => wp_abilities_suite_pro_gate('theme/update-asset', function( $params ) {
+			if ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) {
+				return wp_native_error( 'file_mods_disabled', 'File modifications are disabled (DISALLOW_FILE_MODS is set in wp-config.php).' );
+			}
+			if ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT ) {
+				return wp_native_error( 'file_edit_disabled', 'File editing is disabled (DISALLOW_FILE_EDIT is set in wp-config.php).' );
+			}
+
 			$asset_type = sanitize_text_field( $params['asset_type'] ?? '' );
 			$filename   = sanitize_file_name( $params['filename'] ?? '' );
 			$content    = $params['content'] ?? '';

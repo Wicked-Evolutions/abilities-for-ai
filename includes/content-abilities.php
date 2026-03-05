@@ -387,6 +387,10 @@ add_action( 'wp_abilities_api_init', function() {
                 'excerpt' => array(
                     'type' => 'string',
                     'description' => 'Post excerpt'
+                ),
+                'post_date' => array(
+                    'type' => 'string',
+                    'description' => 'Publish date in MySQL datetime (e.g. "2026-03-05 14:30:00") or ISO 8601 format. Defaults to current time.'
                 )
             )
         ),
@@ -423,6 +427,11 @@ add_action( 'wp_abilities_api_init', function() {
                 'post_status' => $status,
                 'post_excerpt' => $input['excerpt'] ?? ''
             );
+
+            if ( isset( $input['post_date'] ) ) {
+                $post_data['post_date'] = sanitize_text_field( $input['post_date'] );
+                $post_data['post_date_gmt'] = get_gmt_from_date( $post_data['post_date'] );
+            }
 
             $post_id = wp_insert_post( $post_data );
 
@@ -478,6 +487,10 @@ add_action( 'wp_abilities_api_init', function() {
                 'excerpt' => array(
                     'type' => 'string',
                     'description' => 'Post excerpt'
+                ),
+                'post_date' => array(
+                    'type' => 'string',
+                    'description' => 'Publish date in MySQL datetime (e.g. "2026-03-05 14:30:00") or ISO 8601 format.'
                 )
             )
         ),
@@ -510,6 +523,10 @@ add_action( 'wp_abilities_api_init', function() {
             if ( isset( $input['content'] ) ) $post_data['post_content'] = $input['content'];
             if ( isset( $input['status'] ) ) $post_data['post_status'] = $input['status'];
             if ( isset( $input['excerpt'] ) ) $post_data['post_excerpt'] = $input['excerpt'];
+            if ( isset( $input['post_date'] ) ) {
+                $post_data['post_date'] = sanitize_text_field( $input['post_date'] );
+                $post_data['post_date_gmt'] = get_gmt_from_date( $post_data['post_date'] );
+            }
 
             $result = wp_update_post( $post_data );
 
