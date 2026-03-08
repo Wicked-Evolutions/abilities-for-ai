@@ -4,39 +4,31 @@
  *
  * Parse, serialize, list, find, insert, replace, and remove Gutenberg blocks.
  *
- * @package WordPress_Native_Abilities
+ * @package WordPress_Abilities_Suite
  */
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'wp_abilities_api_init', 'wp_native_register_blocks_abilities' );
-
-function wp_native_register_blocks_abilities() {
-
-	$perms = wp_abilities_suite_get_permissions( 'blocks' );
+add_action( 'wp_abilities_api_init', function() {
+	$reg = new WP_Abilities_Suite_Registrar( 'blocks', 'edit_posts' );
 
 	// ===== BLOCKS — READ =====
-	if ( $perms['read'] ) {
 
-	// ---- blocks/parse ----
-	wp_register_ability( 'blocks/parse', array(
+	$reg->read( 'blocks/parse', array(
 		'label'       => 'Parse Blocks',
 		'description' => 'Parse post content into a structured block array. Provide either post_id (reads the post) or raw content string.',
-		'category'    => 'blocks',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'post_id' => array(
-					'type'        => 'integer',
-					'description' => 'Post ID to parse blocks from',
-				),
-				'content' => array(
-					'type'        => 'string',
-					'description' => 'Raw block markup string to parse (alternative to post_id)',
-				),
+				'post_id' => array( 'type' => 'integer', 'description' => 'Post ID to parse blocks from' ),
+				'content' => array( 'type' => 'string', 'description' => 'Raw block markup string to parse (alternative to post_id)' ),
 			),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'block_count' => array( 'type' => 'integer' ),
+			'blocks'      => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => function( $params ) {
 			if ( ! empty( $params['post_id'] ) ) {
 				$check = wp_abilities_suite_require_editable_post( $params['post_id'] );
 				if ( is_wp_error( $check ) ) return $check;
@@ -47,7 +39,7 @@ function wp_native_register_blocks_abilities() {
 				return wp_abilities_error( 'missing_input', 'Provide post_id or content.' );
 			}
 
-			$blocks = parse_blocks( $content );
+			$blocks  = parse_blocks( $content );
 			$cleaned = array();
 			foreach ( $blocks as $index => $b ) {
 				if ( ! empty( $b['blockName'] ) ) {
@@ -56,31 +48,13 @@ function wp_native_register_blocks_abilities() {
 				}
 			}
 
-			return array(
-				'block_count' => count( $cleaned ),
-				'blocks'      => $cleaned,
-			);
+			return array( 'block_count' => count( $cleaned ), 'blocks' => $cleaned );
 		},
-		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
-		},
-		'meta' => array(
-			'show_in_rest' => true,
-			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
-			'annotations'  => array(
-				'readonly'    => true,
-				'destructive' => false,
-				'idempotent'  => true,
-			),
-		
-		'tier' => 'free',),
 	));
 
-	// ---- blocks/serialize ----
-	wp_register_ability( 'blocks/serialize', array(
+	$reg->read( 'blocks/serialize', array(
 		'label'       => 'Serialize Blocks',
 		'description' => 'Convert a structured block array back to HTML comment markup.',
-		'category'    => 'blocks',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -92,53 +66,40 @@ function wp_native_register_blocks_abilities() {
 			),
 			'required' => array( 'blocks' ),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'html'   => array( 'type' => 'string' ),
+			'length' => array( 'type' => 'integer' ),
+		) ),
+		'callback' => function( $params ) {
 			if ( empty( $params['blocks'] ) || ! is_array( $params['blocks'] ) ) {
 				return wp_abilities_error( 'invalid_blocks', 'Blocks array is required.' );
 			}
 			$html = serialize_blocks( $params['blocks'] );
-			return array(
-				'html'   => $html,
-				'length' => strlen( $html ),
-			);
+			return array( 'html' => $html, 'length' => strlen( $html ) );
 		},
-		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
-		},
-		'meta' => array(
-			'show_in_rest' => true,
-			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
-			'annotations'  => array(
-				'readonly'    => true,
-				'destructive' => false,
-				'idempotent'  => true,
-			),
-		
-		'tier' => 'free',),
 	));
 
-	// ---- blocks/list-types ----
-	wp_register_ability( 'blocks/list-types', array(
+	$reg->read( 'blocks/list-types', array(
 		'label'       => 'List Block Types',
 		'description' => 'List all registered block types with their attributes, supports, and styles.',
-		'category'    => 'blocks',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array_merge(
 				array(
-					'namespace' => array(
-						'type'        => 'string',
-						'description' => 'Filter by namespace (e.g. "core", "uagb")',
-					),
-					'search' => array(
-						'type'        => 'string',
-						'description' => 'Search block type names',
-					),
+					'namespace' => array( 'type' => 'string', 'description' => 'Filter by namespace (e.g. "core", "uagb")' ),
+					'search'    => wp_abilities_suite_schema_search( 'Search block type names' ),
 				),
-				wp_abilities_pagination_schema()
+				wp_abilities_suite_schema_pagination()
 			),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_list_output( 'types', array(
+			'name'       => array( 'type' => 'string' ),
+			'title'      => array( 'type' => 'string' ),
+			'category'   => array( 'type' => 'string' ),
+			'supports'   => array( 'type' => 'object' ),
+			'attributes' => array( 'type' => 'object' ),
+		) ),
+		'callback' => function( $params ) {
 			$registry = WP_Block_Type_Registry::get_instance();
 			$all      = $registry->get_all_registered();
 			$types    = array();
@@ -168,43 +129,35 @@ function wp_native_register_blocks_abilities() {
 			$slice = array_slice( $types, $pag['offset'], $pag['per_page'] );
 
 			return array(
-				'types' => $slice,
-				'total' => count( $types ),
-				'page'  => $pag['page'],
-				'pages' => ceil( count( $types ) / $pag['per_page'] ),
+				'total'    => count( $types ),
+				'pages'    => max( 1, (int) ceil( count( $types ) / $pag['per_page'] ) ),
+				'page'     => $pag['page'],
+				'per_page' => $pag['per_page'],
+				'types'    => $slice,
 			);
 		},
-		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
-		},
-		'meta' => array(
-			'show_in_rest' => true,
-			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
-			'annotations'  => array(
-				'readonly'    => true,
-				'destructive' => false,
-				'idempotent'  => true,
-			),
-		
-		'tier' => 'free',),
 	));
 
-	// ---- blocks/get-type ----
-	wp_register_ability( 'blocks/get-type', array(
+	$reg->read( 'blocks/get-type', array(
 		'label'       => 'Get Block Type',
 		'description' => 'Get detailed information about a single registered block type.',
-		'category'    => 'blocks',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'name' => array(
-					'type'        => 'string',
-					'description' => 'Block type name (e.g. "core/paragraph", "uagb/container")',
-				),
+				'name' => array( 'type' => 'string', 'description' => 'Block type name (e.g. "core/paragraph", "uagb/container")' ),
 			),
 			'required' => array( 'name' ),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'name'        => array( 'type' => 'string' ),
+			'title'       => array( 'type' => 'string' ),
+			'description' => array( 'type' => 'string' ),
+			'category'    => array( 'type' => 'string' ),
+			'supports'    => array( 'type' => 'object' ),
+			'attributes'  => array( 'type' => 'object' ),
+			'api_version' => array( 'type' => 'integer' ),
+		) ),
+		'callback' => function( $params ) {
 			$name = sanitize_text_field( $params['name'] ?? '' );
 			if ( ! $name ) {
 				return wp_abilities_error( 'missing_name', 'Block type name is required.' );
@@ -215,66 +168,43 @@ function wp_native_register_blocks_abilities() {
 				return wp_abilities_error( 'not_found', "Block type '{$name}' is not registered." );
 			}
 			return array(
-				'name'            => $type->name,
-				'title'           => $type->title ?? '',
-				'description'     => $type->description ?? '',
-				'category'        => $type->category ?? '',
-				'parent'          => $type->parent ?? null,
-				'ancestor'        => $type->ancestor ?? null,
-				'allowed_blocks'  => $type->allowed_blocks ?? null,
-				'icon'            => is_string( $type->icon ) ? $type->icon : null,
-				'supports'        => $type->supports ?? array(),
-				'attributes'      => $type->attributes ?? array(),
-				'styles'          => $type->styles ?? array(),
-				'example'         => $type->example ?? null,
+				'name'             => $type->name,
+				'title'            => $type->title ?? '',
+				'description'      => $type->description ?? '',
+				'category'         => $type->category ?? '',
+				'parent'           => $type->parent ?? null,
+				'ancestor'         => $type->ancestor ?? null,
+				'allowed_blocks'   => $type->allowed_blocks ?? null,
+				'icon'             => is_string( $type->icon ) ? $type->icon : null,
+				'supports'         => $type->supports ?? array(),
+				'attributes'       => $type->attributes ?? array(),
+				'styles'           => $type->styles ?? array(),
+				'example'          => $type->example ?? null,
 				'provides_context' => $type->provides_context ?? array(),
-				'uses_context'    => $type->uses_context ?? array(),
-				'api_version'     => $type->api_version ?? 1,
+				'uses_context'     => $type->uses_context ?? array(),
+				'api_version'      => $type->api_version ?? 1,
 			);
 		},
-		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
-		},
-		'meta' => array(
-			'show_in_rest' => true,
-			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
-			'annotations'  => array(
-				'readonly'    => true,
-				'destructive' => false,
-				'idempotent'  => true,
-			),
-		
-		'tier' => 'free',),
 	));
 
-	// ---- blocks/find-in-post ----
-	wp_register_ability( 'blocks/find-in-post', array(
+	$reg->read( 'blocks/find-in-post', array(
 		'label'       => 'Find Block in Post',
 		'description' => 'Find blocks by name or attribute value within a post. Returns matching blocks with their index positions.',
-		'category'    => 'blocks',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'post_id' => array(
-					'type'        => 'integer',
-					'description' => 'Post ID to search within',
-				),
-				'block_name' => array(
-					'type'        => 'string',
-					'description' => 'Block type name to find (e.g. "core/paragraph")',
-				),
-				'attribute_key' => array(
-					'type'        => 'string',
-					'description' => 'Attribute key to match',
-				),
-				'attribute_value' => array(
-					'type'        => 'string',
-					'description' => 'Attribute value to match',
-				),
+				'post_id'         => array( 'type' => 'integer', 'description' => 'Post ID to search within' ),
+				'block_name'      => array( 'type' => 'string', 'description' => 'Block type name to find (e.g. "core/paragraph")' ),
+				'attribute_key'   => array( 'type' => 'string', 'description' => 'Attribute key to match' ),
+				'attribute_value' => array( 'type' => 'string', 'description' => 'Attribute value to match' ),
 			),
 			'required' => array( 'post_id' ),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'found'   => array( 'type' => 'integer' ),
+			'matches' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => function( $params ) {
 			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 
@@ -305,72 +235,42 @@ function wp_native_register_blocks_abilities() {
 				}
 
 				if ( $match ) {
-					$matches[] = array(
-						'index' => $index,
-						'block' => $block,
-					);
+					$matches[] = array( 'index' => $index, 'block' => $block );
 				}
 				$index++;
 			}
 
-			return array(
-				'found'   => count( $matches ),
-				'matches' => $matches,
-			);
+			return array( 'found' => count( $matches ), 'matches' => $matches );
 		},
-		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
-		},
-		'meta' => array(
-			'show_in_rest' => true,
-			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
-			'annotations'  => array(
-				'readonly'    => true,
-				'destructive' => false,
-				'idempotent'  => true,
-			),
-		
-		'tier' => 'free',),
 	));
 
-	} // end read
-
 	// ===== BLOCKS — WRITE =====
-	if ( ! empty( $perms['write'] ) ) {
 
-	// ---- blocks/insert ----
-	wp_register_ability( 'blocks/insert', array(
+	$reg->write( 'blocks/insert', array(
 		'label'       => 'Insert Block',
 		'description' => 'Insert one or more blocks at a position in a post. Position 0 = beginning, -1 = end.',
-		'category'    => 'blocks',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'post_id' => array(
-					'type'        => 'integer',
-					'description' => 'Post ID to insert blocks into',
-				),
-				'blocks' => array(
-					'type'        => 'array',
-					'description' => 'Block objects to insert',
-					'items'       => array( 'type' => 'object' ),
-				),
-				'position' => array(
-					'type'        => 'integer',
-					'description' => 'Insert position (0 = beginning, -1 = end, N = after Nth block)',
-					'default'     => -1,
-				),
+				'post_id'  => array( 'type' => 'integer', 'description' => 'Post ID to insert blocks into' ),
+				'blocks'   => array( 'type' => 'array', 'description' => 'Block objects to insert', 'items' => array( 'type' => 'object' ) ),
+				'position' => array( 'type' => 'integer', 'description' => 'Insert position (0 = beginning, -1 = end, N = after Nth block)', 'default' => -1 ),
 			),
 			'required' => array( 'post_id', 'blocks' ),
 		),
-		'execute_callback' => wp_abilities_suite_pro_gate('blocks/insert', function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'post_id'      => array( 'type' => 'integer' ),
+			'inserted'     => array( 'type' => 'integer' ),
+			'total_blocks' => array( 'type' => 'integer' ),
+		) ),
+		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
+		'callback' => function( $params ) {
 			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
-			$post_id = $check->ID;
-
-			$existing    = parse_blocks( $check->post_content );
-			$new_blocks  = $params['blocks'];
-			$position    = intval( $params['position'] ?? -1 );
+			$post_id    = $check->ID;
+			$existing   = parse_blocks( $check->post_content );
+			$new_blocks = $params['blocks'];
+			$position   = intval( $params['position'] ?? -1 );
 
 			if ( $position === -1 || $position >= count( $existing ) ) {
 				$existing = array_merge( $existing, $new_blocks );
@@ -385,67 +285,46 @@ function wp_native_register_blocks_abilities() {
 				'post_content' => serialize_blocks( $existing ),
 			), true );
 
-			if ( is_wp_error( $result ) ) {
-				return $result;
-			}
+			if ( is_wp_error( $result ) ) return $result;
 
 			return array(
-				'post_id'     => $post_id,
-				'inserted'    => count( $new_blocks ),
+				'post_id'      => $post_id,
+				'inserted'     => count( $new_blocks ),
 				'total_blocks' => count( array_filter( $existing, function( $b ) { return ! empty( $b['blockName'] ); } ) ),
 			);
-		}),
-		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
 		},
-		'meta' => array(
-			'show_in_rest' => true,
-			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
-			'annotations'  => array(
-				'readonly'    => false,
-				'destructive' => false,
-				'idempotent'  => false,
-			),
-		
-		'tier' => 'pro',),
 	));
 
-	// ---- blocks/replace ----
-	wp_register_ability( 'blocks/replace', array(
+	$reg->write( 'blocks/replace', array(
 		'label'       => 'Replace Block',
 		'description' => 'Replace a block at a specific index position in a post with a new block.',
-		'category'    => 'blocks',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'post_id' => array(
-					'type'        => 'integer',
-					'description' => 'Post ID containing the block',
-				),
-				'index' => array(
-					'type'        => 'integer',
-					'description' => 'Block index position to replace (from parse or find output)',
-				),
-				'block' => array(
-					'type'        => 'object',
-					'description' => 'New block object to replace with',
-				),
+				'post_id' => array( 'type' => 'integer', 'description' => 'Post ID containing the block' ),
+				'index'   => array( 'type' => 'integer', 'description' => 'Block index position to replace (from parse or find output)' ),
+				'block'   => array( 'type' => 'object', 'description' => 'New block object to replace with' ),
 			),
 			'required' => array( 'post_id', 'index', 'block' ),
 		),
-		'execute_callback' => wp_abilities_suite_pro_gate('blocks/replace', function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'post_id'   => array( 'type' => 'integer' ),
+			'replaced'  => array( 'type' => 'string' ),
+			'new_block' => array( 'type' => 'string' ),
+			'index'     => array( 'type' => 'integer' ),
+		) ),
+		'callback' => function( $params ) {
 			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id = $check->ID;
-
-			$blocks = parse_blocks( $check->post_content );
-			$index  = intval( $params['index'] ?? -1 );
+			$blocks  = parse_blocks( $check->post_content );
+			$index   = intval( $params['index'] ?? -1 );
 
 			if ( $index < 0 || $index >= count( $blocks ) ) {
 				return wp_abilities_error( 'invalid_index', "Block index {$index} is out of range (0-" . ( count( $blocks ) - 1 ) . ")." );
 			}
 
-			$old_name       = $blocks[ $index ]['blockName'] ?? '(empty)';
+			$old_name         = $blocks[ $index ]['blockName'] ?? '(empty)';
 			$blocks[ $index ] = $params['block'];
 
 			$result = wp_update_post( array(
@@ -453,63 +332,42 @@ function wp_native_register_blocks_abilities() {
 				'post_content' => serialize_blocks( $blocks ),
 			), true );
 
-			if ( is_wp_error( $result ) ) {
-				return $result;
-			}
+			if ( is_wp_error( $result ) ) return $result;
 
 			return array(
-				'post_id'      => $post_id,
-				'replaced'     => $old_name,
-				'new_block'    => $params['block']['blockName'] ?? 'unknown',
-				'index'        => $index,
+				'post_id'   => $post_id,
+				'replaced'  => $old_name,
+				'new_block' => $params['block']['blockName'] ?? 'unknown',
+				'index'     => $index,
 			);
-		}),
-		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
 		},
-		'meta' => array(
-			'show_in_rest' => true,
-			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
-			'annotations'  => array(
-				'readonly'    => false,
-				'destructive' => false,
-				'idempotent'  => true,
-			),
-		
-		'tier' => 'pro',),
 	));
 
-	} // end write
-
 	// ===== BLOCKS — DELETE =====
-	if ( ! empty( $perms['delete'] ) ) {
 
-	// ---- blocks/remove ----
-	wp_register_ability( 'blocks/remove', array(
+	$reg->delete( 'blocks/remove', array(
 		'label'       => 'Remove Block',
 		'description' => 'Remove a block at a specific index position from a post.',
-		'category'    => 'blocks',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'post_id' => array(
-					'type'        => 'integer',
-					'description' => 'Post ID containing the block',
-				),
-				'index' => array(
-					'type'        => 'integer',
-					'description' => 'Block index position to remove',
-				),
+				'post_id' => array( 'type' => 'integer', 'description' => 'Post ID containing the block' ),
+				'index'   => array( 'type' => 'integer', 'description' => 'Block index position to remove' ),
 			),
 			'required' => array( 'post_id', 'index' ),
 		),
-		'execute_callback' => wp_abilities_suite_pro_gate('blocks/remove', function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'post_id'          => array( 'type' => 'integer' ),
+			'removed'          => array( 'type' => 'string' ),
+			'remaining_blocks' => array( 'type' => 'integer' ),
+		) ),
+		'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ),
+		'callback' => function( $params ) {
 			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id = $check->ID;
-
-			$blocks = parse_blocks( $check->post_content );
-			$index  = intval( $params['index'] ?? -1 );
+			$blocks  = parse_blocks( $check->post_content );
+			$index   = intval( $params['index'] ?? -1 );
 
 			if ( $index < 0 || $index >= count( $blocks ) ) {
 				return wp_abilities_error( 'invalid_index', "Block index {$index} is out of range (0-" . ( count( $blocks ) - 1 ) . ")." );
@@ -523,30 +381,13 @@ function wp_native_register_blocks_abilities() {
 				'post_content' => serialize_blocks( $blocks ),
 			), true );
 
-			if ( is_wp_error( $result ) ) {
-				return $result;
-			}
+			if ( is_wp_error( $result ) ) return $result;
 
 			return array(
-				'post_id'       => $post_id,
-				'removed'       => $removed,
+				'post_id'          => $post_id,
+				'removed'          => $removed,
 				'remaining_blocks' => count( array_filter( $blocks, function( $b ) { return ! empty( $b['blockName'] ); } ) ),
 			);
-		}),
-		'permission_callback' => function() {
-			return current_user_can( 'edit_posts' );
 		},
-		'meta' => array(
-			'show_in_rest' => true,
-			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
-			'annotations'  => array(
-				'readonly'    => false,
-				'destructive' => true,
-				'idempotent'  => false,
-			),
-		
-		'tier' => 'pro',),
 	));
-
-	} // end delete
-}
+});

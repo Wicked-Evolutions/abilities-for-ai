@@ -49,7 +49,9 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'meta'                => array(
-			'mcp' => array( 'public' => true, 'type' => 'tool' ),
+			'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true, 'permission' => 'read' ),
+			'tier'        => 'free',
+			'mcp'         => array( 'public' => true, 'type' => 'tool' ),
 		),
 	) );
 

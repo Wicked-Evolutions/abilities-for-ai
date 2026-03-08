@@ -4,36 +4,36 @@
  *
  * List, get, register, and unregister block patterns.
  *
- * @package WordPress_Native_Abilities
+ * @package WordPress_Abilities_Suite
  */
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'wp_abilities_api_init', 'wp_native_register_patterns_abilities' );
+add_action( 'wp_abilities_api_init', function() {
+	$reg = new WP_Abilities_Suite_Registrar( 'patterns', 'edit_posts' );
 
-function wp_native_register_patterns_abilities() {
-
-	$perms = wp_abilities_suite_get_permissions( 'patterns' );
-
-	// ===== PATTERNS — READ =====
-	if ( $perms['read'] ) {
-
-	// ---- patterns/list ----
-	wp_register_ability( 'patterns/list', array(
+	$reg->read( 'patterns/list', array(
 		'label'       => 'List Block Patterns',
 		'description' => 'List all registered block patterns with optional category filter.',
-		'category'    => 'patterns',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array_merge(
 				array(
 					'category' => array( 'type' => 'string', 'description' => 'Filter by pattern category slug' ),
-					'search'   => array( 'type' => 'string', 'description' => 'Search pattern names or titles' ),
+					'search'   => wp_abilities_suite_schema_search( 'Search pattern names or titles' ),
 				),
-				wp_abilities_pagination_schema()
+				wp_abilities_suite_schema_pagination()
 			),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_list_output( 'patterns', array(
+			'name'        => array( 'type' => 'string' ),
+			'title'       => array( 'type' => 'string' ),
+			'description' => array( 'type' => 'string' ),
+			'categories'  => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+			'keywords'    => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+			'blockTypes'  => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+		) ),
+		'callback' => function( $params ) {
 			$registry = WP_Block_Patterns_Registry::get_instance();
 			$all      = $registry->get_all_registered();
 			$patterns = array();
@@ -65,21 +65,18 @@ function wp_native_register_patterns_abilities() {
 			$slice = array_slice( $patterns, $pag['offset'], $pag['per_page'] );
 
 			return array(
-				'patterns' => $slice,
 				'total'    => count( $patterns ),
+				'pages'    => max( 1, (int) ceil( count( $patterns ) / $pag['per_page'] ) ),
 				'page'     => $pag['page'],
-				'pages'    => ceil( count( $patterns ) / $pag['per_page'] ),
+				'per_page' => $pag['per_page'],
+				'patterns' => $slice,
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- patterns/get ----
-	wp_register_ability( 'patterns/get', array(
+	$reg->read( 'patterns/get', array(
 		'label'       => 'Get Block Pattern',
 		'description' => 'Get a single block pattern by name, including its content markup.',
-		'category'    => 'patterns',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -87,7 +84,17 @@ function wp_native_register_patterns_abilities() {
 			),
 			'required' => array( 'name' ),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'name'        => array( 'type' => 'string' ),
+			'title'       => array( 'type' => 'string' ),
+			'description' => array( 'type' => 'string' ),
+			'content'     => array( 'type' => 'string' ),
+			'categories'  => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+			'keywords'    => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+			'blockTypes'  => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+			'inserter'    => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function( $params ) {
 			$name     = sanitize_text_field( $params['name'] ?? '' );
 			$registry = WP_Block_Patterns_Registry::get_instance();
 
@@ -95,7 +102,7 @@ function wp_native_register_patterns_abilities() {
 				return wp_abilities_error( 'not_found', "Pattern '{$name}' not found." );
 			}
 
-			$all = $registry->get_all_registered();
+			$all     = $registry->get_all_registered();
 			$pattern = null;
 			foreach ( $all as $p ) {
 				if ( ( $p['name'] ?? '' ) === $name ) {
@@ -119,19 +126,17 @@ function wp_native_register_patterns_abilities() {
 				'inserter'    => $pattern['inserter'] ?? true,
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- patterns/list-categories ----
-	wp_register_ability( 'patterns/list-categories', array(
+	$reg->read( 'patterns/list-categories', array(
 		'label'       => 'List Pattern Categories',
 		'description' => 'List all registered block pattern categories.',
-		'category'    => 'patterns',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() {
+		'output_schema' => wp_abilities_suite_schema_collection_output( 'categories', array(
+			'name'        => array( 'type' => 'string' ),
+			'label'       => array( 'type' => 'string' ),
+			'description' => array( 'type' => 'string' ),
+		) ),
+		'callback' => function() {
 			$registry   = WP_Block_Pattern_Categories_Registry::get_instance();
 			$categories = $registry->get_all_registered();
 			$result     = array();
@@ -142,22 +147,14 @@ function wp_native_register_patterns_abilities() {
 					'description' => $cat['description'] ?? '',
 				);
 			}
-			return array( 'count' => count( $result ), 'categories' => $result );
+			return array( 'total' => count( $result ), 'categories' => $result );
 		},
-		'permission_callback' => function() { return current_user_can( 'edit_posts' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	} // end read
-
-	// ===== PATTERNS — WRITE =====
-	if ( ! empty( $perms['write'] ) ) {
-
-	// ---- patterns/register ----
-	wp_register_ability( 'patterns/register', array(
+	$reg->write( 'patterns/register', array(
 		'label'       => 'Register Block Pattern',
 		'description' => 'Register a new block pattern. The pattern will be available in the block inserter.',
-		'category'    => 'patterns',
+		'capability'  => 'manage_options',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -170,7 +167,11 @@ function wp_native_register_patterns_abilities() {
 			),
 			'required' => array( 'name', 'title', 'content' ),
 		),
-		'execute_callback' => wp_abilities_suite_pro_gate('patterns/register', function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'name'       => array( 'type' => 'string' ),
+			'registered' => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function( $params ) {
 			$name = sanitize_text_field( $params['name'] ?? '' );
 			$args = array(
 				'title'   => sanitize_text_field( $params['title'] ),
@@ -192,21 +193,13 @@ function wp_native_register_patterns_abilities() {
 			}
 
 			return array( 'name' => $name, 'registered' => true );
-		}),
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'pro',),
+		},
 	));
 
-	} // end write
-
-	// ===== PATTERNS — DELETE =====
-	if ( ! empty( $perms['delete'] ) ) {
-
-	// ---- patterns/unregister ----
-	wp_register_ability( 'patterns/unregister', array(
+	$reg->delete( 'patterns/unregister', array(
 		'label'       => 'Unregister Block Pattern',
 		'description' => 'Unregister an existing block pattern by name.',
-		'category'    => 'patterns',
+		'capability'  => 'manage_options',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -214,8 +207,12 @@ function wp_native_register_patterns_abilities() {
 			),
 			'required' => array( 'name' ),
 		),
-		'execute_callback' => wp_abilities_suite_pro_gate('patterns/unregister', function( $params ) {
-			$name = sanitize_text_field( $params['name'] ?? '' );
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'name'         => array( 'type' => 'string' ),
+			'unregistered' => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function( $params ) {
+			$name     = sanitize_text_field( $params['name'] ?? '' );
 			$registry = WP_Block_Patterns_Registry::get_instance();
 
 			if ( ! $registry->is_registered( $name ) ) {
@@ -224,10 +221,6 @@ function wp_native_register_patterns_abilities() {
 
 			$result = unregister_block_pattern( $name );
 			return array( 'name' => $name, 'unregistered' => (bool) $result );
-		}),
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ) , 'tier' => 'pro',),
+		},
 	));
-
-	} // end delete
-}
+});

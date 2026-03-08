@@ -4,61 +4,55 @@
  *
  * Read-only theme listing, mods, and theme.json access for V1.0.
  *
- * @package WordPress_Native_Abilities
+ * @package WordPress_Abilities_Suite
  */
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'wp_abilities_api_init', 'wp_native_register_themes_abilities' );
+add_action( 'wp_abilities_api_init', function() {
+	$reg = new WP_Abilities_Suite_Registrar( 'themes', 'switch_themes' );
 
-function wp_native_register_themes_abilities() {
-
-	$perms = wp_abilities_suite_get_permissions( 'themes' );
-
-	// ===== THEMES — READ =====
-	if ( $perms['read'] ) {
-
-	// ---- themes/list ----
-	wp_register_ability( 'themes/list', array(
+	$reg->read( 'themes/list', array(
 		'label'       => 'List Themes',
 		'description' => 'List all installed themes with version, status, and capabilities.',
-		'category'    => 'themes',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'themes' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+			'total'  => array( 'type' => 'integer' ),
+			'active' => array( 'type' => 'string' ),
+		) ),
+		'callback' => function() {
 			$themes = wp_get_themes();
 			$active = get_stylesheet();
 			$result = array();
 
 			foreach ( $themes as $slug => $theme ) {
 				$result[] = array(
-					'slug'         => $slug,
-					'name'         => $theme->get( 'Name' ),
-					'version'      => $theme->get( 'Version' ),
-					'author'       => $theme->get( 'Author' ),
-					'active'       => ( $slug === $active ),
-					'parent'       => $theme->parent() ? $theme->parent()->get_stylesheet() : null,
-					'block_theme'  => $theme->is_block_theme(),
-					'template'     => $theme->get_template(),
+					'slug'        => $slug,
+					'name'        => $theme->get( 'Name' ),
+					'version'     => $theme->get( 'Version' ),
+					'author'      => $theme->get( 'Author' ),
+					'active'      => ( $slug === $active ),
+					'parent'      => $theme->parent() ? $theme->parent()->get_stylesheet() : null,
+					'block_theme' => $theme->is_block_theme(),
+					'template'    => $theme->get_template(),
 				);
 			}
 
-			return array( 'themes' => $result, 'count' => count( $result ), 'active' => $active );
+			return array( 'total' => count( $result ), 'themes' => $result, 'active' => $active );
 		},
-		'permission_callback' => function() { return current_user_can( 'switch_themes' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- themes/get-active ----
-	wp_register_ability( 'themes/get-active', array(
+	$reg->read( 'themes/get-active', array(
 		'label'       => 'Get Active Theme',
 		'description' => 'Get detailed information about the currently active theme.',
-		'category'    => 'themes',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'name'        => array( 'type' => 'string' ),
+			'slug'        => array( 'type' => 'string' ),
+			'version'     => array( 'type' => 'string' ),
+			'author'      => array( 'type' => 'string' ),
+			'block_theme' => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function() {
 			$theme = wp_get_theme();
 			return array(
 				'name'         => $theme->get( 'Name' ),
@@ -77,19 +71,19 @@ function wp_native_register_themes_abilities() {
 				'requires_php' => $theme->get( 'RequiresPHP' ),
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'switch_themes' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- themes/list-mods ----
-	wp_register_ability( 'themes/list-mods', array(
+	// list-mods and get-mod require edit_theme_options — override the module-level capability.
+	$reg->read( 'themes/list-mods', array(
 		'label'       => 'List Theme Mods',
 		'description' => 'List all theme modifications for the active theme.',
-		'category'    => 'themes',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() {
+		'capability'  => 'edit_theme_options',
+		'output_schema' => wp_abilities_suite_schema_collection_output( 'mods', array(
+			'key'   => array( 'type' => 'string' ),
+			'value' => array( 'type' => 'string', 'description' => 'Mod value (may be string, array, or serialized data)' ),
+			'type'  => array( 'type' => 'string' ),
+		) ),
+		'callback' => function() {
 			$mods = get_theme_mods();
 			if ( ! is_array( $mods ) ) {
 				$mods = array();
@@ -97,22 +91,19 @@ function wp_native_register_themes_abilities() {
 			$result = array();
 			foreach ( $mods as $key => $value ) {
 				$result[] = array(
-					'key'   => $key,
-					'value' => $value,
+					'key'   => (string) $key,
+					'value' => is_scalar( $value ) ? (string) $value : wp_json_encode( $value ),
 					'type'  => gettype( $value ),
 				);
 			}
-			return array( 'theme' => get_stylesheet(), 'mod_count' => count( $result ), 'mods' => $result );
+			return array( 'theme' => get_stylesheet(), 'total' => count( $result ), 'mods' => $result );
 		},
-		'permission_callback' => function() { return current_user_can( 'edit_theme_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- themes/get-mod ----
-	wp_register_ability( 'themes/get-mod', array(
+	$reg->read( 'themes/get-mod', array(
 		'label'       => 'Get Theme Mod',
 		'description' => 'Get a specific theme modification value.',
-		'category'    => 'themes',
+		'capability'  => 'edit_theme_options',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -120,23 +111,24 @@ function wp_native_register_themes_abilities() {
 			),
 			'required' => array( 'name' ),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'name'  => array( 'type' => 'string' ),
+			'value' => array( 'type' => 'string', 'description' => 'Mod value (may be string, array, or serialized data)' ),
+		) ),
+		'callback' => function( $params ) {
 			$name  = sanitize_text_field( $params['name'] ?? '' );
 			$value = get_theme_mod( $name, '__NOT_SET__' );
 			if ( $value === '__NOT_SET__' ) {
 				return wp_abilities_error( 'not_found', "Theme mod '{$name}' not found." );
 			}
-			return array( 'name' => $name, 'value' => $value );
+			return array( 'name' => $name, 'value' => is_scalar( $value ) ? (string) $value : wp_json_encode( $value ) );
 		},
-		'permission_callback' => function() { return current_user_can( 'edit_theme_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- themes/get-theme-json ----
-	wp_register_ability( 'themes/get-theme-json', array(
+	$reg->read( 'themes/get-theme-json', array(
 		'label'       => 'Get Theme JSON',
 		'description' => 'Get the merged theme.json data for the active block theme. Returns settings and styles.',
-		'category'    => 'themes',
+		'capability'  => 'edit_theme_options',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -146,14 +138,18 @@ function wp_native_register_themes_abilities() {
 				),
 			),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'theme'   => array( 'type' => 'string' ),
+			'section' => array( 'type' => 'string' ),
+			'data'    => array( 'type' => 'object' ),
+		) ),
+		'callback' => function( $params ) {
 			if ( ! class_exists( 'WP_Theme_JSON_Resolver' ) ) {
 				return wp_abilities_error( 'not_available', 'theme.json is not available (requires block theme or WP 5.8+).' );
 			}
 
 			$theme = wp_get_theme();
 			if ( ! $theme->is_block_theme() && ! file_exists( $theme->get_theme_root() . '/' . $theme->get_stylesheet() . '/theme.json' ) ) {
-				// Classic themes may still have theme.json.
 				if ( ! file_exists( get_stylesheet_directory() . '/theme.json' ) ) {
 					return wp_abilities_error( 'no_theme_json', 'Active theme does not have a theme.json file.' );
 				}
@@ -172,9 +168,5 @@ function wp_native_register_themes_abilities() {
 
 			return array( 'theme' => $theme->get( 'Name' ), 'data' => $data );
 		},
-		'permission_callback' => function() { return current_user_can( 'edit_theme_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
-
-	} // end read
-}
+});

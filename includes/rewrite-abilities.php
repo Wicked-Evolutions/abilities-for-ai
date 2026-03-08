@@ -4,29 +4,23 @@
  *
  * Permalink structure and rewrite rule management.
  *
- * @package WordPress_Native_Abilities
+ * @package WordPress_Abilities_Suite
  */
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'wp_abilities_api_init', 'wp_native_register_rewrite_abilities' );
+add_action( 'wp_abilities_api_init', function() {
+	$reg = new WP_Abilities_Suite_Registrar( 'rewrite', 'manage_options' );
 
-function wp_native_register_rewrite_abilities() {
-
-	$perms = wp_abilities_suite_get_permissions( 'rewrite' );
-
-	// ===== REWRITE — READ =====
-	if ( $perms['read'] ) {
-
-	// ---- rewrite/get-structure ----
-	wp_register_ability( 'rewrite/get-structure', array(
+	$reg->read( 'rewrite/get-structure', array(
 		'label'       => 'Get Permalink Structure',
 		'description' => 'Get the current permalink structure and rewrite configuration.',
-		'category'    => 'rewrite',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'permalink_structure' => array( 'type' => 'string' ),
+			'using_permalinks'    => array( 'type' => 'boolean' ),
+			'using_index'         => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function() {
 			global $wp_rewrite;
 			return array(
 				'permalink_structure' => $wp_rewrite->permalink_structure,
@@ -41,25 +35,25 @@ function wp_native_register_rewrite_abilities() {
 				'using_index'        => $wp_rewrite->using_index_permalinks(),
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- rewrite/list-rules ----
-	wp_register_ability( 'rewrite/list-rules', array(
+	$reg->read( 'rewrite/list-rules', array(
 		'label'       => 'List Rewrite Rules',
 		'description' => 'List all active rewrite rules (regex → query pairs).',
-		'category'    => 'rewrite',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array_merge(
 				array(
-					'search' => array( 'type' => 'string', 'description' => 'Filter rules by regex or query pattern' ),
+					'search' => wp_abilities_suite_schema_search( 'Filter rules by regex or query pattern' ),
 				),
-				wp_abilities_pagination_schema()
+				wp_abilities_suite_schema_pagination( 50 )
 			),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_list_output( 'rules', array(
+			'regex' => array( 'type' => 'string' ),
+			'query' => array( 'type' => 'string' ),
+		) ),
+		'callback' => function( $params ) {
 			global $wp_rewrite;
 			$rules = $wp_rewrite->wp_rewrite_rules();
 			if ( ! $rules ) {
@@ -83,33 +77,30 @@ function wp_native_register_rewrite_abilities() {
 			$slice = array_slice( $result, $pag['offset'], $pag['per_page'] );
 
 			return array(
-				'rules' => $slice,
-				'total' => count( $result ),
-				'page'  => $pag['page'],
-				'pages' => ceil( count( $result ) / $pag['per_page'] ),
+				'total'    => count( $result ),
+				'pages'    => max( 1, (int) ceil( count( $result ) / $pag['per_page'] ) ),
+				'page'     => $pag['page'],
+				'per_page' => $pag['per_page'],
+				'rules'    => $slice,
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	} // end read
-
-	// ===== REWRITE — WRITE =====
-	if ( ! empty( $perms['write'] ) ) {
-
-	// ---- rewrite/flush ----
-	wp_register_ability( 'rewrite/flush', array(
+	$reg->write( 'rewrite/flush', array(
 		'label'       => 'Flush Rewrite Rules',
 		'description' => 'Flush and regenerate rewrite rules. Safe operation — just rebuilds the rule set.',
-		'category'    => 'rewrite',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
 				'hard' => array( 'type' => 'boolean', 'description' => 'Hard flush — also update .htaccess (default: false)', 'default' => false ),
 			),
 		),
-		'execute_callback' => wp_abilities_suite_pro_gate('rewrite/flush', function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'flushed'    => array( 'type' => 'boolean' ),
+			'hard_flush' => array( 'type' => 'boolean' ),
+			'rule_count' => array( 'type' => 'integer' ),
+		) ),
+		'callback' => function( $params ) {
 			$hard = ! empty( $params['hard'] );
 			flush_rewrite_rules( $hard );
 			global $wp_rewrite;
@@ -119,10 +110,7 @@ function wp_native_register_rewrite_abilities() {
 				'hard_flush' => $hard,
 				'rule_count' => is_array( $rules ) ? count( $rules ) : 0,
 			);
-		}),
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'pro',),
+		},
+		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ),
 	));
-
-	} // end write
-}
+});

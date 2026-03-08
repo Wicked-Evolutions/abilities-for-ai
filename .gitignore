@@ -38,3 +38,7 @@ wp-content/backup-db/
 *.zip
 build/
 dist/
+
+# PHPUnit
+.phpunit.cache/
+.phpunit.result.cache

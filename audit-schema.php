@@ -4,10 +4,13 @@
  *
  * Run via: wp eval-file wp-content/plugins/abilities-suite-for-wordpress/audit-schema.php
  *
- * Checks the 3 critical rules that can break the entire MCP tool list:
+ * Checks the following rules:
  * 1. Empty properties must be {} (object), not [] (array)
  * 2. Array-type properties must have 'items'
  * 3. Every property must have a 'type' field
+ * 4. All abilities must have an output_schema set
+ * 5. Paginated list responses must use standard keys: total, pages, page, per_page
+ *    (not the old 'count' key at top level)
  */
 
 if ( ! function_exists( 'wp_get_abilities' ) ) {
@@ -26,6 +29,28 @@ foreach ( $abilities as $name => $ability ) {
     $checked++;
     $input_schema  = $ability->get_input_schema();
     $output_schema = $ability->get_output_schema();
+
+    // Rule 4: output_schema must be set (not null/empty)
+    if ( empty( $output_schema ) ) {
+        $errors[] = "[{$name}] output_schema is missing or empty — all abilities must declare output_schema";
+    }
+
+    // Rule 5: Paginated list responses must use standard keys (detect 'count' at top-level output)
+    if ( is_array( $output_schema ) || is_object( $output_schema ) ) {
+        $out = (array) $output_schema;
+        $props = (array) ( $out['properties'] ?? array() );
+        if ( isset( $props['count'] ) && ! isset( $props['total'] ) ) {
+            $errors[] = "[{$name}] output_schema uses deprecated 'count' key — rename to 'total' for standard pagination";
+        }
+        // If it looks like a list response (has 'page' or 'per_page' props), check all 4 standard keys exist
+        if ( isset( $props['page'] ) || isset( $props['per_page'] ) ) {
+            foreach ( array( 'total', 'pages', 'page', 'per_page' ) as $required_key ) {
+                if ( ! isset( $props[ $required_key ] ) ) {
+                    $errors[] = "[{$name}] output_schema appears paginated but is missing '{$required_key}' key";
+                }
+            }
+        }
+    }
 
     // Check input schema
     $input_errors = check_schema( $input_schema, "input_schema" );
@@ -102,7 +127,7 @@ function check_schema( $schema, $path ) {
 
 // Output results
 WP_CLI::log( '' );
-WP_CLI::log( "=== WordPress Abilities Suite — Schema Audit ===" );
+WP_CLI::log( "=== WordPress Abilities Suite — Schema Audit (v2) ===" );
 WP_CLI::log( "Checked: {$checked} abilities" );
 WP_CLI::log( '' );
 

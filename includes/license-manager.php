@@ -1,9 +1,18 @@
 <?php
 /**
- * License Manager — Pro Tier Gate
+ * License Manager — FluentCart API Integration
  *
- * Phase 1: Stub implementation. License validation will be implemented
- * via FluentCart in a future release.
+ * Validates Abilities for WordPress Pro licenses via the FluentCart license API
+ * on wickedevolutions.com. Uses a 24-hour transient cache for the validation result
+ * and a 7-day grace period for API unreachability.
+ *
+ * Flow:
+ *   1. activate()  — Called when admin saves the license key. POSTs to the
+ *                    FluentCart activate_license endpoint. Stores the
+ *                    activation_hash returned for future check_license calls.
+ *   2. is_pro_active() — Returns cached result when fresh. Otherwise POSTs
+ *                    to check_license. Falls back to grace period on failure.
+ *   3. deactivate() — POSTs deactivate, clears local state.
  *
  * @package WordPress_Abilities_Suite
  */
@@ -13,31 +22,151 @@ defined( 'ABSPATH' ) || exit;
 class WP_Abilities_Suite_License_Manager {
 
 	/**
-	 * Check if Pro license is active.
+	 * FluentCart store URL where the license API lives.
+	 * The licensing module is enabled on the community subsite.
 	 *
-	 * Phase 1: checks a simple option. Future: FluentCart API validation.
+	 * @var string
+	 */
+	const STORE_URL = 'https://community.wickedevolutions.com';
+
+	/**
+	 * FluentCart product ID for "Abilities for WordPress".
+	 * Used as the item_id parameter in all API calls.
+	 *
+	 * @var int
+	 */
+	const PRODUCT_ID = 66;
+
+	/**
+	 * Cache lifetime for a successful validation result (24 hours).
+	 *
+	 * @var int
+	 */
+	const CACHE_TTL = DAY_IN_SECONDS;
+
+	/**
+	 * Grace period when the license API is unreachable (7 days).
+	 * Within this window, a previously-valid license continues to grant Pro access.
+	 *
+	 * @var int
+	 */
+	const GRACE_PERIOD = 7 * DAY_IN_SECONDS;
+
+	// WordPress option / transient keys.
+	const OPT_LICENSE_KEY  = 'wp_abilities_suite_license_key';
+	const OPT_ACTIV_HASH   = 'wp_abilities_suite_activation_hash';
+	const OPT_LAST_VALID   = 'wp_abilities_suite_last_valid_ts';
+	const TRANSIENT_STATUS = 'wp_abilities_suite_pro_status';
+
+	// ----------------------------------------------------------------------------
+	// Public API
+	// ----------------------------------------------------------------------------
+
+	/**
+	 * Check if a Pro license is currently active.
+	 *
+	 * Returns cached result when available. Re-validates via API when the cache
+	 * expires. Grants access within the grace period if the API is unreachable.
 	 *
 	 * @return bool
 	 */
 	public static function is_pro_active() {
-		// Check cached status first.
-		$status = get_transient( 'wp_abilities_suite_pro_status' );
-		if ( false !== $status ) {
-			return 'active' === $status;
+		$cached = get_transient( self::TRANSIENT_STATUS );
+		if ( false !== $cached ) {
+			return 'active' === $cached;
 		}
 
-		// Phase 1: simple option check.
-		$license_key = get_option( 'wp_abilities_suite_license_key', '' );
+		$license_key = get_option( self::OPT_LICENSE_KEY, '' );
 		if ( empty( $license_key ) ) {
 			return false;
 		}
 
-		// TODO: Remote validation via FluentCart API.
-		// For now, any non-empty key = active (dev/testing mode).
-		$is_active = ! empty( $license_key );
-		set_transient( 'wp_abilities_suite_pro_status', $is_active ? 'active' : 'inactive', 12 * HOUR_IN_SECONDS );
+		$result = self::remote_check( $license_key );
+
+		if ( is_wp_error( $result ) ) {
+			// API unreachable — apply grace period.
+			return self::is_within_grace_period();
+		}
+
+		$is_active = isset( $result['status'] ) && 'valid' === $result['status'];
+
+		if ( $is_active ) {
+			update_option( self::OPT_LAST_VALID, time() );
+			set_transient( self::TRANSIENT_STATUS, 'active', self::CACHE_TTL );
+		} else {
+			set_transient( self::TRANSIENT_STATUS, 'inactive', self::CACHE_TTL );
+		}
 
 		return $is_active;
+	}
+
+	/**
+	 * Activate a license key.
+	 *
+	 * Calls the FluentCart activate_license endpoint, which registers this site
+	 * against the key and returns an activation_hash for future checks.
+	 *
+	 * @param string $license_key The license key to activate.
+	 * @return true|WP_Error
+	 */
+	public static function activate( $license_key ) {
+		$license_key = sanitize_text_field( $license_key );
+		if ( empty( $license_key ) ) {
+			return new WP_Error( 'invalid_key', __( 'License key cannot be empty.', 'wp-abilities-suite' ) );
+		}
+
+		$response = self::remote_request( 'activate_license', array(
+			'license_key' => $license_key,
+			'item_id'     => self::PRODUCT_ID,
+			'site_url'    => home_url(),
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( ! isset( $response['status'] ) || 'valid' !== $response['status'] ) {
+			$message = $response['message'] ?? __( 'License activation failed.', 'wp-abilities-suite' );
+			return new WP_Error( $response['error_type'] ?? 'activation_failed', $message );
+		}
+
+		// Store the key and activation hash for future check_license calls.
+		update_option( self::OPT_LICENSE_KEY, $license_key );
+		update_option( self::OPT_ACTIV_HASH, $response['activation_hash'] ?? '' );
+		update_option( self::OPT_LAST_VALID, time() );
+
+		delete_transient( self::TRANSIENT_STATUS );
+
+		return true;
+	}
+
+	/**
+	 * Deactivate the current license.
+	 *
+	 * Calls the FluentCart deactivate_license endpoint and clears local state.
+	 * Always clears local state even if the remote call fails.
+	 *
+	 * @return bool
+	 */
+	public static function deactivate() {
+		$license_key = get_option( self::OPT_LICENSE_KEY, '' );
+		$activ_hash  = get_option( self::OPT_ACTIV_HASH, '' );
+
+		if ( ! empty( $license_key ) ) {
+			self::remote_request( 'deactivate_license', array(
+				'license_key'     => $license_key,
+				'activation_hash' => $activ_hash,
+				'item_id'         => self::PRODUCT_ID,
+				'site_url'        => home_url(),
+			) );
+		}
+
+		delete_option( self::OPT_LICENSE_KEY );
+		delete_option( self::OPT_ACTIV_HASH );
+		delete_option( self::OPT_LAST_VALID );
+		delete_transient( self::TRANSIENT_STATUS );
+
+		return true;
 	}
 
 	/**
@@ -50,7 +179,8 @@ class WP_Abilities_Suite_License_Manager {
 		return new WP_Error(
 			'pro_required',
 			sprintf(
-				'The "%s" ability requires an active Pro license. Visit https://wickedevolutions.com/pro to upgrade.',
+				/* translators: %s: Ability name */
+				__( 'The "%s" ability requires an active Pro license. Visit https://wickedevolutions.com/pro to upgrade.', 'wp-abilities-suite' ),
 				$ability_name
 			),
 			array( 'status' => 403 )
@@ -58,25 +188,116 @@ class WP_Abilities_Suite_License_Manager {
 	}
 
 	/**
-	 * Activate a license key.
+	 * Get the current license status details for display in admin UI.
 	 *
-	 * @param string $license_key The license key to activate.
-	 * @return bool
+	 * @return array Keys: key (masked), status, expiration, product, activated.
 	 */
-	public static function activate( $license_key ) {
-		update_option( 'wp_abilities_suite_license_key', sanitize_text_field( $license_key ) );
-		delete_transient( 'wp_abilities_suite_pro_status' );
-		return true;
+	public static function get_status() {
+		$license_key = get_option( self::OPT_LICENSE_KEY, '' );
+		$last_valid  = get_option( self::OPT_LAST_VALID, 0 );
+
+		if ( empty( $license_key ) ) {
+			return array(
+				'key'        => '',
+				'status'     => 'unlicensed',
+				'expiration' => '',
+				'activated'  => false,
+			);
+		}
+
+		// Mask the key for display: WKDEVO****abc.
+		$masked_key = substr( $license_key, 0, 6 ) . str_repeat( '*', max( 0, strlen( $license_key ) - 9 ) ) . substr( $license_key, -3 );
+
+		$is_active = self::is_pro_active();
+
+		return array(
+			'key'        => $masked_key,
+			'status'     => $is_active ? 'active' : 'inactive',
+			'expiration' => '',  // Populated if needed from API response.
+			'activated'  => $is_active,
+			'last_valid' => $last_valid ? gmdate( 'Y-m-d H:i:s', $last_valid ) : '',
+		);
+	}
+
+	// ----------------------------------------------------------------------------
+	// Internal Helpers
+	// ----------------------------------------------------------------------------
+
+	/**
+	 * POST to the FluentCart check_license endpoint using the activation hash.
+	 *
+	 * Uses activation_hash (not the raw key) for periodic checks — avoids
+	 * re-consuming an activation slot.
+	 *
+	 * @param string $license_key License key.
+	 * @return array|WP_Error Decoded JSON response or WP_Error on failure.
+	 */
+	private static function remote_check( $license_key ) {
+		$activ_hash = get_option( self::OPT_ACTIV_HASH, '' );
+
+		$payload = array(
+			'item_id'  => self::PRODUCT_ID,
+			'site_url' => home_url(),
+		);
+
+		// Use activation_hash if available; fall back to license_key.
+		if ( ! empty( $activ_hash ) ) {
+			$payload['activation_hash'] = $activ_hash;
+		} else {
+			$payload['license_key'] = $license_key;
+		}
+
+		return self::remote_request( 'check_license', $payload );
 	}
 
 	/**
-	 * Deactivate the current license.
+	 * POST to the FluentCart license API.
+	 *
+	 * The API is a standard WordPress action endpoint:
+	 * POST https://wickedevolutions.com/?fluent-cart={action}
+	 *
+	 * @param string $action  One of: activate_license, check_license, deactivate_license.
+	 * @param array  $payload POST body fields.
+	 * @return array|WP_Error Decoded JSON response or WP_Error on failure.
+	 */
+	private static function remote_request( $action, array $payload ) {
+		$url = add_query_arg( 'fluent-cart', $action, self::STORE_URL . '/' );
+
+		$response = wp_remote_post( $url, array(
+			'timeout'   => 15,
+			'sslverify' => true,
+			'body'      => $payload,
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		$body = wp_remote_retrieve_body( $response );
+
+		$decoded = json_decode( $body, true );
+
+		if ( ! is_array( $decoded ) ) {
+			return new WP_Error(
+				'invalid_response',
+				sprintf( 'License API returned unexpected response (HTTP %d).', $code )
+			);
+		}
+
+		return $decoded;
+	}
+
+	/**
+	 * Check whether the last known-valid timestamp is within the grace period.
 	 *
 	 * @return bool
 	 */
-	public static function deactivate() {
-		delete_option( 'wp_abilities_suite_license_key' );
-		delete_transient( 'wp_abilities_suite_pro_status' );
-		return true;
+	private static function is_within_grace_period() {
+		$last_valid = (int) get_option( self::OPT_LAST_VALID, 0 );
+		if ( $last_valid <= 0 ) {
+			return false;
+		}
+		return ( time() - $last_valid ) < self::GRACE_PERIOD;
 	}
 }

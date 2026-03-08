@@ -20,8 +20,29 @@ define( 'WP_ABILITIES_SUITE_VERSION', '3.7.0' );
 define( 'WP_ABILITIES_SUITE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WP_ABILITIES_SUITE_URL', plugin_dir_url( __FILE__ ) );
 
-// Load shared helpers.
+// PSR-4 autoloader (composer-generated, with graceful fallback).
+$autoloader = WP_ABILITIES_SUITE_PATH . 'vendor/autoload.php';
+if ( file_exists( $autoloader ) ) {
+	require_once $autoloader;
+} else {
+	// Fallback: manual class map for environments without composer install.
+	// CI release ZIPs always include vendor/; this fallback is for dev clones only.
+	spl_autoload_register( function( $class ) {
+		$prefix = 'WickedEvolutions\\AbilitiesSuite\\';
+		if ( strpos( $class, $prefix ) !== 0 ) {
+			return;
+		}
+		$relative = substr( $class, strlen( $prefix ) );
+		$file     = WP_ABILITIES_SUITE_PATH . 'src/' . str_replace( '\\', '/', $relative ) . '.php';
+		if ( file_exists( $file ) ) {
+			require_once $file;
+		}
+	} );
+}
+
+// Load shared helpers and schema builders.
 require_once WP_ABILITIES_SUITE_PATH . 'includes/helpers.php';
+require_once WP_ABILITIES_SUITE_PATH . 'includes/schemas.php';
 
 // Load permission toggles system.
 require_once WP_ABILITIES_SUITE_PATH . 'includes/permissions.php';
@@ -29,6 +50,10 @@ require_once WP_ABILITIES_SUITE_PATH . 'includes/permissions.php';
 // Load Pro tier infrastructure.
 require_once WP_ABILITIES_SUITE_PATH . 'includes/license-manager.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/tier-gate.php';
+
+// compat.php provides `WP_Abilities_Suite_Registrar` alias for the namespaced class —
+// must load after autoloader + helpers so the class and its dependencies exist.
+require_once WP_ABILITIES_SUITE_PATH . 'includes/compat.php';
 
 // Load ability categories FIRST (required before abilities).
 require_once WP_ABILITIES_SUITE_PATH . 'includes/ability-categories.php';

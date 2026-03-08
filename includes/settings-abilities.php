@@ -4,14 +4,12 @@
  *
  * Core WordPress settings access. V1.0: read-only + allowlisted writes.
  *
- * @package WordPress_Native_Abilities
+ * @package WordPress_Abilities_Suite
  */
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'wp_abilities_api_init', 'wp_native_register_settings_abilities' );
-
-function wp_native_register_settings_abilities() {
+add_action( 'wp_abilities_api_init', function() {
 
 	// Settings groups and their option keys.
 	$settings_groups = array(
@@ -35,20 +33,15 @@ function wp_native_register_settings_abilities() {
 		'category_base', 'tag_base',
 	);
 
-	$perms = wp_abilities_suite_get_permissions( 'settings' );
+	$reg = new WP_Abilities_Suite_Registrar( 'settings', 'manage_options' );
 
-	// ===== SETTINGS — READ =====
-	if ( $perms['read'] ) {
-
-	// ---- settings/list ----
-	wp_register_ability( 'settings/list', array(
+	$reg->read( 'settings/list', array(
 		'label'       => 'List Settings',
 		'description' => 'List core WordPress settings grouped by settings page with current values.',
-		'category'    => 'settings',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() use ( $settings_groups ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'groups' => array( 'type' => 'object', 'description' => 'Settings keyed by group name' ),
+		) ),
+		'callback' => function() use ( $settings_groups ) {
 			$result = array();
 			foreach ( $settings_groups as $group => $keys ) {
 				$values = array();
@@ -59,15 +52,11 @@ function wp_native_register_settings_abilities() {
 			}
 			return array( 'groups' => $result );
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- settings/get ----
-	wp_register_ability( 'settings/get', array(
+	$reg->read( 'settings/get', array(
 		'label'       => 'Get Setting',
 		'description' => 'Get a specific WordPress setting/option value.',
-		'category'    => 'settings',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -75,7 +64,11 @@ function wp_native_register_settings_abilities() {
 			),
 			'required' => array( 'option_name' ),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'option_name' => array( 'type' => 'string' ),
+			'value'       => array( 'type' => 'string', 'description' => 'Option value (may be string, array, or serialized data)' ),
+		) ),
+		'callback' => function( $params ) {
 			$name  = sanitize_text_field( $params['option_name'] ?? '' );
 			$value = get_option( $name );
 			if ( $value === false ) {
@@ -83,23 +76,23 @@ function wp_native_register_settings_abilities() {
 			}
 			return array( 'option_name' => $name, 'value' => $value );
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- settings/get-group ----
-	wp_register_ability( 'settings/get-group', array(
+	$reg->read( 'settings/get-group', array(
 		'label'       => 'Get Settings Group',
 		'description' => 'Get all settings in a group: general, writing, reading, discussion, media, permalink, or privacy.',
-		'category'    => 'settings',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'group' => array( 'type' => 'string', 'description' => 'Settings group name' ),
+				'group' => array( 'type' => 'string', 'description' => 'Settings group name', 'enum' => array( 'general', 'writing', 'reading', 'discussion', 'media', 'permalink', 'privacy' ) ),
 			),
 			'required' => array( 'group' ),
 		),
-		'execute_callback' => function( $params ) use ( $settings_groups ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'group'    => array( 'type' => 'string' ),
+			'settings' => array( 'type' => 'object' ),
+		) ),
+		'callback' => function( $params ) use ( $settings_groups ) {
 			$group = sanitize_text_field( $params['group'] ?? '' );
 			if ( ! isset( $settings_groups[ $group ] ) ) {
 				return wp_abilities_error( 'invalid_group', "Invalid group '{$group}'. Valid: " . implode( ', ', array_keys( $settings_groups ) ) );
@@ -110,42 +103,33 @@ function wp_native_register_settings_abilities() {
 			}
 			return array( 'group' => $group, 'settings' => $values );
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- settings/get-permalink-structure ----
-	wp_register_ability( 'settings/get-permalink-structure', array(
+	$reg->read( 'settings/get-permalink-structure', array(
 		'label'       => 'Get Permalink Structure',
 		'description' => 'Get the current permalink configuration.',
-		'category'    => 'settings',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'structure'              => array( 'type' => 'string' ),
+			'category_base'          => array( 'type' => 'string' ),
+			'tag_base'               => array( 'type' => 'string' ),
+			'using_permalinks'       => array( 'type' => 'boolean' ),
+			'using_index_permalinks' => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function() {
 			global $wp_rewrite;
 			return array(
-				'structure'     => get_option( 'permalink_structure' ),
-				'category_base' => get_option( 'category_base' ),
-				'tag_base'      => get_option( 'tag_base' ),
-				'using_permalinks' => $wp_rewrite->using_permalinks(),
+				'structure'              => get_option( 'permalink_structure' ),
+				'category_base'          => get_option( 'category_base' ),
+				'tag_base'               => get_option( 'tag_base' ),
+				'using_permalinks'       => $wp_rewrite->using_permalinks(),
 				'using_index_permalinks' => $wp_rewrite->using_index_permalinks(),
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	} // end read
-
-	// ===== SETTINGS — WRITE =====
-	if ( ! empty( $perms['write'] ) ) {
-
-	// ---- settings/update ----
-	wp_register_ability( 'settings/update', array(
+	$reg->write( 'settings/update', array(
 		'label'       => 'Update Setting',
 		'description' => 'Update a WordPress setting. V1.0: limited to safe allowlisted settings (no siteurl, home, admin_email).',
-		'category'    => 'settings',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -154,7 +138,12 @@ function wp_native_register_settings_abilities() {
 			),
 			'required' => array( 'option_name', 'option_value' ),
 		),
-		'execute_callback' => wp_abilities_suite_pro_gate('settings/update', function( $params ) use ( $writable_settings ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'option_name' => array( 'type' => 'string' ),
+			'updated'     => array( 'type' => 'boolean' ),
+			'new_value'   => array( 'type' => 'string', 'description' => 'Updated option value' ),
+		) ),
+		'callback' => function( $params ) use ( $writable_settings ) {
 			$name = sanitize_text_field( $params['option_name'] ?? '' );
 			if ( ! in_array( $name, $writable_settings, true ) ) {
 				return wp_abilities_error( 'not_allowed', "Setting '{$name}' is not in the V1.0 writable allowlist." );
@@ -162,10 +151,6 @@ function wp_native_register_settings_abilities() {
 			$value  = sanitize_text_field( $params['option_value'] );
 			$result = update_option( $name, $value );
 			return array( 'option_name' => $name, 'updated' => (bool) $result, 'new_value' => get_option( $name ) );
-		}),
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'pro',),
+		},
 	));
-
-	} // end write
-}
+});

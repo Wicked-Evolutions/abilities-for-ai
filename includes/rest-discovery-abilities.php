@@ -4,52 +4,46 @@
  *
  * REST API namespace, route, and schema introspection.
  *
- * @package WordPress_Native_Abilities
+ * @package WordPress_Abilities_Suite
  */
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'wp_abilities_api_init', 'wp_native_register_rest_discovery_abilities' );
+add_action( 'wp_abilities_api_init', function() {
+	$reg = new WP_Abilities_Suite_Registrar( 'rest', 'manage_options' );
 
-function wp_native_register_rest_discovery_abilities() {
-
-	$perms = wp_abilities_suite_get_permissions( 'rest' );
-
-	// ===== REST — READ =====
-	if ( $perms['read'] ) {
-
-	// ---- rest/list-namespaces ----
-	wp_register_ability( 'rest/list-namespaces', array(
+	$reg->read( 'rest/list-namespaces', array(
 		'label'       => 'List REST Namespaces',
 		'description' => 'List all registered REST API namespaces.',
-		'category'    => 'rest',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'total'      => array( 'type' => 'integer', 'description' => 'Total number of namespaces' ),
+			'namespaces' => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+		) ),
+		'callback' => function() {
 			$server     = rest_get_server();
 			$namespaces = $server->get_namespaces();
 			return array(
-				'count'      => count( $namespaces ),
+				'total'      => count( $namespaces ),
 				'namespaces' => array_values( $namespaces ),
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- rest/list-routes ----
-	wp_register_ability( 'rest/list-routes', array(
+	$reg->read( 'rest/list-routes', array(
 		'label'       => 'List REST Routes',
 		'description' => 'List all routes for a namespace with their HTTP methods.',
-		'category'    => 'rest',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
 				'namespace' => array( 'type' => 'string', 'description' => 'REST namespace to filter by (e.g. "wp/v2", "wp-abilities/v1")' ),
 			),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'namespace' => array( 'type' => 'string' ),
+			'total'     => array( 'type' => 'integer' ),
+			'routes'    => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => function( $params ) {
 			$server = rest_get_server();
 			$routes = $server->get_routes();
 			$ns     = $params['namespace'] ?? '';
@@ -72,20 +66,16 @@ function wp_native_register_rest_discovery_abilities() {
 			}
 
 			return array(
-				'namespace'   => $ns ?: '(all)',
-				'route_count' => count( $result ),
-				'routes'      => $result,
+				'namespace' => $ns ?: '(all)',
+				'total'     => count( $result ),
+				'routes'    => $result,
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- rest/get-route-schema ----
-	wp_register_ability( 'rest/get-route-schema', array(
+	$reg->read( 'rest/get-route-schema', array(
 		'label'       => 'Get Route Schema',
 		'description' => 'Get the JSON Schema for a specific REST route\'s arguments and response.',
-		'category'    => 'rest',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -93,7 +83,11 @@ function wp_native_register_rest_discovery_abilities() {
 			),
 			'required' => array( 'route' ),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'route'     => array( 'type' => 'string' ),
+			'endpoints' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => function( $params ) {
 			$server = rest_get_server();
 			$routes = $server->get_routes();
 			$route  = sanitize_text_field( $params['route'] ?? '' );
@@ -121,36 +115,33 @@ function wp_native_register_rest_discovery_abilities() {
 				'endpoints' => $endpoints,
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- rest/get-index ----
-	wp_register_ability( 'rest/get-index', array(
+	$reg->read( 'rest/get-index', array(
 		'label'       => 'Get REST Index',
 		'description' => 'Get the full REST API index (equivalent to /wp-json/).',
-		'category'    => 'rest',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'name'           => array( 'type' => 'string' ),
+			'description'    => array( 'type' => 'string' ),
+			'url'            => array( 'type' => 'string' ),
+			'home'           => array( 'type' => 'string' ),
+			'namespaces'     => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+			'authentication' => array( 'type' => 'object' ),
+		) ),
+		'callback' => function() {
 			$request  = new WP_REST_Request( 'GET', '/' );
 			$response = rest_get_server()->dispatch( $request );
 			$data     = $response->get_data();
 			return array(
-				'name'        => $data['name'] ?? '',
-				'description' => $data['description'] ?? '',
-				'url'         => $data['url'] ?? '',
-				'home'        => $data['home'] ?? '',
-				'gmt_offset'  => $data['gmt_offset'] ?? '',
+				'name'            => $data['name'] ?? '',
+				'description'     => $data['description'] ?? '',
+				'url'             => $data['url'] ?? '',
+				'home'            => $data['home'] ?? '',
+				'gmt_offset'      => $data['gmt_offset'] ?? '',
 				'timezone_string' => $data['timezone_string'] ?? '',
-				'namespaces'  => $data['namespaces'] ?? array(),
-				'authentication' => $data['authentication'] ?? array(),
+				'namespaces'      => $data['namespaces'] ?? array(),
+				'authentication'  => $data['authentication'] ?? array(),
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
-
-	} // end read
-}
+});

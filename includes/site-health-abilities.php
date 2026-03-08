@@ -4,36 +4,30 @@
  *
  * WordPress site health diagnostics (read-only).
  *
- * @package WordPress_Native_Abilities
+ * @package WordPress_Abilities_Suite
  */
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'wp_abilities_api_init', 'wp_native_register_site_health_abilities' );
+add_action( 'wp_abilities_api_init', function() {
+	$reg = new WP_Abilities_Suite_Registrar( 'site-health', 'view_site_health_checks' );
 
-function wp_native_register_site_health_abilities() {
-
-	$perms = wp_abilities_suite_get_permissions( 'site-health' );
-
-	// ===== SITE-HEALTH — READ =====
-	if ( $perms['read'] ) {
-
-	// ---- site-health/status ----
-	wp_register_ability( 'site-health/status', array(
+	$reg->read( 'site-health/status', array(
 		'label'       => 'Site Health Status',
 		'description' => 'Get the overall site health status (good, recommended, critical counts).',
-		'category'    => 'site-health',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'status'             => array( 'type' => 'object' ),
+			'total_direct_tests' => array( 'type' => 'integer' ),
+			'total_async_tests'  => array( 'type' => 'integer' ),
+		) ),
+		'callback' => function() {
 			if ( ! class_exists( 'WP_Site_Health' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/class-wp-site-health.php';
 			}
 			$health = WP_Site_Health::get_instance();
 			$tests  = WP_Site_Health::get_tests();
 
-			$counts = array( 'good' => 0, 'recommended' => 0, 'critical' => 0 );
+			$counts  = array( 'good' => 0, 'recommended' => 0, 'critical' => 0 );
 			$results = get_transient( 'health-check-site-status-result' );
 
 			if ( $results ) {
@@ -48,28 +42,25 @@ function wp_native_register_site_health_abilities() {
 			}
 
 			return array(
-				'status' => $counts,
-				'total_direct_tests'  => count( $tests['direct'] ?? array() ),
-				'total_async_tests'   => count( $tests['async'] ?? array() ),
+				'status'             => $counts,
+				'total_direct_tests' => count( $tests['direct'] ?? array() ),
+				'total_async_tests'  => count( $tests['async'] ?? array() ),
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- site-health/list-tests ----
-	wp_register_ability( 'site-health/list-tests', array(
+	$reg->read( 'site-health/list-tests', array(
 		'label'       => 'List Health Tests',
 		'description' => 'List all available site health tests (direct and async).',
-		'category'    => 'site-health',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'direct' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+			'async'  => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => function() {
 			if ( ! class_exists( 'WP_Site_Health' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/class-wp-site-health.php';
 			}
-			$tests = WP_Site_Health::get_tests();
+			$tests  = WP_Site_Health::get_tests();
 			$direct = array();
 			$async  = array();
 
@@ -82,15 +73,11 @@ function wp_native_register_site_health_abilities() {
 
 			return array( 'direct' => $direct, 'async' => $async );
 		},
-		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- site-health/run-test ----
-	wp_register_ability( 'site-health/run-test', array(
+	$reg->read( 'site-health/run-test', array(
 		'label'       => 'Run Health Test',
 		'description' => 'Run a specific direct site health test and return the result.',
-		'category'    => 'site-health',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -98,7 +85,18 @@ function wp_native_register_site_health_abilities() {
 			),
 			'required' => array( 'test' ),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'test'        => array( 'type' => 'string' ),
+			'label'       => array( 'type' => 'string' ),
+			'status'      => array( 'type' => 'string', 'enum' => array( 'good', 'recommended', 'critical' ) ),
+			'badge'       => array( 'type' => 'object' ),
+			'description' => array( 'type' => 'string' ),
+			'actions'     => array( 'type' => 'string' ),
+		) ),
+		'callback' => function( $params ) {
+			if ( ! function_exists( 'get_core_updates' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/update.php';
+			}
 			if ( ! class_exists( 'WP_Site_Health' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/class-wp-site-health.php';
 			}
@@ -110,15 +108,20 @@ function wp_native_register_site_health_abilities() {
 				return wp_abilities_error( 'not_found', "Test '{$test_key}' not found in direct tests." );
 			}
 
-			$test = $direct[ $test_key ];
+			$test   = $direct[ $test_key ];
 			$result = null;
 
 			if ( is_callable( $test['test'] ) ) {
 				$result = call_user_func( $test['test'] );
 			} elseif ( is_string( $test['test'] ) ) {
-				$health = WP_Site_Health::get_instance();
-				if ( method_exists( $health, $test['test'] ) ) {
-					$result = call_user_func( array( $health, $test['test'] ) );
+				$health      = WP_Site_Health::get_instance();
+				$method_name = $test['test'];
+				// WP 6.x uses get_test_{key} convention; try both.
+				if ( ! method_exists( $health, $method_name ) ) {
+					$method_name = 'get_test_' . $method_name;
+				}
+				if ( method_exists( $health, $method_name ) ) {
+					$result = call_user_func( array( $health, $method_name ) );
 				}
 			}
 
@@ -135,15 +138,11 @@ function wp_native_register_site_health_abilities() {
 				'actions'     => wp_strip_all_tags( $result['actions'] ?? '' ),
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- site-health/info ----
-	wp_register_ability( 'site-health/info', array(
+	$reg->read( 'site-health/info', array(
 		'label'       => 'Site Health Info',
 		'description' => 'Get comprehensive debug information (PHP, DB, server, WordPress versions, active plugins, theme).',
-		'category'    => 'site-health',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -153,7 +152,19 @@ function wp_native_register_site_health_abilities() {
 				),
 			),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'sections'           => array( 'type' => 'object', 'description' => 'Section summary when no section specified' ),
+			'available_sections' => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+			'section'            => array( 'type' => 'string', 'description' => 'Section key when section specified' ),
+			'data'               => array( 'type' => 'object', 'description' => 'Section data when section specified' ),
+		) ),
+		'callback' => function( $params ) {
+			if ( ! function_exists( 'get_core_updates' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/update.php';
+			}
+			if ( ! function_exists( 'got_url_rewrite' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/misc.php';
+			}
 			if ( ! class_exists( 'WP_Debug_Data' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/class-wp-debug-data.php';
 			}
@@ -165,18 +176,16 @@ function wp_native_register_site_health_abilities() {
 				'DB_PASSWORD', 'AUTH_KEY', 'SECURE_AUTH_KEY', 'LOGGED_IN_KEY',
 				'NONCE_KEY', 'AUTH_SALT', 'SECURE_AUTH_SALT', 'LOGGED_IN_SALT',
 				'NONCE_SALT', 'db_password',
-				// SMTP & mail credentials
 				'SMTP_PASSWORD', 'smtp_pass', 'mail_password',
-				// API keys & tokens
 				'API_KEY', 'api_secret', 'SECRET_KEY', 'ACCESS_TOKEN',
 				'PRIVATE_KEY', 'client_secret',
-				// OAuth
 				'OAUTH', 'oauth_token', 'refresh_token',
-				// Generic sensitive patterns
 				'password', 'secret', 'token', 'credential',
 			);
 			foreach ( $info as $section_key => &$section ) {
-				if ( ! isset( $section['fields'] ) ) continue;
+				if ( ! isset( $section['fields'] ) ) {
+					continue;
+				}
 				foreach ( $section['fields'] as $field_key => &$field ) {
 					foreach ( $sensitive_keys as $sensitive ) {
 						if ( stripos( $field_key, $sensitive ) !== false ||
@@ -197,7 +206,6 @@ function wp_native_register_site_health_abilities() {
 				return array( 'section' => $section, 'data' => $info[ $section ] );
 			}
 
-			// Summarize sections to avoid huge payloads.
 			$summary = array();
 			foreach ( $info as $key => $section ) {
 				$summary[ $key ] = array(
@@ -207,9 +215,5 @@ function wp_native_register_site_health_abilities() {
 			}
 			return array( 'sections' => $summary, 'available_sections' => array_keys( $info ) );
 		},
-		'permission_callback' => function() { return current_user_can( 'view_site_health_checks' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
-
-	} // end read
-}
+});

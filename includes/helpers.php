@@ -31,21 +31,13 @@ function wp_abilities_pagination( $input, $default_per_page = 20 ) {
 /**
  * Standard pagination input schema properties.
  *
+ * @deprecated Use wp_abilities_suite_schema_pagination() from schemas.php instead.
+ *             This function is retained as a backwards-compatible alias and will
+ *             be removed in a future version.
  * @return array Schema properties for page and per_page.
  */
 function wp_abilities_pagination_schema() {
-	return array(
-		'page' => array(
-			'type'        => 'integer',
-			'description' => 'Page number (default: 1)',
-			'default'     => 1,
-		),
-		'per_page' => array(
-			'type'        => 'integer',
-			'description' => 'Items per page, max 100 (default: 20)',
-			'default'     => 20,
-		),
-	);
+	return wp_abilities_suite_schema_pagination();
 }
 
 /**

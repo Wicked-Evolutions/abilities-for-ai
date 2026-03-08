@@ -4,32 +4,31 @@
  *
  * Read-only scheduled event listing for V1.0.
  *
- * @package WordPress_Native_Abilities
+ * @package WordPress_Abilities_Suite
  */
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'wp_abilities_api_init', 'wp_native_register_cron_abilities' );
+add_action( 'wp_abilities_api_init', function() {
+	$reg = new WP_Abilities_Suite_Registrar( 'cron', 'manage_options' );
 
-function wp_native_register_cron_abilities() {
-
-	$perms = wp_abilities_suite_get_permissions( 'cron' );
-
-	// ===== CRON — READ =====
-	if ( $perms['read'] ) {
-
-	// ---- cron/list-events ----
-	wp_register_ability( 'cron/list-events', array(
+	$reg->read( 'cron/list-events', array(
 		'label'       => 'List Cron Events',
 		'description' => 'List all scheduled cron events with next run times, recurrence, and arguments.',
-		'category'    => 'cron',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'search' => array( 'type' => 'string', 'description' => 'Filter by hook name' ),
+				'search' => wp_abilities_suite_schema_search( 'Filter by hook name (partial match)' ),
 			),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_collection_output( 'events', array(
+			'hook'      => array( 'type' => 'string' ),
+			'next_run'  => array( 'type' => 'string' ),
+			'timestamp' => array( 'type' => 'integer' ),
+			'schedule'  => array( 'type' => 'string' ),
+			'interval'  => array( 'type' => 'integer' ),
+		) ),
+		'callback' => function( $params ) {
 			$crons = _get_cron_array();
 			if ( ! $crons ) {
 				return array( 'events' => array(), 'total' => 0 );
@@ -60,19 +59,17 @@ function wp_native_register_cron_abilities() {
 
 			return array( 'events' => $events, 'total' => count( $events ) );
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- cron/list-schedules ----
-	wp_register_ability( 'cron/list-schedules', array(
+	$reg->read( 'cron/list-schedules', array(
 		'label'       => 'List Cron Schedules',
 		'description' => 'List available cron recurrence schedules (hourly, twicedaily, daily, etc.).',
-		'category'    => 'cron',
-		'input_schema' => array(
-			'type'       => 'object',
-		),
-		'execute_callback' => function() {
+		'output_schema' => wp_abilities_suite_schema_collection_output( 'schedules', array(
+			'name'     => array( 'type' => 'string' ),
+			'interval' => array( 'type' => 'integer' ),
+			'display'  => array( 'type' => 'string' ),
+		) ),
+		'callback' => function() {
 			$schedules = wp_get_schedules();
 			$result = array();
 			foreach ( $schedules as $key => $schedule ) {
@@ -85,17 +82,13 @@ function wp_native_register_cron_abilities() {
 			usort( $result, function( $a, $b ) {
 				return $a['interval'] - $b['interval'];
 			});
-			return array( 'schedules' => $result, 'count' => count( $result ) );
+			return array( 'total' => count( $result ), 'schedules' => $result );
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
 
-	// ---- cron/get-event ----
-	wp_register_ability( 'cron/get-event', array(
+	$reg->read( 'cron/get-event', array(
 		'label'       => 'Get Cron Event',
 		'description' => 'Get details for a specific cron hook including all scheduled instances.',
-		'category'    => 'cron',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -103,7 +96,12 @@ function wp_native_register_cron_abilities() {
 			),
 			'required' => array( 'hook' ),
 		),
-		'execute_callback' => function( $params ) {
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'hook'      => array( 'type' => 'string' ),
+			'total'     => array( 'type' => 'integer' ),
+			'instances' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => function( $params ) {
 			$hook  = sanitize_text_field( $params['hook'] ?? '' );
 			$crons = _get_cron_array();
 			if ( ! $crons ) {
@@ -131,13 +129,9 @@ function wp_native_register_cron_abilities() {
 
 			return array(
 				'hook'      => $hook,
+				'total'     => count( $instances ),
 				'instances' => $instances,
-				'count'     => count( $instances ),
 			);
 		},
-		'permission_callback' => function() { return current_user_can( 'manage_options' ); },
-		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'free',),
 	));
-
-	} // end read
-}
+});
