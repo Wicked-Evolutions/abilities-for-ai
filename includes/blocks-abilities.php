@@ -44,7 +44,7 @@ function wp_native_register_blocks_abilities() {
 			} elseif ( isset( $params['content'] ) ) {
 				$content = $params['content'];
 			} else {
-				return wp_native_error( 'missing_input', 'Provide post_id or content.' );
+				return wp_abilities_error( 'missing_input', 'Provide post_id or content.' );
 			}
 
 			$blocks = parse_blocks( $content );
@@ -94,7 +94,7 @@ function wp_native_register_blocks_abilities() {
 		),
 		'execute_callback' => function( $params ) {
 			if ( empty( $params['blocks'] ) || ! is_array( $params['blocks'] ) ) {
-				return wp_native_error( 'invalid_blocks', 'Blocks array is required.' );
+				return wp_abilities_error( 'invalid_blocks', 'Blocks array is required.' );
 			}
 			$html = serialize_blocks( $params['blocks'] );
 			return array(
@@ -135,7 +135,7 @@ function wp_native_register_blocks_abilities() {
 						'description' => 'Search block type names',
 					),
 				),
-				wp_native_pagination_schema()
+				wp_abilities_pagination_schema()
 			),
 		),
 		'execute_callback' => function( $params ) {
@@ -164,7 +164,7 @@ function wp_native_register_blocks_abilities() {
 				);
 			}
 
-			$pag   = wp_native_pagination( $params );
+			$pag   = wp_abilities_pagination( $params );
 			$slice = array_slice( $types, $pag['offset'], $pag['per_page'] );
 
 			return array(
@@ -207,12 +207,12 @@ function wp_native_register_blocks_abilities() {
 		'execute_callback' => function( $params ) {
 			$name = sanitize_text_field( $params['name'] ?? '' );
 			if ( ! $name ) {
-				return wp_native_error( 'missing_name', 'Block type name is required.' );
+				return wp_abilities_error( 'missing_name', 'Block type name is required.' );
 			}
 			$registry = WP_Block_Type_Registry::get_instance();
 			$type     = $registry->get_registered( $name );
 			if ( ! $type ) {
-				return wp_native_error( 'not_found', "Block type '{$name}' is not registered." );
+				return wp_abilities_error( 'not_found', "Block type '{$name}' is not registered." );
 			}
 			return array(
 				'name'            => $type->name,
@@ -442,7 +442,7 @@ function wp_native_register_blocks_abilities() {
 			$index  = intval( $params['index'] ?? -1 );
 
 			if ( $index < 0 || $index >= count( $blocks ) ) {
-				return wp_native_error( 'invalid_index', "Block index {$index} is out of range (0-" . ( count( $blocks ) - 1 ) . ")." );
+				return wp_abilities_error( 'invalid_index', "Block index {$index} is out of range (0-" . ( count( $blocks ) - 1 ) . ")." );
 			}
 
 			$old_name       = $blocks[ $index ]['blockName'] ?? '(empty)';
@@ -512,7 +512,7 @@ function wp_native_register_blocks_abilities() {
 			$index  = intval( $params['index'] ?? -1 );
 
 			if ( $index < 0 || $index >= count( $blocks ) ) {
-				return wp_native_error( 'invalid_index', "Block index {$index} is out of range (0-" . ( count( $blocks ) - 1 ) . ")." );
+				return wp_abilities_error( 'invalid_index', "Block index {$index} is out of range (0-" . ( count( $blocks ) - 1 ) . ")." );
 			}
 
 			$removed = $blocks[ $index ]['blockName'] ?? '(empty)';

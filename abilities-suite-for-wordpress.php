@@ -34,6 +34,7 @@ require_once WP_ABILITIES_SUITE_PATH . 'includes/tier-gate.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/ability-categories.php';
 
 // Original v2.0 ability modules.
+require_once WP_ABILITIES_SUITE_PATH . 'includes/suite-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/content-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/taxonomy-abilities.php';
 require_once WP_ABILITIES_SUITE_PATH . 'includes/plugin-abilities.php';

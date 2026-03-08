@@ -124,7 +124,7 @@ function wp_native_register_themes_abilities() {
 			$name  = sanitize_text_field( $params['name'] ?? '' );
 			$value = get_theme_mod( $name, '__NOT_SET__' );
 			if ( $value === '__NOT_SET__' ) {
-				return wp_native_error( 'not_found', "Theme mod '{$name}' not found." );
+				return wp_abilities_error( 'not_found', "Theme mod '{$name}' not found." );
 			}
 			return array( 'name' => $name, 'value' => $value );
 		},
@@ -148,14 +148,14 @@ function wp_native_register_themes_abilities() {
 		),
 		'execute_callback' => function( $params ) {
 			if ( ! class_exists( 'WP_Theme_JSON_Resolver' ) ) {
-				return wp_native_error( 'not_available', 'theme.json is not available (requires block theme or WP 5.8+).' );
+				return wp_abilities_error( 'not_available', 'theme.json is not available (requires block theme or WP 5.8+).' );
 			}
 
 			$theme = wp_get_theme();
 			if ( ! $theme->is_block_theme() && ! file_exists( $theme->get_theme_root() . '/' . $theme->get_stylesheet() . '/theme.json' ) ) {
 				// Classic themes may still have theme.json.
 				if ( ! file_exists( get_stylesheet_directory() . '/theme.json' ) ) {
-					return wp_native_error( 'no_theme_json', 'Active theme does not have a theme.json file.' );
+					return wp_abilities_error( 'no_theme_json', 'Active theme does not have a theme.json file.' );
 				}
 			}
 
@@ -165,7 +165,7 @@ function wp_native_register_themes_abilities() {
 			if ( ! empty( $params['section'] ) ) {
 				$section = sanitize_text_field( $params['section'] );
 				if ( ! isset( $data[ $section ] ) ) {
-					return wp_native_error( 'not_found', "Section '{$section}' not found. Available: " . implode( ', ', array_keys( $data ) ) );
+					return wp_abilities_error( 'not_found', "Section '{$section}' not found. Available: " . implode( ', ', array_keys( $data ) ) );
 				}
 				return array( 'section' => $section, 'data' => $data[ $section ] );
 			}

@@ -107,7 +107,7 @@ function wp_native_register_cron_abilities() {
 			$hook  = sanitize_text_field( $params['hook'] ?? '' );
 			$crons = _get_cron_array();
 			if ( ! $crons ) {
-				return wp_native_error( 'not_found', 'No cron events found.' );
+				return wp_abilities_error( 'not_found', 'No cron events found.' );
 			}
 
 			$instances = array();
@@ -126,7 +126,7 @@ function wp_native_register_cron_abilities() {
 			}
 
 			if ( empty( $instances ) ) {
-				return wp_native_error( 'not_found', "No scheduled events for hook '{$hook}'." );
+				return wp_abilities_error( 'not_found', "No scheduled events for hook '{$hook}'." );
 			}
 
 			return array(

@@ -99,7 +99,7 @@ function wp_native_register_rest_discovery_abilities() {
 			$route  = sanitize_text_field( $params['route'] ?? '' );
 
 			if ( ! isset( $routes[ $route ] ) ) {
-				return wp_native_error( 'not_found', "Route '{$route}' not found." );
+				return wp_abilities_error( 'not_found', "Route '{$route}' not found." );
 			}
 
 			$endpoints = array();

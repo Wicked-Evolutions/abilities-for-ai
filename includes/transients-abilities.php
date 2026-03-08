@@ -29,7 +29,7 @@ function wp_native_register_transients_abilities() {
 				array(
 					'search' => array( 'type' => 'string', 'description' => 'Filter transient names by keyword' ),
 				),
-				wp_native_pagination_schema()
+				wp_abilities_pagination_schema()
 			),
 		),
 		'execute_callback' => function( $params ) {
@@ -43,7 +43,7 @@ function wp_native_register_transients_abilities() {
 				'_transient_timeout_%'
 			));
 
-			$pag = wp_native_pagination( $params );
+			$pag = wp_abilities_pagination( $params );
 
 			$rows = $wpdb->get_results( $wpdb->prepare(
 				"SELECT option_name, option_value FROM {$wpdb->options}
@@ -95,7 +95,7 @@ function wp_native_register_transients_abilities() {
 			$name  = sanitize_text_field( $params['name'] ?? '' );
 			$value = get_transient( $name );
 			if ( $value === false ) {
-				return wp_native_error( 'not_found', "Transient '{$name}' not found or expired." );
+				return wp_abilities_error( 'not_found', "Transient '{$name}' not found or expired." );
 			}
 			$serialized = maybe_serialize( $value );
 			if ( strlen( $serialized ) > MB_IN_BYTES ) {

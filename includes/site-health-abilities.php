@@ -107,7 +107,7 @@ function wp_native_register_site_health_abilities() {
 			$direct   = $tests['direct'] ?? array();
 
 			if ( ! isset( $direct[ $test_key ] ) ) {
-				return wp_native_error( 'not_found', "Test '{$test_key}' not found in direct tests." );
+				return wp_abilities_error( 'not_found', "Test '{$test_key}' not found in direct tests." );
 			}
 
 			$test = $direct[ $test_key ];
@@ -123,7 +123,7 @@ function wp_native_register_site_health_abilities() {
 			}
 
 			if ( ! $result ) {
-				return wp_native_error( 'test_failed', "Could not execute test '{$test_key}'." );
+				return wp_abilities_error( 'test_failed', "Could not execute test '{$test_key}'." );
 			}
 
 			return array(
@@ -192,7 +192,7 @@ function wp_native_register_site_health_abilities() {
 			if ( ! empty( $params['section'] ) ) {
 				$section = sanitize_text_field( $params['section'] );
 				if ( ! isset( $info[ $section ] ) ) {
-					return wp_native_error( 'not_found', "Section '{$section}' not found. Available: " . implode( ', ', array_keys( $info ) ) );
+					return wp_abilities_error( 'not_found', "Section '{$section}' not found. Available: " . implode( ', ', array_keys( $info ) ) );
 				}
 				return array( 'section' => $section, 'data' => $info[ $section ] );
 			}

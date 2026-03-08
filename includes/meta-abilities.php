@@ -94,7 +94,7 @@ function wp_native_register_meta_abilities() {
 			$term_id = intval( $params['term_id'] ?? 0 );
 			$term    = get_term( $term_id );
 			if ( ! $term || is_wp_error( $term ) ) {
-				return wp_native_error( 'not_found', 'Term not found.' );
+				return wp_abilities_error( 'not_found', 'Term not found.' );
 			}
 			$meta = get_term_meta( $term_id );
 			$result = array();
@@ -126,7 +126,7 @@ function wp_native_register_meta_abilities() {
 			$term_id = intval( $params['term_id'] ?? 0 );
 			$term    = get_term( $term_id );
 			if ( ! $term || is_wp_error( $term ) ) {
-				return wp_native_error( 'not_found', 'Term not found.' );
+				return wp_abilities_error( 'not_found', 'Term not found.' );
 			}
 			$single = $params['single'] ?? true;
 			$value  = get_term_meta( $term_id, sanitize_text_field( $params['meta_key'] ), $single );
@@ -153,11 +153,11 @@ function wp_native_register_meta_abilities() {
 			$user_id = intval( $params['user_id'] ?? 0 );
 			$user    = get_userdata( $user_id );
 			if ( ! $user ) {
-				return wp_native_error( 'not_found', 'User not found.' );
+				return wp_abilities_error( 'not_found', 'User not found.' );
 			}
 			// Require edit_user on the target (not just list_users).
 			if ( ! current_user_can( 'edit_user', $user_id ) ) {
-				return wp_native_error( 'forbidden', 'You do not have permission to view meta for this user.' );
+				return wp_abilities_error( 'forbidden', 'You do not have permission to view meta for this user.' );
 			}
 			$sensitive_keys = array(
 				'session_tokens',
@@ -200,15 +200,15 @@ function wp_native_register_meta_abilities() {
 		'execute_callback' => function( $params ) {
 			$user_id = intval( $params['user_id'] ?? 0 );
 			if ( ! get_userdata( $user_id ) ) {
-				return wp_native_error( 'not_found', 'User not found.' );
+				return wp_abilities_error( 'not_found', 'User not found.' );
 			}
 			if ( ! current_user_can( 'edit_user', $user_id ) ) {
-				return wp_native_error( 'forbidden', 'You do not have permission to view meta for this user.' );
+				return wp_abilities_error( 'forbidden', 'You do not have permission to view meta for this user.' );
 			}
 			$key = sanitize_text_field( $params['meta_key'] );
 			$sensitive_keys = array( 'session_tokens', 'wp_capabilities', 'wp_user_level', 'user_pass', 'auth_cookie' );
 			if ( in_array( $key, $sensitive_keys, true ) ) {
-				return wp_native_error( 'forbidden', 'This meta key is protected and cannot be read via this ability.' );
+				return wp_abilities_error( 'forbidden', 'This meta key is protected and cannot be read via this ability.' );
 			}
 			$single = $params['single'] ?? true;
 			$value  = get_user_meta( $user_id, $key, $single );
@@ -316,7 +316,7 @@ function wp_native_register_meta_abilities() {
 			$term_id = intval( $params['term_id'] ?? 0 );
 			$term    = get_term( $term_id );
 			if ( ! $term || is_wp_error( $term ) ) {
-				return wp_native_error( 'not_found', 'Term not found.' );
+				return wp_abilities_error( 'not_found', 'Term not found.' );
 			}
 			$key    = sanitize_text_field( $params['meta_key'] );
 			$value  = sanitize_text_field( $params['meta_value'] );
@@ -345,11 +345,11 @@ function wp_native_register_meta_abilities() {
 		'execute_callback' => wp_abilities_suite_pro_gate('meta/update-user-meta', function( $params ) {
 			$user_id = intval( $params['user_id'] ?? 0 );
 			if ( ! get_userdata( $user_id ) ) {
-				return wp_native_error( 'not_found', 'User not found.' );
+				return wp_abilities_error( 'not_found', 'User not found.' );
 			}
 			// Object-level check: can the current user edit this specific user?
 			if ( ! current_user_can( 'edit_user', $user_id ) ) {
-				return wp_native_error( 'forbidden', 'You do not have permission to edit meta for this user.' );
+				return wp_abilities_error( 'forbidden', 'You do not have permission to edit meta for this user.' );
 			}
 			$key = sanitize_text_field( $params['meta_key'] );
 			// Denylist: block keys that could lead to privilege escalation or session hijacking.
@@ -361,7 +361,7 @@ function wp_native_register_meta_abilities() {
 				'auth_cookie',
 			);
 			if ( in_array( $key, $denied_keys, true ) ) {
-				return wp_native_error( 'forbidden', 'This meta key is protected and cannot be modified via this ability.' );
+				return wp_abilities_error( 'forbidden', 'This meta key is protected and cannot be modified via this ability.' );
 			}
 			$value  = sanitize_text_field( $params['meta_value'] );
 			$result = update_user_meta( $user_id, $key, $value );

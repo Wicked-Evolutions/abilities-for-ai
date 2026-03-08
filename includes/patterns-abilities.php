@@ -30,7 +30,7 @@ function wp_native_register_patterns_abilities() {
 					'category' => array( 'type' => 'string', 'description' => 'Filter by pattern category slug' ),
 					'search'   => array( 'type' => 'string', 'description' => 'Search pattern names or titles' ),
 				),
-				wp_native_pagination_schema()
+				wp_abilities_pagination_schema()
 			),
 		),
 		'execute_callback' => function( $params ) {
@@ -61,7 +61,7 @@ function wp_native_register_patterns_abilities() {
 				);
 			}
 
-			$pag   = wp_native_pagination( $params );
+			$pag   = wp_abilities_pagination( $params );
 			$slice = array_slice( $patterns, $pag['offset'], $pag['per_page'] );
 
 			return array(
@@ -92,7 +92,7 @@ function wp_native_register_patterns_abilities() {
 			$registry = WP_Block_Patterns_Registry::get_instance();
 
 			if ( ! $registry->is_registered( $name ) ) {
-				return wp_native_error( 'not_found', "Pattern '{$name}' not found." );
+				return wp_abilities_error( 'not_found', "Pattern '{$name}' not found." );
 			}
 
 			$all = $registry->get_all_registered();
@@ -105,7 +105,7 @@ function wp_native_register_patterns_abilities() {
 			}
 
 			if ( ! $pattern ) {
-				return wp_native_error( 'not_found', "Pattern '{$name}' not found." );
+				return wp_abilities_error( 'not_found', "Pattern '{$name}' not found." );
 			}
 
 			return array(
@@ -188,7 +188,7 @@ function wp_native_register_patterns_abilities() {
 
 			$result = register_block_pattern( $name, $args );
 			if ( $result === false ) {
-				return wp_native_error( 'registration_failed', "Failed to register pattern '{$name}'. It may already exist." );
+				return wp_abilities_error( 'registration_failed', "Failed to register pattern '{$name}'. It may already exist." );
 			}
 
 			return array( 'name' => $name, 'registered' => true );
@@ -219,7 +219,7 @@ function wp_native_register_patterns_abilities() {
 			$registry = WP_Block_Patterns_Registry::get_instance();
 
 			if ( ! $registry->is_registered( $name ) ) {
-				return wp_native_error( 'not_found', "Pattern '{$name}' is not registered." );
+				return wp_abilities_error( 'not_found', "Pattern '{$name}' is not registered." );
 			}
 
 			$result = unregister_block_pattern( $name );

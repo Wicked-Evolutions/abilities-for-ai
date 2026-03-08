@@ -61,9 +61,11 @@ add_action( 'wp_abilities_api_init', function() {
         'output_schema' => array(
             'type' => 'object',
             'properties' => array(
+                'total' => array('type' => 'integer', 'description' => 'Total matching posts across all pages'),
+                'pages' => array('type' => 'integer', 'description' => 'Total number of pages'),
+                'page' => array('type' => 'integer', 'description' => 'Current page number'),
+                'per_page' => array('type' => 'integer', 'description' => 'Posts per page'),
                 'posts' => array('type' => 'array', 'items' => array('type' => 'object')),
-                'total' => array('type' => 'integer'),
-                'pages' => array('type' => 'integer')
             )
         ),
         'execute_callback' => function( $input ) {
@@ -113,11 +115,14 @@ add_action( 'wp_abilities_api_init', function() {
                 );
             }
 
-            $filtered_total = count( $posts );
+            $per_page = $args['posts_per_page'];
+            $total    = (int) $query->found_posts;
             return array(
-                'posts' => $posts,
-                'total' => $filtered_total,
-                'pages' => max( 1, ceil( $filtered_total / $args['posts_per_page'] ) ),
+                'total'    => $total,
+                'pages'    => max( 1, (int) $query->max_num_pages ),
+                'page'     => (int) $args['paged'],
+                'per_page' => $per_page,
+                'posts'    => $posts,
             );
         },
         'permission_callback' => function() {
@@ -391,6 +396,10 @@ add_action( 'wp_abilities_api_init', function() {
                 'post_date' => array(
                     'type' => 'string',
                     'description' => 'Publish date in MySQL datetime (e.g. "2026-03-05 14:30:00") or ISO 8601 format. Defaults to current time.'
+                ),
+                'author' => array(
+                    'type' => 'integer',
+                    'description' => 'User ID to set as post author. Defaults to current user.'
                 )
             )
         ),
@@ -431,6 +440,14 @@ add_action( 'wp_abilities_api_init', function() {
             if ( isset( $input['post_date'] ) ) {
                 $post_data['post_date'] = sanitize_text_field( $input['post_date'] );
                 $post_data['post_date_gmt'] = get_gmt_from_date( $post_data['post_date'] );
+            }
+
+            if ( isset( $input['author'] ) ) {
+                $author_id = (int) $input['author'];
+                if ( ! get_userdata( $author_id ) ) {
+                    return new WP_Error( 'invalid_author', "User ID {$author_id} does not exist." );
+                }
+                $post_data['post_author'] = $author_id;
             }
 
             $post_id = wp_insert_post( $post_data );
@@ -491,6 +508,10 @@ add_action( 'wp_abilities_api_init', function() {
                 'post_date' => array(
                     'type' => 'string',
                     'description' => 'Publish date in MySQL datetime (e.g. "2026-03-05 14:30:00") or ISO 8601 format.'
+                ),
+                'author' => array(
+                    'type' => 'integer',
+                    'description' => 'User ID to set as post author.'
                 )
             )
         ),
@@ -526,6 +547,13 @@ add_action( 'wp_abilities_api_init', function() {
             if ( isset( $input['post_date'] ) ) {
                 $post_data['post_date'] = sanitize_text_field( $input['post_date'] );
                 $post_data['post_date_gmt'] = get_gmt_from_date( $post_data['post_date'] );
+            }
+            if ( isset( $input['author'] ) ) {
+                $author_id = (int) $input['author'];
+                if ( ! get_userdata( $author_id ) ) {
+                    return new WP_Error( 'invalid_author', "User ID {$author_id} does not exist." );
+                }
+                $post_data['post_author'] = $author_id;
             }
 
             $result = wp_update_post( $post_data );

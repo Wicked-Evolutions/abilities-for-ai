@@ -56,7 +56,7 @@ function wp_native_register_rewrite_abilities() {
 				array(
 					'search' => array( 'type' => 'string', 'description' => 'Filter rules by regex or query pattern' ),
 				),
-				wp_native_pagination_schema()
+				wp_abilities_pagination_schema()
 			),
 		),
 		'execute_callback' => function( $params ) {
@@ -79,7 +79,7 @@ function wp_native_register_rewrite_abilities() {
 				$result[] = array( 'regex' => $regex, 'query' => $query );
 			}
 
-			$pag   = wp_native_pagination( $params, 50 );
+			$pag   = wp_abilities_pagination( $params, 50 );
 			$slice = array_slice( $result, $pag['offset'], $pag['per_page'] );
 
 			return array(

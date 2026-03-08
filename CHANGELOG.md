@@ -2,6 +2,20 @@
 
 All notable changes to WordPress Abilities Suite will be documented in this file.
 
+## [3.7.0] - 2026-03-05
+
+### Added
+- `post_date` parameter to `content/create` and `content/update` — accepts MySQL datetime or ISO 8601 format, enables future scheduling (closes #4)
+- `DISALLOW_FILE_MODS` and `DISALLOW_FILE_EDIT` checks in `filesystem/write-file` and `theme/update-asset` execute callbacks (closes #7)
+
+### Fixed
+- Plugin description: corrected ability count 113 → 111, added filesystem to module list
+
+### Changed
+- Total abilities: 111 (net change 0 — dead code removed, count corrected)
+
+---
+
 ## [3.6.0] - 2026-03-02
 
 ### Added
@@ -42,6 +56,25 @@ All notable changes to WordPress Abilities Suite will be documented in this file
 
 ---
 
+## [3.4.1] - 2026-02-27
+
+### Security (second + third pass — GPT-5.2 Pro + Claude Opus 4.1)
+- **Meta:** `edit_user` object-level checks on user meta; sensitive key denylist + redaction
+- **Content:** type-specific capability checks; per-post `edit_post` filtering in list; `publish_posts` gate
+- **Users:** `edit_user`, `promote_user`, `get_editable_roles` enforcement
+- **Menus:** reorder validates item IDs against menu membership
+- **Taxonomy:** per-taxonomy capability checks (manage/edit/delete/assign)
+- **Comments:** object-level `edit_comment`/`delete_comment` checks
+- **IPv6 SSRF:** full binary comparison for ULA, link-local, and IPv4-mapped ranges via `inet_pton`
+- **SSRF TOCTOU:** DNS pinning via `CURLOPT_RESOLVE` in `media/upload-from-url`; DNS failure detection rejects unresolvable hostnames
+- **media/upload:** actual decoded size verified after `base64_decode`
+- **site-health/info:** expanded redaction (SMTP, API keys, OAuth, tokens)
+
+### Fixed
+- `content/list`: filtered count based on per-post cap check (not unfiltered `found_posts`)
+
+---
+
 ## [3.3.0] - 2026-02-26
 
 ### Security (GPT-5.2 Pro review via Oracle CLI — 10 findings, all fixed)
@@ -64,6 +97,31 @@ All notable changes to WordPress Abilities Suite will be documented in this file
 - Plugin renamed from "WordPress Abilities Suite" to "Abilities Suite for WordPress"
 - Main file renamed from `wordpress-abilities-suite.php` to `abilities-suite-for-wordpress.php`
 - Schema audit script path updated for new plugin directory name
+
+---
+
+## [3.2.0] - 2026-02-25
+
+### Added
+- `content/get-snapshot` — single-call full post data (fields, all meta, taxonomy terms, featured image URL, author details) with `include`/`exclude` filtering
+
+### Fixed
+- Empty property schemas: removed `(object) array()` and `new \stdClass()` that caused MCP tool validation failures (39 tools were silently dropped)
+- `menu-abilities.php`: empty properties schema fixed
+
+---
+
+## [3.1.0] - 2026-02-24
+
+### Added
+- **Permission toggles** — per-module enable/disable via `wp_options` (`includes/permissions.php`)
+- **Admin dashboard** (`admin/dashboard.php`) — toggle UI with module descriptions and ability counts
+- Dashboard CSS (`admin/css/dashboard.css`)
+- `readme.txt` — WordPress plugin directory metadata and changelog
+
+### Changed
+- All 17 module files updated with centralized permission gate checks via `helpers.php`
+- `helpers.php` updated with permission check functions
 
 ---
 
@@ -150,10 +208,14 @@ All notable changes to WordPress Abilities Suite will be documented in this file
 
 | Version | Date | Abilities | Categories | Key Changes |
 |---------|------|-----------|------------|-------------|
-| 3.6.0 | 2026-03-02 | 113 | 18 | Filesystem abilities module (4 abilities) |
+| 3.7.0 | 2026-03-05 | 111 | 18 | post_date scheduling, DISALLOW_FILE_EDIT checks, count corrected |
+| 3.6.0 | 2026-03-02 | 111 | 18 | Filesystem module (4 abilities), Free/Pro tier gate |
 | 3.5.1 | 2026-02-28 | 106 | 17 | Division by zero fix, LiteSpeed purge fix |
 | 3.5.0 | 2026-02-27 | 106 | 17 | content/change-type, content/search-replace, cache/flush-page-cache |
+| 3.4.1 | 2026-02-27 | 103 | 17 | Security hardening second + third pass (14 findings) |
 | 3.3.0 | 2026-02-26 | 103 | 17 | Security hardening (10 fixes), MCP metadata normalization, plugin rename |
+| 3.2.0 | 2026-02-25 | 103 | 17 | content/get-snapshot, empty schema fix (39 tools recovered) |
+| 3.1.0 | 2026-02-24 | 103 | 17 | Permission toggles, admin dashboard |
 | 3.0.0 | 2026-02-24 | 103 | 17 | 10 new modules, JSON Schema fixes |
 | 2.0.0 | 2025-12-21 | 51 | 7 | Menu management, Content v2 |
 | 1.0.5 | 2025-12-12 | 40 | 6 | Base64 media upload |

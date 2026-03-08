@@ -26,12 +26,12 @@ defined( 'ABSPATH' ) || exit;
  */
 function wp_abilities_filesystem_validate_path( $relative_path, $must_exist = true ) {
 	if ( empty( $relative_path ) || ! is_string( $relative_path ) ) {
-		return wp_native_error( 'invalid_path', 'Path is required and must be a string.' );
+		return wp_abilities_error( 'invalid_path', 'Path is required and must be a string.' );
 	}
 
 	// Reject traversal sequences before any resolution.
 	if ( preg_match( '#(^|[/\\\\])\.\.([/\\\\]|$)#', $relative_path ) ) {
-		return wp_native_error( 'traversal_rejected', 'Path traversal (../) is not allowed.' );
+		return wp_abilities_error( 'traversal_rejected', 'Path traversal (../) is not allowed.' );
 	}
 
 	$normalized = wp_normalize_path( ABSPATH . ltrim( $relative_path, '/' ) );
@@ -39,12 +39,12 @@ function wp_abilities_filesystem_validate_path( $relative_path, $must_exist = tr
 	if ( $must_exist ) {
 		$resolved = realpath( $normalized );
 		if ( $resolved === false ) {
-			return wp_native_error( 'not_found', 'Path does not exist.' );
+			return wp_abilities_error( 'not_found', 'Path does not exist.' );
 		}
 		$resolved = wp_normalize_path( $resolved );
 		// Must be within ABSPATH.
 		if ( strpos( $resolved, wp_normalize_path( ABSPATH ) ) !== 0 ) {
-			return wp_native_error( 'outside_abspath', 'Path resolves outside the WordPress installation.' );
+			return wp_abilities_error( 'outside_abspath', 'Path resolves outside the WordPress installation.' );
 		}
 		return $resolved;
 	}
@@ -53,11 +53,11 @@ function wp_abilities_filesystem_validate_path( $relative_path, $must_exist = tr
 	$parent = dirname( $normalized );
 	$resolved_parent = realpath( $parent );
 	if ( $resolved_parent === false ) {
-		return wp_native_error( 'parent_not_found', 'Parent directory does not exist.' );
+		return wp_abilities_error( 'parent_not_found', 'Parent directory does not exist.' );
 	}
 	$resolved_parent = wp_normalize_path( $resolved_parent );
 	if ( strpos( $resolved_parent, wp_normalize_path( ABSPATH ) ) !== 0 ) {
-		return wp_native_error( 'outside_abspath', 'Target directory resolves outside the WordPress installation.' );
+		return wp_abilities_error( 'outside_abspath', 'Target directory resolves outside the WordPress installation.' );
 	}
 
 	return $resolved_parent . '/' . basename( $normalized );
@@ -76,10 +76,10 @@ function wp_abilities_filesystem_check_extension( $path ) {
 	$ext = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
 
 	if ( in_array( $ext, $blocked, true ) ) {
-		return wp_native_error( 'extension_blocked', "Writing to .{$ext} files is not allowed." );
+		return wp_abilities_error( 'extension_blocked', "Writing to .{$ext} files is not allowed." );
 	}
 	if ( ! in_array( $ext, $allowed, true ) ) {
-		return wp_native_error( 'extension_not_allowed', "Extension .{$ext} is not in the allowed list: " . implode( ', ', $allowed ) );
+		return wp_abilities_error( 'extension_not_allowed', "Extension .{$ext} is not in the allowed list: " . implode( ', ', $allowed ) );
 	}
 
 	return true;
@@ -121,12 +121,12 @@ function wp_abilities_suite_register_filesystem_abilities() {
 			}
 
 			if ( ! is_dir( $abs ) ) {
-				return wp_native_error( 'not_a_directory', 'Path is not a directory.' );
+				return wp_abilities_error( 'not_a_directory', 'Path is not a directory.' );
 			}
 
 			$entries = @scandir( $abs );
 			if ( $entries === false ) {
-				return wp_native_error( 'read_failed', 'Could not read directory.' );
+				return wp_abilities_error( 'read_failed', 'Could not read directory.' );
 			}
 
 			$items = array();
@@ -174,17 +174,17 @@ function wp_abilities_suite_register_filesystem_abilities() {
 			}
 
 			if ( ! is_file( $abs ) ) {
-				return wp_native_error( 'not_a_file', 'Path is not a file.' );
+				return wp_abilities_error( 'not_a_file', 'Path is not a file.' );
 			}
 
 			$size = filesize( $abs );
 			if ( $size > MB_IN_BYTES ) {
-				return wp_native_error( 'file_too_large', 'File exceeds 1MB limit (' . size_format( $size ) . ').' );
+				return wp_abilities_error( 'file_too_large', 'File exceeds 1MB limit (' . size_format( $size ) . ').' );
 			}
 
 			$content = @file_get_contents( $abs );
 			if ( $content === false ) {
-				return wp_native_error( 'read_failed', 'Could not read file.' );
+				return wp_abilities_error( 'read_failed', 'Could not read file.' );
 			}
 
 			return array(
@@ -203,8 +203,7 @@ function wp_abilities_suite_register_filesystem_abilities() {
 	} // end read
 
 	// ===== FILESYSTEM — WRITE =====
-	if ( ! empty( $perms['write'] ) ) {
-
+	// Always register write abilities — permission check happens at execution time (pro gate + DISALLOW_FILE_EDIT).
 	// ---- filesystem/write-file ----
 	wp_register_ability( 'filesystem/write-file', array(
 		'label'       => 'Write File',
@@ -221,10 +220,10 @@ function wp_abilities_suite_register_filesystem_abilities() {
 		),
 		'execute_callback' => wp_abilities_suite_pro_gate('filesystem/write-file', function( $params ) {
 			if ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) {
-				return wp_native_error( 'file_mods_disabled', 'File modifications are disabled (DISALLOW_FILE_MODS is set in wp-config.php).' );
+				return wp_abilities_error( 'file_mods_disabled', 'File modifications are disabled (DISALLOW_FILE_MODS is set in wp-config.php).' );
 			}
 			if ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT ) {
-				return wp_native_error( 'file_edit_disabled', 'File editing is disabled (DISALLOW_FILE_EDIT is set in wp-config.php).' );
+				return wp_abilities_error( 'file_edit_disabled', 'File editing is disabled (DISALLOW_FILE_EDIT is set in wp-config.php).' );
 			}
 
 			$path    = $params['path'] ?? '';
@@ -247,7 +246,7 @@ function wp_abilities_suite_register_filesystem_abilities() {
 			$result = @file_put_contents( $abs, $content, $flags );
 
 			if ( $result === false ) {
-				return wp_native_error( 'write_failed', 'Could not write to file. Check permissions.' );
+				return wp_abilities_error( 'write_failed', 'Could not write to file. Check permissions.' );
 			}
 
 			return array(
@@ -277,10 +276,10 @@ function wp_abilities_suite_register_filesystem_abilities() {
 		),
 		'execute_callback' => wp_abilities_suite_pro_gate('theme/update-asset', function( $params ) {
 			if ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) {
-				return wp_native_error( 'file_mods_disabled', 'File modifications are disabled (DISALLOW_FILE_MODS is set in wp-config.php).' );
+				return wp_abilities_error( 'file_mods_disabled', 'File modifications are disabled (DISALLOW_FILE_MODS is set in wp-config.php).' );
 			}
 			if ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT ) {
-				return wp_native_error( 'file_edit_disabled', 'File editing is disabled (DISALLOW_FILE_EDIT is set in wp-config.php).' );
+				return wp_abilities_error( 'file_edit_disabled', 'File editing is disabled (DISALLOW_FILE_EDIT is set in wp-config.php).' );
 			}
 
 			$asset_type = sanitize_text_field( $params['asset_type'] ?? '' );
@@ -289,13 +288,13 @@ function wp_abilities_suite_register_filesystem_abilities() {
 
 			$allowed_types = array( 'css', 'js', 'json', 'md' );
 			if ( ! in_array( $asset_type, $allowed_types, true ) ) {
-				return wp_native_error( 'invalid_asset_type', 'Asset type must be: ' . implode( ', ', $allowed_types ) );
+				return wp_abilities_error( 'invalid_asset_type', 'Asset type must be: ' . implode( ', ', $allowed_types ) );
 			}
 
 			// Verify file extension matches declared asset_type.
 			$ext = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
 			if ( $ext !== $asset_type ) {
-				return wp_native_error( 'extension_mismatch', "Filename extension .{$ext} does not match asset_type '{$asset_type}'." );
+				return wp_abilities_error( 'extension_mismatch', "Filename extension .{$ext} does not match asset_type '{$asset_type}'." );
 			}
 
 			$theme_dir = get_stylesheet_directory();
@@ -304,7 +303,7 @@ function wp_abilities_suite_register_filesystem_abilities() {
 			// Create subdirectory if needed.
 			if ( ! is_dir( $assets_dir ) ) {
 				if ( ! wp_mkdir_p( $assets_dir ) ) {
-					return wp_native_error( 'mkdir_failed', "Could not create directory: assets/{$asset_type}/" );
+					return wp_abilities_error( 'mkdir_failed', "Could not create directory: assets/{$asset_type}/" );
 				}
 			}
 
@@ -314,12 +313,12 @@ function wp_abilities_suite_register_filesystem_abilities() {
 			$resolved = wp_normalize_path( realpath( dirname( $target ) ) . '/' . basename( $target ) );
 			$theme_norm = wp_normalize_path( $theme_dir );
 			if ( strpos( $resolved, $theme_norm ) !== 0 ) {
-				return wp_native_error( 'outside_theme', 'Resolved path escapes the theme directory.' );
+				return wp_abilities_error( 'outside_theme', 'Resolved path escapes the theme directory.' );
 			}
 
 			$result = @file_put_contents( $target, $content );
 			if ( $result === false ) {
-				return wp_native_error( 'write_failed', 'Could not write theme asset. Check permissions.' );
+				return wp_abilities_error( 'write_failed', 'Could not write theme asset. Check permissions.' );
 			}
 
 			return array(
@@ -332,5 +331,4 @@ function wp_abilities_suite_register_filesystem_abilities() {
 		'meta' => array( 'show_in_rest' => true, 'mcp' => array( 'public' => true, 'type' => 'tool' ), 'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ) , 'tier' => 'pro',),
 	));
 
-	} // end write
 }

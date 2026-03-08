@@ -4,7 +4,7 @@
  *
  * Pagination, sanitization, and shared utilities used across all modules.
  *
- * @package WordPress_Native_Abilities
+ * @package WordPress_Abilities_Suite
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * @param int   $default_per_page Default items per page.
  * @return array [ 'page' => int, 'per_page' => int, 'offset' => int ]
  */
-function wp_native_pagination( $input, $default_per_page = 20 ) {
+function wp_abilities_pagination( $input, $default_per_page = 20 ) {
 	$page     = max( 1, intval( $input['page'] ?? 1 ) );
 	$per_page = min( 100, max( 1, intval( $input['per_page'] ?? $default_per_page ) ) );
 	$offset   = ( $page - 1 ) * $per_page;
@@ -33,7 +33,7 @@ function wp_native_pagination( $input, $default_per_page = 20 ) {
  *
  * @return array Schema properties for page and per_page.
  */
-function wp_native_pagination_schema() {
+function wp_abilities_pagination_schema() {
 	return array(
 		'page' => array(
 			'type'        => 'integer',
@@ -53,10 +53,41 @@ function wp_native_pagination_schema() {
  *
  * @param string $code    Error code.
  * @param string $message Error message.
+ * @param array  $data    Optional error data.
  * @return WP_Error
  */
-function wp_native_error( $code, $message ) {
-	return new WP_Error( $code, $message );
+function wp_abilities_error( $code, $message, $data = array() ) {
+	return new WP_Error( $code, $message, $data );
+}
+
+/**
+ * Resolve a user across WordPress.
+ *
+ * @param string|int $identifier Email address or WordPress user ID.
+ * @return array Basic user info.
+ */
+if ( ! function_exists( 'wp_abilities_resolve_user' ) ) {
+	function wp_abilities_resolve_user( $identifier ) {
+		$result = array();
+
+		if ( is_numeric( $identifier ) ) {
+			$user = get_userdata( (int) $identifier );
+			$email = $user ? $user->user_email : null;
+			$result['wp_user_id'] = (int) $identifier;
+			$result['wp_user'] = $user ? $user->display_name : null;
+		} else {
+			$email = sanitize_email( $identifier );
+			$user = get_user_by( 'email', $email );
+			$result['wp_user_id'] = $user ? $user->ID : null;
+			$result['wp_user'] = $user ? $user->display_name : null;
+		}
+
+		if ( $email ) {
+			$result['email'] = $email;
+		}
+
+		return $result;
+	}
 }
 
 /**
@@ -65,10 +96,10 @@ function wp_native_error( $code, $message ) {
 function wp_abilities_suite_require_editable_post( $post_id, $capability = 'edit_post' ) {
     $post = get_post( absint( $post_id ) );
     if ( ! $post ) {
-        return new WP_Error( 'not_found', 'Post not found.' );
+        return wp_abilities_error( 'not_found', 'Post not found.' );
     }
     if ( ! current_user_can( $capability, $post->ID ) ) {
-        return new WP_Error( 'forbidden', 'You do not have permission to perform this action on this post.' );
+        return wp_abilities_error( 'forbidden', 'You do not have permission to perform this action on this post.' );
     }
     return $post;
 }
@@ -247,7 +278,7 @@ function wp_abilities_suite_can( $module, $op ) {
 /**
  * Check if an IP address is in a private/internal range.
  */
-function wp_abilities_suite_is_private_ip( $ip ) {
+function wp_abilities_is_private_ip( $ip ) {
     // IPv4 private/reserved ranges.
     $ipv4_ranges = array(
         '127.0.0.0/8',

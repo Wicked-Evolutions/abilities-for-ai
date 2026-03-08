@@ -12,6 +12,9 @@ Thumbs.db
 *.sublime-*
 *~
 
+# Dependencies
+vendor/
+
 # Node
 node_modules/
 npm-debug.log*
