@@ -343,3 +343,13 @@ function wp_abilities_is_private_ip( $ip ) {
 
     return false;
 }
+
+/**
+ * Alias for wp_abilities_is_private_ip() using the suite naming convention.
+ *
+ * @param string $ip IP address to check.
+ * @return bool True if the IP is private/internal.
+ */
+function wp_abilities_suite_is_private_ip( string $ip ): bool {
+    return wp_abilities_is_private_ip( $ip );
+}

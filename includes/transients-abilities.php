@@ -183,7 +183,7 @@ add_action( 'wp_abilities_api_init', function() {
 		),
 		'output_schema' => wp_abilities_suite_schema_success_output( array(
 			'flushed' => array( 'type' => 'boolean' ),
-			'post_id' => array( 'type' => 'integer' ),
+			'post_id' => array( 'type' => array( 'integer', 'null' ) ),
 			'systems' => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
 		) ),
 		'callback' => function( $params ) {

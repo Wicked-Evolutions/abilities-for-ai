@@ -2,6 +2,14 @@
 
 All notable changes to WordPress Abilities Suite will be documented in this file.
 
+## [3.7.1] - 2026-03-09
+
+### Fixed
+- `media/create` — fatal error: added missing `wp_abilities_suite_is_private_ip()` alias in `helpers.php` (function existed as `wp_abilities_is_private_ip`, call-site used suite-prefixed name)
+- `cache/flush-page-cache` — output schema mismatch: `post_id` declared as `integer` but returns `null` when no post ID provided; updated to `['integer', 'null']`
+
+---
+
 ## [3.7.0] - 2026-03-05
 
 ### Added
