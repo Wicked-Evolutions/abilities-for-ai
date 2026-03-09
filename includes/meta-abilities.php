@@ -153,7 +153,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return wp_abilities_error( 'not_found', 'User not found.' );
 			}
 			if ( ! current_user_can( 'edit_user', $user_id ) ) {
-				return wp_abilities_error( 'forbidden', 'You do not have permission to view meta for this user.' );
+				return wp_abilities_error( 'rest_forbidden', 'You do not have permission to view meta for this user.' );
 			}
 			$sensitive_keys = array(
 				'session_tokens', 'wp_capabilities', 'wp_user_level',
@@ -196,12 +196,12 @@ add_action( 'wp_abilities_api_init', function() {
 				return wp_abilities_error( 'not_found', 'User not found.' );
 			}
 			if ( ! current_user_can( 'edit_user', $user_id ) ) {
-				return wp_abilities_error( 'forbidden', 'You do not have permission to view meta for this user.' );
+				return wp_abilities_error( 'rest_forbidden', 'You do not have permission to view meta for this user.' );
 			}
 			$key            = sanitize_text_field( $params['meta_key'] );
 			$sensitive_keys = array( 'session_tokens', 'wp_capabilities', 'wp_user_level', 'user_pass', 'auth_cookie' );
 			if ( in_array( $key, $sensitive_keys, true ) ) {
-				return wp_abilities_error( 'forbidden', 'This meta key is protected and cannot be read via this ability.' );
+				return wp_abilities_error( 'rest_forbidden', 'This meta key is protected and cannot be read via this ability.' );
 			}
 			$single = $params['single'] ?? true;
 			$value  = get_user_meta( $user_id, $key, $single );
@@ -342,12 +342,12 @@ add_action( 'wp_abilities_api_init', function() {
 				return wp_abilities_error( 'not_found', 'User not found.' );
 			}
 			if ( ! current_user_can( 'edit_user', $user_id ) ) {
-				return wp_abilities_error( 'forbidden', 'You do not have permission to edit meta for this user.' );
+				return wp_abilities_error( 'rest_forbidden', 'You do not have permission to edit meta for this user.' );
 			}
 			$key         = sanitize_text_field( $params['meta_key'] );
 			$denied_keys = array( 'wp_capabilities', 'wp_user_level', 'session_tokens', 'user_pass', 'auth_cookie' );
 			if ( in_array( $key, $denied_keys, true ) ) {
-				return wp_abilities_error( 'forbidden', 'This meta key is protected and cannot be modified via this ability.' );
+				return wp_abilities_error( 'rest_forbidden', 'This meta key is protected and cannot be modified via this ability.' );
 			}
 			$value  = sanitize_text_field( $params['meta_value'] );
 			$result = update_user_meta( $user_id, $key, $value );

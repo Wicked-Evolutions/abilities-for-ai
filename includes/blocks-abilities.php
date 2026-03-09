@@ -36,7 +36,7 @@ add_action( 'wp_abilities_api_init', function() {
 			} elseif ( isset( $params['content'] ) ) {
 				$content = $params['content'];
 			} else {
-				return wp_abilities_error( 'missing_input', 'Provide post_id or content.' );
+				return wp_abilities_error( 'ability_invalid_input', 'Provide post_id or content.' );
 			}
 
 			$blocks  = parse_blocks( $content );
@@ -72,7 +72,7 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'callback' => function( $params ) {
 			if ( empty( $params['blocks'] ) || ! is_array( $params['blocks'] ) ) {
-				return wp_abilities_error( 'invalid_blocks', 'Blocks array is required.' );
+				return wp_abilities_error( 'ability_invalid_input', 'Blocks array is required.' );
 			}
 			$html = serialize_blocks( $params['blocks'] );
 			return array( 'html' => $html, 'length' => strlen( $html ) );
@@ -160,7 +160,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'callback' => function( $params ) {
 			$name = sanitize_text_field( $params['name'] ?? '' );
 			if ( ! $name ) {
-				return wp_abilities_error( 'missing_name', 'Block type name is required.' );
+				return wp_abilities_error( 'ability_invalid_input', 'Block type name is required.' );
 			}
 			$registry = WP_Block_Type_Registry::get_instance();
 			$type     = $registry->get_registered( $name );
@@ -321,7 +321,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$index   = intval( $params['index'] ?? -1 );
 
 			if ( $index < 0 || $index >= count( $blocks ) ) {
-				return wp_abilities_error( 'invalid_index', "Block index {$index} is out of range (0-" . ( count( $blocks ) - 1 ) . ")." );
+				return wp_abilities_error( 'ability_invalid_input', "Block index {$index} is out of range (0-" . ( count( $blocks ) - 1 ) . ")." );
 			}
 
 			$old_name         = $blocks[ $index ]['blockName'] ?? '(empty)';
@@ -370,7 +370,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$index   = intval( $params['index'] ?? -1 );
 
 			if ( $index < 0 || $index >= count( $blocks ) ) {
-				return wp_abilities_error( 'invalid_index', "Block index {$index} is out of range (0-" . ( count( $blocks ) - 1 ) . ")." );
+				return wp_abilities_error( 'ability_invalid_input', "Block index {$index} is out of range (0-" . ( count( $blocks ) - 1 ) . ")." );
 			}
 
 			$removed = $blocks[ $index ]['blockName'] ?? '(empty)';

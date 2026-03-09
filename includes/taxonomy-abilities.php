@@ -291,10 +291,10 @@ add_action( 'wp_abilities_api_init', function() {
 			$taxonomy = $input['taxonomy'];
 			$tax_obj  = get_taxonomy( $taxonomy );
 			if ( ! $tax_obj ) {
-				return new WP_Error( 'invalid_taxonomy', 'Invalid taxonomy.' );
+				return new WP_Error( 'ability_invalid_input', 'Invalid taxonomy.' );
 			}
 			if ( ! current_user_can( $tax_obj->cap->manage_terms ) ) {
-				return new WP_Error( 'forbidden', "You do not have permission to manage terms in \"{$taxonomy}\"." );
+				return new WP_Error( 'rest_forbidden', "You do not have permission to manage terms in \"{$taxonomy}\"." );
 			}
 			$args = array();
 			if ( ! empty( $input['slug'] ) ) {
@@ -358,10 +358,10 @@ add_action( 'wp_abilities_api_init', function() {
 			$taxonomy = $input['taxonomy'];
 			$tax_obj  = get_taxonomy( $taxonomy );
 			if ( ! $tax_obj ) {
-				return new WP_Error( 'invalid_taxonomy', 'Invalid taxonomy.' );
+				return new WP_Error( 'ability_invalid_input', 'Invalid taxonomy.' );
 			}
 			if ( ! current_user_can( $tax_obj->cap->edit_terms ) ) {
-				return new WP_Error( 'forbidden', "You do not have permission to edit terms in \"{$taxonomy}\"." );
+				return new WP_Error( 'rest_forbidden', "You do not have permission to edit terms in \"{$taxonomy}\"." );
 			}
 			$args = array();
 			if ( isset( $input['name'] ) ) {
@@ -428,10 +428,10 @@ add_action( 'wp_abilities_api_init', function() {
 			$taxonomy = $input['taxonomy'];
 			$tax_obj  = get_taxonomy( $taxonomy );
 			if ( ! $tax_obj ) {
-				return new WP_Error( 'invalid_taxonomy', 'Invalid taxonomy.' );
+				return new WP_Error( 'ability_invalid_input', 'Invalid taxonomy.' );
 			}
 			if ( ! current_user_can( $tax_obj->cap->assign_terms ) ) {
-				return new WP_Error( 'forbidden', "You do not have permission to assign terms in \"{$taxonomy}\"." );
+				return new WP_Error( 'rest_forbidden', "You do not have permission to assign terms in \"{$taxonomy}\"." );
 			}
 			$result = wp_set_object_terms( $input['post_id'], $input['terms'], $taxonomy, $input['append'] ?? false );
 			if ( is_wp_error( $result ) ) {
@@ -461,10 +461,10 @@ add_action( 'wp_abilities_api_init', function() {
 			$taxonomy = $input['taxonomy'];
 			$tax_obj  = get_taxonomy( $taxonomy );
 			if ( ! $tax_obj ) {
-				return new WP_Error( 'invalid_taxonomy', 'Invalid taxonomy.' );
+				return new WP_Error( 'ability_invalid_input', 'Invalid taxonomy.' );
 			}
 			if ( ! current_user_can( $tax_obj->cap->delete_terms ) ) {
-				return new WP_Error( 'forbidden', "You do not have permission to delete terms in \"{$taxonomy}\"." );
+				return new WP_Error( 'rest_forbidden', "You do not have permission to delete terms in \"{$taxonomy}\"." );
 			}
 			$result = wp_delete_term( $input['term_id'], $taxonomy );
 			if ( is_wp_error( $result ) ) {

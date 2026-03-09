@@ -357,7 +357,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$current = wp_setup_nav_menu_item( $post );
 			$menus   = wp_get_object_terms( $item_id, 'nav_menu' );
 			if ( empty( $menus ) || is_wp_error( $menus ) ) {
-				return new WP_Error( 'no_menu', "Menu item {$item_id} is not assigned to any menu." );
+				return new WP_Error( 'not_found', "Menu item {$item_id} is not assigned to any menu." );
 			}
 			$menu_id = $menus[0]->term_id;
 
@@ -407,7 +407,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'not_found', "Menu {$menu_id} not found." );
 			}
 			if ( ! is_array( $item_order ) || empty( $item_order ) ) {
-				return new WP_Error( 'invalid_order', 'item_order must be a non-empty array of item IDs.' );
+				return new WP_Error( 'ability_invalid_input', 'item_order must be a non-empty array of item IDs.' );
 			}
 
 			$existing_items = wp_get_nav_menu_items( $menu_id );
@@ -453,7 +453,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$menu_id    = (int) $input['menu_id'];
 			$registered = get_registered_nav_menus();
 			if ( ! isset( $registered[ $location ] ) ) {
-				return new WP_Error( 'invalid_location', "Location \"{$location}\" is not registered. Available: " . implode( ', ', array_keys( $registered ) ) );
+				return new WP_Error( 'ability_invalid_input', "Location \"{$location}\" is not registered. Available: " . implode( ', ', array_keys( $registered ) ) );
 			}
 			$menu = wp_get_nav_menu_object( $menu_id );
 			if ( ! $menu ) {
@@ -483,7 +483,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$location   = sanitize_key( $input['location'] );
 			$registered = get_registered_nav_menus();
 			if ( ! isset( $registered[ $location ] ) ) {
-				return new WP_Error( 'invalid_location', "Location \"{$location}\" is not registered. Available: " . implode( ', ', array_keys( $registered ) ) );
+				return new WP_Error( 'ability_invalid_input', "Location \"{$location}\" is not registered. Available: " . implode( ', ', array_keys( $registered ) ) );
 			}
 			$locations              = get_nav_menu_locations();
 			$locations[ $location ] = 0;
@@ -544,7 +544,7 @@ add_action( 'wp_abilities_api_init', function() {
 			}
 			$result = wp_delete_post( $item_id, true );
 			if ( ! $result ) {
-				return new WP_Error( 'delete_failed', "Failed to delete menu item {$item_id}." );
+				return new WP_Error( 'ability_invalid_input', "Failed to delete menu item {$item_id}." );
 			}
 			return array( 'success' => true );
 		},

@@ -144,7 +144,7 @@ add_action( 'wp_abilities_api_init', function() {
 			} elseif ( ! empty( $input['username'] ) ) {
 				$user = get_user_by( 'login', $input['username'] );
 			} else {
-				return new WP_Error( 'missing_identifier', 'Provide id, email, or username' );
+				return new WP_Error( 'ability_invalid_input', 'Provide id, email, or username' );
 			}
 			if ( ! $user ) {
 				return new WP_Error( 'not_found', 'User not found' );
@@ -227,7 +227,7 @@ add_action( 'wp_abilities_api_init', function() {
 			}
 			$editable_roles = get_editable_roles();
 			if ( ! isset( $editable_roles[ $role ] ) ) {
-				return new WP_Error( 'forbidden', "You cannot assign the role \"{$role}\"." );
+				return new WP_Error( 'rest_forbidden', "You cannot assign the role \"{$role}\"." );
 			}
 			$userdata = array(
 				'user_login' => sanitize_user( $input['username'] ),
@@ -317,11 +317,11 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'not_found', 'User not found' );
 			}
 			if ( ! current_user_can( 'edit_user', $user_id ) ) {
-				return new WP_Error( 'forbidden', 'You do not have permission to edit this user.' );
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to edit this user.' );
 			}
 			if ( isset( $input['role'] ) ) {
 				if ( ! current_user_can( 'promote_user', $user_id ) ) {
-					return new WP_Error( 'forbidden', 'You do not have permission to change roles for this user.' );
+					return new WP_Error( 'rest_forbidden', 'You do not have permission to change roles for this user.' );
 				}
 				if ( ! function_exists( 'get_editable_roles' ) ) {
 					require_once ABSPATH . 'wp-admin/includes/user.php';
@@ -329,7 +329,7 @@ add_action( 'wp_abilities_api_init', function() {
 				$editable_roles = get_editable_roles();
 				$new_role       = sanitize_text_field( $input['role'] );
 				if ( ! isset( $editable_roles[ $new_role ] ) ) {
-					return new WP_Error( 'forbidden', "You cannot assign the role \"{$new_role}\"." );
+					return new WP_Error( 'rest_forbidden', "You cannot assign the role \"{$new_role}\"." );
 				}
 			}
 			$userdata = array( 'ID' => $user_id );
@@ -397,12 +397,12 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'not_found', 'User not found' );
 			}
 			if ( $user_id === get_current_user_id() ) {
-				return new WP_Error( 'cannot_delete_self', 'Cannot delete your own account' );
+				return new WP_Error( 'rest_forbidden', 'Cannot delete your own account' );
 			}
 			$reassign = isset( $input['reassign'] ) ? (int) $input['reassign'] : null;
 			$result   = wp_delete_user( $user_id, $reassign );
 			if ( ! $result ) {
-				return new WP_Error( 'delete_failed', 'Failed to delete user' );
+				return new WP_Error( 'ability_invalid_input', 'Failed to delete user' );
 			}
 			return array( 'success' => true, 'message' => 'User deleted successfully' );
 		},

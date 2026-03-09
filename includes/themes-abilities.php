@@ -145,13 +145,13 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'callback' => function( $params ) {
 			if ( ! class_exists( 'WP_Theme_JSON_Resolver' ) ) {
-				return wp_abilities_error( 'not_available', 'theme.json is not available (requires block theme or WP 5.8+).' );
+				return wp_abilities_error( 'ability_invalid_input', 'theme.json is not available (requires block theme or WP 5.8+).' );
 			}
 
 			$theme = wp_get_theme();
 			if ( ! $theme->is_block_theme() && ! file_exists( $theme->get_theme_root() . '/' . $theme->get_stylesheet() . '/theme.json' ) ) {
 				if ( ! file_exists( get_stylesheet_directory() . '/theme.json' ) ) {
-					return wp_abilities_error( 'no_theme_json', 'Active theme does not have a theme.json file.' );
+					return wp_abilities_error( 'not_found', 'Active theme does not have a theme.json file.' );
 				}
 			}
 

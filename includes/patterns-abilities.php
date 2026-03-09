@@ -189,7 +189,7 @@ add_action( 'wp_abilities_api_init', function() {
 
 			$result = register_block_pattern( $name, $args );
 			if ( $result === false ) {
-				return wp_abilities_error( 'registration_failed', "Failed to register pattern '{$name}'. It may already exist." );
+				return wp_abilities_error( 'ability_invalid_input', "Failed to register pattern '{$name}'. It may already exist." );
 			}
 
 			return array( 'name' => $name, 'registered' => true );

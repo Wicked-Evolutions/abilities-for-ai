@@ -150,7 +150,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'not_found', 'Comment not found' );
 			}
 			if ( ! current_user_can( 'edit_comment', $comment->comment_ID ) ) {
-				return new WP_Error( 'forbidden', 'You do not have permission to view this comment.' );
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to view this comment.' );
 			}
 			return array(
 				'id'           => $comment->comment_ID,
@@ -221,7 +221,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'callback' => function( $input ) {
 			$post = get_post( $input['post_id'] );
 			if ( ! $post ) {
-				return new WP_Error( 'invalid_post', 'Post not found' );
+				return new WP_Error( 'not_found', 'Post not found' );
 			}
 			$current_user = wp_get_current_user();
 			$commentdata  = array(
@@ -236,7 +236,7 @@ add_action( 'wp_abilities_api_init', function() {
 			);
 			$comment_id = wp_insert_comment( $commentdata );
 			if ( ! $comment_id ) {
-				return new WP_Error( 'create_failed', 'Failed to create comment' );
+				return new WP_Error( 'ability_invalid_input', 'Failed to create comment' );
 			}
 			return array(
 				'id'     => $comment_id,
@@ -288,7 +288,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'not_found', 'Comment not found' );
 			}
 			if ( ! current_user_can( 'edit_comment', $comment->comment_ID ) ) {
-				return new WP_Error( 'forbidden', 'You do not have permission to edit this comment.' );
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to edit this comment.' );
 			}
 			$commentarr = array( 'comment_ID' => $input['id'] );
 			if ( isset( $input['content'] ) ) {
@@ -317,7 +317,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return $result;
 			}
 			if ( ! $result ) {
-				return new WP_Error( 'update_failed', 'Failed to update comment' );
+				return new WP_Error( 'ability_invalid_input', 'Failed to update comment' );
 			}
 			return array( 'success' => true, 'id' => (int) $input['id'] );
 		},
@@ -352,12 +352,12 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'not_found', 'Comment not found' );
 			}
 			if ( ! current_user_can( 'delete_comment', $comment->comment_ID ) ) {
-				return new WP_Error( 'forbidden', 'You do not have permission to delete this comment.' );
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to delete this comment.' );
 			}
 			$force  = $input['force'] ?? false;
 			$result = wp_delete_comment( $input['id'], $force );
 			if ( ! $result ) {
-				return new WP_Error( 'delete_failed', 'Failed to delete comment' );
+				return new WP_Error( 'ability_invalid_input', 'Failed to delete comment' );
 			}
 			return array(
 				'success' => true,

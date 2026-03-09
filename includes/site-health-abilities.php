@@ -126,7 +126,7 @@ add_action( 'wp_abilities_api_init', function() {
 			}
 
 			if ( ! $result ) {
-				return wp_abilities_error( 'test_failed', "Could not execute test '{$test_key}'." );
+				return wp_abilities_error( 'ability_invalid_input', "Could not execute test '{$test_key}'." );
 			}
 
 			return array(

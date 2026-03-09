@@ -95,7 +95,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'callback' => function( $params ) use ( $settings_groups ) {
 			$group = sanitize_text_field( $params['group'] ?? '' );
 			if ( ! isset( $settings_groups[ $group ] ) ) {
-				return wp_abilities_error( 'invalid_group', "Invalid group '{$group}'. Valid: " . implode( ', ', array_keys( $settings_groups ) ) );
+				return wp_abilities_error( 'ability_invalid_input', "Invalid group '{$group}'. Valid: " . implode( ', ', array_keys( $settings_groups ) ) );
 			}
 			$values = array();
 			foreach ( $settings_groups[ $group ] as $key ) {
@@ -146,7 +146,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'callback' => function( $params ) use ( $writable_settings ) {
 			$name = sanitize_text_field( $params['option_name'] ?? '' );
 			if ( ! in_array( $name, $writable_settings, true ) ) {
-				return wp_abilities_error( 'not_allowed', "Setting '{$name}' is not in the V1.0 writable allowlist." );
+				return wp_abilities_error( 'rest_forbidden', "Setting '{$name}' is not in the V1.0 writable allowlist." );
 			}
 			$value  = sanitize_text_field( $params['option_value'] );
 			$result = update_option( $name, $value );

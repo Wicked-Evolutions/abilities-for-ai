@@ -72,10 +72,10 @@ add_action( 'wp_abilities_api_init', function() {
 			$post_type     = sanitize_key( $input['post_type'] ?? 'post' );
 			$post_type_obj = get_post_type_object( $post_type );
 			if ( ! $post_type_obj ) {
-				return new WP_Error( 'invalid_post_type', 'Invalid post type.' );
+				return new WP_Error( 'ability_invalid_input', 'Invalid post type.' );
 			}
 			if ( ! current_user_can( $post_type_obj->cap->edit_posts ) ) {
-				return new WP_Error( 'forbidden', 'You do not have permission to list this post type.' );
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to list this post type.' );
 			}
 
 			$args = array(
@@ -492,16 +492,16 @@ add_action( 'wp_abilities_api_init', function() {
 			$post_type     = sanitize_key( $input['post_type'] ?? 'post' );
 			$post_type_obj = get_post_type_object( $post_type );
 			if ( ! $post_type_obj ) {
-				return new WP_Error( 'invalid_post_type', 'Invalid post type.' );
+				return new WP_Error( 'ability_invalid_input', 'Invalid post type.' );
 			}
 			if ( ! current_user_can( $post_type_obj->cap->create_posts ) ) {
-				return new WP_Error( 'forbidden', 'You do not have permission to create this post type.' );
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to create this post type.' );
 			}
 
 			$status = $input['status'] ?? 'draft';
 			if ( in_array( $status, array( 'publish', 'future' ), true ) ) {
 				if ( ! current_user_can( $post_type_obj->cap->publish_posts ) ) {
-					return new WP_Error( 'forbidden', 'You do not have permission to publish this post type.' );
+					return new WP_Error( 'rest_forbidden', 'You do not have permission to publish this post type.' );
 				}
 			}
 
@@ -521,7 +521,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( isset( $input['author'] ) ) {
 				$author_id = (int) $input['author'];
 				if ( ! get_userdata( $author_id ) ) {
-					return new WP_Error( 'invalid_author', "User ID {$author_id} does not exist." );
+					return new WP_Error( 'ability_invalid_input', "User ID {$author_id} does not exist." );
 				}
 				$post_data['post_author'] = $author_id;
 			}
@@ -588,7 +588,7 @@ add_action( 'wp_abilities_api_init', function() {
 
 			if ( isset( $input['status'] ) && in_array( $input['status'], array( 'publish', 'future' ), true ) ) {
 				if ( $post->post_status !== $input['status'] && ! current_user_can( $post_type_obj->cap->publish_posts ) ) {
-					return new WP_Error( 'forbidden', 'You do not have permission to publish this post type.' );
+					return new WP_Error( 'rest_forbidden', 'You do not have permission to publish this post type.' );
 				}
 			}
 
@@ -605,7 +605,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( isset( $input['author'] ) ) {
 				$author_id = (int) $input['author'];
 				if ( ! get_userdata( $author_id ) ) {
-					return new WP_Error( 'invalid_author', "User ID {$author_id} does not exist." );
+					return new WP_Error( 'ability_invalid_input', "User ID {$author_id} does not exist." );
 				}
 				$post_data['post_author'] = $author_id;
 			}
@@ -650,15 +650,15 @@ add_action( 'wp_abilities_api_init', function() {
 
 			$new_type_obj = get_post_type_object( $new_type );
 			if ( ! $new_type_obj ) {
-				return new WP_Error( 'invalid_post_type', "Post type '{$new_type}' does not exist." );
+				return new WP_Error( 'ability_invalid_input', "Post type '{$new_type}' does not exist." );
 			}
 
 			if ( ! current_user_can( $new_type_obj->cap->create_posts ) ) {
-				return new WP_Error( 'forbidden', "You do not have permission to create {$new_type} posts." );
+				return new WP_Error( 'rest_forbidden', "You do not have permission to create {$new_type} posts." );
 			}
 
 			if ( $old_type === $new_type ) {
-				return new WP_Error( 'no_change', "Post is already of type '{$new_type}'." );
+				return new WP_Error( 'ability_invalid_input', "Post is already of type '{$new_type}'." );
 			}
 
 			$old_permalink = get_permalink( $post->ID );
@@ -755,11 +755,11 @@ add_action( 'wp_abilities_api_init', function() {
 			$dry_run = ! empty( $input['dry_run'] );
 
 			if ( empty( $search ) ) {
-				return new WP_Error( 'empty_search', 'Search string cannot be empty.' );
+				return new WP_Error( 'ability_invalid_input', 'Search string cannot be empty.' );
 			}
 
 			if ( $search === $replace ) {
-				return new WP_Error( 'no_change', 'Search and replace strings are identical.' );
+				return new WP_Error( 'ability_invalid_input', 'Search and replace strings are identical.' );
 			}
 
 			$query_args = array(
@@ -859,7 +859,7 @@ add_action( 'wp_abilities_api_init', function() {
 
 			$result = wp_delete_post( $input['id'], $input['force'] ?? false );
 			if ( ! $result ) {
-				return new WP_Error( 'delete_failed', 'Failed to delete post' );
+				return new WP_Error( 'ability_invalid_input', 'Failed to delete post' );
 			}
 
 			return array(

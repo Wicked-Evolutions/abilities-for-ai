@@ -482,7 +482,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return $result;
 			}
 			if ( ! $result ) {
-				return new WP_Error( 'install_failed', 'Plugin installation failed' );
+				return new WP_Error( 'ability_invalid_input', 'Plugin installation failed' );
 			}
 
 			$plugin_file = $upgrader->plugin_info();

@@ -91,7 +91,7 @@ function wp_abilities_suite_require_editable_post( $post_id, $capability = 'edit
         return wp_abilities_error( 'not_found', 'Post not found.' );
     }
     if ( ! current_user_can( $capability, $post->ID ) ) {
-        return wp_abilities_error( 'forbidden', 'You do not have permission to perform this action on this post.' );
+        return wp_abilities_error( 'rest_forbidden', 'You do not have permission to perform this action on this post.' );
     }
     return $post;
 }

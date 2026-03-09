@@ -167,16 +167,16 @@ add_action( 'wp_abilities_api_init', function() {
 			$url    = esc_url_raw( $input['url'] );
 			$parsed = wp_parse_url( $url );
 			if ( ! $parsed || ! in_array( $parsed['scheme'] ?? '', array( 'http', 'https' ), true ) ) {
-				return new WP_Error( 'invalid_url', 'Only http and https URLs are allowed.' );
+				return new WP_Error( 'ability_invalid_input', 'Only http and https URLs are allowed.' );
 			}
 
 			$host        = $parsed['host'] ?? '';
 			$resolved_ip = gethostbyname( $host );
 			if ( $resolved_ip === $host ) {
-				return new WP_Error( 'dns_failed', 'Could not resolve hostname.' );
+				return new WP_Error( 'ability_invalid_input', 'Could not resolve hostname.' );
 			}
 			if ( wp_abilities_suite_is_private_ip( $resolved_ip ) ) {
-				return new WP_Error( 'blocked_url', 'URLs pointing to private/internal IP addresses are not allowed.' );
+				return new WP_Error( 'ability_invalid_input', 'URLs pointing to private/internal IP addresses are not allowed.' );
 			}
 
 			$pin_dns = function( $args ) use ( $host, $resolved_ip, &$pin_dns ) {
@@ -204,7 +204,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$max_size = 10 * MB_IN_BYTES;
 			if ( filesize( $tmp ) > $max_size ) {
 				@unlink( $tmp );
-				return new WP_Error( 'file_too_large', 'Downloaded file exceeds maximum allowed size of ' . size_format( $max_size ) . '.' );
+				return new WP_Error( 'ability_invalid_input', 'Downloaded file exceeds maximum allowed size of ' . size_format( $max_size ) . '.' );
 			}
 
 			$file_array = array(
@@ -300,27 +300,27 @@ add_action( 'wp_abilities_api_init', function() {
 			$max_size       = 10 * MB_IN_BYTES;
 			$estimated_size = (int) ( strlen( $input['file_data'] ) * 0.75 );
 			if ( $estimated_size > $max_size ) {
-				return new WP_Error( 'file_too_large', 'Base64 data exceeds maximum allowed size of ' . size_format( $max_size ) . '.' );
+				return new WP_Error( 'ability_invalid_input', 'Base64 data exceeds maximum allowed size of ' . size_format( $max_size ) . '.' );
 			}
 
 			$file_data = base64_decode( $input['file_data'], true );
 			if ( $file_data === false ) {
-				return new WP_Error( 'invalid_base64', 'Invalid base64 data provided' );
+				return new WP_Error( 'ability_invalid_input', 'Invalid base64 data provided' );
 			}
 			if ( strlen( $file_data ) > $max_size ) {
-				return new WP_Error( 'file_too_large', 'Decoded file exceeds maximum allowed size of ' . size_format( $max_size ) . '.' );
+				return new WP_Error( 'ability_invalid_input', 'Decoded file exceeds maximum allowed size of ' . size_format( $max_size ) . '.' );
 			}
 
 			$filename = sanitize_file_name( $input['filename'] );
 			if ( empty( $filename ) ) {
-				return new WP_Error( 'invalid_filename', 'Invalid filename provided' );
+				return new WP_Error( 'ability_invalid_input', 'Invalid filename provided' );
 			}
 
 			$upload_dir    = wp_upload_dir();
 			$temp_file     = $upload_dir['basedir'] . '/temp_' . uniqid() . '_' . $filename;
 			$bytes_written = file_put_contents( $temp_file, $file_data );
 			if ( $bytes_written === false ) {
-				return new WP_Error( 'file_write_failed', 'Failed to write temporary file' );
+				return new WP_Error( 'ability_invalid_input', 'Failed to write temporary file' );
 			}
 
 			$file_array    = array(
@@ -397,7 +397,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'not_found', 'Attachment not found' );
 			}
 			if ( ! current_user_can( 'edit_post', $attachment_id ) ) {
-				return new WP_Error( 'forbidden', 'You do not have permission to edit this attachment.' );
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to edit this attachment.' );
 			}
 			$update_data = array( 'ID' => $attachment_id );
 			if ( isset( $input['title'] ) ) {
@@ -454,11 +454,11 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'not_found', 'Attachment not found' );
 			}
 			if ( ! current_user_can( 'delete_post', $attachment_id ) ) {
-				return new WP_Error( 'forbidden', 'You do not have permission to delete this attachment.' );
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to delete this attachment.' );
 			}
 			$result = wp_delete_attachment( $attachment_id, $force );
 			if ( ! $result ) {
-				return new WP_Error( 'delete_failed', 'Failed to delete attachment' );
+				return new WP_Error( 'ability_invalid_input', 'Failed to delete attachment' );
 			}
 			return array(
 				'success' => true,
