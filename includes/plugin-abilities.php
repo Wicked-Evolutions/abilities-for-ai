@@ -28,7 +28,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_list_output( 'plugins', array(
+		'output_schema' => wp_abilities_suite_schema_collection_output( 'plugins', array(
 			'file'      => array( 'type' => 'string' ),
 			'name'      => array( 'type' => 'string' ),
 			'version'   => array( 'type' => 'string' ),
@@ -102,7 +102,7 @@ add_action( 'wp_abilities_api_init', function() {
 				}
 			}
 
-			return $plugins;
+			return array( 'plugins' => $plugins, 'total' => count( $plugins ) );
 		},
 	) );
 

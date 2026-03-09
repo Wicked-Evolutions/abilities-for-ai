@@ -2,6 +2,14 @@
 
 All notable changes to WordPress Abilities Suite will be documented in this file.
 
+## [3.7.2] - 2026-03-09
+
+### Fixed
+- `content/discover-types` — handler returned a plain array but output schema declared `schema_collection_output` (expected `{post_types: [], total: N}`). Wrapped return and added `array_values()` to re-index associative `get_post_types()` result.
+- `plugins/list` — handler returned a plain array but schema declared paginated `schema_list_output`. Changed schema to `schema_collection_output` and wrapped return as `{plugins: [...], total: N}`.
+
+---
+
 ## [3.7.1] - 2026-03-09
 
 ### Fixed

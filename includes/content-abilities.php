@@ -327,7 +327,7 @@ add_action( 'wp_abilities_api_init', function() {
 
 			$post_types = get_post_types( $args, 'objects' );
 
-			return array_map( function( $post_type ) {
+			$items = array_values( array_map( function( $post_type ) {
 				return array(
 					'name'         => $post_type->name,
 					'label'        => $post_type->label,
@@ -337,7 +337,9 @@ add_action( 'wp_abilities_api_init', function() {
 					'rest_base'    => $post_type->rest_base,
 					'supports'     => get_all_post_type_supports( $post_type->name ),
 				);
-			}, $post_types );
+			}, $post_types ) );
+
+			return array( 'post_types' => $items, 'total' => count( $items ) );
 		},
 	) );
 
