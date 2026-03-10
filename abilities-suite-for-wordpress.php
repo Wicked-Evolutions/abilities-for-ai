@@ -121,3 +121,13 @@ register_deactivation_hook( __FILE__, function() {
     wp_cache_flush();
     error_log( 'WordPress Abilities Suite: Deactivated' );
 });
+
+// New multisite subsite: set default permissions automatically.
+add_action( 'wp_initialize_site', function( $new_site ) {
+    $site_id = $new_site->blog_id;
+    switch_to_blog( $site_id );
+    if ( false === get_option( 'wp_abilities_suite_permissions' ) ) {
+        update_option( 'wp_abilities_suite_permissions', wp_abilities_suite_permission_defaults() );
+    }
+    restore_current_blog();
+}, 200 ); // Priority 200: run after WordPress core finishes site setup.

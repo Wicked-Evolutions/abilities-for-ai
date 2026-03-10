@@ -51,9 +51,6 @@ class Registrar {
 	 * @param array  $config Compact config array.
 	 */
 	public function read( $name, $config ) {
-		if ( empty( $this->perms['read'] ) ) {
-			return;
-		}
 		$this->register( $name, $config, 'read' );
 	}
 
@@ -64,9 +61,6 @@ class Registrar {
 	 * @param array  $config Compact config array.
 	 */
 	public function write( $name, $config ) {
-		if ( empty( $this->perms['write'] ) ) {
-			return;
-		}
 		$config = array_merge( array( 'tier' => 'pro' ), $config );
 		$this->register( $name, $config, 'write' );
 	}
@@ -78,9 +72,6 @@ class Registrar {
 	 * @param array  $config Compact config array.
 	 */
 	public function delete( $name, $config ) {
-		if ( empty( $this->perms['delete'] ) ) {
-			return;
-		}
 		$config = array_merge( array( 'tier' => 'pro' ), $config );
 		$this->register( $name, $config, 'delete' );
 	}
@@ -115,6 +106,17 @@ class Registrar {
 		if ( isset( $config['annotations'] ) ) {
 			$annotations = array_merge( $annotations, $config['annotations'] );
 		}
+
+		// Wrap with per-ability permission gate (checked at execution time).
+		$ability_name = $name;
+		$module       = $this->module;
+		$original_cb  = $callback;
+		$callback     = static function( $input = null ) use ( $original_cb, $ability_name, $module, $op_type ) {
+			if ( ! wp_abilities_suite_ability_enabled( $ability_name, $module, $op_type ) ) {
+				return new \WP_Error( 'ability_disabled', sprintf( 'Ability "%s" is disabled by permission settings.', $ability_name ), array( 'status' => 403 ) );
+			}
+			return $original_cb( $input );
+		};
 
 		// Wrap Pro callbacks with license gate.
 		if ( $tier === 'pro' ) {

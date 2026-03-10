@@ -38,12 +38,62 @@ function wp_abilities_suite_sanitize_permissions( $input ) {
 	$defaults  = wp_abilities_suite_permission_defaults();
 	$sanitized = array();
 
+	// Module-level permissions.
 	foreach ( $defaults as $module => $ops ) {
 		$sanitized[ $module ] = array();
 		foreach ( $ops as $op => $default_val ) {
 			// Checkbox: present in POST = checked (true), absent = unchecked (false).
 			$sanitized[ $module ][ $op ] = ! empty( $input[ $module ][ $op ] );
 		}
+	}
+
+	// Per-ability overrides.
+	// Only store overrides that DIFFER from the module-level permission.
+	// This prevents stale overrides when module toggles change.
+	$category_to_module = array(
+		'content' => 'content', 'taxonomies' => 'taxonomies', 'plugins' => 'plugins',
+		'media' => 'media', 'users' => 'users', 'comments' => 'comments',
+		'menus' => 'menus', 'blocks' => 'blocks', 'patterns' => 'patterns',
+		'meta' => 'meta', 'settings' => 'settings', 'site-health' => 'site-health',
+		'cache' => 'cache', 'cron' => 'cron', 'themes' => 'themes',
+		'rest' => 'rest', 'rewrite' => 'rewrite', 'filesystem' => 'filesystem',
+	);
+	$overrides = array();
+	if ( ! empty( $input['_overrides'] ) && is_array( $input['_overrides'] ) ) {
+		foreach ( $input['_overrides'] as $ability_name => $enabled ) {
+			$ability_name = preg_replace( '/[^a-z0-9\-\/]/', '', $ability_name );
+			if ( empty( $ability_name ) ) {
+				continue;
+			}
+			$ability_enabled = ! empty( $enabled );
+
+			// Determine the module for this ability from the name prefix.
+			$parts  = explode( '/', $ability_name );
+			$module = $category_to_module[ $parts[0] ] ?? null;
+			if ( ! $module ) {
+				continue;
+			}
+
+			// Get the module-level permission for this ability's operation type.
+			$module_perms   = $sanitized[ $module ] ?? array();
+			// We need to know the op type. Abilities registered via the form have their op
+			// embedded in their checkbox placement. Since we only have the name, we check
+			// all three ops — if module has the op enabled but ability is disabled, store override.
+			// Simplification: store only if ability is disabled AND module would allow it.
+			$module_has_read   = ! empty( $module_perms['read'] );
+			$module_has_write  = ! empty( $module_perms['write'] );
+			$module_has_delete = ! empty( $module_perms['delete'] );
+			$module_would_allow = $module_has_read || $module_has_write || $module_has_delete;
+
+			// Only store if ability is OFF but module is ON (actual override).
+			if ( ! $ability_enabled && $module_would_allow ) {
+				$overrides[ $ability_name ] = false;
+			}
+		}
+	}
+
+	if ( ! empty( $overrides ) ) {
+		$sanitized['_overrides'] = $overrides;
 	}
 
 	return $sanitized;
@@ -124,22 +174,54 @@ function wp_abilities_suite_get_ability_counts() {
  * @return array [ 'enabled' => int, 'total' => int ]
  */
 function wp_abilities_suite_enabled_count() {
-	$counts  = wp_abilities_suite_get_ability_counts();
-	$enabled = 0;
-	$total   = 0;
+	if ( ! function_exists( 'wp_get_abilities' ) ) {
+		return array( 'enabled' => 0, 'total' => 0 );
+	}
 
-	foreach ( $counts as $module => $module_counts ) {
-		$perms = wp_abilities_suite_get_permissions( $module );
-		$total += $module_counts['total'];
+	$category_to_module = array(
+		'content'    => 'content',
+		'taxonomies' => 'taxonomies',
+		'plugins'    => 'plugins',
+		'media'      => 'media',
+		'users'      => 'users',
+		'comments'   => 'comments',
+		'menus'      => 'menus',
+		'blocks'     => 'blocks',
+		'patterns'   => 'patterns',
+		'meta'       => 'meta',
+		'settings'   => 'settings',
+		'site-health' => 'site-health',
+		'cache'      => 'cache',
+		'cron'       => 'cron',
+		'themes'     => 'themes',
+		'rest'       => 'rest',
+		'rewrite'    => 'rewrite',
+		'filesystem' => 'filesystem',
+	);
 
-		if ( ! empty( $perms['read'] ) ) {
-			$enabled += $module_counts['read'];
+	$abilities = wp_get_abilities();
+	$enabled   = 0;
+	$total     = 0;
+
+	foreach ( $abilities as $name => $ability ) {
+		if ( ! is_object( $ability ) || ! method_exists( $ability, 'get_category' ) ) {
+			continue;
 		}
-		if ( ! empty( $perms['write'] ) ) {
-			$enabled += $module_counts['write'];
+
+		$category = $ability->get_category();
+		$module   = $category_to_module[ $category ] ?? null;
+		if ( ! $module ) {
+			continue;
 		}
-		if ( ! empty( $perms['delete'] ) ) {
-			$enabled += $module_counts['delete'];
+
+		$meta        = $ability->get_meta();
+		$readonly    = ! empty( $meta['annotations']['readonly'] );
+		$destructive = ! empty( $meta['annotations']['destructive'] );
+		$op          = $destructive ? 'delete' : ( $readonly ? 'read' : 'write' );
+
+		$total++;
+		if ( wp_abilities_suite_ability_enabled( $name, $module, $op ) ) {
+			$enabled++;
 		}
 	}
 

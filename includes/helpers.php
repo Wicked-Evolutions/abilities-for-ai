@@ -198,14 +198,14 @@ function wp_abilities_suite_permission_defaults() {
 		'blocks'     => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'patterns'   => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'meta'       => array( 'read' => true, 'write' => true, 'delete' => false ),
-		'settings'   => array( 'read' => true, 'write' => false ),
+		'settings'   => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'site-health' => array( 'read' => true ),
 		'cache'      => array( 'read' => true, 'write' => true, 'delete' => false ),
-		'cron'       => array( 'read' => true ),
-		'themes'     => array( 'read' => true ),
+		'cron'       => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'themes'     => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'rest'       => array( 'read' => true ),
-		'rewrite'    => array( 'read' => true, 'write' => true ),
-		'filesystem' => array( 'read' => true, 'write' => false ),
+		'rewrite'    => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'filesystem' => array( 'read' => true, 'write' => true, 'delete' => false ),
 	);
 }
 
@@ -253,6 +253,36 @@ function wp_abilities_suite_get_permissions( $module ) {
 	$module_saved    = $perms[ $module ] ?? array();
 
 	return wp_parse_args( $module_saved, $module_defaults );
+}
+
+/**
+ * Check if a specific ability is enabled, considering per-ability overrides.
+ *
+ * Resolution order:
+ * 1. Per-ability override (if set) wins.
+ * 2. Module-level permission is the fallback.
+ *
+ * @param string $ability_name Full ability name (e.g. 'content/search-replace').
+ * @param string $module       Module slug.
+ * @param string $op           Operation type: 'read', 'write', or 'delete'.
+ * @return bool Whether the ability is permitted.
+ */
+function wp_abilities_suite_ability_enabled( $ability_name, $module, $op ) {
+	static $perms = null;
+	if ( $perms === null ) {
+		$perms = get_option( 'wp_abilities_suite_permissions', array() );
+	}
+
+	$overrides = $perms['_overrides'] ?? array();
+
+	// Per-ability override exists — use it.
+	if ( isset( $overrides[ $ability_name ] ) ) {
+		return ! empty( $overrides[ $ability_name ] );
+	}
+
+	// Fall back to module-level permission.
+	$module_perms = wp_abilities_suite_get_permissions( $module );
+	return ! empty( $module_perms[ $op ] );
 }
 
 /**

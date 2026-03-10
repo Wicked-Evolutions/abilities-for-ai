@@ -519,10 +519,12 @@ class WP_Abilities_Suite_Dashboard {
 								$detail_id  = 'detail-' . sanitize_html_class( str_replace( '/', '-', $name ) );
 								$source_css = self::get_source_css( $ability['source'] );
 								$op         = $this->get_ability_op( $ability );
-								$perms      = $module ? wp_abilities_suite_get_permissions( $module ) : array( 'read' => true, 'write' => true, 'delete' => true );
-								$is_enabled = ! empty( $perms[ $op ] );
+								$is_enabled = $module ? wp_abilities_suite_ability_enabled( $name, $module, $op ) : true;
+								$module_enabled = $module ? ! empty( wp_abilities_suite_get_permissions( $module )[ $op ] ) : true;
+								$has_override   = $is_enabled !== $module_enabled;
+								$safe_name      = esc_attr( $name );
 								?>
-								<tr>
+								<tr<?php if ( $has_override ) echo ' class="has-override"'; ?>>
 									<td>
 										<strong><?php echo esc_html( $name ); ?></strong>
 										<div class="row-actions">
@@ -552,9 +554,15 @@ class WP_Abilities_Suite_Dashboard {
 											<span class="badge badge-free">Free</span>
 										<?php endif; ?>
 									</td>
-									<td class="perm-col"><?php if ( 'read' === $op ) : ?><input type="checkbox" <?php checked( $is_enabled ); ?> disabled title="Controlled by module toggle"><?php endif; ?></td>
-									<td class="perm-col"><?php if ( 'write' === $op ) : ?><input type="checkbox" <?php checked( $is_enabled ); ?> disabled title="Controlled by module toggle"><?php endif; ?></td>
-									<td class="perm-col"><?php if ( 'delete' === $op ) : ?><input type="checkbox" <?php checked( $is_enabled ); ?> disabled title="Controlled by module toggle" class="destructive-check"><?php endif; ?></td>
+									<td class="perm-col"><?php if ( 'read' === $op ) : ?>
+										<input type="checkbox" class="ability-perm-checkbox" data-module="<?php echo esc_attr( $module ); ?>" data-ability="<?php echo $safe_name; ?>" data-op="read" <?php checked( $is_enabled ); ?> <?php if ( ! $module_enabled ) echo 'disabled title="Enable module Read first"'; ?>>
+									<?php endif; ?></td>
+									<td class="perm-col"><?php if ( 'write' === $op ) : ?>
+										<input type="checkbox" class="ability-perm-checkbox" data-module="<?php echo esc_attr( $module ); ?>" data-ability="<?php echo $safe_name; ?>" data-op="write" <?php checked( $is_enabled ); ?> <?php if ( ! $module_enabled ) echo 'disabled title="Enable module Write first"'; ?>>
+									<?php endif; ?></td>
+									<td class="perm-col"><?php if ( 'delete' === $op ) : ?>
+										<input type="checkbox" class="ability-perm-checkbox destructive-check" data-module="<?php echo esc_attr( $module ); ?>" data-ability="<?php echo $safe_name; ?>" data-op="delete" <?php checked( $is_enabled ); ?> <?php if ( ! $module_enabled ) echo 'disabled title="Enable module Delete first"'; ?>>
+									<?php endif; ?></td>
 								</tr>
 
 								<!-- Inline detail panel (hidden by default) -->
@@ -611,7 +619,7 @@ class WP_Abilities_Suite_Dashboard {
 					<span class="save-summary">
 						<strong id="save-enabled"><?php echo wp_abilities_suite_enabled_count()['enabled']; ?></strong>
 						of <?php echo wp_abilities_suite_enabled_count()['total']; ?> abilities enabled
-						· Restart MCP adapter after saving
+						· Changes take effect on next request
 					</span>
 				</div>
 			</div>
@@ -803,22 +811,68 @@ Active Plugins: <?php echo count( get_option( 'active_plugins', array() ) ); ?><
 			}
 		}
 		(function() {
-			var checkboxes = document.querySelectorAll('.perm-checkbox');
-			var enabledEl  = document.getElementById('save-enabled');
+			var moduleCheckboxes  = document.querySelectorAll('.perm-checkbox');
+			var abilityCheckboxes = document.querySelectorAll('.ability-perm-checkbox');
+			var enabledEl         = document.getElementById('save-enabled');
+			var form              = document.getElementById('wp-abilities-perm-form');
+
+			// Track each ability's initial checked state to detect user changes.
+			var initialState = {};
+			abilityCheckboxes.forEach(function(cb) {
+				initialState[cb.getAttribute('data-ability')] = cb.checked;
+			});
 
 			function recalc() {
 				var total = 0;
-				checkboxes.forEach(function(cb) {
-					if (cb.checked) {
-						total += parseInt(cb.getAttribute('data-count') || 0);
-					}
+				abilityCheckboxes.forEach(function(cb) {
+					if (cb.checked && !cb.disabled) total++;
 				});
 				if (enabledEl) enabledEl.textContent = total;
 			}
 
-			checkboxes.forEach(function(cb) {
-				cb.addEventListener('change', recalc);
+			// Module toggle: check/uncheck all ability checkboxes in that module+op.
+			moduleCheckboxes.forEach(function(mcb) {
+				mcb.addEventListener('change', function() {
+					var mod = mcb.getAttribute('data-module');
+					var op  = mcb.getAttribute('data-op');
+					abilityCheckboxes.forEach(function(acb) {
+						if (acb.getAttribute('data-module') === mod && acb.getAttribute('data-op') === op) {
+							acb.disabled = !mcb.checked;
+							acb.checked  = mcb.checked;
+						}
+					});
+					recalc();
+				});
 			});
+
+			// Individual ability checkbox: update count on change.
+			abilityCheckboxes.forEach(function(acb) {
+				acb.addEventListener('change', recalc);
+			});
+
+			// On form submit: inject hidden inputs ONLY for abilities that are unchecked.
+			// This way only disabled abilities get submitted as overrides.
+			if (form) {
+				form.addEventListener('submit', function() {
+					// Remove any previously injected override inputs.
+					form.querySelectorAll('.injected-override').forEach(function(el) { el.remove(); });
+
+					abilityCheckboxes.forEach(function(cb) {
+						var ability = cb.getAttribute('data-ability');
+						if (!cb.checked && !cb.disabled) {
+							// Ability is explicitly unchecked — inject hidden input.
+							var hidden = document.createElement('input');
+							hidden.type = 'hidden';
+							hidden.name = 'wp_abilities_suite_permissions[_overrides][' + ability + ']';
+							hidden.value = '0';
+							hidden.className = 'injected-override';
+							form.appendChild(hidden);
+						}
+					});
+				});
+			}
+
+			recalc();
 		})();
 		</script>
 		<?php
