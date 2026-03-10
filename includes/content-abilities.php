@@ -25,7 +25,7 @@ add_action( 'wp_abilities_api_init', function() {
 					'description' => 'Post type to list (post, page, or custom post type)',
 					'default'     => 'post',
 				),
-				'posts_per_page' => array(
+				'per_page' => array(
 					'type'        => 'integer',
 					'description' => 'Number of posts to return',
 					'default'     => 10,
@@ -80,7 +80,7 @@ add_action( 'wp_abilities_api_init', function() {
 
 			$args = array(
 				'post_type'      => $post_type,
-				'posts_per_page' => $input['posts_per_page'] ?? 10,
+				'posts_per_page' => (int) ( $input['per_page'] ?? 10 ),
 				'paged'          => $input['paged'] ?? 1,
 				'post_status'    => $input['post_status'] ?? 'publish',
 				'orderby'        => $input['orderby'] ?? 'date',
@@ -184,6 +184,11 @@ add_action( 'wp_abilities_api_init', function() {
 					'items'       => array( 'type' => 'string' ),
 					'description' => 'Sections to exclude. Options: meta, terms, thumbnail, author, content. Ignored if include is set.',
 				),
+				'char_limit' => array(
+					'type'        => 'integer',
+					'description' => 'Truncate post_content to this many characters. Useful to get metadata without full HTML weight. 0 or omitted = no limit.',
+					'minimum'     => 0,
+				),
 				'meta_keys' => array(
 					'type'        => 'array',
 					'items'       => array( 'type' => 'string' ),
@@ -225,7 +230,11 @@ add_action( 'wp_abilities_api_init', function() {
 			);
 
 			if ( isset( $sections['content'] ) ) {
-				$result['content'] = $post->post_content;
+				$content = $post->post_content;
+				if ( ! empty( $input['char_limit'] ) && mb_strlen( $content ) > $input['char_limit'] ) {
+					$content = mb_substr( $content, 0, $input['char_limit'] ) . '… [truncated]';
+				}
+				$result['content'] = $content;
 			}
 
 			if ( isset( $sections['meta'] ) ) {

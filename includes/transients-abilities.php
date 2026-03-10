@@ -131,14 +131,16 @@ add_action( 'wp_abilities_api_init', function() {
 			$info      = array(
 				'persistent_cache' => (bool) $using_ext,
 				'drop_in_exists'   => file_exists( WP_CONTENT_DIR . '/object-cache.php' ),
+				'class'            => '',
+				'stats'            => '',
 			);
 			if ( $using_ext && is_object( $wp_object_cache ) ) {
+				$info['class'] = get_class( $wp_object_cache );
 				if ( method_exists( $wp_object_cache, 'stats' ) ) {
 					ob_start();
 					$wp_object_cache->stats();
 					$info['stats'] = ob_get_clean();
 				}
-				$info['class'] = get_class( $wp_object_cache );
 			}
 			return $info;
 		},
