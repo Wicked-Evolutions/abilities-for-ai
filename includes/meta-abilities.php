@@ -382,4 +382,68 @@ add_action( 'wp_abilities_api_init', function() {
 			return array( 'post_id' => $post_id, 'key' => $key, 'deleted' => (bool) $result );
 		},
 	));
+
+	$reg->delete( 'meta/delete-term-meta', array(
+		'label'       => 'Delete Term Meta',
+		'description' => 'Delete a meta key from a taxonomy term.',
+		'capability'  => 'manage_options',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'term_id', 'meta_key' ),
+			'properties' => array(
+				'term_id'  => array( 'type' => 'integer', 'description' => 'Term ID' ),
+				'meta_key' => array( 'type' => 'string', 'description' => 'Meta key to delete' ),
+			),
+		),
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'term_id' => array( 'type' => 'integer' ),
+			'key'     => array( 'type' => 'string' ),
+			'deleted' => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function( $params ) {
+			$term_id = intval( $params['term_id'] ?? 0 );
+			$term    = get_term( $term_id );
+			if ( ! $term || is_wp_error( $term ) ) {
+				return wp_abilities_error( 'not_found', 'Term not found.' );
+			}
+			$key    = sanitize_text_field( $params['meta_key'] );
+			$result = delete_term_meta( $term_id, $key );
+			return array( 'term_id' => $term_id, 'key' => $key, 'deleted' => (bool) $result );
+		},
+	));
+
+	$reg->delete( 'meta/delete-user-meta', array(
+		'label'       => 'Delete User Meta',
+		'description' => 'Delete a meta key from a user. Security-sensitive keys are blocked.',
+		'capability'  => 'edit_users',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'user_id', 'meta_key' ),
+			'properties' => array(
+				'user_id'  => array( 'type' => 'integer', 'description' => 'User ID' ),
+				'meta_key' => array( 'type' => 'string', 'description' => 'Meta key to delete' ),
+			),
+		),
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'user_id' => array( 'type' => 'integer' ),
+			'key'     => array( 'type' => 'string' ),
+			'deleted' => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function( $params ) {
+			$user_id = intval( $params['user_id'] ?? 0 );
+			if ( ! get_userdata( $user_id ) ) {
+				return wp_abilities_error( 'not_found', 'User not found.' );
+			}
+			if ( ! current_user_can( 'edit_user', $user_id ) ) {
+				return wp_abilities_error( 'rest_forbidden', 'You do not have permission to delete meta for this user.' );
+			}
+			$key         = sanitize_text_field( $params['meta_key'] );
+			$denied_keys = array( 'wp_capabilities', 'wp_user_level', 'session_tokens', 'user_pass', 'auth_cookie' );
+			if ( in_array( $key, $denied_keys, true ) ) {
+				return wp_abilities_error( 'rest_forbidden', 'This meta key is protected and cannot be deleted via this ability.' );
+			}
+			$result = delete_user_meta( $user_id, $key );
+			return array( 'user_id' => $user_id, 'key' => $key, 'deleted' => (bool) $result );
+		},
+	));
 });

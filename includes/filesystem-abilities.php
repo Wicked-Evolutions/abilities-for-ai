@@ -307,4 +307,53 @@ add_action( 'wp_abilities_api_init', function() {
 			);
 		},
 	) );
+
+	// ===== FILESYSTEM — DELETE =====
+
+	$reg->delete( 'filesystem/delete-file', array(
+		'label'       => 'Delete File',
+		'description' => 'Delete a file within the WordPress installation. Restricted to safe extensions (css, js, json, md, txt, html). PHP files are blocked.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'path' ),
+			'properties' => array(
+				'path' => array(
+					'type'        => 'string',
+					'description' => 'Relative path from ABSPATH',
+				),
+			),
+		),
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'path'    => array( 'type' => 'string' ),
+			'deleted' => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function( $params ) {
+			if ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) {
+				return wp_abilities_error( 'rest_forbidden', 'File modifications are disabled (DISALLOW_FILE_MODS is set in wp-config.php).' );
+			}
+
+			$path = $params['path'] ?? '';
+
+			$ext_check = wp_abilities_filesystem_check_extension( $path );
+			if ( is_wp_error( $ext_check ) ) {
+				return $ext_check;
+			}
+
+			$abs = wp_abilities_filesystem_validate_path( $path, true );
+			if ( is_wp_error( $abs ) ) {
+				return $abs;
+			}
+
+			if ( ! is_file( $abs ) ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Path is not a file.' );
+			}
+
+			$result = @unlink( $abs );
+			if ( ! $result ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Could not delete file. Check permissions.' );
+			}
+
+			return array( 'success' => true, 'path' => $path, 'deleted' => true );
+		},
+	) );
 } );

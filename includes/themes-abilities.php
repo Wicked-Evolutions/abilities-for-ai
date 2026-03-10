@@ -169,4 +169,228 @@ add_action( 'wp_abilities_api_init', function() {
 			return array( 'theme' => $theme->get( 'Name' ), 'data' => $data );
 		},
 	));
+
+	// ===== THEMES — WRITE =====
+
+	$reg->write( 'themes/activate', array(
+		'label'       => 'Activate Theme',
+		'description' => 'Switch to a different installed theme. The theme must already be installed.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'stylesheet' ),
+			'properties' => array(
+				'stylesheet' => array(
+					'type'        => 'string',
+					'description' => 'Theme stylesheet slug (directory name)',
+				),
+			),
+		),
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'message'    => array( 'type' => 'string' ),
+			'stylesheet' => array( 'type' => 'string' ),
+		) ),
+		'callback' => function( $input ) {
+			$stylesheet = sanitize_text_field( $input['stylesheet'] );
+			$theme      = wp_get_theme( $stylesheet );
+
+			if ( ! $theme->exists() ) {
+				return new WP_Error( 'not_found', "Theme '{$stylesheet}' is not installed" );
+			}
+
+			if ( get_stylesheet() === $stylesheet ) {
+				return array( 'success' => true, 'message' => 'Theme is already active', 'stylesheet' => $stylesheet );
+			}
+
+			switch_theme( $stylesheet );
+
+			return array( 'success' => true, 'message' => 'Theme activated successfully', 'stylesheet' => $stylesheet );
+		},
+	) );
+
+	$reg->write( 'themes/install', array(
+		'capability'  => 'install_themes',
+		'label'       => 'Install Theme',
+		'description' => 'Install a theme from the WordPress.org repository by slug.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'slug' ),
+			'properties' => array(
+				'slug' => array(
+					'type'        => 'string',
+					'description' => 'Theme slug from WordPress.org repository',
+				),
+				'activate' => array(
+					'type'        => 'boolean',
+					'default'     => false,
+					'description' => 'Activate theme after installation',
+				),
+			),
+		),
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'message'    => array( 'type' => 'string' ),
+			'stylesheet' => array( 'type' => 'string' ),
+		) ),
+		'annotations' => array( 'idempotent' => false ),
+		'callback' => function( $input ) {
+			if ( ! function_exists( 'themes_api' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/theme.php';
+			}
+			if ( ! class_exists( 'Theme_Upgrader' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+			}
+
+			$slug = sanitize_text_field( $input['slug'] );
+
+			$api = themes_api( 'theme_information', array(
+				'slug'   => $slug,
+				'fields' => array( 'sections' => false, 'description' => false ),
+			) );
+
+			if ( is_wp_error( $api ) ) {
+				return $api;
+			}
+
+			$upgrader = new Theme_Upgrader( new WP_Ajax_Upgrader_Skin() );
+			$result   = $upgrader->install( $api->download_link );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+			if ( ! $result ) {
+				return new WP_Error( 'ability_invalid_input', 'Theme installation failed' );
+			}
+
+			$response = array(
+				'success'    => true,
+				'message'    => 'Theme installed successfully',
+				'stylesheet' => $slug,
+			);
+
+			if ( $input['activate'] ?? false ) {
+				switch_theme( $slug );
+				$response['message'] = 'Theme installed and activated successfully';
+			}
+
+			return $response;
+		},
+	) );
+
+	$reg->write( 'themes/set-mod', array(
+		'capability'  => 'edit_theme_options',
+		'label'       => 'Set Theme Mod',
+		'description' => 'Set a theme modification value for the active theme.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'name', 'value' ),
+			'properties' => array(
+				'name' => array(
+					'type'        => 'string',
+					'description' => 'Theme mod name',
+				),
+				'value' => array(
+					'type'        => 'string',
+					'description' => 'Value to set (use JSON string for arrays/objects)',
+				),
+			),
+		),
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'name'  => array( 'type' => 'string' ),
+			'value' => array( 'type' => 'string' ),
+		) ),
+		'callback' => function( $input ) {
+			$name  = sanitize_text_field( $input['name'] );
+			$value = $input['value'];
+
+			// Attempt to decode JSON for complex values.
+			$decoded = json_decode( $value, true );
+			if ( json_last_error() === JSON_ERROR_NONE && ( is_array( $decoded ) || is_object( $decoded ) ) ) {
+				$value = $decoded;
+			}
+
+			set_theme_mod( $name, $value );
+
+			return array(
+				'success' => true,
+				'name'    => $name,
+				'value'   => is_scalar( $value ) ? (string) $value : wp_json_encode( $value ),
+			);
+		},
+	) );
+
+	// ===== THEMES — DELETE =====
+
+	$reg->delete( 'themes/delete', array(
+		'capability'  => 'delete_themes',
+		'label'       => 'Delete Theme',
+		'description' => 'Delete an installed theme. The theme must not be the active theme or its parent.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'stylesheet' ),
+			'properties' => array(
+				'stylesheet' => array(
+					'type'        => 'string',
+					'description' => 'Theme stylesheet slug (directory name) to delete',
+				),
+			),
+		),
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'message' => array( 'type' => 'string' ),
+		) ),
+		'callback' => function( $input ) {
+			if ( ! function_exists( 'delete_theme' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/theme.php';
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+			}
+
+			$stylesheet = sanitize_text_field( $input['stylesheet'] );
+			$theme      = wp_get_theme( $stylesheet );
+
+			if ( ! $theme->exists() ) {
+				return new WP_Error( 'not_found', "Theme '{$stylesheet}' is not installed" );
+			}
+
+			if ( get_stylesheet() === $stylesheet || get_template() === $stylesheet ) {
+				return new WP_Error( 'ability_invalid_input', 'Cannot delete the active theme or its parent' );
+			}
+
+			$result = delete_theme( $stylesheet );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			return array( 'success' => true, 'message' => 'Theme deleted successfully' );
+		},
+	) );
+
+	$reg->delete( 'themes/delete-mod', array(
+		'capability'  => 'edit_theme_options',
+		'label'       => 'Delete Theme Mod',
+		'description' => 'Remove a theme modification from the active theme.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'name' ),
+			'properties' => array(
+				'name' => array(
+					'type'        => 'string',
+					'description' => 'Theme mod name to remove',
+				),
+			),
+		),
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'name'    => array( 'type' => 'string' ),
+			'deleted' => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function( $input ) {
+			$name = sanitize_text_field( $input['name'] );
+
+			$exists = get_theme_mod( $name, '__NOT_SET__' );
+			if ( $exists === '__NOT_SET__' ) {
+				return wp_abilities_error( 'not_found', "Theme mod '{$name}' does not exist." );
+			}
+
+			remove_theme_mod( $name );
+
+			return array( 'success' => true, 'name' => $name, 'deleted' => true );
+		},
+	) );
 });

@@ -153,4 +153,51 @@ add_action( 'wp_abilities_api_init', function() {
 			return array( 'option_name' => $name, 'updated' => (bool) $result, 'new_value' => get_option( $name ) );
 		},
 	));
+
+	// ===== SETTINGS — DELETE =====
+
+	$reg->delete( 'settings/delete', array(
+		'label'       => 'Delete Option',
+		'description' => 'Delete a WordPress option from the database. Core WordPress options and protected options are blocked. Use this for cleaning up custom/plugin options only.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'option_name' ),
+			'properties' => array(
+				'option_name' => array(
+					'type'        => 'string',
+					'description' => 'Option name to delete',
+				),
+			),
+		),
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'option_name' => array( 'type' => 'string' ),
+			'deleted'     => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function( $params ) use ( $settings_groups ) {
+			$name = sanitize_text_field( $params['option_name'] ?? '' );
+
+			// Block deletion of core settings.
+			$core_options = array();
+			foreach ( $settings_groups as $keys ) {
+				$core_options = array_merge( $core_options, $keys );
+			}
+			// Also block critical WP internals.
+			$protected = array_merge( $core_options, array(
+				'siteurl', 'home', 'admin_email', 'active_plugins',
+				'template', 'stylesheet', 'db_version', 'initial_db_version',
+				'wp_user_roles', 'auth_key', 'auth_salt',
+			) );
+
+			if ( in_array( $name, $protected, true ) ) {
+				return wp_abilities_error( 'rest_forbidden', "Option '{$name}' is a core/protected option and cannot be deleted." );
+			}
+
+			if ( get_option( $name ) === false ) {
+				return wp_abilities_error( 'not_found', "Option '{$name}' does not exist." );
+			}
+
+			$result = delete_option( $name );
+			return array( 'success' => true, 'option_name' => $name, 'deleted' => (bool) $result );
+		},
+	));
 });

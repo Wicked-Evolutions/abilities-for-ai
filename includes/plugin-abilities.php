@@ -509,4 +509,51 @@ add_action( 'wp_abilities_api_init', function() {
 			return $response;
 		},
 	) );
+
+	// ===== PLUGINS — DELETE =====
+
+	$reg->delete( 'plugins/delete', array(
+		'capability'  => 'delete_plugins',
+		'label'       => 'Delete Plugin',
+		'description' => 'Delete an inactive plugin from the filesystem. The plugin must be deactivated first.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'plugin' ),
+			'properties' => array(
+				'plugin' => array(
+					'type'        => 'string',
+					'description' => 'Plugin file path (e.g., "plugin-folder/plugin-file.php")',
+				),
+			),
+		),
+		'output_schema' => wp_abilities_suite_schema_success_output( array(
+			'message' => array( 'type' => 'string' ),
+		) ),
+		'callback' => function( $input ) {
+			if ( ! function_exists( 'get_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+			if ( ! function_exists( 'delete_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+			}
+
+			$plugin_file = $input['plugin'];
+			$all_plugins = get_plugins();
+
+			if ( ! isset( $all_plugins[ $plugin_file ] ) ) {
+				return new WP_Error( 'not_found', 'Plugin not found' );
+			}
+
+			if ( is_plugin_active( $plugin_file ) ) {
+				return new WP_Error( 'ability_invalid_input', 'Plugin must be deactivated before deletion' );
+			}
+
+			$result = delete_plugins( array( $plugin_file ) );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			return array( 'success' => true, 'message' => 'Plugin deleted successfully' );
+		},
+	) );
 } );

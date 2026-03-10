@@ -227,7 +227,7 @@ The filesystem module (v3.6.0) uses native PHP filesystem functions with a layer
 
 ## Free/Pro Tier System
 
-All 111 abilities are registered and visible to AI agents regardless of license. Pro abilities return a clear 403 response at execution time without a valid license, creating natural discovery of available capabilities.
+All 112 abilities are registered and visible to AI agents regardless of license. Pro abilities return a clear 403 response at execution time without a valid license, creating natural discovery of available capabilities.
 
 - **Permission toggle** — per-module write ON/OFF control in admin dashboard
 - **License gate** — Pro abilities require a valid license key (Phase 1: any non-empty key activates)

@@ -111,6 +111,67 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	$reg->read( 'media/get', array(
+		'label'       => 'Get Media Item',
+		'description' => 'Get detailed information about a specific media attachment by ID, including metadata, sizes, and file info.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'id' ),
+			'properties' => array(
+				'id' => array( 'type' => 'integer', 'description' => 'Attachment ID' ),
+			),
+		),
+		'output_schema' => wp_abilities_suite_schema_item_output( array(
+			'id'        => array( 'type' => 'integer' ),
+			'title'     => array( 'type' => 'string' ),
+			'url'       => array( 'type' => 'string' ),
+			'mime_type' => array( 'type' => 'string' ),
+			'date'      => array( 'type' => 'string' ),
+		) ),
+		'callback' => function( $input ) {
+			$attachment = get_post( $input['id'] );
+			if ( ! $attachment || $attachment->post_type !== 'attachment' ) {
+				return new WP_Error( 'not_found', 'Media item not found' );
+			}
+
+			$file_path = get_attached_file( $attachment->ID );
+			$file_size = file_exists( $file_path ) ? filesize( $file_path ) : 0;
+			$metadata  = wp_get_attachment_metadata( $attachment->ID );
+
+			$result = array(
+				'id'          => $attachment->ID,
+				'title'       => $attachment->post_title,
+				'caption'     => $attachment->post_excerpt,
+				'description' => $attachment->post_content,
+				'alt_text'    => get_post_meta( $attachment->ID, '_wp_attachment_image_alt', true ),
+				'mime_type'   => $attachment->post_mime_type,
+				'url'         => wp_get_attachment_url( $attachment->ID ),
+				'date'        => $attachment->post_date,
+				'modified'    => $attachment->post_modified,
+				'author'      => (int) $attachment->post_author,
+				'file_size'   => $file_size,
+				'filename'    => basename( $file_path ),
+				'parent'      => (int) $attachment->post_parent,
+				'metadata'    => $metadata,
+			);
+
+			// Add image sizes if it's an image.
+			if ( wp_attachment_is_image( $attachment->ID ) && ! empty( $metadata['sizes'] ) ) {
+				$sizes = array();
+				foreach ( $metadata['sizes'] as $size_name => $size_data ) {
+					$sizes[ $size_name ] = array(
+						'width'  => $size_data['width'],
+						'height' => $size_data['height'],
+						'url'    => wp_get_attachment_image_url( $attachment->ID, $size_name ),
+					);
+				}
+				$result['sizes'] = $sizes;
+			}
+
+			return $result;
+		},
+	) );
+
 	// ===== MEDIA — WRITE =====
 
 	$reg->write( 'media/create', array(

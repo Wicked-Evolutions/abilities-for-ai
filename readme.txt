@@ -12,7 +12,7 @@ Complete native WordPress AI control through the Abilities API — content, bloc
 
 == Description ==
 
-Abilities Suite for WordPress gives AI clients full control over native WordPress functionality through the [WordPress Abilities API](https://developer.wordpress.org/abilities/). 113 abilities across 18 modules — from content management to block editing, metadata to cron scheduling.
+Abilities Suite for WordPress gives AI clients full control over native WordPress functionality through the [WordPress Abilities API](https://developer.wordpress.org/abilities/). 112 abilities across 18 modules — from content management to block editing, metadata to cron scheduling.
 
 **Works with any MCP-compatible AI client** — Claude Code, Claude Desktop, Cursor, and more.
 
