@@ -38,6 +38,13 @@ class WP_Abilities_Suite_License_Manager {
 	const PRODUCT_ID = 66;
 
 	/**
+	 * FluentCart product ID for "Abilities for WordPress — Multisite".
+	 *
+	 * @var int
+	 */
+	const PRODUCT_ID_MULTISITE = 78;
+
+	/**
 	 * Cache lifetime for a successful validation result (24 hours).
 	 *
 	 * @var int
@@ -76,7 +83,7 @@ class WP_Abilities_Suite_License_Manager {
 			return 'active' === $cached;
 		}
 
-		$license_key = get_option( self::OPT_LICENSE_KEY, '' );
+		$license_key = self::get_opt( self::OPT_LICENSE_KEY, '' );
 		if ( empty( $license_key ) ) {
 			return false;
 		}
@@ -91,7 +98,7 @@ class WP_Abilities_Suite_License_Manager {
 		$is_active = isset( $result['status'] ) && 'valid' === $result['status'];
 
 		if ( $is_active ) {
-			update_option( self::OPT_LAST_VALID, time() );
+			self::update_opt( self::OPT_LAST_VALID, time() );
 			set_transient( self::TRANSIENT_STATUS, 'active', self::CACHE_TTL );
 		} else {
 			set_transient( self::TRANSIENT_STATUS, 'inactive', self::CACHE_TTL );
@@ -121,6 +128,20 @@ class WP_Abilities_Suite_License_Manager {
 			'site_url'    => home_url(),
 		) );
 
+		// If key_mismatch on single-site product, try the multisite product ID.
+		if (
+			! is_wp_error( $response )
+			&& isset( $response['error_type'] )
+			&& 'key_mismatch' === $response['error_type']
+			&& is_multisite()
+		) {
+			$response = self::remote_request( 'activate_license', array(
+				'license_key' => $license_key,
+				'item_id'     => self::PRODUCT_ID_MULTISITE,
+				'site_url'    => home_url(),
+			) );
+		}
+
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -130,10 +151,21 @@ class WP_Abilities_Suite_License_Manager {
 			return new WP_Error( $response['error_type'] ?? 'activation_failed', $message );
 		}
 
+		// Detect license scope from the product ID in the API response.
+		$response_product = (int) ( $response['product_id'] ?? $response['item_id'] ?? self::PRODUCT_ID );
+		$is_network       = is_multisite() && self::PRODUCT_ID_MULTISITE === $response_product;
+
+		// Set scope before storing options so get_opt/update_opt route correctly.
+		if ( $is_network ) {
+			update_site_option( 'wp_abilities_suite_license_scope', 'network' );
+		} else {
+			delete_site_option( 'wp_abilities_suite_license_scope' );
+		}
+
 		// Store the key and activation hash for future check_license calls.
-		update_option( self::OPT_LICENSE_KEY, $license_key );
-		update_option( self::OPT_ACTIV_HASH, $response['activation_hash'] ?? '' );
-		update_option( self::OPT_LAST_VALID, time() );
+		self::update_opt( self::OPT_LICENSE_KEY, $license_key );
+		self::update_opt( self::OPT_ACTIV_HASH, $response['activation_hash'] ?? '' );
+		self::update_opt( self::OPT_LAST_VALID, time() );
 
 		delete_transient( self::TRANSIENT_STATUS );
 
@@ -149,22 +181,23 @@ class WP_Abilities_Suite_License_Manager {
 	 * @return bool
 	 */
 	public static function deactivate() {
-		$license_key = get_option( self::OPT_LICENSE_KEY, '' );
-		$activ_hash  = get_option( self::OPT_ACTIV_HASH, '' );
+		$license_key = self::get_opt( self::OPT_LICENSE_KEY, '' );
+		$activ_hash  = self::get_opt( self::OPT_ACTIV_HASH, '' );
 
 		if ( ! empty( $license_key ) ) {
 			self::remote_request( 'deactivate_license', array(
 				'license_key'     => $license_key,
 				'activation_hash' => $activ_hash,
-				'item_id'         => self::PRODUCT_ID,
+				'item_id'         => self::current_product_id(),
 				'site_url'        => home_url(),
 			) );
 		}
 
-		delete_option( self::OPT_LICENSE_KEY );
-		delete_option( self::OPT_ACTIV_HASH );
-		delete_option( self::OPT_LAST_VALID );
+		self::delete_opt( self::OPT_LICENSE_KEY );
+		self::delete_opt( self::OPT_ACTIV_HASH );
+		self::delete_opt( self::OPT_LAST_VALID );
 		delete_transient( self::TRANSIENT_STATUS );
+		delete_site_option( 'wp_abilities_suite_license_scope' );
 
 		return true;
 	}
@@ -193,8 +226,8 @@ class WP_Abilities_Suite_License_Manager {
 	 * @return array Keys: key (masked), status, expiration, product, activated.
 	 */
 	public static function get_status() {
-		$license_key = get_option( self::OPT_LICENSE_KEY, '' );
-		$last_valid  = get_option( self::OPT_LAST_VALID, 0 );
+		$license_key = self::get_opt( self::OPT_LICENSE_KEY, '' );
+		$last_valid  = self::get_opt( self::OPT_LAST_VALID, 0 );
 
 		if ( empty( $license_key ) ) {
 			return array(
@@ -224,6 +257,65 @@ class WP_Abilities_Suite_License_Manager {
 	// ----------------------------------------------------------------------------
 
 	/**
+	 * Whether the current license has network (multisite) scope.
+	 *
+	 * @return bool
+	 */
+	private static function is_network_license() {
+		if ( ! is_multisite() ) {
+			return false;
+		}
+		return 'network' === get_site_option( 'wp_abilities_suite_license_scope', '' );
+	}
+
+	/**
+	 * Return the correct FluentCart product ID for API calls.
+	 *
+	 * @return int
+	 */
+	private static function current_product_id() {
+		return self::is_network_license() ? self::PRODUCT_ID_MULTISITE : self::PRODUCT_ID;
+	}
+
+	/**
+	 * Read a license option, respecting network scope.
+	 *
+	 * @param string $key     Option key.
+	 * @param mixed  $default Default value.
+	 * @return mixed
+	 */
+	private static function get_opt( $key, $default = '' ) {
+		return self::is_network_license() ? get_site_option( $key, $default ) : get_option( $key, $default );
+	}
+
+	/**
+	 * Write a license option, respecting network scope.
+	 *
+	 * @param string $key   Option key.
+	 * @param mixed  $value Value.
+	 */
+	private static function update_opt( $key, $value ) {
+		if ( self::is_network_license() ) {
+			update_site_option( $key, $value );
+		} else {
+			update_option( $key, $value );
+		}
+	}
+
+	/**
+	 * Delete a license option, respecting network scope.
+	 *
+	 * @param string $key Option key.
+	 */
+	private static function delete_opt( $key ) {
+		if ( self::is_network_license() ) {
+			delete_site_option( $key );
+		} else {
+			delete_option( $key );
+		}
+	}
+
+	/**
 	 * POST to the FluentCart check_license endpoint using the activation hash.
 	 *
 	 * Uses activation_hash (not the raw key) for periodic checks — avoids
@@ -233,10 +325,10 @@ class WP_Abilities_Suite_License_Manager {
 	 * @return array|WP_Error Decoded JSON response or WP_Error on failure.
 	 */
 	private static function remote_check( $license_key ) {
-		$activ_hash = get_option( self::OPT_ACTIV_HASH, '' );
+		$activ_hash = self::get_opt( self::OPT_ACTIV_HASH, '' );
 
 		$payload = array(
-			'item_id'  => self::PRODUCT_ID,
+			'item_id'  => self::current_product_id(),
 			'site_url' => home_url(),
 		);
 
@@ -294,7 +386,7 @@ class WP_Abilities_Suite_License_Manager {
 	 * @return bool
 	 */
 	private static function is_within_grace_period() {
-		$last_valid = (int) get_option( self::OPT_LAST_VALID, 0 );
+		$last_valid = (int) self::get_opt( self::OPT_LAST_VALID, 0 );
 		if ( $last_valid <= 0 ) {
 			return false;
 		}
