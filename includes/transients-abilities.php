@@ -129,7 +129,7 @@ add_action( 'wp_abilities_api_init', function() {
 			global $wp_object_cache;
 			$using_ext = wp_using_ext_object_cache();
 			$info      = array(
-				'persistent_cache' => $using_ext,
+				'persistent_cache' => (bool) $using_ext,
 				'drop_in_exists'   => file_exists( WP_CONTENT_DIR . '/object-cache.php' ),
 			);
 			if ( $using_ext && is_object( $wp_object_cache ) ) {
