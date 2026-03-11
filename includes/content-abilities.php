@@ -501,12 +501,8 @@ add_action( 'wp_abilities_api_init', function() {
 					'description' => 'Post slug. Auto-generated from title if not provided.',
 				),
 				'terms' => array(
-					'type'        => 'object',
-					'description' => 'Taxonomy terms to assign. Keys are taxonomy slugs (e.g. "category", "post_tag"), values are arrays of term IDs.',
-					'additionalProperties' => array(
-						'type'  => 'array',
-						'items' => array( 'type' => 'integer' ),
-					),
+					'type'        => 'string',
+					'description' => 'JSON object of taxonomy terms to assign. Keys are taxonomy slugs, values are arrays of term IDs. Example: {"category": [3, 5], "post_tag": [12]}',
 				),
 			),
 		),
@@ -562,8 +558,15 @@ add_action( 'wp_abilities_api_init', function() {
 				return $post_id;
 			}
 
-			if ( ! empty( $input['terms'] ) && is_array( $input['terms'] ) ) {
-				foreach ( $input['terms'] as $taxonomy => $term_ids ) {
+			if ( ! empty( $input['terms'] ) ) {
+				$terms = $input['terms'];
+				if ( is_string( $terms ) ) {
+					$terms = json_decode( $terms, true );
+				}
+				if ( ! is_array( $terms ) ) {
+					$terms = array();
+				}
+				foreach ( $terms as $taxonomy => $term_ids ) {
 					$taxonomy = sanitize_key( $taxonomy );
 					if ( ! taxonomy_exists( $taxonomy ) ) {
 						continue;
