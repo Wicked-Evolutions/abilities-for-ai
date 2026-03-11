@@ -282,15 +282,30 @@ No Composer dependencies.
 
 ### Capability Checks
 
-Every ability enforces WordPress capabilities at execution time:
+Every ability enforces WordPress capabilities at execution time. The WordPress user role assigned to your AI agent determines which modules are accessible:
 
-- `edit_posts` — content, taxonomy, block, pattern, meta operations
-- `activate_plugins` — plugin management
-- `upload_files` — media operations
-- `create_users` — user management
-- `moderate_comments` — comment operations
-- `edit_theme_options` — menu operations
-- `manage_options` — settings, cache, cron, themes, site health, REST, rewrite, filesystem
+| Module | Capability | Administrator | Editor |
+|--------|-----------|:---:|:---:|
+| Content | `edit_posts` | Yes | Yes |
+| Blocks | `edit_posts` | Yes | Yes |
+| Taxonomies | `edit_posts` | Yes | Yes |
+| Patterns | `edit_posts` | Yes | Yes |
+| Meta | `edit_posts` | Yes | Yes |
+| Media | `upload_files` | Yes | Yes |
+| Comments | `moderate_comments` | Yes | — |
+| Menus | `edit_theme_options` | Yes | — |
+| Themes | `switch_themes` | Yes | — |
+| Users | `list_users` | Yes | — |
+| Plugins | `activate_plugins` | Yes | — |
+| Settings | `manage_options` | Yes | — |
+| Cache | `manage_options` | Yes | — |
+| Cron | `manage_options` | Yes | — |
+| Filesystem | `manage_options` | Yes | — |
+| REST Discovery | `manage_options` | Yes | — |
+| Rewrite | `manage_options` | Yes | — |
+| Site Health | `view_site_health_checks` | Yes | — |
+
+**Editor** gives access to 6 content-focused modules — ideal for publishing workflows where AI should write content but not manage infrastructure. **Administrator** unlocks all 18 modules.
 
 ### Permission Toggles
 
