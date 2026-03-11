@@ -5,6 +5,10 @@
  * Provides a namespaced static interface for helper functions.
  * Procedural functions are defined in includes/helpers.php for backward compat.
  * New code can use this class; existing module files continue using functions directly.
+ * *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
  * @package WickedEvolutions\AbilitiesSuite
  */

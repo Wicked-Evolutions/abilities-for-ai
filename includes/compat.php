@@ -8,6 +8,10 @@
  * after PSR-4 adoption.
  *
  * Load order: After autoloader registration. Before module files.
+ * *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
  * @package WickedEvolutions\AbilitiesSuite
  */

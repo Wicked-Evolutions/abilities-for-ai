@@ -4,6 +4,10 @@
  *
  * WordPress media library management.
  *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
  * @package WordPress_Abilities_Suite
  */
 
@@ -174,7 +178,9 @@ add_action( 'wp_abilities_api_init', function() {
 
 	// ===== MEDIA — WRITE =====
 
+	// media/create is free — round-trip: upload → test → delete.
 	$reg->write( 'media/create', array(
+		'tier'        => 'free',
 		'label'       => 'Upload Media',
 		'description' => 'Upload media from a URL to the WordPress media library',
 		'input_schema' => array(
@@ -485,7 +491,9 @@ add_action( 'wp_abilities_api_init', function() {
 
 	// ===== MEDIA — DELETE =====
 
+	// media/delete is free — round-trip: upload → test → delete.
 	$reg->delete( 'media/delete', array(
+		'tier'        => 'free',
 		'capability'  => 'delete_posts',
 		'label'       => 'Delete Media',
 		'description' => 'Delete a media item from the library',

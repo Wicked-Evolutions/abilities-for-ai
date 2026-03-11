@@ -3,9 +3,10 @@
  * Plugin Name: Abilities Suite for WordPress
  * Plugin URI:  https://github.com/Influencentricity/abilities-suite-for-wordpress
  * Description: 112 native WordPress abilities across 18 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, filesystem, and more. Powers AI control through the official Abilities API.
- * Version: 3.8.1
+ * Version: 3.10.0
  * Author: Influencentricity
  * Author URI: https://influencentricity.com
+ * Copyright: Copyright (C) 2026 Influencentricity | Wicked Evolutions
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Requires PHP: 7.4
@@ -16,7 +17,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Define plugin constants
-define( 'WP_ABILITIES_SUITE_VERSION', '3.7.2' );
+define( 'WP_ABILITIES_SUITE_VERSION', '3.10.0' );
 define( 'WP_ABILITIES_SUITE_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WP_ABILITIES_SUITE_URL', plugin_dir_url( __FILE__ ) );
 

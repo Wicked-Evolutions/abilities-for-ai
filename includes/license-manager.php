@@ -14,6 +14,10 @@
  *                    to check_license. Falls back to grace period on failure.
  *   3. deactivate() — POSTs deactivate, clears local state.
  *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
  * @package WordPress_Abilities_Suite
  */
 

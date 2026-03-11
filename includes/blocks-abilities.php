@@ -4,6 +4,10 @@
  *
  * Parse, serialize, list, find, insert, replace, and remove Gutenberg blocks.
  *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
  * @package WordPress_Abilities_Suite
  */
 
@@ -345,7 +349,9 @@ add_action( 'wp_abilities_api_init', function() {
 
 	// ===== BLOCKS — DELETE =====
 
+	// blocks/remove is free — round-trip: insert → test → remove the test.
 	$reg->delete( 'blocks/remove', array(
+		'tier'        => 'free',
 		'label'       => 'Remove Block',
 		'description' => 'Remove a block at a specific index position from a post.',
 		'input_schema' => array(

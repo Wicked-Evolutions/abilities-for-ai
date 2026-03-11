@@ -18,6 +18,10 @@
  *   - menus/assign-location     (write)
  *   - menus/unassign-location   (write)
  *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
  * @package WordPress_Abilities_Suite
  */
 
@@ -494,7 +498,9 @@ add_action( 'wp_abilities_api_init', function() {
 
 	// ===== MENUS — DELETE =====
 
+	// menus/delete-menu is free — round-trip: create → test → delete the test.
 	$reg->delete( 'menus/delete-menu', array(
+		'tier'        => 'free',
 		'label'       => 'Delete Menu',
 		'description' => 'Delete a navigation menu and all its items. Destructive and cannot be undone.',
 		'input_schema' => array(
@@ -524,7 +530,9 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	// menus/delete-menu-item is free — round-trip: add → test → delete the test.
 	$reg->delete( 'menus/delete-menu-item', array(
+		'tier'        => 'free',
 		'label'       => 'Delete Menu Item',
 		'description' => 'Remove a single item from a menu.',
 		'input_schema' => array(

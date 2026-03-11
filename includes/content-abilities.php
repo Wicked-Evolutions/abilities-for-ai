@@ -4,6 +4,10 @@
  *
  * WordPress content (posts, pages, CPTs) management.
  *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
  * @package WordPress_Abilities_Suite
  */
 
@@ -841,7 +845,9 @@ add_action( 'wp_abilities_api_init', function() {
 
 	// ===== CONTENT — DELETE =====
 
+	// content/delete is free — round-trip: create → test → delete the test.
 	$reg->delete( 'content/delete', array(
+		'tier'        => 'free',
 		'label'       => 'Delete Content',
 		'description' => 'Delete content (move to trash or permanently delete)',
 		'input_schema' => array(

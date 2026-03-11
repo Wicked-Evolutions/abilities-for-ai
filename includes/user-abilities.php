@@ -4,6 +4,10 @@
  *
  * WordPress user management.
  *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
  * @package WordPress_Abilities_Suite
  */
 
@@ -169,7 +173,9 @@ add_action( 'wp_abilities_api_init', function() {
 
 	// ===== USERS — WRITE =====
 
+	// users/create is free — round-trip: create → test → (admin deletes).
 	$reg->write( 'users/create', array(
+		'tier'        => 'free',
 		'capability'  => 'create_users',
 		'label'       => 'Create User',
 		'description' => 'Create a new WordPress user with specified details and role',

@@ -4,6 +4,10 @@
  *
  * WordPress comment management.
  *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
  * @package WordPress_Abilities_Suite
  */
 
@@ -172,9 +176,7 @@ add_action( 'wp_abilities_api_init', function() {
 
 	// ===== COMMENTS — WRITE =====
 
-	// comments/create is free despite being a write operation.
 	$reg->write( 'comments/create', array(
-		'tier'        => 'free',
 		'label'       => 'Create Comment',
 		'description' => 'Create a new comment on a post',
 		'input_schema' => array(

@@ -4,6 +4,10 @@
  *
  * WordPress plugin management — listing, activation, deactivation, installation.
  *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
  * @package WordPress_Abilities_Suite
  */
 
@@ -411,7 +415,9 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	// plugins/install is free — users can install plugins to test.
 	$reg->write( 'plugins/install', array(
+		'tier'        => 'free',
 		'capability'  => 'install_plugins',
 		'label'       => 'Install Plugin',
 		'description' => 'Install a plugin from the WordPress.org repository',

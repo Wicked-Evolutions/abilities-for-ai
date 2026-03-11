@@ -5,6 +5,10 @@
  * Provides a namespaced interface for the license manager.
  * The procedural class WP_Abilities_Suite_License_Manager is defined in
  * includes/license-manager.php for backward compat.
+ * *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
  * @package WickedEvolutions\AbilitiesSuite
  */

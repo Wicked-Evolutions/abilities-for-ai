@@ -5,6 +5,10 @@
  * Categories must be registered BEFORE abilities that reference them.
  * This file runs on the 'wp_abilities_api_categories_init' hook.
  *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
  * @package WordPress_Abilities_Suite
  */
 

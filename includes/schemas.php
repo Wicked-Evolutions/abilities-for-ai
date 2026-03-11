@@ -6,6 +6,10 @@
  * Fluent Suite copies this pattern — keep the function signatures stable.
  *
  * Naming convention: wp_abilities_suite_schema_*()
+ * *
+ * Copyright (C) 2026 Influencentricity | Wicked Evolutions
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
  * @package WordPress_Abilities_Suite
  */
