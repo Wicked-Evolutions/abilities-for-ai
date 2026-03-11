@@ -43,7 +43,7 @@ class Abilities_For_AI_Dashboard {
 		'user'        => 'WordPress Core',
 		// MCP Adapter.
 		'mcp-adapter' => 'MCP Adapter',
-		// Fluent Suite.
+		// Fluent Plugins.
 		'fluent-crm'       => 'Fluent Plugins',
 		'fluent-community' => 'Fluent Plugins',
 		'fluent-forms'     => 'Fluent Plugins',
@@ -76,32 +76,32 @@ class Abilities_For_AI_Dashboard {
 	public function add_menu_pages() {
 		add_menu_page(
 			'Abilities for AI',
-			'WP Abilities',
+			'Abilities for AI',
 			'manage_options',
-			'wp-abilities-suite',
+			'abilities-for-ai',
 			array( $this, 'render_page' ),
 			'dashicons-admin-tools',
 			30
 		);
 
-		// Single submenu that mirrors the parent (removes "WP Abilities" duplicate).
+		// Single submenu that mirrors the parent (removes duplicate).
 		add_submenu_page(
-			'wp-abilities-suite',
+			'abilities-for-ai',
 			'Abilities for AI',
 			'Dashboard',
 			'manage_options',
-			'wp-abilities-suite',
+			'abilities-for-ai',
 			array( $this, 'render_page' )
 		);
 	}
 
 	public function enqueue_assets( $hook ) {
-		if ( strpos( $hook, 'wp-abilities' ) === false ) {
+		if ( strpos( $hook, 'abilities-for-ai' ) === false ) {
 			return;
 		}
 
 		wp_enqueue_style(
-			'wp-abilities-suite-admin',
+			'abilities-for-ai-admin',
 			ABILITIES_FOR_AI_URL . 'admin/css/dashboard.css',
 			array(),
 			ABILITIES_FOR_AI_VERSION
@@ -125,10 +125,10 @@ class Abilities_For_AI_Dashboard {
 			if ( is_wp_error( $result ) ) {
 				add_settings_error( 'wp_abilities_license', 'activation_failed', $result->get_error_message(), 'error' );
 			} else {
-				add_settings_error( 'wp_abilities_license', 'activated', __( 'License activated successfully.', 'wp-abilities-suite' ), 'success' );
+				add_settings_error( 'wp_abilities_license', 'activated', __( 'License activated successfully.', 'abilities-for-ai' ), 'success' );
 			}
 			set_transient( 'settings_errors', get_settings_errors(), 30 );
-			wp_safe_redirect( add_query_arg( array( 'page' => 'wp-abilities-suite', 'tab' => 'license', 'settings-updated' => 'true' ), admin_url( 'admin.php' ) ) );
+			wp_safe_redirect( add_query_arg( array( 'page' => 'abilities-for-ai', 'tab' => 'license', 'settings-updated' => 'true' ), admin_url( 'admin.php' ) ) );
 			exit;
 		}
 
@@ -136,9 +136,9 @@ class Abilities_For_AI_Dashboard {
 		if ( isset( $_POST['wp_abilities_license_deactivate'] ) ) {
 			check_admin_referer( 'abilities_for_ai_license_nonce' );
 			Abilities_For_AI_License_Manager::deactivate();
-			add_settings_error( 'wp_abilities_license', 'deactivated', __( 'License deactivated.', 'wp-abilities-suite' ), 'info' );
+			add_settings_error( 'wp_abilities_license', 'deactivated', __( 'License deactivated.', 'abilities-for-ai' ), 'info' );
 			set_transient( 'settings_errors', get_settings_errors(), 30 );
-			wp_safe_redirect( add_query_arg( array( 'page' => 'wp-abilities-suite', 'tab' => 'license', 'settings-updated' => 'true' ), admin_url( 'admin.php' ) ) );
+			wp_safe_redirect( add_query_arg( array( 'page' => 'abilities-for-ai', 'tab' => 'license', 'settings-updated' => 'true' ), admin_url( 'admin.php' ) ) );
 			exit;
 		}
 	}
@@ -231,11 +231,11 @@ class Abilities_For_AI_Dashboard {
 			<?php endif; ?>
 
 			<nav class="nav-tab-wrapper wp-abilities-tabs">
-				<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'wp-abilities-suite', 'tab' => 'explorer' ), admin_url( 'admin.php' ) ) ); ?>"
+				<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'abilities-for-ai', 'tab' => 'explorer' ), admin_url( 'admin.php' ) ) ); ?>"
 				   class="nav-tab <?php echo 'explorer' === $active_tab ? 'nav-tab-active' : ''; ?>">
 					Explorer
 				</a>
-				<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'wp-abilities-suite', 'tab' => 'license' ), admin_url( 'admin.php' ) ) ); ?>"
+				<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'abilities-for-ai', 'tab' => 'license' ), admin_url( 'admin.php' ) ) ); ?>"
 				   class="nav-tab <?php echo 'license' === $active_tab ? 'nav-tab-active' : ''; ?>">
 					License
 				</a>
@@ -347,7 +347,7 @@ class Abilities_For_AI_Dashboard {
 			</div>
 			<div class="stats-card">
 				<h3><?php echo esc_html( ABILITIES_FOR_AI_VERSION ); ?></h3>
-				<p>Suite Version</p>
+				<p>Version</p>
 			</div>
 		</div>
 		<?php
@@ -361,7 +361,7 @@ class Abilities_For_AI_Dashboard {
 		?>
 		<div class="abilities-filter-bar">
 			<form method="get">
-				<input type="hidden" name="page" value="wp-abilities-suite">
+				<input type="hidden" name="page" value="abilities-for-ai">
 				<input type="hidden" name="tab" value="explorer">
 
 				<label for="filter-source">Source:</label>
@@ -395,7 +395,7 @@ class Abilities_For_AI_Dashboard {
 				<input type="text" name="s" placeholder="Search abilities…" value="<?php echo esc_attr( $search_filter ); ?>">
 				<button type="submit" class="button button-primary">Filter</button>
 				<?php if ( $has_filters ) : ?>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wp-abilities-suite&tab=explorer' ) ); ?>" class="button">Clear</a>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=abilities-for-ai&tab=explorer' ) ); ?>" class="button">Clear</a>
 				<?php endif; ?>
 			</form>
 		</div>
@@ -631,10 +631,10 @@ class Abilities_For_AI_Dashboard {
 	 * Map a category slug to its permission module.
 	 *
 	 * @param string $category Category slug.
-	 * @return string|null Module slug or null if not a WP Suite module.
+	 * @return string|null Module slug or null if not a known module.
 	 */
 	private function get_ability_module( $category ) {
-		// WP Suite modules map 1:1 with category slugs.
+		// Modules map 1:1 with category slugs.
 		$defaults = abilities_for_ai_permission_defaults();
 		if ( isset( $defaults[ $category ] ) ) {
 			return $category;
@@ -661,7 +661,7 @@ class Abilities_For_AI_Dashboard {
 			<?php if ( $is_active ) : ?>
 				<div class="license-status">
 					<span class="dot dot-active"></span>
-					<strong style="color:#00a32a;"><?php esc_html_e( 'Active', 'wp-abilities-suite' ); ?></strong>
+					<strong style="color:#00a32a;"><?php esc_html_e( 'Active', 'abilities-for-ai' ); ?></strong>
 				</div>
 				<form method="post">
 					<?php wp_nonce_field( 'abilities_for_ai_license_nonce' ); ?>
@@ -680,7 +680,7 @@ class Abilities_For_AI_Dashboard {
 			<?php elseif ( $has_key ) : ?>
 				<div class="license-status">
 					<span class="dot dot-inactive"></span>
-					<strong style="color:#d63638;"><?php esc_html_e( 'Inactive', 'wp-abilities-suite' ); ?></strong>
+					<strong style="color:#d63638;"><?php esc_html_e( 'Inactive', 'abilities-for-ai' ); ?></strong>
 				</div>
 				<form method="post">
 					<?php wp_nonce_field( 'abilities_for_ai_license_nonce' ); ?>
@@ -696,7 +696,7 @@ class Abilities_For_AI_Dashboard {
 			<?php else : ?>
 				<div class="license-status">
 					<span class="dot dot-unlicensed"></span>
-					<strong style="color:#dba617;"><?php esc_html_e( 'No License', 'wp-abilities-suite' ); ?></strong>
+					<strong style="color:#dba617;"><?php esc_html_e( 'No License', 'abilities-for-ai' ); ?></strong>
 				</div>
 				<form method="post">
 					<?php wp_nonce_field( 'abilities_for_ai_license_nonce' ); ?>

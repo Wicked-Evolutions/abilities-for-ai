@@ -1,10 +1,10 @@
 {
   "name": "wicked-evolutions/abilities-for-ai",
-  "description": "111 native WordPress abilities across 18 modules — powers AI control through the official Abilities API",
+  "description": "138 native WordPress abilities across 18 modules — powers AI control through the official Abilities API",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "require": {
-    "php": ">=7.4"
+    "php": ">=8.0"
   },
   "autoload": {
     "psr-4": {

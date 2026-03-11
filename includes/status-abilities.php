@@ -1,6 +1,6 @@
 <?php
 /**
- * Suite Management Abilities
+ * Status Abilities
  *
  * Global status and registration information for the entire Abilities ecosystem.
  *
@@ -13,12 +13,12 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// Register Suite abilities
+// Register Status abilities
 add_action( 'wp_abilities_api_init', function() {
 
 	wp_register_ability( 'suite/get-status', array(
-		'label'               => 'Get Suite Status',
-		'description'         => 'Get unified status of all active ability modules, permissions, and license state across Core and Fluent suites.',
+		'label'               => 'Get Status',
+		'description'         => 'Get unified status of all active ability modules, permissions, and license state.',
 		'category'            => 'settings',
 		'execute_callback'    => 'abilities_for_ai_get_status',
 		'permission_callback' => function() {
@@ -62,7 +62,7 @@ add_action( 'wp_abilities_api_init', function() {
 } );
 
 /**
- * Execute callback for suite/get-status.
+ * Execute callback for suite/get-status (ability name preserved for backwards compatibility).
  */
 function abilities_for_ai_get_status() {
 	$status = array(

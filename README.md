@@ -247,7 +247,7 @@ License validation uses FluentCart API with 24-hour cache and 7-day grace period
 | `rewrite/list-rules` | Read | Free |
 | `rewrite/flush` | Write | Pro |
 
-### Suite (1)
+### Status (1)
 
 | Ability | Op | Tier |
 |---------|-----|------|
@@ -257,7 +257,7 @@ License validation uses FluentCart API with 24-hour cache and 7-day grace period
 
 - WordPress 6.9+ (Abilities API in core)
 - PHP 7.4+
-- [MCP Adapter for WordPress](https://github.com/Wicked-Evolutions/mcp-adapter-for-wordpress) (for MCP integration)
+- [Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter) (for MCP integration)
 
 WordPress 7.0 (April 2026) ships the JS client for the Abilities API, completing the server-client loop.
 
@@ -266,7 +266,7 @@ WordPress 7.0 (April 2026) ships the JS client for the Abilities API, completing
 1. Upload `abilities-for-ai/` to `wp-content/plugins/`
 2. Activate the plugin
 3. All 138 abilities auto-register through the Abilities API
-4. Connect an MCP-compatible AI client via [WP Abilities MCP](https://github.com/Wicked-Evolutions/wp-abilities-mcp)
+4. Connect an MCP-compatible AI client via [Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp)
 
 No Composer dependencies.
 
@@ -329,13 +329,13 @@ Candidate abilities: `users/create-application-password`, `users/list-applicatio
 
 ## Links
 
-- [WP Abilities MCP](https://github.com/Wicked-Evolutions/wp-abilities-mcp) — MCP bridge for AI clients
-- [MCP Adapter for WordPress](https://github.com/Wicked-Evolutions/mcp-adapter-for-wordpress) — WordPress-side MCP protocol handler
+- [Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp) — MCP bridge for AI clients
+- [Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter) — WordPress-side MCP protocol handler
 - [Product home](https://wickedevolutions.com)
 
 ## Version
 
-**Current:** 3.10.0
+**Current:** 1.0.0
 
 ## License
 

@@ -52,7 +52,7 @@ All 138 abilities are registered and visible to AI regardless of license. Pro ab
 * **REST Discovery** (4) — Namespaces, routes, schemas, full index
 * **Cron** (5) — List events, schedules, get event, create, delete
 * **Rewrite** (3) — Permalink structure, rules, flush
-* **Suite** (1) — Plugin status and diagnostics
+* **Status** (1) — Plugin status and diagnostics
 
 = Permission Toggles =
 
@@ -88,8 +88,8 @@ Network activation supported. Network-wide license at $199 LTD covers all subsit
 1. Upload `abilities-for-ai/` to `wp-content/plugins/`
 2. Activate the plugin
 3. All 138 abilities auto-register through the Abilities API
-4. Install [MCP Adapter for WordPress](https://github.com/Wicked-Evolutions/mcp-adapter-for-wordpress) for MCP protocol support
-5. Connect your AI client via [WP Abilities MCP](https://github.com/Wicked-Evolutions/wp-abilities-mcp)
+4. Install [Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter) for MCP protocol support
+5. Connect your AI client via [Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp)
 
 No Composer dependencies required.
 
@@ -101,7 +101,7 @@ The Abilities API is a standardized way for WordPress to expose functionality to
 
 = What AI clients work with this? =
 
-Any AI client or IDE that supports the Model Context Protocol (MCP) — Claude Code, Claude Desktop, Gemini CLI, Cursor, Windsurf, VS Code, and others. You need the MCP Adapter for WordPress plugin to bridge between MCP and the Abilities API.
+Any AI client or IDE that supports the Model Context Protocol (MCP) — Claude Code, Claude Desktop, Gemini CLI, Cursor, Windsurf, VS Code, and others. You need the Abilities MCP Adapter plugin to bridge between MCP and the Abilities API.
 
 = What is the difference between free and pro? =
 

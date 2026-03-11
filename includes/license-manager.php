@@ -123,7 +123,7 @@ class Abilities_For_AI_License_Manager {
 	public static function activate( $license_key ) {
 		$license_key = sanitize_text_field( $license_key );
 		if ( empty( $license_key ) ) {
-			return new WP_Error( 'invalid_key', __( 'License key cannot be empty.', 'wp-abilities-suite' ) );
+			return new WP_Error( 'invalid_key', __( 'License key cannot be empty.', 'abilities-for-ai' ) );
 		}
 
 		$response = self::remote_request( 'activate_license', array(
@@ -151,7 +151,7 @@ class Abilities_For_AI_License_Manager {
 		}
 
 		if ( ! isset( $response['status'] ) || 'valid' !== $response['status'] ) {
-			$message = $response['message'] ?? __( 'License activation failed.', 'wp-abilities-suite' );
+			$message = $response['message'] ?? __( 'License activation failed.', 'abilities-for-ai' );
 			return new WP_Error( $response['error_type'] ?? 'activation_failed', $message );
 		}
 
@@ -217,7 +217,7 @@ class Abilities_For_AI_License_Manager {
 			'pro_required',
 			sprintf(
 				/* translators: %s: Ability name */
-				__( 'The "%s" ability requires an active Pro license. Visit https://wickedevolutions.com/pro to upgrade.', 'wp-abilities-suite' ),
+				__( 'The "%s" ability requires an active Pro license. Visit https://wickedevolutions.com/pro to upgrade.', 'abilities-for-ai' ),
 				$ability_name
 			),
 			array( 'status' => 403 )

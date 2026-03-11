@@ -379,7 +379,7 @@ function wp_abilities_is_private_ip( $ip ) {
 }
 
 /**
- * Alias for wp_abilities_is_private_ip() using the suite naming convention.
+ * Alias for wp_abilities_is_private_ip().
  *
  * @param string $ip IP address to check.
  * @return bool True if the IP is private/internal.

@@ -3,7 +3,7 @@
  * Shared Input/Output Schema Helpers
  *
  * Centralised JSON Schema building blocks used across all ability modules.
- * Fluent Suite copies this pattern — keep the function signatures stable.
+ * Abilities for Fluent Plugins copies this pattern — keep the function signatures stable.
  *
  * Naming convention: abilities_for_ai_schema_*()
  * *
