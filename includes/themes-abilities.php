@@ -8,18 +8,18 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'themes', 'switch_themes' );
+	$reg = new Abilities_For_AI_Registrar( 'themes', 'switch_themes' );
 
 	$reg->read( 'themes/list', array(
 		'label'       => 'List Themes',
 		'description' => 'List all installed themes with version, status, and capabilities.',
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'themes' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 			'total'  => array( 'type' => 'integer' ),
 			'active' => array( 'type' => 'string' ),
@@ -49,7 +49,7 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'themes/get-active', array(
 		'label'       => 'Get Active Theme',
 		'description' => 'Get detailed information about the currently active theme.',
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'name'        => array( 'type' => 'string' ),
 			'slug'        => array( 'type' => 'string' ),
 			'version'     => array( 'type' => 'string' ),
@@ -82,7 +82,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'label'       => 'List Theme Mods',
 		'description' => 'List all theme modifications for the active theme.',
 		'capability'  => 'edit_theme_options',
-		'output_schema' => wp_abilities_suite_schema_collection_output( 'mods', array(
+		'output_schema' => abilities_for_ai_schema_collection_output( 'mods', array(
 			'key'   => array( 'type' => 'string' ),
 			'value' => array( 'type' => 'string', 'description' => 'Mod value (may be string, array, or serialized data)' ),
 			'type'  => array( 'type' => 'string' ),
@@ -115,7 +115,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'name' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'name'  => array( 'type' => 'string' ),
 			'value' => array( 'type' => 'string', 'description' => 'Mod value (may be string, array, or serialized data)' ),
 		) ),
@@ -142,7 +142,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'theme'   => array( 'type' => 'string' ),
 			'section' => array( 'type' => 'string' ),
 			'data'    => array( 'type' => 'object' ),
@@ -189,7 +189,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'message'    => array( 'type' => 'string' ),
 			'stylesheet' => array( 'type' => 'string' ),
 		) ),
@@ -230,7 +230,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'message'    => array( 'type' => 'string' ),
 			'stylesheet' => array( 'type' => 'string' ),
 		) ),
@@ -297,7 +297,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'name'  => array( 'type' => 'string' ),
 			'value' => array( 'type' => 'string' ),
 		) ),
@@ -337,7 +337,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'message' => array( 'type' => 'string' ),
 		) ),
 		'callback' => function( $input ) {
@@ -380,7 +380,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'name'    => array( 'type' => 'string' ),
 			'deleted' => array( 'type' => 'boolean' ),
 		) ),

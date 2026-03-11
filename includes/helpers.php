@@ -8,7 +8,7 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -35,13 +35,13 @@ function wp_abilities_pagination( $input, $default_per_page = 20 ) {
 /**
  * Standard pagination input schema properties.
  *
- * @deprecated Use wp_abilities_suite_schema_pagination() from schemas.php instead.
+ * @deprecated Use abilities_for_ai_schema_pagination() from schemas.php instead.
  *             This function is retained as a backwards-compatible alias and will
  *             be removed in a future version.
  * @return array Schema properties for page and per_page.
  */
 function wp_abilities_pagination_schema() {
-	return wp_abilities_suite_schema_pagination();
+	return abilities_for_ai_schema_pagination();
 }
 
 /**
@@ -89,7 +89,7 @@ if ( ! function_exists( 'wp_abilities_resolve_user' ) ) {
 /**
  * Validate that a post exists and the current user can edit it.
  */
-function wp_abilities_suite_require_editable_post( $post_id, $capability = 'edit_post' ) {
+function abilities_for_ai_require_editable_post( $post_id, $capability = 'edit_post' ) {
     $post = get_post( absint( $post_id ) );
     if ( ! $post ) {
         return wp_abilities_error( 'not_found', 'Post not found.' );
@@ -190,7 +190,7 @@ function menu_abilities_get_location_assignments() {
  *
  * @return array Module permission defaults.
  */
-function wp_abilities_suite_permission_defaults() {
+function abilities_for_ai_permission_defaults() {
 	return array(
 		'content'    => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'taxonomies' => array( 'read' => true, 'write' => true, 'delete' => false ),
@@ -218,7 +218,7 @@ function wp_abilities_suite_permission_defaults() {
  *
  * @return array Module slug => label.
  */
-function wp_abilities_suite_module_labels() {
+function abilities_for_ai_module_labels() {
 	return array(
 		'content'    => 'Content',
 		'taxonomies' => 'Taxonomies',
@@ -247,12 +247,12 @@ function wp_abilities_suite_module_labels() {
  * @param string $module Module slug (e.g. 'meta', 'content').
  * @return array Associative array with 'read', 'write', 'delete' keys (booleans).
  */
-function wp_abilities_suite_get_permissions( $module ) {
+function abilities_for_ai_get_permissions( $module ) {
 	static $perms = null;
 	if ( $perms === null ) {
-		$perms = get_option( 'wp_abilities_suite_permissions', array() );
+		$perms = get_option( 'abilities_for_ai_permissions', array() );
 	}
-	$defaults = wp_abilities_suite_permission_defaults();
+	$defaults = abilities_for_ai_permission_defaults();
 	$module_defaults = $defaults[ $module ] ?? array( 'read' => true );
 	$module_saved    = $perms[ $module ] ?? array();
 
@@ -271,10 +271,10 @@ function wp_abilities_suite_get_permissions( $module ) {
  * @param string $op           Operation type: 'read', 'write', or 'delete'.
  * @return bool Whether the ability is permitted.
  */
-function wp_abilities_suite_ability_enabled( $ability_name, $module, $op ) {
+function abilities_for_ai_ability_enabled( $ability_name, $module, $op ) {
 	static $perms = null;
 	if ( $perms === null ) {
-		$perms = get_option( 'wp_abilities_suite_permissions', array() );
+		$perms = get_option( 'abilities_for_ai_permissions', array() );
 	}
 
 	$overrides = $perms['_overrides'] ?? array();
@@ -285,7 +285,7 @@ function wp_abilities_suite_ability_enabled( $ability_name, $module, $op ) {
 	}
 
 	// Fall back to module-level permission.
-	$module_perms = wp_abilities_suite_get_permissions( $module );
+	$module_perms = abilities_for_ai_get_permissions( $module );
 	return ! empty( $module_perms[ $op ] );
 }
 
@@ -296,8 +296,8 @@ function wp_abilities_suite_ability_enabled( $ability_name, $module, $op ) {
  * @param string $op     Operation type: 'read', 'write', or 'delete'.
  * @return bool Whether the operation is permitted.
  */
-function wp_abilities_suite_can( $module, $op ) {
-	$perms = wp_abilities_suite_get_permissions( $module );
+function abilities_for_ai_can( $module, $op ) {
+	$perms = abilities_for_ai_get_permissions( $module );
 	return ! empty( $perms[ $op ] );
 }
 
@@ -384,6 +384,6 @@ function wp_abilities_is_private_ip( $ip ) {
  * @param string $ip IP address to check.
  * @return bool True if the IP is private/internal.
  */
-function wp_abilities_suite_is_private_ip( string $ip ): bool {
+function abilities_for_ai_is_private_ip( string $ip ): bool {
     return wp_abilities_is_private_ip( $ip );
 }

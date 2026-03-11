@@ -8,7 +8,7 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -38,12 +38,12 @@ add_action( 'wp_abilities_api_init', function() {
 		'show_on_front', 'page_on_front', 'page_for_posts',
 	);
 
-	$reg = new WP_Abilities_Suite_Registrar( 'settings', 'manage_options' );
+	$reg = new Abilities_For_AI_Registrar( 'settings', 'manage_options' );
 
 	$reg->read( 'settings/list', array(
 		'label'       => 'List Settings',
 		'description' => 'List core WordPress settings grouped by settings page with current values.',
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'groups' => array( 'type' => 'object', 'description' => 'Settings keyed by group name' ),
 		) ),
 		'callback' => function() use ( $settings_groups ) {
@@ -69,7 +69,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'option_name' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'option_name' => array( 'type' => 'string' ),
 			'value'       => array( 'description' => 'Option value (string, integer, boolean, array, or object)' ),
 		) ),
@@ -93,7 +93,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'group' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'group'    => array( 'type' => 'string' ),
 			'settings' => array( 'type' => 'object' ),
 		) ),
@@ -113,7 +113,7 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'settings/get-permalink-structure', array(
 		'label'       => 'Get Permalink Structure',
 		'description' => 'Get the current permalink configuration.',
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'structure'              => array( 'type' => 'string' ),
 			'category_base'          => array( 'type' => 'string' ),
 			'tag_base'               => array( 'type' => 'string' ),
@@ -143,7 +143,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'option_name', 'option_value' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'option_name' => array( 'type' => 'string' ),
 			'updated'     => array( 'type' => 'boolean' ),
 			'new_value'   => array( 'type' => 'string', 'description' => 'Updated option value' ),
@@ -174,7 +174,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'option_name' => array( 'type' => 'string' ),
 			'deleted'     => array( 'type' => 'boolean' ),
 		) ),

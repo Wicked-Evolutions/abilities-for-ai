@@ -1,4 +1,4 @@
-# Abilities Suite for WordPress
+# Abilities for AI
 
 138 native WordPress abilities across 18 modules. Powers AI control through the official Abilities API.
 
@@ -257,22 +257,22 @@ License validation uses FluentCart API with 24-hour cache and 7-day grace period
 
 - WordPress 6.9+ (Abilities API in core)
 - PHP 7.4+
-- [MCP Adapter for WordPress](https://github.com/Influencentricity/mcp-adapter-for-wordpress) (for MCP integration)
+- [MCP Adapter for WordPress](https://github.com/Wicked-Evolutions/mcp-adapter-for-wordpress) (for MCP integration)
 
 WordPress 7.0 (April 2026) ships the JS client for the Abilities API, completing the server-client loop.
 
 ## Installation
 
-1. Upload `abilities-suite-for-wordpress/` to `wp-content/plugins/`
+1. Upload `abilities-for-ai/` to `wp-content/plugins/`
 2. Activate the plugin
 3. All 138 abilities auto-register through the Abilities API
-4. Connect an MCP-compatible AI client via [WP Abilities MCP](https://github.com/Influencentricity/wp-abilities-mcp)
+4. Connect an MCP-compatible AI client via [WP Abilities MCP](https://github.com/Wicked-Evolutions/wp-abilities-mcp)
 
 No Composer dependencies.
 
 ## Admin Dashboard
 
-**Settings > Abilities Suite** provides a unified dashboard with two tabs:
+**Settings > Abilities for AI** provides a unified dashboard with two tabs:
 
 **Abilities Explorer** — Browse all registered abilities with inline Read/Write/Delete toggles per module. Filter by module, operation type, or tier. See exactly what AI can and cannot do on your site.
 
@@ -329,8 +329,8 @@ Candidate abilities: `users/create-application-password`, `users/list-applicatio
 
 ## Links
 
-- [WP Abilities MCP](https://github.com/Influencentricity/wp-abilities-mcp) — MCP bridge for AI clients
-- [MCP Adapter for WordPress](https://github.com/Influencentricity/mcp-adapter-for-wordpress) — WordPress-side MCP protocol handler
+- [WP Abilities MCP](https://github.com/Wicked-Evolutions/wp-abilities-mcp) — MCP bridge for AI clients
+- [MCP Adapter for WordPress](https://github.com/Wicked-Evolutions/mcp-adapter-for-wordpress) — WordPress-side MCP protocol handler
 - [Product home](https://wickedevolutions.com)
 
 ## Version

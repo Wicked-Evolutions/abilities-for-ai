@@ -10,10 +10,10 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WickedEvolutions\AbilitiesSuite
+ * @package WickedEvolutions\AbilitiesForAI
  */
 
-namespace WickedEvolutions\AbilitiesSuite\Helpers;
+namespace WickedEvolutions\AbilitiesForAI\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,7 +36,7 @@ class Helpers {
 	 * @return array
 	 */
 	public static function pagination_schema() {
-		return wp_abilities_suite_pagination_schema();
+		return abilities_for_ai_pagination_schema();
 	}
 
 	/**
@@ -45,7 +45,7 @@ class Helpers {
 	 * @return bool
 	 */
 	public static function is_pro() {
-		return \WP_Abilities_Suite_License_Manager::is_pro_active();
+		return \Abilities_For_AI_License_Manager::is_pro_active();
 	}
 
 	/**
@@ -55,6 +55,6 @@ class Helpers {
 	 * @return array
 	 */
 	public static function get_permissions( $module ) {
-		return wp_abilities_suite_get_permissions( $module );
+		return abilities_for_ai_get_permissions( $module );
 	}
 }

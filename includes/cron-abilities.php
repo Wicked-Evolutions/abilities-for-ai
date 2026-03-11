@@ -8,13 +8,13 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'cron', 'manage_options' );
+	$reg = new Abilities_For_AI_Registrar( 'cron', 'manage_options' );
 
 	$reg->read( 'cron/list-events', array(
 		'label'       => 'List Cron Events',
@@ -22,10 +22,10 @@ add_action( 'wp_abilities_api_init', function() {
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'search' => wp_abilities_suite_schema_search( 'Filter by hook name (partial match)' ),
+				'search' => abilities_for_ai_schema_search( 'Filter by hook name (partial match)' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_collection_output( 'events', array(
+		'output_schema' => abilities_for_ai_schema_collection_output( 'events', array(
 			'hook'      => array( 'type' => 'string' ),
 			'next_run'  => array( 'type' => 'string' ),
 			'timestamp' => array( 'type' => 'integer' ),
@@ -68,7 +68,7 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'cron/list-schedules', array(
 		'label'       => 'List Cron Schedules',
 		'description' => 'List available cron recurrence schedules (hourly, twicedaily, daily, etc.).',
-		'output_schema' => wp_abilities_suite_schema_collection_output( 'schedules', array(
+		'output_schema' => abilities_for_ai_schema_collection_output( 'schedules', array(
 			'name'     => array( 'type' => 'string' ),
 			'interval' => array( 'type' => 'integer' ),
 			'display'  => array( 'type' => 'string' ),
@@ -100,7 +100,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'hook' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'hook'      => array( 'type' => 'string' ),
 			'total'     => array( 'type' => 'integer' ),
 			'instances' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
@@ -162,7 +162,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'hook'      => array( 'type' => 'string' ),
 			'timestamp' => array( 'type' => 'integer' ),
 			'next_run'  => array( 'type' => 'string' ),
@@ -227,7 +227,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'hook'    => array( 'type' => 'string' ),
 			'removed' => array( 'type' => 'integer', 'description' => 'Number of instances removed' ),
 		) ),

@@ -9,115 +9,115 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'wp_abilities_api_categories_init', 'wp_abilities_suite_register_categories' );
+add_action( 'wp_abilities_api_categories_init', 'abilities_for_ai_register_categories' );
 
 /**
- * Register all ability categories for the WordPress Abilities Suite
+ * Register all ability categories for the Abilities for AI
  */
-function wp_abilities_suite_register_categories() {
+function abilities_for_ai_register_categories() {
 
     // Content category
     wp_register_ability_category( 'content', array(
-        'label' => __( 'Content Management', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'Abilities for managing WordPress content including posts, pages, and custom post types.', 'abilities-suite-for-wordpress' ),
+        'label' => __( 'Content Management', 'abilities-for-ai' ),
+        'description' => __( 'Abilities for managing WordPress content including posts, pages, and custom post types.', 'abilities-for-ai' ),
     ));
 
     // Taxonomies category
     wp_register_ability_category( 'taxonomies', array(
-        'label' => __( 'Taxonomy Management', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'Abilities for managing WordPress taxonomies, categories, tags, and terms.', 'abilities-suite-for-wordpress' ),
+        'label' => __( 'Taxonomy Management', 'abilities-for-ai' ),
+        'description' => __( 'Abilities for managing WordPress taxonomies, categories, tags, and terms.', 'abilities-for-ai' ),
     ));
 
     // Plugins category
     wp_register_ability_category( 'plugins', array(
-        'label' => __( 'Plugin Management', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'Abilities for managing WordPress plugins including installation, activation, and updates.', 'abilities-suite-for-wordpress' ),
+        'label' => __( 'Plugin Management', 'abilities-for-ai' ),
+        'description' => __( 'Abilities for managing WordPress plugins including installation, activation, and updates.', 'abilities-for-ai' ),
     ));
 
     // Media category
     wp_register_ability_category( 'media', array(
-        'label' => __( 'Media Management', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'Abilities for managing WordPress media library including uploads, attachments, and files.', 'abilities-suite-for-wordpress' ),
+        'label' => __( 'Media Management', 'abilities-for-ai' ),
+        'description' => __( 'Abilities for managing WordPress media library including uploads, attachments, and files.', 'abilities-for-ai' ),
     ));
 
     // Users category
     wp_register_ability_category( 'users', array(
-        'label' => __( 'User Management', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'Abilities for managing WordPress users, roles, and permissions.', 'abilities-suite-for-wordpress' ),
+        'label' => __( 'User Management', 'abilities-for-ai' ),
+        'description' => __( 'Abilities for managing WordPress users, roles, and permissions.', 'abilities-for-ai' ),
     ));
 
     // Comments category
     wp_register_ability_category( 'comments', array(
-        'label' => __( 'Comment Management', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'Abilities for managing WordPress comments and discussions.', 'abilities-suite-for-wordpress' ),
+        'label' => __( 'Comment Management', 'abilities-for-ai' ),
+        'description' => __( 'Abilities for managing WordPress comments and discussions.', 'abilities-for-ai' ),
     ));
 
     // Menus category
     wp_register_ability_category( 'menus', array(
-        'label' => __( 'Menu Management', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'WordPress navigation menu management — menus, items, and location assignments.', 'abilities-suite-for-wordpress' ),
+        'label' => __( 'Menu Management', 'abilities-for-ai' ),
+        'description' => __( 'WordPress navigation menu management — menus, items, and location assignments.', 'abilities-for-ai' ),
     ));
 
     // V3.0 categories.
     wp_register_ability_category( 'blocks', array(
-        'label'       => __( 'Block Editor', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'WordPress Gutenberg block parsing, serialization, and manipulation.', 'abilities-suite-for-wordpress' ),
+        'label'       => __( 'Block Editor', 'abilities-for-ai' ),
+        'description' => __( 'WordPress Gutenberg block parsing, serialization, and manipulation.', 'abilities-for-ai' ),
     ));
 
     wp_register_ability_category( 'patterns', array(
-        'label'       => __( 'Block Patterns', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'WordPress block pattern registration and management.', 'abilities-suite-for-wordpress' ),
+        'label'       => __( 'Block Patterns', 'abilities-for-ai' ),
+        'description' => __( 'WordPress block pattern registration and management.', 'abilities-for-ai' ),
     ));
 
     wp_register_ability_category( 'meta', array(
-        'label'       => __( 'Meta Fields', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'Post, term, and user meta field management.', 'abilities-suite-for-wordpress' ),
+        'label'       => __( 'Meta Fields', 'abilities-for-ai' ),
+        'description' => __( 'Post, term, and user meta field management.', 'abilities-for-ai' ),
     ));
 
     wp_register_ability_category( 'settings', array(
-        'label'       => __( 'Settings', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'WordPress core settings and options.', 'abilities-suite-for-wordpress' ),
+        'label'       => __( 'Settings', 'abilities-for-ai' ),
+        'description' => __( 'WordPress core settings and options.', 'abilities-for-ai' ),
     ));
 
     wp_register_ability_category( 'site-health', array(
-        'label'       => __( 'Site Health', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'WordPress site health diagnostics and debug information.', 'abilities-suite-for-wordpress' ),
+        'label'       => __( 'Site Health', 'abilities-for-ai' ),
+        'description' => __( 'WordPress site health diagnostics and debug information.', 'abilities-for-ai' ),
     ));
 
     wp_register_ability_category( 'cache', array(
-        'label'       => __( 'Cache & Transients', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'WordPress transient and object cache management.', 'abilities-suite-for-wordpress' ),
+        'label'       => __( 'Cache & Transients', 'abilities-for-ai' ),
+        'description' => __( 'WordPress transient and object cache management.', 'abilities-for-ai' ),
     ));
 
     wp_register_ability_category( 'cron', array(
-        'label'       => __( 'Cron', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'WordPress scheduled event and cron management.', 'abilities-suite-for-wordpress' ),
+        'label'       => __( 'Cron', 'abilities-for-ai' ),
+        'description' => __( 'WordPress scheduled event and cron management.', 'abilities-for-ai' ),
     ));
 
     wp_register_ability_category( 'themes', array(
-        'label'       => __( 'Themes', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'WordPress theme listing, mods, and theme.json access.', 'abilities-suite-for-wordpress' ),
+        'label'       => __( 'Themes', 'abilities-for-ai' ),
+        'description' => __( 'WordPress theme listing, mods, and theme.json access.', 'abilities-for-ai' ),
     ));
 
     wp_register_ability_category( 'rest', array(
-        'label'       => __( 'REST Discovery', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'WordPress REST API namespace, route, and schema introspection.', 'abilities-suite-for-wordpress' ),
+        'label'       => __( 'REST Discovery', 'abilities-for-ai' ),
+        'description' => __( 'WordPress REST API namespace, route, and schema introspection.', 'abilities-for-ai' ),
     ));
 
     wp_register_ability_category( 'rewrite', array(
-        'label'       => __( 'Rewrite Rules', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'WordPress permalink structure and rewrite rule management.', 'abilities-suite-for-wordpress' ),
+        'label'       => __( 'Rewrite Rules', 'abilities-for-ai' ),
+        'description' => __( 'WordPress permalink structure and rewrite rule management.', 'abilities-for-ai' ),
     ));
 
     wp_register_ability_category( 'filesystem', array(
-        'label'       => __( 'Filesystem', 'abilities-suite-for-wordpress' ),
-        'description' => __( 'Read and write files within the WordPress installation directory.', 'abilities-suite-for-wordpress' ),
+        'label'       => __( 'Filesystem', 'abilities-for-ai' ),
+        'description' => __( 'Read and write files within the WordPress installation directory.', 'abilities-for-ai' ),
     ));
 
-    error_log( 'WordPress Abilities Suite: Registered 18 ability categories' );
+    error_log( 'Abilities for AI: Registered 18 ability categories' );
 }

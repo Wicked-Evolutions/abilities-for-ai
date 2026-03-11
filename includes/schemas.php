@@ -5,13 +5,13 @@
  * Centralised JSON Schema building blocks used across all ability modules.
  * Fluent Suite copies this pattern — keep the function signatures stable.
  *
- * Naming convention: wp_abilities_suite_schema_*()
+ * Naming convention: abilities_for_ai_schema_*()
  * *
  * Copyright (C) 2026 Influencentricity | Wicked Evolutions
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -24,12 +24,12 @@ defined( 'ABSPATH' ) || exit;
  * Standard pagination input schema properties (page + per_page).
  *
  * Usage — spread into 'properties':
- *   'properties' => array_merge( [...], wp_abilities_suite_schema_pagination() )
+ *   'properties' => array_merge( [...], abilities_for_ai_schema_pagination() )
  *
  * @param int $default_per_page Default items per page (default: 20).
  * @return array Schema property definitions.
  */
-function wp_abilities_suite_schema_pagination( $default_per_page = 20 ) {
+function abilities_for_ai_schema_pagination( $default_per_page = 20 ) {
 	return array(
 		'page' => array(
 			'type'        => 'integer',
@@ -53,7 +53,7 @@ function wp_abilities_suite_schema_pagination( $default_per_page = 20 ) {
  * @param string $description Optional custom description.
  * @return array Schema property definition.
  */
-function wp_abilities_suite_schema_post_type( $description = 'Post type slug (e.g. post, page, or custom post type)' ) {
+function abilities_for_ai_schema_post_type( $description = 'Post type slug (e.g. post, page, or custom post type)' ) {
 	return array(
 		'type'        => 'string',
 		'description' => $description,
@@ -68,7 +68,7 @@ function wp_abilities_suite_schema_post_type( $description = 'Post type slug (e.
  * @param string $description Optional custom description.
  * @return array Schema property definition.
  */
-function wp_abilities_suite_schema_search( $description = 'Search query string' ) {
+function abilities_for_ai_schema_search( $description = 'Search query string' ) {
 	return array(
 		'type'        => 'string',
 		'description' => $description,
@@ -84,7 +84,7 @@ function wp_abilities_suite_schema_search( $description = 'Search query string' 
  * @param string $description Optional custom description.
  * @return array Schema property definition.
  */
-function wp_abilities_suite_schema_orderby( $options = array( 'date', 'title', 'modified', 'ID', 'menu_order' ), $default = 'date', $description = 'Field to order results by' ) {
+function abilities_for_ai_schema_orderby( $options = array( 'date', 'title', 'modified', 'ID', 'menu_order' ), $default = 'date', $description = 'Field to order results by' ) {
 	return array(
 		'type'        => 'string',
 		'description' => $description,
@@ -103,7 +103,7 @@ function wp_abilities_suite_schema_orderby( $options = array( 'date', 'title', '
  * Returns a schema for: { total, pages, page, per_page, items: [...] }
  *
  * Usage:
- *   'output_schema' => wp_abilities_suite_schema_list_output( 'posts', array(
+ *   'output_schema' => abilities_for_ai_schema_list_output( 'posts', array(
  *       'id'    => array( 'type' => 'integer' ),
  *       'title' => array( 'type' => 'string' ),
  *   ) )
@@ -112,7 +112,7 @@ function wp_abilities_suite_schema_orderby( $options = array( 'date', 'title', '
  * @param array  $item_props  Properties of a single item object.
  * @return array output_schema definition.
  */
-function wp_abilities_suite_schema_list_output( $items_key = 'items', $item_props = array() ) {
+function abilities_for_ai_schema_list_output( $items_key = 'items', $item_props = array() ) {
 	$item_schema = array( 'type' => 'object' );
 	if ( ! empty( $item_props ) ) {
 		$item_schema['properties'] = $item_props;
@@ -140,7 +140,7 @@ function wp_abilities_suite_schema_list_output( $items_key = 'items', $item_prop
  * @param array  $item_props Properties of a single item object.
  * @return array output_schema definition.
  */
-function wp_abilities_suite_schema_collection_output( $items_key = 'items', $item_props = array() ) {
+function abilities_for_ai_schema_collection_output( $items_key = 'items', $item_props = array() ) {
 	$item_schema = array( 'type' => 'object' );
 	if ( ! empty( $item_props ) ) {
 		$item_schema['properties'] = $item_props;
@@ -163,7 +163,7 @@ function wp_abilities_suite_schema_collection_output( $items_key = 'items', $ite
  * @param array $extra_props Additional properties beyond 'success'.
  * @return array output_schema definition.
  */
-function wp_abilities_suite_schema_success_output( $extra_props = array() ) {
+function abilities_for_ai_schema_success_output( $extra_props = array() ) {
 	return array(
 		'type'       => 'object',
 		'properties' => array_merge(
@@ -183,7 +183,7 @@ function wp_abilities_suite_schema_success_output( $extra_props = array() ) {
  * @param array $item_props Properties of the returned object.
  * @return array output_schema definition.
  */
-function wp_abilities_suite_schema_item_output( $item_props = array() ) {
+function abilities_for_ai_schema_item_output( $item_props = array() ) {
 	$schema = array( 'type' => 'object' );
 	if ( ! empty( $item_props ) ) {
 		$schema['properties'] = $item_props;

@@ -1,4 +1,4 @@
-# ROADMAP — Abilities Suite for WordPress
+# ROADMAP — Abilities for AI
 
 > Source of truth for product development state. Obsidian roadmap references this file.
 > Part of the Wicked Evolutions Trinity AI Suite for WordPress.

@@ -12,7 +12,7 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -90,7 +90,7 @@ function wp_abilities_filesystem_check_extension( $path ) {
 // ============================================================
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'filesystem', 'manage_options' );
+	$reg = new Abilities_For_AI_Registrar( 'filesystem', 'manage_options' );
 
 	// ===== FILESYSTEM — READ =====
 
@@ -103,7 +103,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'path' => array( 'type' => 'string', 'description' => 'Relative path from ABSPATH (default: root)' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'path'  => array( 'type' => 'string' ),
 			'total' => array( 'type' => 'integer' ),
 			'items' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
@@ -157,7 +157,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'path' => array( 'type' => 'string', 'description' => 'Relative path from ABSPATH' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'content'  => array( 'type' => 'string' ),
 			'encoding' => array( 'type' => 'string' ),
 			'metadata' => array( 'type' => 'object' ),
@@ -203,7 +203,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'append'  => array( 'type' => 'boolean', 'description' => 'Append instead of overwrite (default: false)' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'bytes_written' => array( 'type' => 'integer' ),
 			'path'          => array( 'type' => 'string' ),
 			'mode'          => array( 'type' => 'string' ),
@@ -257,7 +257,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'content'    => array( 'type' => 'string', 'description' => 'File content to write' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'theme' => array( 'type' => 'string' ),
 			'path'  => array( 'type' => 'string' ),
 		) ),
@@ -327,7 +327,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'path'    => array( 'type' => 'string' ),
 			'deleted' => array( 'type' => 'boolean' ),
 		) ),

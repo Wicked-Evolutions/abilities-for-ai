@@ -3,7 +3,7 @@
  * Ability Registrar — eliminates boilerplate from ability module files.
  *
  * Usage in a module file:
- *   $reg = new WP_Abilities_Suite_Registrar( 'cron', 'manage_options' );
+ *   $reg = new Abilities_For_AI_Registrar( 'cron', 'manage_options' );
  *   $reg->read( 'cron/list-events', [
  *       'label'        => 'List Cron Events',
  *       'description'  => '...',
@@ -16,12 +16,12 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class WP_Abilities_Suite_Registrar {
+class Abilities_For_AI_Registrar {
 
 	private $module;
 	private $capability;
@@ -34,7 +34,7 @@ class WP_Abilities_Suite_Registrar {
 	public function __construct( $module, $capability ) {
 		$this->module     = $module;
 		$this->capability = $capability;
-		$this->perms      = wp_abilities_suite_get_permissions( $module );
+		$this->perms      = abilities_for_ai_get_permissions( $module );
 	}
 
 	/**
@@ -87,7 +87,7 @@ class WP_Abilities_Suite_Registrar {
 		$module       = $this->module;
 		$original_cb  = $callback;
 		$callback     = static function( $input = null ) use ( $original_cb, $ability_name, $module, $op_type ) {
-			if ( ! wp_abilities_suite_ability_enabled( $ability_name, $module, $op_type ) ) {
+			if ( ! abilities_for_ai_ability_enabled( $ability_name, $module, $op_type ) ) {
 				return new \WP_Error( 'ability_disabled', sprintf( 'Ability "%s" is disabled by permission settings.', $ability_name ), array( 'status' => 403 ) );
 			}
 			return $original_cb( $input );
@@ -95,7 +95,7 @@ class WP_Abilities_Suite_Registrar {
 
 		// Wrap Pro callbacks with license gate.
 		if ( $tier === 'pro' ) {
-			$callback = wp_abilities_suite_pro_gate( $name, $callback );
+			$callback = abilities_for_ai_pro_gate( $name, $callback );
 		}
 
 		// When no input_schema is defined, WP Core invokes the callback with zero arguments.

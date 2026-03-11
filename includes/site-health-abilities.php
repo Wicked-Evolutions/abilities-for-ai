@@ -8,18 +8,18 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'site-health', 'view_site_health_checks' );
+	$reg = new Abilities_For_AI_Registrar( 'site-health', 'view_site_health_checks' );
 
 	$reg->read( 'site-health/status', array(
 		'label'       => 'Site Health Status',
 		'description' => 'Get the overall site health status (good, recommended, critical counts).',
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'status'             => array( 'type' => 'object' ),
 			'total_direct_tests' => array( 'type' => 'integer' ),
 			'total_async_tests'  => array( 'type' => 'integer' ),
@@ -56,7 +56,7 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'site-health/list-tests', array(
 		'label'       => 'List Health Tests',
 		'description' => 'List all available site health tests (direct and async).',
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'direct' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 			'async'  => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 		) ),
@@ -89,7 +89,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'test' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'test'        => array( 'type' => 'string' ),
 			'label'       => array( 'type' => 'string' ),
 			'status'      => array( 'type' => 'string', 'enum' => array( 'good', 'recommended', 'critical' ) ),
@@ -159,7 +159,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'sections'           => array( 'type' => 'object', 'description' => 'Section summary when no section specified' ),
 			'available_sections' => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
 			'section'            => array( 'type' => 'string', 'description' => 'Section key when section specified' ),

@@ -8,13 +8,13 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'blocks', 'edit_posts' );
+	$reg = new Abilities_For_AI_Registrar( 'blocks', 'edit_posts' );
 
 	// ===== BLOCKS — READ =====
 
@@ -28,13 +28,13 @@ add_action( 'wp_abilities_api_init', function() {
 				'content' => array( 'type' => 'string', 'description' => 'Raw block markup string to parse (alternative to post_id)' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'block_count' => array( 'type' => 'integer' ),
 			'blocks'      => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 		) ),
 		'callback' => function( $params ) {
 			if ( ! empty( $params['post_id'] ) ) {
-				$check = wp_abilities_suite_require_editable_post( $params['post_id'] );
+				$check = abilities_for_ai_require_editable_post( $params['post_id'] );
 				if ( is_wp_error( $check ) ) return $check;
 				$content = $check->post_content;
 			} elseif ( isset( $params['content'] ) ) {
@@ -70,7 +70,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'blocks' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'html'   => array( 'type' => 'string' ),
 			'length' => array( 'type' => 'integer' ),
 		) ),
@@ -91,12 +91,12 @@ add_action( 'wp_abilities_api_init', function() {
 			'properties' => array_merge(
 				array(
 					'namespace' => array( 'type' => 'string', 'description' => 'Filter by namespace (e.g. "core", "uagb")' ),
-					'search'    => wp_abilities_suite_schema_search( 'Search block type names' ),
+					'search'    => abilities_for_ai_schema_search( 'Search block type names' ),
 				),
-				wp_abilities_suite_schema_pagination()
+				abilities_for_ai_schema_pagination()
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_list_output( 'types', array(
+		'output_schema' => abilities_for_ai_schema_list_output( 'types', array(
 			'name'       => array( 'type' => 'string' ),
 			'title'      => array( 'type' => 'string' ),
 			'category'   => array( 'type' => 'string' ),
@@ -152,7 +152,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'name' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'name'        => array( 'type' => 'string' ),
 			'title'       => array( 'type' => 'string' ),
 			'description' => array( 'type' => 'string' ),
@@ -204,12 +204,12 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'post_id' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'found'   => array( 'type' => 'integer' ),
 			'matches' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 		) ),
 		'callback' => function( $params ) {
-			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 
 			$blocks  = parse_blocks( $check->post_content );
@@ -262,14 +262,14 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'post_id', 'blocks' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'post_id'      => array( 'type' => 'integer' ),
 			'inserted'     => array( 'type' => 'integer' ),
 			'total_blocks' => array( 'type' => 'integer' ),
 		) ),
 		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
 		'callback' => function( $params ) {
-			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id    = $check->ID;
 			$existing   = parse_blocks( $check->post_content );
@@ -311,14 +311,14 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'post_id', 'index', 'block' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'post_id'   => array( 'type' => 'integer' ),
 			'replaced'  => array( 'type' => 'string' ),
 			'new_block' => array( 'type' => 'string' ),
 			'index'     => array( 'type' => 'integer' ),
 		) ),
 		'callback' => function( $params ) {
-			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id = $check->ID;
 			$blocks  = parse_blocks( $check->post_content );
@@ -362,14 +362,14 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'post_id', 'index' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'post_id'          => array( 'type' => 'integer' ),
 			'removed'          => array( 'type' => 'string' ),
 			'remaining_blocks' => array( 'type' => 'integer' ),
 		) ),
 		'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ),
 		'callback' => function( $params ) {
-			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id = $check->ID;
 			$blocks  = parse_blocks( $check->post_content );

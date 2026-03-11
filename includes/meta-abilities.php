@@ -8,13 +8,13 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'meta', 'edit_posts' );
+	$reg = new Abilities_For_AI_Registrar( 'meta', 'edit_posts' );
 
 	// ===== META — READ =====
 
@@ -28,13 +28,13 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'post_id' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'post_id'    => array( 'type' => 'integer' ),
 			'meta_count' => array( 'type' => 'integer' ),
 			'meta'       => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 		) ),
 		'callback' => function( $params ) {
-			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id = $check->ID;
 			$meta    = get_post_meta( $post_id );
@@ -58,13 +58,13 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'post_id', 'meta_key' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'post_id' => array( 'type' => 'integer' ),
 			'key'     => array( 'type' => 'string' ),
 			'value'   => array( 'type' => 'string', 'description' => 'Meta value (may be string, array, or serialized data)' ),
 		) ),
 		'callback' => function( $params ) {
-			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id = $check->ID;
 			$single  = $params['single'] ?? true;
@@ -84,7 +84,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'term_id' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'term_id'    => array( 'type' => 'integer' ),
 			'meta_count' => array( 'type' => 'integer' ),
 			'meta'       => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
@@ -117,7 +117,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'term_id', 'meta_key' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'term_id' => array( 'type' => 'integer' ),
 			'key'     => array( 'type' => 'string' ),
 			'value'   => array( 'type' => 'string', 'description' => 'Meta value (may be string, array, or serialized data)' ),
@@ -145,7 +145,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'user_id' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'user_id'    => array( 'type' => 'integer' ),
 			'meta_count' => array( 'type' => 'integer' ),
 			'meta'       => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
@@ -189,7 +189,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'user_id', 'meta_key' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'user_id' => array( 'type' => 'integer' ),
 			'key'     => array( 'type' => 'string' ),
 			'value'   => array( 'type' => 'string', 'description' => 'Meta value (may be string, array, or serialized data)' ),
@@ -232,7 +232,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'object_type'    => array( 'type' => 'string' ),
 			'object_subtype' => array( 'type' => 'string' ),
 			'total'          => array( 'type' => 'integer' ),
@@ -275,13 +275,13 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'post_id', 'meta_key', 'meta_value' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'post_id' => array( 'type' => 'integer' ),
 			'key'     => array( 'type' => 'string' ),
 			'updated' => array( 'type' => 'boolean' ),
 		) ),
 		'callback' => function( $params ) {
-			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id = $check->ID;
 			$key     = sanitize_text_field( $params['meta_key'] );
@@ -304,7 +304,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'term_id', 'meta_key', 'meta_value' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'term_id' => array( 'type' => 'integer' ),
 			'key'     => array( 'type' => 'string' ),
 			'updated' => array( 'type' => 'boolean' ),
@@ -335,7 +335,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'user_id', 'meta_key', 'meta_value' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'user_id' => array( 'type' => 'integer' ),
 			'key'     => array( 'type' => 'string' ),
 			'updated' => array( 'type' => 'boolean' ),
@@ -372,13 +372,13 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'post_id', 'meta_key' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'post_id' => array( 'type' => 'integer' ),
 			'key'     => array( 'type' => 'string' ),
 			'deleted' => array( 'type' => 'boolean' ),
 		) ),
 		'callback' => function( $params ) {
-			$check = wp_abilities_suite_require_editable_post( $params['post_id'] ?? 0 );
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id = $check->ID;
 			$key     = sanitize_text_field( $params['meta_key'] );
@@ -399,7 +399,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'meta_key' => array( 'type' => 'string', 'description' => 'Meta key to delete' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'term_id' => array( 'type' => 'integer' ),
 			'key'     => array( 'type' => 'string' ),
 			'deleted' => array( 'type' => 'boolean' ),
@@ -428,7 +428,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'meta_key' => array( 'type' => 'string', 'description' => 'Meta key to delete' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'user_id' => array( 'type' => 'integer' ),
 			'key'     => array( 'type' => 'string' ),
 			'deleted' => array( 'type' => 'boolean' ),

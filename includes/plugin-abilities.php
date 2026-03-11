@@ -8,13 +8,13 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'plugins', 'activate_plugins' );
+	$reg = new Abilities_For_AI_Registrar( 'plugins', 'activate_plugins' );
 
 	// ===== PLUGINS — READ =====
 
@@ -32,7 +32,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_collection_output( 'plugins', array(
+		'output_schema' => abilities_for_ai_schema_collection_output( 'plugins', array(
 			'file'      => array( 'type' => 'string' ),
 			'name'      => array( 'type' => 'string' ),
 			'version'   => array( 'type' => 'string' ),
@@ -123,7 +123,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'file'      => array( 'type' => 'string' ),
 			'name'      => array( 'type' => 'string' ),
 			'version'   => array( 'type' => 'string' ),
@@ -210,7 +210,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'plugins' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 			'info'    => array( 'type' => 'object' ),
 		) ),
@@ -329,7 +329,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'message' => array( 'type' => 'string' ),
 		) ),
 		'callback' => function( $input ) {
@@ -390,7 +390,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'message' => array( 'type' => 'string' ),
 		) ),
 		'callback' => function( $input ) {
@@ -441,7 +441,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'message'     => array( 'type' => 'string' ),
 			'plugin_file' => array( 'type' => 'string' ),
 		) ),
@@ -532,7 +532,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'message' => array( 'type' => 'string' ),
 		) ),
 		'callback' => function( $input ) {

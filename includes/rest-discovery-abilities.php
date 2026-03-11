@@ -8,18 +8,18 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'rest', 'manage_options' );
+	$reg = new Abilities_For_AI_Registrar( 'rest', 'manage_options' );
 
 	$reg->read( 'rest/list-namespaces', array(
 		'label'       => 'List REST Namespaces',
 		'description' => 'List all registered REST API namespaces.',
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'total'      => array( 'type' => 'integer', 'description' => 'Total number of namespaces' ),
 			'namespaces' => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
 		) ),
@@ -42,7 +42,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'namespace' => array( 'type' => 'string', 'description' => 'REST namespace to filter by (e.g. "wp/v2", "wp-abilities/v1")' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'namespace' => array( 'type' => 'string' ),
 			'total'     => array( 'type' => 'integer' ),
 			'routes'    => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
@@ -87,7 +87,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'route' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'route'     => array( 'type' => 'string' ),
 			'endpoints' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 		) ),
@@ -124,7 +124,7 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'rest/get-index', array(
 		'label'       => 'Get REST Index',
 		'description' => 'Get the full REST API index (equivalent to /wp-json/).',
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'name'           => array( 'type' => 'string' ),
 			'description'    => array( 'type' => 'string' ),
 			'url'            => array( 'type' => 'string' ),

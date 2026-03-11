@@ -18,8 +18,8 @@ if ( ! defined( 'DAY_IN_SECONDS' ) ) {
 if ( ! defined( 'HOUR_IN_SECONDS' ) ) {
 	define( 'HOUR_IN_SECONDS', 3600 );
 }
-if ( ! defined( 'WP_ABILITIES_SUITE_VERSION' ) ) {
-	define( 'WP_ABILITIES_SUITE_VERSION', 'test' );
+if ( ! defined( 'ABILITIES_FOR_AI_VERSION' ) ) {
+	define( 'ABILITIES_FOR_AI_VERSION', 'test' );
 }
 
 // WP_Error class.
@@ -178,9 +178,9 @@ if ( ! function_exists( 'current_user_can' ) ) {
 	}
 }
 
-// Stub: wp_abilities_suite_pro_gate() — passthrough in unit tests.
-if ( ! function_exists( 'wp_abilities_suite_pro_gate' ) ) {
-	function wp_abilities_suite_pro_gate( $name, $callback ) {
+// Stub: abilities_for_ai_pro_gate() — passthrough in unit tests.
+if ( ! function_exists( 'abilities_for_ai_pro_gate' ) ) {
+	function abilities_for_ai_pro_gate( $name, $callback ) {
 		return $callback;
 	}
 }

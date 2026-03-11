@@ -8,13 +8,13 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'patterns', 'edit_posts' );
+	$reg = new Abilities_For_AI_Registrar( 'patterns', 'edit_posts' );
 
 	$reg->read( 'patterns/list', array(
 		'label'       => 'List Block Patterns',
@@ -24,12 +24,12 @@ add_action( 'wp_abilities_api_init', function() {
 			'properties' => array_merge(
 				array(
 					'category' => array( 'type' => 'string', 'description' => 'Filter by pattern category slug' ),
-					'search'   => wp_abilities_suite_schema_search( 'Search pattern names or titles' ),
+					'search'   => abilities_for_ai_schema_search( 'Search pattern names or titles' ),
 				),
-				wp_abilities_suite_schema_pagination()
+				abilities_for_ai_schema_pagination()
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_list_output( 'patterns', array(
+		'output_schema' => abilities_for_ai_schema_list_output( 'patterns', array(
 			'name'        => array( 'type' => 'string' ),
 			'title'       => array( 'type' => 'string' ),
 			'description' => array( 'type' => 'string' ),
@@ -88,7 +88,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'name' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'name'        => array( 'type' => 'string' ),
 			'title'       => array( 'type' => 'string' ),
 			'description' => array( 'type' => 'string' ),
@@ -135,7 +135,7 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'patterns/list-categories', array(
 		'label'       => 'List Pattern Categories',
 		'description' => 'List all registered block pattern categories.',
-		'output_schema' => wp_abilities_suite_schema_collection_output( 'categories', array(
+		'output_schema' => abilities_for_ai_schema_collection_output( 'categories', array(
 			'name'        => array( 'type' => 'string' ),
 			'label'       => array( 'type' => 'string' ),
 			'description' => array( 'type' => 'string' ),
@@ -171,7 +171,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'name', 'title', 'content' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'name'       => array( 'type' => 'string' ),
 			'registered' => array( 'type' => 'boolean' ),
 		) ),
@@ -211,7 +211,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'name' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'name'         => array( 'type' => 'string' ),
 			'unregistered' => array( 'type' => 'boolean' ),
 		) ),

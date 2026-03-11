@@ -5,7 +5,7 @@
  * Tests pure helper functions that have no WordPress database dependency.
  * Runs without WP_TESTS_DIR (unit mode via stubs).
  *
- * @package WordPress_Abilities_Suite\Tests\Unit
+ * @package Abilities_For_AI\Tests\Unit
  */
 
 use PHPUnit\Framework\TestCase;
@@ -88,10 +88,10 @@ class HelpersTest extends TestCase {
 		$this->assertFalse( wp_abilities_is_private_ip( '1.1.1.1' ) );
 	}
 
-	// ── wp_abilities_suite_permission_defaults() ──────────────────────────────
+	// ── abilities_for_ai_permission_defaults() ──────────────────────────────
 
 	public function test_permission_defaults_returns_array() {
-		$defaults = wp_abilities_suite_permission_defaults();
+		$defaults = abilities_for_ai_permission_defaults();
 		$this->assertIsArray( $defaults );
 		$this->assertArrayHasKey( 'content', $defaults );
 		$this->assertArrayHasKey( 'cron', $defaults );
@@ -99,33 +99,33 @@ class HelpersTest extends TestCase {
 	}
 
 	public function test_permission_defaults_content_read_on() {
-		$defaults = wp_abilities_suite_permission_defaults();
+		$defaults = abilities_for_ai_permission_defaults();
 		$this->assertTrue( $defaults['content']['read'] );
 	}
 
 	public function test_permission_defaults_filesystem_write_off() {
-		$defaults = wp_abilities_suite_permission_defaults();
+		$defaults = abilities_for_ai_permission_defaults();
 		$this->assertFalse( $defaults['filesystem']['write'] );
 	}
 
 	public function test_permission_defaults_cron_read_only() {
-		$defaults = wp_abilities_suite_permission_defaults();
+		$defaults = abilities_for_ai_permission_defaults();
 		$this->assertTrue( $defaults['cron']['read'] );
 		$this->assertArrayNotHasKey( 'write', $defaults['cron'] );
 	}
 
-	// ── wp_abilities_suite_get_permissions() ─────────────────────────────────
+	// ── abilities_for_ai_get_permissions() ─────────────────────────────────
 
 	public function test_get_permissions_merges_saved_with_defaults() {
 		// The stubs return an empty option by default.
-		$perms = wp_abilities_suite_get_permissions( 'content' );
+		$perms = abilities_for_ai_get_permissions( 'content' );
 		$this->assertArrayHasKey( 'read', $perms );
 		$this->assertArrayHasKey( 'write', $perms );
 		$this->assertArrayHasKey( 'delete', $perms );
 	}
 
 	public function test_get_permissions_unknown_module_defaults_to_read() {
-		$perms = wp_abilities_suite_get_permissions( 'nonexistent-module' );
+		$perms = abilities_for_ai_get_permissions( 'nonexistent-module' );
 		$this->assertTrue( $perms['read'] );
 		$this->assertArrayNotHasKey( 'write', $perms );
 	}

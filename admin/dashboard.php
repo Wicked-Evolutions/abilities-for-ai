@@ -1,6 +1,6 @@
 <?php
 /**
- * Abilities for WordPress — Unified Dashboard
+ * Abilities for AI — Unified Dashboard
  *
  * Single admin page with two tabs:
  *   1. Explorer — filterable table of ALL registered abilities with inline R/W/D
@@ -9,18 +9,18 @@
  *
  * Replaces the previous separate Explorer + Settings pages.
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class WP_Abilities_Suite_Dashboard {
+class Abilities_For_AI_Dashboard {
 
 	/**
 	 * Source detection map: category slug → human-readable source.
 	 */
 	private static $source_map = array(
-		// WordPress Core (abilities-suite-for-wordpress).
+		// WordPress Core (abilities-for-ai).
 		'content'     => 'WordPress Core',
 		'taxonomies'  => 'WordPress Core',
 		'plugins'     => 'WordPress Core',
@@ -75,8 +75,8 @@ class WP_Abilities_Suite_Dashboard {
 
 	public function add_menu_pages() {
 		add_menu_page(
-			'Abilities for WordPress',
-			'Abilities for WordPress',
+			'Abilities for AI',
+			'WP Abilities',
 			'manage_options',
 			'wp-abilities-suite',
 			array( $this, 'render_page' ),
@@ -84,10 +84,10 @@ class WP_Abilities_Suite_Dashboard {
 			30
 		);
 
-		// Single submenu that mirrors the parent (removes "Abilities for WordPress" duplicate).
+		// Single submenu that mirrors the parent (removes "WP Abilities" duplicate).
 		add_submenu_page(
 			'wp-abilities-suite',
-			'Abilities for WordPress',
+			'Abilities for AI',
 			'Dashboard',
 			'manage_options',
 			'wp-abilities-suite',
@@ -102,9 +102,9 @@ class WP_Abilities_Suite_Dashboard {
 
 		wp_enqueue_style(
 			'wp-abilities-suite-admin',
-			WP_ABILITIES_SUITE_URL . 'admin/css/dashboard.css',
+			ABILITIES_FOR_AI_URL . 'admin/css/dashboard.css',
 			array(),
-			WP_ABILITIES_SUITE_VERSION
+			ABILITIES_FOR_AI_VERSION
 		);
 	}
 
@@ -118,9 +118,9 @@ class WP_Abilities_Suite_Dashboard {
 
 		// Activate.
 		if ( isset( $_POST['wp_abilities_license_activate'] ) ) {
-			check_admin_referer( 'wp_abilities_suite_license_nonce' );
+			check_admin_referer( 'abilities_for_ai_license_nonce' );
 			$key    = sanitize_text_field( wp_unslash( $_POST['wp_abilities_license_key'] ?? '' ) );
-			$result = WP_Abilities_Suite_License_Manager::activate( $key );
+			$result = Abilities_For_AI_License_Manager::activate( $key );
 
 			if ( is_wp_error( $result ) ) {
 				add_settings_error( 'wp_abilities_license', 'activation_failed', $result->get_error_message(), 'error' );
@@ -134,8 +134,8 @@ class WP_Abilities_Suite_Dashboard {
 
 		// Deactivate.
 		if ( isset( $_POST['wp_abilities_license_deactivate'] ) ) {
-			check_admin_referer( 'wp_abilities_suite_license_nonce' );
-			WP_Abilities_Suite_License_Manager::deactivate();
+			check_admin_referer( 'abilities_for_ai_license_nonce' );
+			Abilities_For_AI_License_Manager::deactivate();
 			add_settings_error( 'wp_abilities_license', 'deactivated', __( 'License deactivated.', 'wp-abilities-suite' ), 'info' );
 			set_transient( 'settings_errors', get_settings_errors(), 30 );
 			wp_safe_redirect( add_query_arg( array( 'page' => 'wp-abilities-suite', 'tab' => 'license', 'settings-updated' => 'true' ), admin_url( 'admin.php' ) ) );
@@ -223,8 +223,8 @@ class WP_Abilities_Suite_Dashboard {
 		$saved      = isset( $_GET['settings-updated'] ) && 'true' === $_GET['settings-updated'];
 		?>
 		<div class="wrap">
-			<h1>Abilities for WordPress</h1>
-			<p class="wp-abilities-subtitle">v<?php echo esc_html( WP_ABILITIES_SUITE_VERSION ); ?> — Universal control panel for all registered WordPress abilities</p>
+			<h1>Abilities for AI</h1>
+			<p class="wp-abilities-subtitle">v<?php echo esc_html( ABILITIES_FOR_AI_VERSION ); ?> — Universal control panel for all registered WordPress abilities</p>
 
 			<?php if ( $saved ) : ?>
 				<?php settings_errors( 'wp_abilities_license' ); ?>
@@ -314,7 +314,7 @@ class WP_Abilities_Suite_Dashboard {
 		}
 
 		// Permission & count data.
-		$enabled_info = wp_abilities_suite_enabled_count();
+		$enabled_info = abilities_for_ai_enabled_count();
 		$perm_saved   = isset( $_GET['settings-updated'] ) && 'true' === $_GET['settings-updated'];
 
 		$this->render_stats( $abilities, $all_sources, $all_categories, $enabled_info );
@@ -346,7 +346,7 @@ class WP_Abilities_Suite_Dashboard {
 				<p>Sources</p>
 			</div>
 			<div class="stats-card">
-				<h3><?php echo esc_html( WP_ABILITIES_SUITE_VERSION ); ?></h3>
+				<h3><?php echo esc_html( ABILITIES_FOR_AI_VERSION ); ?></h3>
 				<p>Suite Version</p>
 			</div>
 		</div>
@@ -407,12 +407,12 @@ class WP_Abilities_Suite_Dashboard {
 	 */
 	private function render_explorer_table( $abilities, $source_filter, $category_filter, $type_filter ) {
 		$has_filters   = $source_filter || $category_filter || $type_filter;
-		$defaults      = wp_abilities_suite_permission_defaults();
-		$module_labels = wp_abilities_suite_module_labels();
-		$counts        = wp_abilities_suite_get_ability_counts();
+		$defaults      = abilities_for_ai_permission_defaults();
+		$module_labels = abilities_for_ai_module_labels();
+		$counts        = abilities_for_ai_get_ability_counts();
 		?>
 		<form method="post" action="options.php" id="wp-abilities-perm-form">
-			<?php settings_fields( 'wp_abilities_suite_permissions_group' ); ?>
+			<?php settings_fields( 'abilities_for_ai_permissions_group' ); ?>
 
 			<div class="wp-abilities-list">
 				<p class="abilities-count">
@@ -448,7 +448,7 @@ class WP_Abilities_Suite_Dashboard {
 								if ( $module && $module !== $current_module ) :
 									$current_module = $module;
 									$label          = $module_labels[ $module ] ?? $module;
-									$perms          = wp_abilities_suite_get_permissions( $module );
+									$perms          = abilities_for_ai_get_permissions( $module );
 									$module_counts  = $counts[ $module ] ?? array( 'read' => 0, 'write' => 0, 'delete' => 0, 'total' => 0 );
 									$module_ops     = $defaults[ $module ] ?? array();
 									$has_write      = array_key_exists( 'write', $module_ops );
@@ -466,9 +466,9 @@ class WP_Abilities_Suite_Dashboard {
 											<?php endif; ?>
 											<span class="module-controls">
 												<label title="All Read in <?php echo esc_attr( $label ); ?>">
-													<input type="hidden" name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][read]" value="0">
+													<input type="hidden" name="abilities_for_ai_permissions[<?php echo esc_attr( $module ); ?>][read]" value="0">
 													<input type="checkbox"
-														name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][read]"
+														name="abilities_for_ai_permissions[<?php echo esc_attr( $module ); ?>][read]"
 														value="1"
 														class="perm-checkbox"
 														data-module="<?php echo esc_attr( $module ); ?>"
@@ -479,9 +479,9 @@ class WP_Abilities_Suite_Dashboard {
 												</label>
 												<?php if ( $has_write ) : ?>
 													<label title="All Write in <?php echo esc_attr( $label ); ?>">
-														<input type="hidden" name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][write]" value="0">
+														<input type="hidden" name="abilities_for_ai_permissions[<?php echo esc_attr( $module ); ?>][write]" value="0">
 														<input type="checkbox"
-															name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][write]"
+															name="abilities_for_ai_permissions[<?php echo esc_attr( $module ); ?>][write]"
 															value="1"
 															class="perm-checkbox"
 															data-module="<?php echo esc_attr( $module ); ?>"
@@ -493,9 +493,9 @@ class WP_Abilities_Suite_Dashboard {
 												<?php endif; ?>
 												<?php if ( $has_delete ) : ?>
 													<label title="All Delete in <?php echo esc_attr( $label ); ?>">
-														<input type="hidden" name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][delete]" value="0">
+														<input type="hidden" name="abilities_for_ai_permissions[<?php echo esc_attr( $module ); ?>][delete]" value="0">
 														<input type="checkbox"
-															name="wp_abilities_suite_permissions[<?php echo esc_attr( $module ); ?>][delete]"
+															name="abilities_for_ai_permissions[<?php echo esc_attr( $module ); ?>][delete]"
 															value="1"
 															class="perm-checkbox perm-delete"
 															data-module="<?php echo esc_attr( $module ); ?>"
@@ -519,8 +519,8 @@ class WP_Abilities_Suite_Dashboard {
 								$detail_id  = 'detail-' . sanitize_html_class( str_replace( '/', '-', $name ) );
 								$source_css = self::get_source_css( $ability['source'] );
 								$op         = $this->get_ability_op( $ability );
-								$is_enabled = $module ? wp_abilities_suite_ability_enabled( $name, $module, $op ) : true;
-								$module_enabled = $module ? ! empty( wp_abilities_suite_get_permissions( $module )[ $op ] ) : true;
+								$is_enabled = $module ? abilities_for_ai_ability_enabled( $name, $module, $op ) : true;
+								$module_enabled = $module ? ! empty( abilities_for_ai_get_permissions( $module )[ $op ] ) : true;
 								$has_override   = $is_enabled !== $module_enabled;
 								$safe_name      = esc_attr( $name );
 								?>
@@ -617,8 +617,8 @@ class WP_Abilities_Suite_Dashboard {
 				<div class="save-bar">
 					<?php submit_button( 'Save Permissions', 'primary', 'submit', false ); ?>
 					<span class="save-summary">
-						<strong id="save-enabled"><?php echo wp_abilities_suite_enabled_count()['enabled']; ?></strong>
-						of <?php echo wp_abilities_suite_enabled_count()['total']; ?> abilities enabled
+						<strong id="save-enabled"><?php echo abilities_for_ai_enabled_count()['enabled']; ?></strong>
+						of <?php echo abilities_for_ai_enabled_count()['total']; ?> abilities enabled
 						· Changes take effect on next request
 					</span>
 				</div>
@@ -635,7 +635,7 @@ class WP_Abilities_Suite_Dashboard {
 	 */
 	private function get_ability_module( $category ) {
 		// WP Suite modules map 1:1 with category slugs.
-		$defaults = wp_abilities_suite_permission_defaults();
+		$defaults = abilities_for_ai_permission_defaults();
 		if ( isset( $defaults[ $category ] ) ) {
 			return $category;
 		}
@@ -645,14 +645,14 @@ class WP_Abilities_Suite_Dashboard {
 	// ─── License Tab ─────────────────────────────────────────────
 
 	private function render_license_tab() {
-		$status = WP_Abilities_Suite_License_Manager::get_status();
+		$status = Abilities_For_AI_License_Manager::get_status();
 		$is_active   = $status['activated'];
 		$has_key     = ! empty( $status['key'] );
 		?>
 
 		<div class="license-card">
 			<h3>
-				Abilities for WordPress
+				Abilities for AI
 				<?php if ( $is_active ) : ?>
 					<span class="badge badge-pro" style="vertical-align:middle;">Pro</span>
 				<?php endif; ?>
@@ -664,14 +664,14 @@ class WP_Abilities_Suite_Dashboard {
 					<strong style="color:#00a32a;"><?php esc_html_e( 'Active', 'wp-abilities-suite' ); ?></strong>
 				</div>
 				<form method="post">
-					<?php wp_nonce_field( 'wp_abilities_suite_license_nonce' ); ?>
+					<?php wp_nonce_field( 'abilities_for_ai_license_nonce' ); ?>
 					<div class="key-field">
 						<input type="text" value="<?php echo esc_attr( $status['key'] ); ?>" disabled>
 						<button type="submit" name="wp_abilities_license_deactivate" class="button button-danger button-sm">Deactivate</button>
 					</div>
 				</form>
 				<p class="license-meta">
-					<span>Product ID: <?php echo WP_Abilities_Suite_License_Manager::PRODUCT_ID; ?></span>
+					<span>Product ID: <?php echo Abilities_For_AI_License_Manager::PRODUCT_ID; ?></span>
 					<?php if ( ! empty( $status['last_valid'] ) ) : ?>
 						<span>Last validated: <?php echo esc_html( $status['last_valid'] ); ?> UTC</span>
 					<?php endif; ?>
@@ -683,7 +683,7 @@ class WP_Abilities_Suite_Dashboard {
 					<strong style="color:#d63638;"><?php esc_html_e( 'Inactive', 'wp-abilities-suite' ); ?></strong>
 				</div>
 				<form method="post">
-					<?php wp_nonce_field( 'wp_abilities_suite_license_nonce' ); ?>
+					<?php wp_nonce_field( 'abilities_for_ai_license_nonce' ); ?>
 					<div class="key-field">
 						<input type="text" value="<?php echo esc_attr( $status['key'] ); ?>" disabled>
 						<button type="submit" name="wp_abilities_license_deactivate" class="button button-danger button-sm">Remove</button>
@@ -699,7 +699,7 @@ class WP_Abilities_Suite_Dashboard {
 					<strong style="color:#dba617;"><?php esc_html_e( 'No License', 'wp-abilities-suite' ); ?></strong>
 				</div>
 				<form method="post">
-					<?php wp_nonce_field( 'wp_abilities_suite_license_nonce' ); ?>
+					<?php wp_nonce_field( 'abilities_for_ai_license_nonce' ); ?>
 					<div class="key-field">
 						<input type="text" name="wp_abilities_license_key" placeholder="Enter your license key…">
 						<button type="submit" name="wp_abilities_license_activate" class="button button-primary button-sm">Activate</button>
@@ -722,7 +722,7 @@ class WP_Abilities_Suite_Dashboard {
 		$abilities = $this->get_abilities_array();
 
 		// Count free vs pro per module.
-		$module_labels = wp_abilities_suite_module_labels();
+		$module_labels = abilities_for_ai_module_labels();
 		$module_tiers  = array();
 
 		foreach ( $abilities as $a ) {
@@ -784,13 +784,13 @@ class WP_Abilities_Suite_Dashboard {
 		}
 		ksort( $source_counts );
 
-		$enabled_info = wp_abilities_suite_enabled_count();
-		$license      = WP_Abilities_Suite_License_Manager::get_status();
+		$enabled_info = abilities_for_ai_enabled_count();
+		$license      = Abilities_For_AI_License_Manager::get_status();
 		?>
 		<div class="wp-abilities-settings" style="margin-top:20px;">
 			<h2 style="margin-top:0;padding-top:0;border-top:none;">Debug Information</h2>
 			<p>Copy this when reporting issues:</p>
-			<textarea class="debug-area" readonly>Plugin: Abilities for WordPress v<?php echo esc_html( WP_ABILITIES_SUITE_VERSION ); ?>
+			<textarea class="debug-area" readonly>Plugin: Abilities for AI v<?php echo esc_html( ABILITIES_FOR_AI_VERSION ); ?>
 
 WordPress: <?php echo get_bloginfo( 'version' ); ?> | PHP: <?php echo PHP_VERSION; ?> | Multisite: <?php echo is_multisite() ? 'Yes' : 'No'; ?>
 
@@ -863,7 +863,7 @@ Active Plugins: <?php echo count( get_option( 'active_plugins', array() ) ); ?><
 							// Ability is explicitly unchecked — inject hidden input.
 							var hidden = document.createElement('input');
 							hidden.type = 'hidden';
-							hidden.name = 'wp_abilities_suite_permissions[_overrides][' + ability + ']';
+							hidden.name = 'abilities_for_ai_permissions[_overrides][' + ability + ']';
 							hidden.value = '0';
 							hidden.className = 'injected-override';
 							form.appendChild(hidden);
@@ -879,4 +879,4 @@ Active Plugins: <?php echo count( get_option( 'active_plugins', array() ) ); ?><
 	}
 }
 
-new WP_Abilities_Suite_Dashboard();
+new Abilities_For_AI_Dashboard();

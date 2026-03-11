@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to WordPress Abilities Suite will be documented in this file.
+All notable changes to Abilities for AI will be documented in this file.
 
 ## [3.7.2] - 2026-03-09
 
@@ -13,7 +13,7 @@ All notable changes to WordPress Abilities Suite will be documented in this file
 ## [3.7.1] - 2026-03-09
 
 ### Fixed
-- `media/create` — fatal error: added missing `wp_abilities_suite_is_private_ip()` alias in `helpers.php` (function existed as `wp_abilities_is_private_ip`, call-site used suite-prefixed name)
+- `media/create` — fatal error: added missing `abilities_for_ai_is_private_ip()` alias in `helpers.php` (function existed as `wp_abilities_is_private_ip`, call-site used suite-prefixed name)
 - `cache/flush-page-cache` — output schema mismatch: `post_id` declared as `integer` but returns `null` when no post ID provided; updated to `['integer', 'null']`
 
 ---
@@ -43,7 +43,7 @@ All notable changes to WordPress Abilities Suite will be documented in this file
 - Write permissions default OFF — admin must explicitly enable
 - **Free/Pro tier gate** (Phase 1): 69 free abilities (read) + 44 pro abilities (write)
 - `license-manager.php` stub — any non-empty key activates Pro
-- `tier-gate.php` — `wp_abilities_suite_pro_gate()` closure wrapper for pro abilities
+- `tier-gate.php` — `abilities_for_ai_pro_gate()` closure wrapper for pro abilities
 - Execution-time blocking: all 113 abilities registered and visible; pro abilities return 403 without license
 
 ### Changed
@@ -110,8 +110,8 @@ All notable changes to WordPress Abilities Suite will be documented in this file
 
 ### Changed
 - **MCP metadata normalized** — 54 abilities across 10 v3 modules now include `show_in_rest` and `mcp.public` metadata (were silently missing)
-- Plugin renamed from "WordPress Abilities Suite" to "Abilities Suite for WordPress"
-- Main file renamed from `wordpress-abilities-suite.php` to `abilities-suite-for-wordpress.php`
+- Plugin renamed from "Abilities for AI" to "Abilities for AI"
+- Main file renamed from `wordpress-abilities-suite.php` to `abilities-for-ai.php`
 - Schema audit script path updated for new plugin directory name
 
 ---

@@ -9,7 +9,7 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -19,12 +19,12 @@ defined( 'ABSPATH' ) || exit;
  */
 add_action( 'admin_init', function() {
 	register_setting(
-		'wp_abilities_suite_permissions_group',
-		'wp_abilities_suite_permissions',
+		'abilities_for_ai_permissions_group',
+		'abilities_for_ai_permissions',
 		array(
 			'type'              => 'object',
-			'sanitize_callback' => 'wp_abilities_suite_sanitize_permissions',
-			'default'           => wp_abilities_suite_permission_defaults(),
+			'sanitize_callback' => 'abilities_for_ai_sanitize_permissions',
+			'default'           => abilities_for_ai_permission_defaults(),
 		)
 	);
 });
@@ -38,8 +38,8 @@ add_action( 'admin_init', function() {
  * @param mixed $input Raw POST input.
  * @return array Sanitized permissions.
  */
-function wp_abilities_suite_sanitize_permissions( $input ) {
-	$defaults  = wp_abilities_suite_permission_defaults();
+function abilities_for_ai_sanitize_permissions( $input ) {
+	$defaults  = abilities_for_ai_permission_defaults();
 	$sanitized = array();
 
 	// Module-level permissions.
@@ -111,7 +111,7 @@ function wp_abilities_suite_sanitize_permissions( $input ) {
  *
  * @return array Module counts: [ 'content' => ['read' => 5, 'write' => 2, 'delete' => 1, 'total' => 8], ... ]
  */
-function wp_abilities_suite_get_ability_counts() {
+function abilities_for_ai_get_ability_counts() {
 	// Map category slugs to modules for counting.
 	$category_to_module = array(
 		'content'    => 'content',
@@ -135,7 +135,7 @@ function wp_abilities_suite_get_ability_counts() {
 	);
 
 	$counts = array();
-	foreach ( array_keys( wp_abilities_suite_permission_defaults() ) as $module ) {
+	foreach ( array_keys( abilities_for_ai_permission_defaults() ) as $module ) {
 		$counts[ $module ] = array( 'read' => 0, 'write' => 0, 'delete' => 0, 'total' => 0 );
 	}
 
@@ -177,7 +177,7 @@ function wp_abilities_suite_get_ability_counts() {
  *
  * @return array [ 'enabled' => int, 'total' => int ]
  */
-function wp_abilities_suite_enabled_count() {
+function abilities_for_ai_enabled_count() {
 	if ( ! function_exists( 'wp_get_abilities' ) ) {
 		return array( 'enabled' => 0, 'total' => 0 );
 	}
@@ -224,7 +224,7 @@ function wp_abilities_suite_enabled_count() {
 		$op          = $destructive ? 'delete' : ( $readonly ? 'read' : 'write' );
 
 		$total++;
-		if ( wp_abilities_suite_ability_enabled( $name, $module, $op ) ) {
+		if ( abilities_for_ai_ability_enabled( $name, $module, $op ) ) {
 			$enabled++;
 		}
 	}

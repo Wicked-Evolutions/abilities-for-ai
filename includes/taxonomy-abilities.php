@@ -8,13 +8,13 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'taxonomies', 'edit_posts' );
+	$reg = new Abilities_For_AI_Registrar( 'taxonomies', 'edit_posts' );
 
 	// ===== TAXONOMIES — READ =====
 
@@ -31,7 +31,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_collection_output( 'taxonomies', array(
+		'output_schema' => abilities_for_ai_schema_collection_output( 'taxonomies', array(
 			'name'         => array( 'type' => 'string' ),
 			'label'        => array( 'type' => 'string' ),
 			'hierarchical' => array( 'type' => 'boolean' ),
@@ -97,7 +97,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_list_output( 'terms', array(
+		'output_schema' => abilities_for_ai_schema_list_output( 'terms', array(
 			'term_id'  => array( 'type' => 'integer' ),
 			'name'     => array( 'type' => 'string' ),
 			'slug'     => array( 'type' => 'string' ),
@@ -155,7 +155,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'taxonomy' => array( 'type' => 'string', 'description' => 'Taxonomy name' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'term_id'    => array( 'type' => 'integer' ),
 			'name'       => array( 'type' => 'string' ),
 			'slug'       => array( 'type' => 'string' ),
@@ -198,9 +198,9 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array() ),
+		'output_schema' => abilities_for_ai_schema_item_output( array() ),
 		'callback' => function( $input ) {
-			$check = wp_abilities_suite_require_editable_post( $input['post_id'] );
+			$check = abilities_for_ai_require_editable_post( $input['post_id'] );
 			if ( is_wp_error( $check ) ) {
 				return $check;
 			}
@@ -286,7 +286,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'term_id'          => array( 'type' => 'integer' ),
 			'term_taxonomy_id' => array( 'type' => 'integer' ),
 		) ),
@@ -355,7 +355,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'term_id' => array( 'type' => 'integer' ),
 		) ),
 		'callback' => function( $input ) {
@@ -421,11 +421,11 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'term_taxonomy_ids' => array( 'type' => 'array', 'items' => array( 'type' => 'integer' ) ),
 		) ),
 		'callback' => function( $input ) {
-			$check = wp_abilities_suite_require_editable_post( $input['post_id'] );
+			$check = abilities_for_ai_require_editable_post( $input['post_id'] );
 			if ( is_wp_error( $check ) ) {
 				return $check;
 			}
@@ -461,7 +461,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'taxonomy' => array( 'type' => 'string', 'description' => 'Taxonomy name' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array() ),
+		'output_schema' => abilities_for_ai_schema_success_output( array() ),
 		'annotations'   => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ),
 		'callback' => function( $input ) {
 			$taxonomy = $input['taxonomy'];

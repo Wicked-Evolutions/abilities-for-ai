@@ -1,5 +1,5 @@
 {
-  "name": "wicked-evolutions/abilities-suite-for-wordpress",
+  "name": "wicked-evolutions/abilities-for-ai",
   "description": "111 native WordPress abilities across 18 modules — powers AI control through the official Abilities API",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
@@ -8,7 +8,7 @@
   },
   "autoload": {
     "psr-4": {
-      "WickedEvolutions\\AbilitiesSuite\\": "src/"
+      "WickedEvolutions\\AbilitiesForAI\\": "src/"
     }
   },
   "config": {

@@ -8,13 +8,13 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'media', 'upload_files' );
+	$reg = new Abilities_For_AI_Registrar( 'media', 'upload_files' );
 
 	// ===== MEDIA — READ =====
 
@@ -59,7 +59,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_list_output( 'media', array(
+		'output_schema' => abilities_for_ai_schema_list_output( 'media', array(
 			'id'        => array( 'type' => 'integer' ),
 			'title'     => array( 'type' => 'string' ),
 			'url'       => array( 'type' => 'string' ),
@@ -125,7 +125,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'id' => array( 'type' => 'integer', 'description' => 'Attachment ID' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'id'        => array( 'type' => 'integer' ),
 			'title'     => array( 'type' => 'string' ),
 			'url'       => array( 'type' => 'string' ),
@@ -213,7 +213,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'id'        => array( 'type' => 'integer' ),
 			'url'       => array( 'type' => 'string' ),
 			'title'     => array( 'type' => 'string' ),
@@ -242,7 +242,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( $resolved_ip === $host ) {
 				return new WP_Error( 'ability_invalid_input', 'Could not resolve hostname.' );
 			}
-			if ( wp_abilities_suite_is_private_ip( $resolved_ip ) ) {
+			if ( abilities_for_ai_is_private_ip( $resolved_ip ) ) {
 				return new WP_Error( 'ability_invalid_input', 'URLs pointing to private/internal IP addresses are not allowed.' );
 			}
 
@@ -346,7 +346,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'id'        => array( 'type' => 'integer' ),
 			'url'       => array( 'type' => 'string' ),
 			'title'     => array( 'type' => 'string' ),
@@ -454,7 +454,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'id' => array( 'type' => 'integer' ),
 		) ),
 		'callback' => function( $input ) {
@@ -512,7 +512,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'message' => array( 'type' => 'string' ),
 		) ),
 		'callback' => function( $input ) {

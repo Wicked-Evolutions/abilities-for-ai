@@ -89,7 +89,7 @@ jobs:
       - name: Build release ZIP
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          ZIP_NAME="abilities-suite-for-wordpress-${VERSION}.zip"
+          ZIP_NAME="abilities-for-ai-${VERSION}.zip"
           zip -r "${ZIP_NAME}" . \
             --exclude ".git/*" \
             --exclude ".github/*" \

@@ -4,13 +4,13 @@
  *
  * Tests that the Registrar correctly builds wp_register_ability() calls,
  * injects annotations, respects tier/permission toggles, and that the
- * class alias (WP_Abilities_Suite_Registrar) resolves correctly.
+ * class alias (Abilities_For_AI_Registrar) resolves correctly.
  *
- * @package WordPress_Abilities_Suite\Tests\Unit
+ * @package Abilities_For_AI\Tests\Unit
  */
 
 use PHPUnit\Framework\TestCase;
-use WickedEvolutions\AbilitiesSuite\Core\Registrar;
+use WickedEvolutions\AbilitiesForAI\Core\Registrar;
 
 class RegistrarTest extends TestCase {
 
@@ -25,13 +25,13 @@ class RegistrarTest extends TestCase {
 	// ── Class alias ───────────────────────────────────────────────────────────
 
 	public function test_legacy_class_alias_exists() {
-		$this->assertTrue( class_exists( 'WP_Abilities_Suite_Registrar' ) );
+		$this->assertTrue( class_exists( 'Abilities_For_AI_Registrar' ) );
 	}
 
 	public function test_legacy_alias_is_same_as_namespaced() {
 		$this->assertSame(
 			Registrar::class,
-			get_class( new \WP_Abilities_Suite_Registrar( 'cron', 'manage_options' ) )
+			get_class( new \Abilities_For_AI_Registrar( 'cron', 'manage_options' ) )
 		);
 	}
 
@@ -139,7 +139,7 @@ class RegistrarTest extends TestCase {
 		// Must run in separate process to avoid static cache from earlier tests.
 		// 'blocks' module has delete=false by default, but we override it here.
 		global $_wp_options_store;
-		$_wp_options_store['wp_abilities_suite_permissions'] = array(
+		$_wp_options_store['abilities_for_ai_permissions'] = array(
 			'media' => array( 'read' => true, 'write' => true, 'delete' => true ),
 		);
 

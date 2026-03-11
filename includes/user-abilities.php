@@ -8,13 +8,13 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'users', 'list_users' );
+	$reg = new Abilities_For_AI_Registrar( 'users', 'list_users' );
 
 	// ===== USERS — READ =====
 
@@ -59,7 +59,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_list_output( 'users', array(
+		'output_schema' => abilities_for_ai_schema_list_output( 'users', array(
 			'id'           => array( 'type' => 'integer' ),
 			'username'     => array( 'type' => 'string' ),
 			'email'        => array( 'type' => 'string' ),
@@ -131,7 +131,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'id'           => array( 'type' => 'integer' ),
 			'username'     => array( 'type' => 'string' ),
 			'email'        => array( 'type' => 'string' ),
@@ -219,7 +219,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'id'       => array( 'type' => 'integer' ),
 			'username' => array( 'type' => 'string' ),
 			'email'    => array( 'type' => 'string' ),
@@ -313,7 +313,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'id' => array( 'type' => 'integer' ),
 		) ),
 		'callback' => function( $input ) {
@@ -391,7 +391,7 @@ add_action( 'wp_abilities_api_init', function() {
 				),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'message' => array( 'type' => 'string' ),
 		) ),
 		'callback' => function( $input ) {

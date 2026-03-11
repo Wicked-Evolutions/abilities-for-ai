@@ -8,18 +8,18 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'rewrite', 'manage_options' );
+	$reg = new Abilities_For_AI_Registrar( 'rewrite', 'manage_options' );
 
 	$reg->read( 'rewrite/get-structure', array(
 		'label'       => 'Get Permalink Structure',
 		'description' => 'Get the current permalink structure and rewrite configuration.',
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'permalink_structure' => array( 'type' => 'string' ),
 			'using_permalinks'    => array( 'type' => 'boolean' ),
 			'using_index'         => array( 'type' => 'boolean' ),
@@ -48,12 +48,12 @@ add_action( 'wp_abilities_api_init', function() {
 			'type'       => 'object',
 			'properties' => array_merge(
 				array(
-					'search' => wp_abilities_suite_schema_search( 'Filter rules by regex or query pattern' ),
+					'search' => abilities_for_ai_schema_search( 'Filter rules by regex or query pattern' ),
 				),
-				wp_abilities_suite_schema_pagination( 50 )
+				abilities_for_ai_schema_pagination( 50 )
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_list_output( 'rules', array(
+		'output_schema' => abilities_for_ai_schema_list_output( 'rules', array(
 			'regex' => array( 'type' => 'string' ),
 			'query' => array( 'type' => 'string' ),
 		) ),
@@ -99,7 +99,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'hard' => array( 'type' => 'boolean', 'description' => 'Hard flush — also update .htaccess (default: false)', 'default' => false ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'flushed'    => array( 'type' => 'boolean' ),
 			'hard_flush' => array( 'type' => 'boolean' ),
 			'rule_count' => array( 'type' => 'integer' ),

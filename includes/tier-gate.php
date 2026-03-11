@@ -6,7 +6,7 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -21,10 +21,10 @@ defined( 'ABSPATH' ) || exit;
  * @param callable $callback     The original execute_callback.
  * @return callable Wrapped callback.
  */
-function wp_abilities_suite_pro_gate( $ability_name, $callback ) {
+function abilities_for_ai_pro_gate( $ability_name, $callback ) {
 	return function( $params ) use ( $ability_name, $callback ) {
-		if ( ! WP_Abilities_Suite_License_Manager::is_pro_active() ) {
-			return WP_Abilities_Suite_License_Manager::pro_required_error( $ability_name );
+		if ( ! Abilities_For_AI_License_Manager::is_pro_active() ) {
+			return Abilities_For_AI_License_Manager::pro_required_error( $ability_name );
 		}
 		return $callback( $params );
 	};

@@ -8,7 +8,7 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -20,7 +20,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'label'               => 'Get Suite Status',
 		'description'         => 'Get unified status of all active ability modules, permissions, and license state across Core and Fluent suites.',
 		'category'            => 'settings',
-		'execute_callback'    => 'wp_abilities_suite_get_status',
+		'execute_callback'    => 'abilities_for_ai_get_status',
 		'permission_callback' => function() {
 			return current_user_can( 'manage_options' );
 		},
@@ -64,12 +64,12 @@ add_action( 'wp_abilities_api_init', function() {
 /**
  * Execute callback for suite/get-status.
  */
-function wp_abilities_suite_get_status() {
+function abilities_for_ai_get_status() {
 	$status = array(
 		'core' => array(
-			'version'     => WP_ABILITIES_SUITE_VERSION,
-			'permissions' => wp_abilities_suite_get_permissions_summary(),
-			'pro_active'  => WP_Abilities_Suite_License_Manager::is_pro_active(),
+			'version'     => ABILITIES_FOR_AI_VERSION,
+			'permissions' => abilities_for_ai_get_permissions_summary(),
+			'pro_active'  => Abilities_For_AI_License_Manager::is_pro_active(),
 		),
 		'environment' => array(
 			'wp_version'  => get_bloginfo( 'version' ),
@@ -92,12 +92,12 @@ function wp_abilities_suite_get_status() {
 /**
  * Helper to get a clean permissions summary.
  */
-function wp_abilities_suite_get_permissions_summary() {
-	$modules = wp_abilities_suite_module_labels();
+function abilities_for_ai_get_permissions_summary() {
+	$modules = abilities_for_ai_module_labels();
 	$summary = array();
 
 	foreach ( $modules as $slug => $label ) {
-		$perms = wp_abilities_suite_get_permissions( $slug );
+		$perms = abilities_for_ai_get_permissions( $slug );
 		$active_perms = array();
 		foreach ( $perms as $op => $enabled ) {
 			if ( $enabled ) {

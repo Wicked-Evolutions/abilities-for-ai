@@ -1,4 +1,4 @@
-# Abilities Suite for WordPress — Refactoring SSD Plans
+# Abilities for AI for WordPress — Refactoring SSD Plans
 
 > Four independent, detailed plans for refactoring the plugin.
 > Each plan is self-contained and can be handed to an agent for execution.
@@ -8,14 +8,14 @@
 
 ## Current State Summary (for agent context)
 
-- **Plugin:** Abilities Suite for WordPress v3.7.0
-- **Location:** `/Users/wicked/my-agent/wordpress-plugins-temp/abilities-suite-for-wordpress/`
+- **Plugin:** Abilities for AI for WordPress v3.7.0
+- **Location:** `/Users/wicked/my-agent/wordpress-plugins-temp/abilities-for-ai/`
 - **Architecture:** Procedural, hook-driven, flat module structure
 - **Scale:** 111 abilities, 18 modules, ~8,300 lines PHP, 27 files
-- **Entry point:** `abilities-suite-for-wordpress.php` → requires 4 infrastructure files → 18 ability modules → admin dashboard
+- **Entry point:** `abilities-for-ai.php` → requires 4 infrastructure files → 18 ability modules → admin dashboard
 - **Hook:** All abilities register on `wp_abilities_api_init` via `wp_register_ability()`
-- **Permissions:** `wp_abilities_suite_get_permissions($module)` returns `['read' => bool, 'write' => bool, 'delete' => bool]`
-- **Pro gate:** `wp_abilities_suite_pro_gate($name, $callback)` wraps callbacks with license check
+- **Permissions:** `abilities_for_ai_get_permissions($module)` returns `['read' => bool, 'write' => bool, 'delete' => bool]`
+- **Pro gate:** `abilities_for_ai_pro_gate($name, $callback)` wraps callbacks with license check
 - **No tests, no Composer, no autoloading, no classes for abilities**
 
 ---
@@ -27,7 +27,7 @@
 ### Problem
 Every ability module repeats identical boilerplate:
 1. `add_action('wp_abilities_api_init', ...)` wrapper
-2. `$perms = wp_abilities_suite_get_permissions('module')` call
+2. `$perms = abilities_for_ai_get_permissions('module')` call
 3. `if ($perms['read']) { ... }` / `if ($perms['write']) { ... }` / `if ($perms['delete']) { ... }` blocks
 4. Each `wp_register_ability()` call repeats `'meta' => array(...)` with identical `show_in_rest`, `mcp`, and `annotations` fields
 5. `'permission_callback' => function() { return current_user_can('...'); }` is copy-pasted per ability
@@ -71,7 +71,7 @@ defined( 'ABSPATH' ) || exit;
  * Ability Registrar — eliminates boilerplate from ability module files.
  *
  * Usage in a module file:
- *   $reg = new WP_Abilities_Suite_Registrar( 'cron', 'manage_options' );
+ *   $reg = new Abilities_For_AI_Registrar( 'cron', 'manage_options' );
  *   $reg->read( 'cron/list-events', [
  *       'label'       => 'List Cron Events',
  *       'description' => '...',
@@ -79,7 +79,7 @@ defined( 'ABSPATH' ) || exit;
  *       'callback'    => function( $params ) { ... },
  *   ]);
  */
-class WP_Abilities_Suite_Registrar {
+class Abilities_For_AI_Registrar {
 
     private $module;
     private $capability;
@@ -92,7 +92,7 @@ class WP_Abilities_Suite_Registrar {
     public function __construct( $module, $capability ) {
         $this->module     = $module;
         $this->capability = $capability;
-        $this->perms      = wp_abilities_suite_get_permissions( $module );
+        $this->perms      = abilities_for_ai_get_permissions( $module );
     }
 
     /**
@@ -143,7 +143,7 @@ class WP_Abilities_Suite_Registrar {
 
         // Wrap Pro callbacks with license gate.
         if ( $tier === 'pro' ) {
-            $callback = wp_abilities_suite_pro_gate( $name, $callback );
+            $callback = abilities_for_ai_pro_gate( $name, $callback );
         }
 
         $args = array(
@@ -185,7 +185,7 @@ defined( 'ABSPATH' ) || exit;
  * Base class for ability modules.
  *
  * Usage:
- *   class Cron_Module extends WP_Abilities_Suite_Module {
+ *   class Cron_Module extends Abilities_For_AI_Module {
  *       protected $module     = 'cron';
  *       protected $capability = 'manage_options';
  *
@@ -195,7 +195,7 @@ defined( 'ABSPATH' ) || exit;
  *   }
  *   new Cron_Module(); // Self-registers on wp_abilities_api_init
  */
-abstract class WP_Abilities_Suite_Module {
+abstract class Abilities_For_AI_Module {
     protected $module;
     protected $capability;
 
@@ -204,11 +204,11 @@ abstract class WP_Abilities_Suite_Module {
     }
 
     public function boot() {
-        $reg = new WP_Abilities_Suite_Registrar( $this->module, $this->capability );
+        $reg = new Abilities_For_AI_Registrar( $this->module, $this->capability );
         $this->register( $reg );
     }
 
-    abstract public function register( WP_Abilities_Suite_Registrar $reg );
+    abstract public function register( Abilities_For_AI_Registrar $reg );
 }
 ```
 
@@ -220,7 +220,7 @@ Convert `cron-abilities.php` (smallest at 143 lines, 3 abilities, read-only) fro
 // BEFORE (cron-abilities.php — 143 lines)
 add_action( 'wp_abilities_api_init', 'wp_native_register_cron_abilities' );
 function wp_native_register_cron_abilities() {
-    $perms = wp_abilities_suite_get_permissions( 'cron' );
+    $perms = abilities_for_ai_get_permissions( 'cron' );
     if ( $perms['read'] ) {
         wp_register_ability( 'cron/list-events', array(
             'label'       => 'List Cron Events',
@@ -243,7 +243,7 @@ To:
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-    $reg = new WP_Abilities_Suite_Registrar( 'cron', 'manage_options' );
+    $reg = new Abilities_For_AI_Registrar( 'cron', 'manage_options' );
 
     $reg->read( 'cron/list-events', array(
         'label'       => 'List Cron Events',
@@ -290,8 +290,8 @@ After proof-of-concept is verified working, migrate all modules in order of comp
 Add `require_once` for the new class files BEFORE the ability modules:
 
 ```php
-// In abilities-suite-for-wordpress.php, after tier-gate.php:
-require_once WP_ABILITIES_SUITE_PATH . 'includes/class-ability-registrar.php';
+// In abilities-for-ai.php, after tier-gate.php:
+require_once ABILITIES_FOR_AI_PATH . 'includes/class-ability-registrar.php';
 ```
 
 ### Step 6: Update audit-schema.php
@@ -300,8 +300,8 @@ No changes needed — the audit validates registered abilities at runtime, not s
 
 ## Deliverables
 
-1. **New file:** `includes/class-ability-registrar.php` — the `WP_Abilities_Suite_Registrar` class
-2. **Modified file:** `abilities-suite-for-wordpress.php` — add require_once for new class
+1. **New file:** `includes/class-ability-registrar.php` — the `Abilities_For_AI_Registrar` class
+2. **Modified file:** `abilities-for-ai.php` — add require_once for new class
 3. **Modified files:** All 18 `*-abilities.php` files — converted to use Registrar
 4. **Verification:** Run `wp eval-file audit-schema.php` on production to confirm all 111 abilities still pass schema validation
 5. **Verification:** Run `wp eval 'echo count(wp_get_abilities());'` to confirm 111 abilities registered
@@ -327,11 +327,11 @@ No changes needed — the audit validates registered abilities at runtime, not s
 ## Specification
 
 ### Problem
-The plugin uses 22 `require_once` statements in the main plugin file, loading every file regardless of whether it's needed. There's no `composer.json`, no namespace structure, no autoloader. Class names use `WP_Abilities_Suite_` prefix convention instead of namespaces. Adding new modules requires manually adding a `require_once` line to the main file.
+The plugin uses 22 `require_once` statements in the main plugin file, loading every file regardless of whether it's needed. There's no `composer.json`, no namespace structure, no autoloader. Class names use `Abilities_For_AI_` prefix convention instead of namespaces. Adding new modules requires manually adding a `require_once` line to the main file.
 
 ### Current Load Chain
 ```
-abilities-suite-for-wordpress.php (lines 24-56):
+abilities-for-ai.php (lines 24-56):
   require_once includes/helpers.php
   require_once includes/permissions.php
   require_once includes/license-manager.php
@@ -356,7 +356,7 @@ abilities-suite-for-wordpress.php (lines 24-56):
 
 ```json
 {
-    "name": "influencentricity/abilities-suite-for-wordpress",
+    "name": "influencentricity/abilities-for-ai",
     "description": "111 native WordPress abilities across 18 modules",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
@@ -434,7 +434,7 @@ namespace Jeager\AbilitiesSuite\Core;
 defined( 'ABSPATH' ) || exit;
 
 class LicenseManager {
-    // ... exact same methods, no WP_Abilities_Suite_ prefix needed
+    // ... exact same methods, no Abilities_For_AI_ prefix needed
 }
 ```
 
@@ -476,31 +476,31 @@ if ( ! function_exists( 'wp_native_pagination_schema' ) ) {
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'WP_ABILITIES_SUITE_VERSION', '3.7.0' );
-define( 'WP_ABILITIES_SUITE_PATH', plugin_dir_path( __FILE__ ) );
-define( 'WP_ABILITIES_SUITE_URL', plugin_dir_url( __FILE__ ) );
+define( 'ABILITIES_FOR_AI_VERSION', '3.7.0' );
+define( 'ABILITIES_FOR_AI_PATH', plugin_dir_path( __FILE__ ) );
+define( 'ABILITIES_FOR_AI_URL', plugin_dir_url( __FILE__ ) );
 
 // PSR-4 autoloader.
-if ( file_exists( WP_ABILITIES_SUITE_PATH . 'vendor/autoload.php' ) ) {
-    require_once WP_ABILITIES_SUITE_PATH . 'vendor/autoload.php';
+if ( file_exists( ABILITIES_FOR_AI_PATH . 'vendor/autoload.php' ) ) {
+    require_once ABILITIES_FOR_AI_PATH . 'vendor/autoload.php';
 }
 
 // Backward-compatible global function aliases.
-require_once WP_ABILITIES_SUITE_PATH . 'includes/compat.php';
+require_once ABILITIES_FOR_AI_PATH . 'includes/compat.php';
 
 // Load ability categories FIRST.
-require_once WP_ABILITIES_SUITE_PATH . 'includes/ability-categories.php';
+require_once ABILITIES_FOR_AI_PATH . 'includes/ability-categories.php';
 
 // Load all ability modules.
 // (These will gradually migrate to src/Modules/ and be autoloaded.)
-$modules = glob( WP_ABILITIES_SUITE_PATH . 'includes/*-abilities.php' );
+$modules = glob( ABILITIES_FOR_AI_PATH . 'includes/*-abilities.php' );
 foreach ( $modules as $module_file ) {
     require_once $module_file;
 }
 
 // Admin dashboard.
 if ( is_admin() ) {
-    require_once WP_ABILITIES_SUITE_PATH . 'admin/dashboard.php';
+    require_once ABILITIES_FOR_AI_PATH . 'admin/dashboard.php';
 }
 
 // Activation/deactivation hooks unchanged.
@@ -517,7 +517,7 @@ Generate the autoloader. The `vendor/` directory must be committed or built duri
 3. **Moved + namespaced files:** `LicenseManager.php`, `TierGate.php`, `Permissions.php`
 4. **Extracted + namespaced files:** `Pagination.php`, `MenuTree.php`, `Validation.php`, `ErrorFactory.php` from `helpers.php`
 5. **New file:** `includes/compat.php` — backward-compatible function aliases
-6. **Modified file:** `abilities-suite-for-wordpress.php` — autoloader + glob-based module loading
+6. **Modified file:** `abilities-for-ai.php` — autoloader + glob-based module loading
 7. **Generated:** `vendor/autoload.php` via `composer dump-autoload`
 
 ### Critical Constraints
@@ -632,7 +632,7 @@ require_once $_tests_dir . '/includes/functions.php';
 
 // Load the plugin.
 tests_add_filter( 'muplugins_loaded', function() {
-    require dirname( __DIR__ ) . '/abilities-suite-for-wordpress.php';
+    require dirname( __DIR__ ) . '/abilities-for-ai.php';
 });
 
 require $_tests_dir . '/includes/bootstrap.php';
@@ -695,11 +695,11 @@ wp_register_ability( 'cron/list-events', array(
 ```php
 wp_register_ability( 'cron/list-events', array(
     // ...
-    'execute_callback' => 'wp_abilities_suite_execute_cron_list_events',
+    'execute_callback' => 'abilities_for_ai_execute_cron_list_events',
 ));
 
 // --- Testable named function ---
-function wp_abilities_suite_execute_cron_list_events( $params ) {
+function abilities_for_ai_execute_cron_list_events( $params ) {
     $crons = _get_cron_array();
     // ... 25 lines of logic (UNCHANGED) ...
     return array( 'events' => $events, 'total' => count( $events ) );
@@ -708,13 +708,13 @@ function wp_abilities_suite_execute_cron_list_events( $params ) {
 
 #### Naming Convention
 ```
-wp_abilities_suite_execute_{module}_{ability_slug_underscored}
+abilities_for_ai_execute_{module}_{ability_slug_underscored}
 ```
 
 Examples:
-- `cron/list-events` → `wp_abilities_suite_execute_cron_list_events`
-- `content/get-snapshot` → `wp_abilities_suite_execute_content_get_snapshot`
-- `menu/add-menu-item` → `wp_abilities_suite_execute_menu_add_menu_item`
+- `cron/list-events` → `abilities_for_ai_execute_cron_list_events`
+- `content/get-snapshot` → `abilities_for_ai_execute_content_get_snapshot`
+- `menu/add-menu-item` → `abilities_for_ai_execute_menu_add_menu_item`
 
 #### Migration Order (same as Plan 1)
 
@@ -739,7 +739,7 @@ Many callbacks contain pure logic that can be tested WITHOUT WordPress:
 #### Example: Cron event formatting (currently inline)
 ```php
 // EXTRACT from cron/list-events callback:
-function wp_abilities_suite_format_cron_event( $hook, $timestamp, $data ) {
+function abilities_for_ai_format_cron_event( $hook, $timestamp, $data ) {
     return array(
         'hook'      => $hook,
         'next_run'  => date( 'Y-m-d H:i:s', $timestamp ),
@@ -756,7 +756,7 @@ This function is pure PHP — no WordPress dependencies — and can be unit-test
 #### Example: Settings allowlist check (currently inline in settings/update)
 ```php
 // EXTRACT:
-function wp_abilities_suite_is_writable_setting( $name, $writable_settings ) {
+function abilities_for_ai_is_writable_setting( $name, $writable_settings ) {
     return in_array( $name, $writable_settings, true );
 }
 ```
@@ -776,21 +776,21 @@ class CronAbilitiesTest extends WP_UnitTestCase {
 
     public function test_list_events_returns_array() {
         $this->set_current_user_as_admin();
-        $result = wp_abilities_suite_execute_cron_list_events( array() );
+        $result = abilities_for_ai_execute_cron_list_events( array() );
         $this->assertIsArray( $result );
         $this->assertArrayHasKey( 'events', $result );
         $this->assertArrayHasKey( 'total', $result );
     }
 
     public function test_list_events_filters_by_search() {
-        $result = wp_abilities_suite_execute_cron_list_events( array( 'search' => 'wp_cron' ) );
+        $result = abilities_for_ai_execute_cron_list_events( array( 'search' => 'wp_cron' ) );
         foreach ( $result['events'] as $event ) {
             $this->assertStringContainsString( 'wp_cron', $event['hook'] );
         }
     }
 
     public function test_get_event_returns_error_for_missing_hook() {
-        $result = wp_abilities_suite_execute_cron_get_event( array( 'hook' => 'nonexistent_hook_xyz' ) );
+        $result = abilities_for_ai_execute_cron_get_event( array( 'hook' => 'nonexistent_hook_xyz' ) );
         $this->assertInstanceOf( WP_Error::class, $result );
     }
 }
@@ -802,7 +802,7 @@ class CronAbilitiesTest extends WP_UnitTestCase {
 class CronFormattersTest extends TestCase {
 
     public function test_format_cron_event() {
-        $result = wp_abilities_suite_format_cron_event(
+        $result = abilities_for_ai_format_cron_event(
             'my_hook',
             1709856000,
             array( 'schedule' => 'hourly', 'interval' => 3600 )
@@ -845,8 +845,8 @@ class CronFormattersTest extends TestCase {
   'execute_callback' => function( $params ) use ( $settings_groups ) { ... }
 
   // AFTER:
-  function wp_abilities_suite_execute_settings_list( $params ) {
-      $settings_groups = wp_abilities_suite_settings_groups(); // Extract to helper
+  function abilities_for_ai_execute_settings_list( $params ) {
+      $settings_groups = abilities_for_ai_settings_groups(); // Extract to helper
       // ...
   }
   ```
@@ -895,7 +895,7 @@ A single file containing all reusable schema fragments as functions:
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Centralized schema definitions for Abilities Suite.
+ * Centralized schema definitions for Abilities for AI.
  *
  * All reusable JSON Schema fragments live here.
  * Module files reference these instead of defining inline.
@@ -912,7 +912,7 @@ defined( 'ABSPATH' ) || exit;
  * @param int $default_per_page Default items per page.
  * @return array Schema properties for page + per_page.
  */
-function wp_abilities_suite_schema_pagination( $default_per_page = 20 ) {
+function abilities_for_ai_schema_pagination( $default_per_page = 20 ) {
     return array(
         'page' => array(
             'type'        => 'integer',
@@ -933,7 +933,7 @@ function wp_abilities_suite_schema_pagination( $default_per_page = 20 ) {
 /**
  * Post ID input property (required).
  */
-function wp_abilities_suite_schema_post_id( $description = 'Post ID.' ) {
+function abilities_for_ai_schema_post_id( $description = 'Post ID.' ) {
     return array(
         'post_id' => array(
             'type'        => 'integer',
@@ -945,7 +945,7 @@ function wp_abilities_suite_schema_post_id( $description = 'Post ID.' ) {
 /**
  * Post type input property (optional, defaults to 'post').
  */
-function wp_abilities_suite_schema_post_type() {
+function abilities_for_ai_schema_post_type() {
     return array(
         'post_type' => array(
             'type'        => 'string',
@@ -958,7 +958,7 @@ function wp_abilities_suite_schema_post_type() {
 /**
  * Search/filter input property.
  */
-function wp_abilities_suite_schema_search( $description = 'Search keyword.' ) {
+function abilities_for_ai_schema_search( $description = 'Search keyword.' ) {
     return array(
         'search' => array(
             'type'        => 'string',
@@ -970,7 +970,7 @@ function wp_abilities_suite_schema_search( $description = 'Search keyword.' ) {
 /**
  * Sort order input properties.
  */
-function wp_abilities_suite_schema_orderby( $default_orderby = 'date', $default_order = 'DESC' ) {
+function abilities_for_ai_schema_orderby( $default_orderby = 'date', $default_order = 'DESC' ) {
     return array(
         'orderby' => array(
             'type'        => 'string',
@@ -997,7 +997,7 @@ function wp_abilities_suite_schema_orderby( $default_orderby = 'date', $default_
  * @param array  $item_props Properties of each item in the array (optional).
  * @return array Output schema.
  */
-function wp_abilities_suite_schema_list_output( $items_key, $item_props = array() ) {
+function abilities_for_ai_schema_list_output( $items_key, $item_props = array() ) {
     $items_schema = array( 'type' => 'object' );
     if ( ! empty( $item_props ) ) {
         $items_schema['properties'] = $item_props;
@@ -1028,7 +1028,7 @@ function wp_abilities_suite_schema_list_output( $items_key, $item_props = array(
  * @param array $properties Item properties.
  * @return array Output schema.
  */
-function wp_abilities_suite_schema_item_output( $properties ) {
+function abilities_for_ai_schema_item_output( $properties ) {
     return array(
         'type'       => 'object',
         'properties' => $properties,
@@ -1038,7 +1038,7 @@ function wp_abilities_suite_schema_item_output( $properties ) {
 /**
  * Standard success output for write/delete operations.
  */
-function wp_abilities_suite_schema_success_output( $extra_props = array() ) {
+function abilities_for_ai_schema_success_output( $extra_props = array() ) {
     return array(
         'type'       => 'object',
         'properties' => array_merge(
@@ -1057,10 +1057,10 @@ In `helpers.php`, deprecate the old function and alias to new:
 
 ```php
 /**
- * @deprecated Use wp_abilities_suite_schema_pagination() instead.
+ * @deprecated Use abilities_for_ai_schema_pagination() instead.
  */
 function wp_native_pagination_schema() {
-    return wp_abilities_suite_schema_pagination();
+    return abilities_for_ai_schema_pagination();
 }
 ```
 
@@ -1103,10 +1103,10 @@ Currently many abilities have no `output_schema`. Add them using the schema buil
 
 ```php
 // cron/list-events:
-'output_schema' => wp_abilities_suite_schema_list_output( 'events' ),
+'output_schema' => abilities_for_ai_schema_list_output( 'events' ),
 
 // settings/get:
-'output_schema' => wp_abilities_suite_schema_item_output( array(
+'output_schema' => abilities_for_ai_schema_item_output( array(
     'option_name' => array( 'type' => 'string' ),
     'value'       => array( 'type' => 'string' ),
 )),
@@ -1130,7 +1130,7 @@ After:
 ```php
 'input_schema' => array(
     'type'       => 'object',
-    'properties' => wp_abilities_suite_schema_search( 'Filter by hook name' ),
+    'properties' => abilities_for_ai_schema_search( 'Filter by hook name' ),
 ),
 ```
 
@@ -1156,9 +1156,9 @@ After:
 'input_schema' => array(
     'type'       => 'object',
     'properties' => array_merge(
-        wp_abilities_suite_schema_pagination(),
-        wp_abilities_suite_schema_search( 'Search users' ),
-        wp_abilities_suite_schema_orderby( 'registered' ),
+        abilities_for_ai_schema_pagination(),
+        abilities_for_ai_schema_search( 'Search users' ),
+        abilities_for_ai_schema_orderby( 'registered' ),
         array(
             'role' => array( 'type' => 'string', 'description' => 'Filter by role' ),
         )
@@ -1173,7 +1173,7 @@ Add validation rule: if an ability has pagination properties, they must use the 
 ## Deliverables
 
 1. **New file:** `includes/schemas.php` — all shared schema fragment functions
-2. **Modified file:** `abilities-suite-for-wordpress.php` — add `require_once` for schemas.php (before modules)
+2. **Modified file:** `abilities-for-ai.php` — add `require_once` for schemas.php (before modules)
 3. **Modified file:** `includes/helpers.php` — deprecate `wp_native_pagination_schema()`, alias to new
 4. **Modified files:** All 18 `*-abilities.php` — replace inline schemas with function calls
 5. **Modified file:** Content module — standardize `posts_per_page`/`paged` to `per_page`/`page` (with backward compat in callback)

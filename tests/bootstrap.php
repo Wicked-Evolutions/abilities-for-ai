@@ -1,6 +1,6 @@
 <?php
 /**
- * PHPUnit Bootstrap — Abilities Suite for WordPress
+ * PHPUnit Bootstrap — Abilities for AI
  *
  * Two modes:
  *  1. Unit tests (no WP_TESTS_DIR) — loads stubs only. Fast, no database.
@@ -12,7 +12,7 @@
  *   vendor/bin/phpunit --testsuite Integration
  */
 
-define( 'WP_ABILITIES_SUITE_TESTS', true );
+define( 'ABILITIES_FOR_AI_TESTS', true );
 
 $vendor_autoload = dirname( __DIR__ ) . '/vendor/autoload.php';
 if ( file_exists( $vendor_autoload ) ) {
@@ -20,7 +20,7 @@ if ( file_exists( $vendor_autoload ) ) {
 } else {
 	// Dev clone without composer install — register manual autoloader.
 	spl_autoload_register( function( $class ) {
-		$prefix = 'WickedEvolutions\\AbilitiesSuite\\';
+		$prefix = 'WickedEvolutions\\AbilitiesForAI\\';
 		if ( strpos( $class, $prefix ) !== 0 ) {
 			return;
 		}
@@ -47,7 +47,7 @@ if ( $wp_tests_dir ) {
 
 	// Load the plugin before WordPress initialises.
 	tests_add_filter( 'muplugins_loaded', function() {
-		require_once dirname( __DIR__ ) . '/abilities-suite-for-wordpress.php';
+		require_once dirname( __DIR__ ) . '/abilities-for-ai.php';
 	} );
 
 	// Bootstrap WordPress.

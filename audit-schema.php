@@ -1,8 +1,8 @@
 <?php
 /**
- * JSON Schema Audit Script for WordPress Abilities Suite.
+ * JSON Schema Audit Script for Abilities for AI.
  *
- * Run via: wp eval-file wp-content/plugins/abilities-suite-for-wordpress/audit-schema.php
+ * Run via: wp eval-file wp-content/plugins/abilities-for-ai/audit-schema.php
  *
  * Checks the following rules:
  * 1. Empty properties must be {} (object), not [] (array)
@@ -127,7 +127,7 @@ function check_schema( $schema, $path ) {
 
 // Output results
 WP_CLI::log( '' );
-WP_CLI::log( "=== WordPress Abilities Suite — Schema Audit (v2) ===" );
+WP_CLI::log( "=== Abilities for AI — Schema Audit (v2) ===" );
 WP_CLI::log( "Checked: {$checked} abilities" );
 WP_CLI::log( '' );
 

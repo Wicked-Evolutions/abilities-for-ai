@@ -22,7 +22,7 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -32,7 +32,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Build a hierarchical tree from a flat list of menu items.
  */
-function wp_abilities_suite_menu_build_tree( $items ) {
+function abilities_for_ai_menu_build_tree( $items ) {
 	$by_id = array();
 	$tree  = array();
 
@@ -70,7 +70,7 @@ function wp_abilities_suite_menu_build_tree( $items ) {
 /**
  * Format a single menu item for API output.
  */
-function wp_abilities_suite_menu_format_item( $item ) {
+function abilities_for_ai_menu_format_item( $item ) {
 	return array(
 		'id'          => (int) $item->ID,
 		'title'       => $item->title,
@@ -90,14 +90,14 @@ function wp_abilities_suite_menu_format_item( $item ) {
 // ===== ABILITIES =====
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'menus', 'edit_theme_options' );
+	$reg = new Abilities_For_AI_Registrar( 'menus', 'edit_theme_options' );
 
 	// ===== MENUS — READ =====
 
 	$reg->read( 'menus/list-menus', array(
 		'label'       => 'List Menus',
 		'description' => 'List all navigation menus with item counts and assigned theme locations.',
-		'output_schema' => wp_abilities_suite_schema_collection_output( 'menus', array(
+		'output_schema' => abilities_for_ai_schema_collection_output( 'menus', array(
 			'id'        => array( 'type' => 'integer' ),
 			'name'      => array( 'type' => 'string' ),
 			'slug'      => array( 'type' => 'string' ),
@@ -140,7 +140,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'menu_id' => array( 'type' => 'integer', 'description' => 'The menu term ID.' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'id'    => array( 'type' => 'integer' ),
 			'name'  => array( 'type' => 'string' ),
 			'slug'  => array( 'type' => 'string' ),
@@ -153,7 +153,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'not_found', "Menu {$menu_id} not found." );
 			}
 			$items = wp_get_nav_menu_items( $menu_id );
-			$tree  = $items ? wp_abilities_suite_menu_build_tree( $items ) : array();
+			$tree  = $items ? abilities_for_ai_menu_build_tree( $items ) : array();
 			return array( 'id' => (int) $menu->term_id, 'name' => $menu->name, 'slug' => $menu->slug, 'items' => $tree );
 		},
 	) );
@@ -168,7 +168,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'menu_id' => array( 'type' => 'integer', 'description' => 'The menu term ID.' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'items' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 		) ),
 		'callback' => function( $input ) {
@@ -181,7 +181,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$result = array();
 			if ( $items ) {
 				foreach ( $items as $item ) {
-					$result[] = wp_abilities_suite_menu_format_item( $item );
+					$result[] = abilities_for_ai_menu_format_item( $item );
 				}
 			}
 			return array( 'items' => $result );
@@ -191,7 +191,7 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'menus/list-locations', array(
 		'label'       => 'List Menu Locations',
 		'description' => 'List all registered theme menu locations with their current menu assignments.',
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'locations' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 		) ),
 		'callback' => function( $input ) {
@@ -224,7 +224,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'location' => array( 'type' => 'string', 'description' => 'Optional theme location slug to assign.' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'menu' => array( 'type' => 'object' ),
 		) ),
 		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
@@ -262,7 +262,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'target'    => array( 'type' => 'string', 'description' => 'Link target: "" or "_blank".', 'default' => '' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'item' => array( 'type' => 'object' ),
 		) ),
 		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
@@ -348,7 +348,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'attr_title' => array( 'type' => 'string', 'description' => 'Title attribute (tooltip).' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'item' => array( 'type' => 'object' ),
 		) ),
 		'callback' => function( $input ) {
@@ -400,7 +400,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'item_order' => array( 'type' => 'array', 'items' => array( 'type' => 'integer' ), 'description' => 'Array of menu item IDs in desired order.' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'items' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 		) ),
 		'callback' => function( $input ) {
@@ -447,7 +447,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'menu_id'  => array( 'type' => 'integer', 'description' => 'The menu term ID to assign.' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'location'  => array( 'type' => 'string' ),
 			'menu_id'   => array( 'type' => 'integer' ),
 			'menu_name' => array( 'type' => 'string' ),
@@ -480,7 +480,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'location' => array( 'type' => 'string', 'description' => 'Theme location slug to clear.' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'location' => array( 'type' => 'string' ),
 		) ),
 		'callback' => function( $input ) {
@@ -510,7 +510,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'menu_id' => array( 'type' => 'integer', 'description' => 'The menu term ID to delete.' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'deleted_items' => array( 'type' => 'integer' ),
 		) ),
 		'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ),
@@ -542,7 +542,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'item_id' => array( 'type' => 'integer', 'description' => 'The menu item post ID to delete.' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array() ),
+		'output_schema' => abilities_for_ai_schema_success_output( array() ),
 		'annotations'   => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ),
 		'callback' => function( $input ) {
 			$item_id = (int) $input['item_id'];

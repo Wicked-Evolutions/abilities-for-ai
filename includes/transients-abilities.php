@@ -8,13 +8,13 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'wp_abilities_api_init', function() {
-	$reg = new WP_Abilities_Suite_Registrar( 'cache', 'manage_options' );
+	$reg = new Abilities_For_AI_Registrar( 'cache', 'manage_options' );
 
 	// ===== CACHE — READ =====
 
@@ -25,12 +25,12 @@ add_action( 'wp_abilities_api_init', function() {
 			'type'       => 'object',
 			'properties' => array_merge(
 				array(
-					'search' => wp_abilities_suite_schema_search( 'Filter transient names by keyword' ),
+					'search' => abilities_for_ai_schema_search( 'Filter transient names by keyword' ),
 				),
-				wp_abilities_suite_schema_pagination()
+				abilities_for_ai_schema_pagination()
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_list_output( 'transients', array(
+		'output_schema' => abilities_for_ai_schema_list_output( 'transients', array(
 			'name'       => array( 'type' => 'string' ),
 			'value_size' => array( 'type' => 'integer' ),
 			'expires'    => array( 'type' => 'string' ),
@@ -92,7 +92,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'name' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'name'    => array( 'type' => 'string' ),
 			'value'   => array( 'type' => 'string', 'description' => 'Transient value (may be string, array, or serialized data)' ),
 			'expires' => array( 'type' => 'string' ),
@@ -123,7 +123,7 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'cache/object-cache-status', array(
 		'label'       => 'Object Cache Status',
 		'description' => 'Check if a persistent object cache is active and get cache statistics.',
-		'output_schema' => wp_abilities_suite_schema_item_output( array(
+		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'persistent_cache' => array( 'type' => 'boolean' ),
 			'drop_in_exists'   => array( 'type' => 'boolean' ),
 			'class'            => array( 'type' => 'string' ),
@@ -164,7 +164,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'name', 'value' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'name'       => array( 'type' => 'string' ),
 			'set'        => array( 'type' => 'boolean' ),
 			'expiration' => array( 'type' => 'integer' ),
@@ -187,7 +187,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'post_id' => array( 'type' => 'integer', 'description' => 'Purge cache for a specific post only (if supported by the cache plugin). Omit to purge all.' ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'flushed' => array( 'type' => 'boolean' ),
 			'post_id' => array( 'type' => array( 'integer', 'null' ) ),
 			'systems' => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
@@ -253,7 +253,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 			'required' => array( 'name' ),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'name'    => array( 'type' => 'string' ),
 			'deleted' => array( 'type' => 'boolean' ),
 		) ),
@@ -273,7 +273,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'all' => array( 'type' => 'boolean', 'description' => 'Flush ALL transients, not just expired (default: false)', 'default' => false ),
 			),
 		),
-		'output_schema' => wp_abilities_suite_schema_success_output( array(
+		'output_schema' => abilities_for_ai_schema_success_output( array(
 			'flushed'      => array( 'type' => 'string' ),
 			'rows_deleted' => array( 'type' => 'integer' ),
 		) ),

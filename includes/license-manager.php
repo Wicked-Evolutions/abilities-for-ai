@@ -2,7 +2,7 @@
 /**
  * License Manager — FluentCart API Integration
  *
- * Validates Abilities for WordPress Pro licenses via the FluentCart license API
+ * Validates Abilities for AI Pro licenses via the FluentCart license API
  * on wickedevolutions.com. Uses a 24-hour transient cache for the validation result
  * and a 7-day grace period for API unreachability.
  *
@@ -18,12 +18,12 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package WordPress_Abilities_Suite
+ * @package Abilities_For_AI
  */
 
 defined( 'ABSPATH' ) || exit;
 
-class WP_Abilities_Suite_License_Manager {
+class Abilities_For_AI_License_Manager {
 
 	/**
 	 * FluentCart store URL where the license API lives.
@@ -34,7 +34,7 @@ class WP_Abilities_Suite_License_Manager {
 	const STORE_URL = 'https://community.wickedevolutions.com';
 
 	/**
-	 * FluentCart product ID for "Abilities for WordPress".
+	 * FluentCart product ID for "Abilities for AI".
 	 * Used as the item_id parameter in all API calls.
 	 *
 	 * @var int
@@ -42,7 +42,7 @@ class WP_Abilities_Suite_License_Manager {
 	const PRODUCT_ID = 66;
 
 	/**
-	 * FluentCart product ID for "Abilities for WordPress — Multisite".
+	 * FluentCart product ID for "Abilities for AI — Multisite".
 	 *
 	 * @var int
 	 */
@@ -64,10 +64,10 @@ class WP_Abilities_Suite_License_Manager {
 	const GRACE_PERIOD = 7 * DAY_IN_SECONDS;
 
 	// WordPress option / transient keys.
-	const OPT_LICENSE_KEY  = 'wp_abilities_suite_license_key';
-	const OPT_ACTIV_HASH   = 'wp_abilities_suite_activation_hash';
-	const OPT_LAST_VALID   = 'wp_abilities_suite_last_valid_ts';
-	const TRANSIENT_STATUS = 'wp_abilities_suite_pro_status';
+	const OPT_LICENSE_KEY  = 'abilities_for_ai_license_key';
+	const OPT_ACTIV_HASH   = 'abilities_for_ai_activation_hash';
+	const OPT_LAST_VALID   = 'abilities_for_ai_last_valid_ts';
+	const TRANSIENT_STATUS = 'abilities_for_ai_pro_status';
 
 	// ----------------------------------------------------------------------------
 	// Public API
@@ -161,9 +161,9 @@ class WP_Abilities_Suite_License_Manager {
 
 		// Set scope before storing options so get_opt/update_opt route correctly.
 		if ( $is_network ) {
-			update_site_option( 'wp_abilities_suite_license_scope', 'network' );
+			update_site_option( 'abilities_for_ai_license_scope', 'network' );
 		} else {
-			delete_site_option( 'wp_abilities_suite_license_scope' );
+			delete_site_option( 'abilities_for_ai_license_scope' );
 		}
 
 		// Store the key and activation hash for future check_license calls.
@@ -201,7 +201,7 @@ class WP_Abilities_Suite_License_Manager {
 		self::delete_opt( self::OPT_ACTIV_HASH );
 		self::delete_opt( self::OPT_LAST_VALID );
 		delete_transient( self::TRANSIENT_STATUS );
-		delete_site_option( 'wp_abilities_suite_license_scope' );
+		delete_site_option( 'abilities_for_ai_license_scope' );
 
 		return true;
 	}
@@ -269,7 +269,7 @@ class WP_Abilities_Suite_License_Manager {
 		if ( ! is_multisite() ) {
 			return false;
 		}
-		return 'network' === get_site_option( 'wp_abilities_suite_license_scope', '' );
+		return 'network' === get_site_option( 'abilities_for_ai_license_scope', '' );
 	}
 
 	/**
