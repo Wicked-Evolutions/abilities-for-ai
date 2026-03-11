@@ -82,6 +82,9 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/rest-discovery-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/rewrite-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/filesystem-abilities.php';
 
+// Knowledge layer — auto-loads .md docs from knowledge/ as read-only abilities.
+require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-abilities.php';
+
 // Load admin dashboard
 if ( is_admin() ) {
     require_once ABILITIES_FOR_AI_PATH . 'admin/dashboard.php';
