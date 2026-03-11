@@ -14,7 +14,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Abilities Suite for WordPress gives AI clients full control over native WordPress functionality through the [WordPress Abilities API](https://developer.wordpress.org/abilities/). 138 abilities across 18 modules — from content management to block editing, metadata to cron scheduling.
 
-**Works with any MCP-compatible AI client** — Claude Code, Claude Desktop, Cursor, and more.
+**Works with any MCP-compatible AI client or IDE** — Claude Code, Claude Desktop, Gemini CLI, Cursor, Windsurf, VS Code, and any other tool that supports the Model Context Protocol.
 
 = Free Tier — The Round-Trip (77 abilities) =
 
@@ -101,7 +101,7 @@ The Abilities API is a standardized way for WordPress to expose functionality to
 
 = What AI clients work with this? =
 
-Any client that speaks the Model Context Protocol (MCP) — Claude Code, Claude Desktop, Cursor, and others. You need the MCP Adapter for WordPress plugin to bridge between MCP and the Abilities API.
+Any AI client or IDE that supports the Model Context Protocol (MCP) — Claude Code, Claude Desktop, Gemini CLI, Cursor, Windsurf, VS Code, and others. You need the MCP Adapter for WordPress plugin to bridge between MCP and the Abilities API.
 
 = What is the difference between free and pro? =
 
