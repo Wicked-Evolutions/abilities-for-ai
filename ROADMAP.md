@@ -15,6 +15,8 @@
 |-----|----------|-------|
 | ~~`settings/get` output schema rejects non-string values~~ | ~~Medium~~ | **FIXED** — removed `type: string` constraint, value now accepts any type. |
 | `content/list` pagination on multisite | Low | GitHub #9. Parameter naming fixed (`per_page`), but multisite-specific WP_Query behavior may still cause issues. Needs live verification. |
+| ~~`taxonomies/get-content-terms` returns JSON array instead of object~~ | ~~P1~~ | **FIXED** — `(object) $result` cast. GitHub #14. Deployed 2026-03-11. |
+| ~~`site-health/run-test` php_version test — undefined `wp_check_php_version()`~~ | ~~P3~~ | **FIXED** — added `require_once misc.php`. GitHub #15. Deployed 2026-03-11. |
 
 ## Gaps
 
@@ -23,11 +25,10 @@
 | ~~`settings/update` missing front page settings~~ | ~~Medium~~ | **FIXED** — added `show_on_front`, `page_on_front`, `page_for_posts` to writable allowlist. |
 | ~~`content/create` missing `post_name` param~~ | ~~Medium~~ | **FIXED** — added `post_name` param to input schema and callback. |
 | ~~`content/create` missing taxonomy terms param~~ | ~~Medium~~ | **FIXED** — added `terms` param (object: taxonomy slug → array of term IDs). Uses `wp_set_object_terms()` after insert. Free tier. |
-| Application Passwords abilities | Low | No ability to create/list/revoke Application Passwords. Required for self-service AI agent onboarding. Candidates: `users/create-application-password`, `users/list-application-passwords`, `users/revoke-application-password`. |
-| `plugin/upload-zip` ability | Low | Install plugin from ZIP using Plugin_Upgrader. GitHub #6. |
-| `.php` write support (dev mode) | Low | Filesystem writes restricted to safe extensions. Level B extension whitelist when `DISALLOW_FILE_EDIT` is false. |
-| `fluent-snippets/create-snippet` | Low | Cross-product gap. Fluent Snippets active on WE but only read abilities exist. Lives in abilities-suite-for-fluent-plugins. |
-| `custom_css` post type workaround | Info | Additional CSS can be created via `content/create` with `post_type: custom_css`, `post_name: {theme_slug}`. Works but fragile. |
+| Application Passwords abilities | Low | Deferred post-alpha. No ability to create/list/revoke Application Passwords. Required for self-service AI agent onboarding. Candidates: `users/create-application-password`, `users/list-application-passwords`, `users/revoke-application-password`. Manual setup via WP admin or WP-CLI works for alpha. |
+| `plugin/upload-zip` ability | Low | Deferred post-alpha. Install plugin from ZIP using Plugin_Upgrader. GitHub #6. `plugins/install` from repo covers most cases. ZIP upload is for premium/custom plugins — rare in MCP context. |
+| `.php` write support (dev mode) | Low | Deferred post-alpha. Filesystem writes restricted to safe extensions by design. Security boundary — PHP writes are a liability even in dev mode. SSH available for edge cases. |
+| `custom_css` post type workaround | Info | Known pattern, not a bug. Additional CSS can be created via `content/create` with `post_type: custom_css`, `post_name: {theme_slug}`. Works but fragile. |
 
 ## Not Started
 
