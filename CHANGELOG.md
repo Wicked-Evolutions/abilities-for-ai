@@ -241,19 +241,27 @@ All notable changes to Abilities for AI will be documented in this file.
 
 | Version | Date | Abilities | Categories | Key Changes |
 |---------|------|-----------|------------|-------------|
-| 3.7.0 | 2026-03-05 | 111 | 18 | post_date scheduling, DISALLOW_FILE_EDIT checks, count corrected |
-| 3.6.0 | 2026-03-02 | 111 | 18 | Filesystem module (4 abilities), Free/Pro tier gate |
-| 3.5.1 | 2026-02-28 | 106 | 17 | Division by zero fix, LiteSpeed purge fix |
-| 3.5.0 | 2026-02-27 | 106 | 17 | content/change-type, content/search-replace, cache/flush-page-cache |
-| 3.4.1 | 2026-02-27 | 103 | 17 | Security hardening second + third pass (14 findings) |
-| 3.3.0 | 2026-02-26 | 103 | 17 | Security hardening (10 fixes), MCP metadata normalization, plugin rename |
-| 3.2.0 | 2026-02-25 | 103 | 17 | content/get-snapshot, empty schema fix (39 tools recovered) |
-| 3.1.0 | 2026-02-24 | 103 | 17 | Permission toggles, admin dashboard |
-| 3.0.0 | 2026-02-24 | 103 | 17 | 10 new modules, JSON Schema fixes |
-| 2.0.0 | 2025-12-21 | 51 | 7 | Menu management, Content v2 |
-| 1.0.5 | 2025-12-12 | 40 | 6 | Base64 media upload |
-| 1.0.4 | 2025-12-12 | 39 | 6 | Ability persistence fix |
-| 1.0.3 | 2025-12-11 | 39 | 6 | Initial release |
+| 1.0.0 | 2026-03-11 | 138 | 18 | Renamed to Abilities for AI, WordPress.org trademark compliance |
+| 3.10.0* | 2026-03-11 | 138 | 18 | Free/Pro tier realignment (77 free / 61 pro), GPL headers |
+| 3.9.0* | 2026-03-10 | 138 | 18 | Per-ability permission overrides |
+| 3.8.0* | 2026-03-10 | 138 | 18 | CRUD completeness sprint, unified dashboard |
+| 3.7.2* | 2026-03-09 | 111 | 18 | Output schema fixes (discover-types, plugins/list) |
+| 3.7.1* | 2026-03-09 | 111 | 18 | media/create helper alias, cache schema fix |
+| 3.7.0* | 2026-03-05 | 111 | 18 | post_date scheduling, DISALLOW_FILE_EDIT checks |
+| 3.6.0* | 2026-03-02 | 111 | 18 | Filesystem module (4 abilities), Free/Pro tier gate |
+| 3.5.1* | 2026-02-28 | 106 | 17 | Division by zero fix, LiteSpeed purge fix |
+| 3.5.0* | 2026-02-27 | 106 | 17 | content/change-type, content/search-replace, cache/flush-page-cache |
+| 3.4.1* | 2026-02-27 | 103 | 17 | Security hardening second + third pass (14 findings) |
+| 3.3.0* | 2026-02-26 | 103 | 17 | Security hardening (10 fixes), MCP metadata normalization |
+| 3.2.0* | 2026-02-25 | 103 | 17 | content/get-snapshot, empty schema fix (39 tools recovered) |
+| 3.1.0* | 2026-02-24 | 103 | 17 | Permission toggles, admin dashboard |
+| 3.0.0* | 2026-02-24 | 103 | 17 | 10 new modules, JSON Schema fixes |
+| 2.0.0* | 2025-12-21 | 51 | 7 | Menu management, Content v2 |
+| 1.0.5* | 2025-12-12 | 40 | 6 | Base64 media upload |
+| 1.0.4* | 2025-12-12 | 39 | 6 | Ability persistence fix |
+| 1.0.3* | 2025-12-11 | 39 | 6 | Initial release |
+
+*Pre-rename versions (released as "WP Abilities Suite")
 
 ---
 

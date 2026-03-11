@@ -59,7 +59,7 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/compat.php';
 // Load ability categories FIRST (required before abilities).
 require_once ABILITIES_FOR_AI_PATH . 'includes/ability-categories.php';
 
-// Original v2.0 ability modules.
+// Ability modules.
 require_once ABILITIES_FOR_AI_PATH . 'includes/status-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/content-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/taxonomy-abilities.php';
@@ -69,7 +69,7 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/user-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/comment-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/menu-abilities.php';
 
-// New v3.0 ability modules.
+// Additional ability modules.
 require_once ABILITIES_FOR_AI_PATH . 'includes/blocks-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/patterns-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/meta-abilities.php';

@@ -256,7 +256,7 @@ License validation uses FluentCart API with 24-hour cache and 7-day grace period
 ## Requirements
 
 - WordPress 6.9+ (Abilities API in core)
-- PHP 7.4+
+- PHP 8.0+
 - [Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter) (for MCP integration)
 
 WordPress 7.0 (April 2026) ships the JS client for the Abilities API, completing the server-client loop.
