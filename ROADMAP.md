@@ -22,7 +22,7 @@
 |-----|----------|-------|
 | ~~`settings/update` missing front page settings~~ | ~~Medium~~ | **FIXED** — added `show_on_front`, `page_on_front`, `page_for_posts` to writable allowlist. |
 | ~~`content/create` missing `post_name` param~~ | ~~Medium~~ | **FIXED** — added `post_name` param to input schema and callback. |
-| `content/create` missing taxonomy terms param | Medium | Cannot assign categories/tags at creation time. Requires separate `taxonomies/assign-to-content` call (pro-gated). |
+| ~~`content/create` missing taxonomy terms param~~ | ~~Medium~~ | **FIXED** — added `terms` param (object: taxonomy slug → array of term IDs). Uses `wp_set_object_terms()` after insert. Free tier. |
 | Application Passwords abilities | Low | No ability to create/list/revoke Application Passwords. Required for self-service AI agent onboarding. Candidates: `users/create-application-password`, `users/list-application-passwords`, `users/revoke-application-password`. |
 | `plugin/upload-zip` ability | Low | Install plugin from ZIP using Plugin_Upgrader. GitHub #6. |
 | `.php` write support (dev mode) | Low | Filesystem writes restricted to safe extensions. Level B extension whitelist when `DISALLOW_FILE_EDIT` is false. |

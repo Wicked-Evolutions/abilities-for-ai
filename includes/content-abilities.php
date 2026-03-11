@@ -500,6 +500,14 @@ add_action( 'wp_abilities_api_init', function() {
 					'type'        => 'string',
 					'description' => 'Post slug. Auto-generated from title if not provided.',
 				),
+				'terms' => array(
+					'type'        => 'object',
+					'description' => 'Taxonomy terms to assign. Keys are taxonomy slugs (e.g. "category", "post_tag"), values are arrays of term IDs.',
+					'additionalProperties' => array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'integer' ),
+					),
+				),
 			),
 		),
 		'output_schema' => wp_abilities_suite_schema_success_output( array(
@@ -552,6 +560,17 @@ add_action( 'wp_abilities_api_init', function() {
 			$post_id = wp_insert_post( $post_data );
 			if ( is_wp_error( $post_id ) ) {
 				return $post_id;
+			}
+
+			if ( ! empty( $input['terms'] ) && is_array( $input['terms'] ) ) {
+				foreach ( $input['terms'] as $taxonomy => $term_ids ) {
+					$taxonomy = sanitize_key( $taxonomy );
+					if ( ! taxonomy_exists( $taxonomy ) ) {
+						continue;
+					}
+					$term_ids = array_map( 'intval', (array) $term_ids );
+					wp_set_object_terms( $post_id, $term_ids, $taxonomy );
+				}
 			}
 
 			return array(
