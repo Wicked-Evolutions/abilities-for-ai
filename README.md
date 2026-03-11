@@ -319,6 +319,14 @@ Pro abilities are always visible but return 403 at execution time without a vali
 
 Network activation supported. Network-wide license at $199 LTD covers all subsites.
 
+## Known Gaps
+
+| Gap | Description | Workaround |
+|-----|-------------|------------|
+| Application Passwords | No ability to create, list, or revoke WordPress Application Passwords (`wp-json/wp/v2/users/{id}/application-passwords`). Required for self-service AI agent onboarding. | WP-CLI: `wp user application-password create <user> <name>` or WordPress Admin UI |
+
+Candidate abilities: `users/create-application-password`, `users/list-application-passwords`, `users/revoke-application-password`.
+
 ## Links
 
 - [WP Abilities MCP](https://github.com/Influencentricity/wp-abilities-mcp) — MCP bridge for AI clients
