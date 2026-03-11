@@ -1,11 +1,257 @@
 # Abilities Suite for WordPress
 
-111 native WordPress abilities across 18 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, filesystem, and more. Powers AI control through the official Abilities API.
+138 native WordPress abilities across 18 modules. Powers AI control through the official Abilities API.
 
-**Free tier:** 67 read abilities — browse content, inspect settings, discover capabilities.
-**Pro tier:** 44 write abilities — create, update, delete, and manage your WordPress site.
+| | |
+|---|---|
+| **Total abilities** | 138 |
+| **Free tier** | 77 |
+| **Pro tier** | 61 |
+| **Modules** | 18 |
 
-See [CHANGELOG.md](CHANGELOG.md) for version history.
+## Free Tier — The Round-Trip
+
+The free tier gives AI full read access to everything (71 abilities) plus a controlled write round-trip: create something, inspect it, delete it. This lets AI agents prove competence before a site owner commits to Pro.
+
+- **Read everything** (71) — browse content, inspect settings, discover capabilities, parse blocks, list users, check site health
+- **Test write** (4) — `content/create`, `taxonomies/create-term`, `plugins/install`, `media/create`
+- **Delete the test** (6) — `content/delete`, `blocks/remove`, `taxonomies/delete-term`, `menus/delete-menu`, `menus/delete-menu-item`, `media/delete`
+
+**77 free abilities total.** Enough to explore, prototype, and demonstrate value.
+
+## Pro Tier — The Juice
+
+Pro unlocks the abilities that build on what exists: update content, modify blocks, bulk search-replace, manage themes, configure settings, assign taxonomies, reorder menus. The operations that turn an AI assistant into an AI operator.
+
+**61 pro abilities.** Everything that modifies, updates, or manages production state.
+
+## Pro Gate
+
+All 138 abilities are registered and visible to AI regardless of license. Pro abilities return a clear 403 with an upgrade URL at execution time. The AI discovers the gate naturally — no hidden capabilities, no surprise walls.
+
+License validation uses FluentCart API with 24-hour cache and 7-day grace period for renewal gaps.
+
+## 18 Modules
+
+### Content (11)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `content/list` | Read | Free |
+| `content/get` | Read | Free |
+| `content/get-snapshot` | Read | Free |
+| `content/discover-types` | Read | Free |
+| `content/find-by-url` | Read | Free |
+| `content/get-by-slug` | Read | Free |
+| `content/create` | Write | Free |
+| `content/update` | Write | Pro |
+| `content/change-type` | Write | Pro |
+| `content/search-replace` | Write | Pro |
+| `content/delete` | Delete | Free |
+
+### Blocks (8)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `blocks/parse` | Read | Free |
+| `blocks/serialize` | Read | Free |
+| `blocks/list-types` | Read | Free |
+| `blocks/get-type` | Read | Free |
+| `blocks/find-in-post` | Read | Free |
+| `blocks/insert` | Write | Pro |
+| `blocks/replace` | Write | Pro |
+| `blocks/remove` | Delete | Free |
+
+### Taxonomies (8)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `taxonomies/discover` | Read | Free |
+| `taxonomies/list-terms` | Read | Free |
+| `taxonomies/get-term` | Read | Free |
+| `taxonomies/get-content-terms` | Read | Free |
+| `taxonomies/create-term` | Write | Free |
+| `taxonomies/update-term` | Write | Pro |
+| `taxonomies/assign-to-content` | Write | Pro |
+| `taxonomies/delete-term` | Delete | Free |
+
+### Menus (12)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `menus/list-menus` | Read | Free |
+| `menus/get-menu` | Read | Free |
+| `menus/list-menu-items` | Read | Free |
+| `menus/list-locations` | Read | Free |
+| `menus/create-menu` | Write | Pro |
+| `menus/add-menu-item` | Write | Pro |
+| `menus/update-menu-item` | Write | Pro |
+| `menus/reorder-menu-items` | Write | Pro |
+| `menus/assign-location` | Write | Pro |
+| `menus/unassign-location` | Write | Pro |
+| `menus/delete-menu` | Delete | Free |
+| `menus/delete-menu-item` | Delete | Free |
+
+### Meta (13)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `meta/list-post-meta` | Read | Free |
+| `meta/get-post-meta` | Read | Free |
+| `meta/list-term-meta` | Read | Free |
+| `meta/get-term-meta` | Read | Free |
+| `meta/list-user-meta` | Read | Free |
+| `meta/get-user-meta` | Read | Free |
+| `meta/list-registered` | Read | Free |
+| `meta/update-post-meta` | Write | Pro |
+| `meta/update-term-meta` | Write | Pro |
+| `meta/update-user-meta` | Write | Pro |
+| `meta/delete-post-meta` | Delete | Pro |
+| `meta/delete-term-meta` | Delete | Pro |
+| `meta/delete-user-meta` | Delete | Pro |
+
+### Cache (7)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `cache/list-transients` | Read | Free |
+| `cache/get-transient` | Read | Free |
+| `cache/object-cache-status` | Read | Free |
+| `cache/set-transient` | Write | Pro |
+| `cache/flush-page-cache` | Write | Pro |
+| `cache/delete-transient` | Delete | Pro |
+| `cache/flush` | Delete | Pro |
+
+### Plugins (7)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `plugins/list` | Read | Free |
+| `plugins/get` | Read | Free |
+| `plugins/search-repository` | Read | Free |
+| `plugins/install` | Write | Free |
+| `plugins/activate` | Write | Pro |
+| `plugins/deactivate` | Write | Pro |
+| `plugins/delete` | Delete | Pro |
+
+### Media (6)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `media/list` | Read | Free |
+| `media/get` | Read | Free |
+| `media/create` | Write | Free |
+| `media/upload` | Write | Pro |
+| `media/update` | Write | Pro |
+| `media/delete` | Delete | Free |
+
+### Users (5)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `users/list` | Read | Free |
+| `users/get` | Read | Free |
+| `users/create` | Write | Free |
+| `users/update` | Write | Pro |
+| `users/delete` | Delete | Pro |
+
+### Comments (5)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `comments/list` | Read | Free |
+| `comments/get` | Read | Free |
+| `comments/create` | Write | Pro |
+| `comments/update` | Write | Pro |
+| `comments/delete` | Delete | Pro |
+
+### Patterns (5)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `patterns/list` | Read | Free |
+| `patterns/get` | Read | Free |
+| `patterns/list-categories` | Read | Free |
+| `patterns/register` | Write | Pro |
+| `patterns/unregister` | Delete | Pro |
+
+### Settings (6)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `settings/list` | Read | Free |
+| `settings/get` | Read | Free |
+| `settings/get-group` | Read | Free |
+| `settings/get-permalink-structure` | Read | Free |
+| `settings/update` | Write | Pro |
+| `settings/delete` | Delete | Pro |
+
+### Themes (10)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `themes/list` | Read | Free |
+| `themes/get-active` | Read | Free |
+| `themes/list-mods` | Read | Free |
+| `themes/get-mod` | Read | Free |
+| `themes/get-theme-json` | Read | Free |
+| `themes/activate` | Write | Pro |
+| `themes/install` | Write | Pro |
+| `themes/set-mod` | Write | Pro |
+| `themes/delete` | Delete | Pro |
+| `themes/delete-mod` | Delete | Pro |
+
+### Site Health (4)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `site-health/status` | Read | Free |
+| `site-health/list-tests` | Read | Free |
+| `site-health/run-test` | Read | Free |
+| `site-health/info` | Read | Free |
+
+### Filesystem (5)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `filesystem/list-directory` | Read | Free |
+| `filesystem/read-file` | Read | Free |
+| `filesystem/write-file` | Write | Pro |
+| `theme/update-asset` | Write | Pro |
+| `filesystem/delete-file` | Delete | Pro |
+
+### REST Discovery (4)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `rest/list-namespaces` | Read | Free |
+| `rest/list-routes` | Read | Free |
+| `rest/get-route-schema` | Read | Free |
+| `rest/get-index` | Read | Free |
+
+### Cron (5)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `cron/list-events` | Read | Free |
+| `cron/list-schedules` | Read | Free |
+| `cron/get-event` | Read | Free |
+| `cron/create-event` | Write | Pro |
+| `cron/delete-event` | Delete | Pro |
+
+### Rewrite (3)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `rewrite/get-structure` | Read | Free |
+| `rewrite/list-rules` | Read | Free |
+| `rewrite/flush` | Write | Pro |
+
+### Suite (1)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `suite/get-status` | Read | Free |
 
 ## Requirements
 
@@ -13,265 +259,67 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 - PHP 7.4+
 - [MCP Adapter for WordPress](https://github.com/Influencentricity/mcp-adapter-for-wordpress) (for MCP integration)
 
-## 111 Abilities
-
-### Content Management (11)
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `content/list` | read | List posts, pages, or custom post types with filtering |
-| `content/get` | read | Get a specific post by ID |
-| `content/get-snapshot` | read | Get content snapshot with metadata |
-| `content/create` | write | Create new content |
-| `content/update` | write | Update existing content |
-| `content/delete` | write | Delete content |
-| `content/discover-types` | read | Discover all available post types |
-| `content/find-by-url` | read | Find content by URL |
-| `content/get-by-slug` | read | Get content by slug |
-| `content/change-type` | write | Convert post between types |
-| `content/search-replace` | write | Bulk find/replace in post content |
-
-### Taxonomy Management (8)
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `taxonomies/discover` | read | List all available taxonomies |
-| `taxonomies/list-terms` | read | List terms in a taxonomy |
-| `taxonomies/get-term` | read | Get a specific term |
-| `taxonomies/create-term` | write | Create new terms |
-| `taxonomies/update-term` | write | Update existing terms |
-| `taxonomies/delete-term` | write | Delete terms |
-| `taxonomies/assign-to-content` | write | Assign terms to posts |
-| `taxonomies/get-content-terms` | read | Get all terms for a post |
-
-### Plugin Management (6)
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `plugins/list` | read | List all installed plugins |
-| `plugins/get` | read | Get detailed plugin information |
-| `plugins/activate` | write | Activate plugins |
-| `plugins/deactivate` | write | Deactivate plugins |
-| `plugins/install` | write | Install from WordPress.org |
-| `plugins/search-repository` | read | Search WordPress.org plugins |
-
-### Media Library (5)
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `media/list` | read | List media library items |
-| `media/create` | write | Upload media from URL |
-| `media/upload` | write | Upload media from base64 data |
-| `media/update` | write | Update media metadata |
-| `media/delete` | write | Delete media items |
-
-### User Management (5)
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `users/list` | read | List WordPress users |
-| `users/get` | read | Get user details |
-| `users/create` | write | Create new users |
-| `users/update` | write | Update user information |
-| `users/delete` | write | Delete users |
-
-### Comment Management (5)
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `comments/list` | read | List comments with filtering |
-| `comments/get` | read | Get specific comment |
-| `comments/create` | write | Create new comments |
-| `comments/update` | write | Update comments |
-| `comments/delete` | write | Delete comments |
-
-### Menu Management (12)
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `menus/list-menus` | read | List all navigation menus |
-| `menus/get-menu` | read | Get menu with hierarchical items |
-| `menus/create-menu` | write | Create a new menu |
-| `menus/delete-menu` | write | Delete a menu |
-| `menus/list-menu-items` | read | List items in a menu |
-| `menus/add-menu-item` | write | Add item to a menu |
-| `menus/update-menu-item` | write | Update a menu item |
-| `menus/delete-menu-item` | write | Delete a menu item |
-| `menus/reorder-menu-items` | write | Reorder menu items |
-| `menus/list-locations` | read | List registered menu locations |
-| `menus/assign-location` | write | Assign a menu to a location |
-| `menus/unassign-location` | write | Unassign a menu from a location |
-
-### Block Editor (8) — *New in v3.0*
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `blocks/parse` | read | Parse post content into structured block array |
-| `blocks/serialize` | read | Convert block array back to HTML |
-| `blocks/list-types` | read | List all registered block types |
-| `blocks/get-type` | read | Get single block type details |
-| `blocks/find-in-post` | read | Find blocks by name or attribute in a post |
-| `blocks/insert` | write | Insert blocks at position in post content |
-| `blocks/replace` | write | Replace block at index in post content |
-| `blocks/remove` | write | Remove block at index from post content |
-
-### Block Patterns (5) — *New in v3.0*
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `patterns/list` | read | List all registered block patterns |
-| `patterns/get` | read | Get a specific block pattern |
-| `patterns/list-categories` | read | List pattern categories |
-| `patterns/register` | write | Register a new block pattern |
-| `patterns/unregister` | write | Unregister a block pattern |
-
-### Meta Fields (11) — *New in v3.0*
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `meta/list-post-meta` | read | List all meta for a post |
-| `meta/get-post-meta` | read | Get specific post meta value |
-| `meta/update-post-meta` | write | Update post meta value |
-| `meta/delete-post-meta` | write | Delete post meta key |
-| `meta/list-term-meta` | read | List all meta for a term |
-| `meta/get-term-meta` | read | Get specific term meta value |
-| `meta/update-term-meta` | write | Update term meta value |
-| `meta/list-user-meta` | read | List all meta for a user |
-| `meta/get-user-meta` | read | Get specific user meta value |
-| `meta/update-user-meta` | write | Update user meta value |
-| `meta/list-registered` | read | List all registered meta keys |
-
-### Settings (5) — *New in v3.0*
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `settings/list` | read | List WordPress settings (allowlisted) |
-| `settings/get` | read | Get a specific setting value |
-| `settings/get-group` | read | Get multiple settings at once |
-| `settings/update` | write | Update a setting value |
-| `settings/get-permalink-structure` | read | Get permalink structure |
-
-### Site Health (4) — *New in v3.0*
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `site-health/status` | read | Get site health status summary |
-| `site-health/list-tests` | read | List available health tests |
-| `site-health/run-test` | read | Run a specific health test |
-| `site-health/info` | read | Get detailed site health info |
-
-### Cache & Transients (7) — *New in v3.0, expanded in v3.5*
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `cache/list-transients` | read | List stored transients |
-| `cache/get-transient` | read | Get a transient value |
-| `cache/set-transient` | write | Set a transient with expiration |
-| `cache/flush-page-cache` | write | Purge full-page cache (LiteSpeed, WP Super Cache, W3TC, WPFC) |
-| `cache/delete-transient` | write | Delete a transient |
-| `cache/flush` | write | Flush the object cache |
-| `cache/object-cache-status` | read | Get object cache status |
-
-### Cron (3) — *New in v3.0*
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `cron/list-events` | read | List all scheduled cron events |
-| `cron/list-schedules` | read | List cron schedule intervals |
-| `cron/get-event` | read | Get details of a specific cron event |
-
-### Themes (5) — *New in v3.0*
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `themes/list` | read | List installed themes |
-| `themes/get-active` | read | Get active theme details |
-| `themes/list-mods` | read | List theme modifications |
-| `themes/get-mod` | read | Get a specific theme mod value |
-| `themes/get-theme-json` | read | Get resolved theme.json data |
-
-### REST Discovery (4) — *New in v3.0*
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `rest/list-namespaces` | read | List all REST API namespaces |
-| `rest/list-routes` | read | List routes in a namespace |
-| `rest/get-route-schema` | read | Get schema for a specific route |
-| `rest/get-index` | read | Get the full REST API index |
-
-### Rewrite Rules (3) — *New in v3.0*
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `rewrite/get-structure` | read | Get current permalink structure |
-| `rewrite/list-rules` | read | List all rewrite rules |
-| `rewrite/flush` | write | Flush rewrite rules |
-
-### Filesystem (4) — *New in v3.6.0*
-
-| Ability | Type | Description |
-|---------|------|-------------|
-| `filesystem/list-directory` | read | List files and folders in a directory within the WordPress installation |
-| `filesystem/read-file` | read | Read the content of a file within the WordPress installation (1MB limit) |
-| `filesystem/write-file` | write | Write or append content to a file (extension whitelist: css, js, json, md, txt, html) |
-| `theme/update-asset` | write | Write a file to the active theme's assets/ directory |
-
-## Filesystem Security
-
-The filesystem module (v3.6.0) uses native PHP filesystem functions with a layered security model:
-
-- **ABSPATH containment** — all paths validated with `realpath()` to prevent traversal
-- **Extension whitelist** — only `.css`, `.js`, `.json`, `.md`, `.txt`, `.html` can be written; `.php` is blocked
-- **Write permissions default OFF** — admin must explicitly enable filesystem writes
-- **Dual gate system** — both permission toggle AND Pro license must pass for write operations
-
-## Free/Pro Tier System
-
-All 112 abilities are registered and visible to AI agents regardless of license. Pro abilities return a clear 403 response at execution time without a valid license, creating natural discovery of available capabilities.
-
-- **Permission toggle** — per-module write ON/OFF control in admin dashboard
-- **License gate** — Pro abilities require a valid license key (Phase 1: any non-empty key activates)
-- Both gates must pass — neither alone is sufficient
+WordPress 7.0 (April 2026) ships the JS client for the Abilities API, completing the server-client loop.
 
 ## Installation
 
-1. Upload to `wp-content/plugins/abilities-suite-for-wordpress/`
+1. Upload `abilities-suite-for-wordpress/` to `wp-content/plugins/`
 2. Activate the plugin
-3. All abilities are auto-discovered by the MCP Adapter
+3. All 138 abilities auto-register through the Abilities API
+4. Connect an MCP-compatible AI client via [WP Abilities MCP](https://github.com/Influencentricity/wp-abilities-mcp)
 
-No Composer dependencies required.
+No Composer dependencies.
 
 ## Admin Dashboard
 
-The plugin includes a built-in admin dashboard at **Settings → Abilities Suite** with:
-- Ability browser showing all registered abilities
-- Category breakdown with counts
-- Test interface for individual abilities
-- System diagnostics
+**Settings > Abilities Suite** provides a unified dashboard with two tabs:
 
-## Multisite Support
+**Abilities Explorer** — Browse all registered abilities with inline Read/Write/Delete toggles per module. Filter by module, operation type, or tier. See exactly what AI can and cannot do on your site.
 
-Network activation supported. Plugin management is multisite-aware.
+**License** — Enter and validate your Pro license key. Network-wide license available for multisite ($199 LTD).
 
-## Security
+## Security Model
 
-All abilities include WordPress capability checks:
-- `edit_posts` — content, taxonomy, block, pattern, and meta operations
+### Capability Checks
+
+Every ability enforces WordPress capabilities at execution time:
+
+- `edit_posts` — content, taxonomy, block, pattern, meta operations
 - `activate_plugins` — plugin management
 - `upload_files` — media operations
 - `create_users` — user management
 - `moderate_comments` — comment operations
 - `edit_theme_options` — menu operations
-- `manage_options` — settings, cache, cron, themes, site health, REST, rewrite, filesystem operations
+- `manage_options` — settings, cache, cron, themes, site health, REST, rewrite, filesystem
+
+### Permission Toggles
+
+Per-module Read/Write/Delete toggles in the admin dashboard. Disabled abilities are not registered — they do not appear in the API at all. Progressive disclosure: start read-only, enable write when comfortable, enable delete when confident.
+
+### Pro Gate
+
+Pro abilities are always visible but return 403 at execution time without a valid license. Both the permission toggle AND the license must pass — neither alone is sufficient.
+
+## Multisite Support
+
+Network activation supported. Network-wide license at $199 LTD covers all subsites.
+
+## Links
+
+- [WP Abilities MCP](https://github.com/Influencentricity/wp-abilities-mcp) — MCP bridge for AI clients
+- [MCP Adapter for WordPress](https://github.com/Influencentricity/mcp-adapter-for-wordpress) — WordPress-side MCP protocol handler
+- [Product home](https://wickedevolutions.com)
 
 ## Version
 
-**Current:** 3.6.0
-
-## Author
-
-[Influencentricity](https://influencentricity.com)
+**Current:** 3.10.0
 
 ## License
 
 GPL-2.0-or-later
+
+Copyright Influencentricity | Wicked Evolutions
+
+## Author
+
+[Influencentricity](https://influencentricity.com)
