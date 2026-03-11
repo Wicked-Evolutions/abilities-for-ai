@@ -2,6 +2,23 @@
 
 All notable changes to Abilities for AI will be documented in this file.
 
+## [1.0.0] - 2026-03-11
+
+### Changed
+- **Renamed:** WP Abilities Suite → **Abilities for AI** (WordPress.org trademark compliance)
+- Plugin slug: `abilities-suite-for-wordpress` → `abilities-for-ai`
+- Namespace: `WickedEvolutions\AbilitiesSuite` → `WickedEvolutions\AbilitiesForAI`
+- Constants: `WP_ABILITIES_SUITE_*` → `ABILITIES_FOR_AI_*`
+- Options: `wp_abilities_suite_*` → `abilities_for_ai_*`
+- GitHub repo: `Wicked-Evolutions/abilities-for-ai`
+- Composer autoloader regenerated for new namespace
+- Deployed to helenawillow.com and wickedevolutions.com with license + permission migration
+
+### Fixed
+- Stale Composer autoloader mapping (`AbilitiesSuite` → `AbilitiesForAI`) — `composer dump-autoload` required after namespace rename
+
+---
+
 ## [3.7.2] - 2026-03-09
 
 ### Fixed
