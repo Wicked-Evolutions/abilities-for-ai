@@ -496,6 +496,10 @@ add_action( 'wp_abilities_api_init', function() {
 					'type'        => 'integer',
 					'description' => 'User ID to set as post author. Defaults to current user.',
 				),
+				'post_name' => array(
+					'type'        => 'string',
+					'description' => 'Post slug. Auto-generated from title if not provided.',
+				),
 			),
 		),
 		'output_schema' => wp_abilities_suite_schema_success_output( array(
@@ -527,6 +531,10 @@ add_action( 'wp_abilities_api_init', function() {
 				'post_status'  => $status,
 				'post_excerpt' => $input['excerpt'] ?? '',
 			);
+
+			if ( isset( $input['post_name'] ) ) {
+				$post_data['post_name'] = sanitize_title( $input['post_name'] );
+			}
 
 			if ( isset( $input['post_date'] ) ) {
 				$post_data['post_date']     = sanitize_text_field( $input['post_date'] );

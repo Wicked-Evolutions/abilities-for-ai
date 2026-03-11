@@ -35,6 +35,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'thumbnail_size_w', 'thumbnail_size_h', 'medium_size_w', 'medium_size_h',
 		'large_size_w', 'large_size_h',
 		'category_base', 'tag_base',
+		'show_on_front', 'page_on_front', 'page_for_posts',
 	);
 
 	$reg = new WP_Abilities_Suite_Registrar( 'settings', 'manage_options' );
@@ -70,7 +71,7 @@ add_action( 'wp_abilities_api_init', function() {
 		),
 		'output_schema' => wp_abilities_suite_schema_item_output( array(
 			'option_name' => array( 'type' => 'string' ),
-			'value'       => array( 'type' => 'string', 'description' => 'Option value (may be string, array, or serialized data)' ),
+			'value'       => array( 'description' => 'Option value (string, integer, boolean, array, or object)' ),
 		) ),
 		'callback' => function( $params ) {
 			$name  = sanitize_text_field( $params['option_name'] ?? '' );

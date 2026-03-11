@@ -13,15 +13,15 @@
 
 | Bug | Priority | Notes |
 |-----|----------|-------|
-| `settings/get` output schema rejects non-string values | Medium | `value` field enforces `type: string` but options can be arrays/objects/integers. One-line schema fix. |
+| ~~`settings/get` output schema rejects non-string values~~ | ~~Medium~~ | **FIXED** — removed `type: string` constraint, value now accepts any type. |
 | `content/list` pagination on multisite | Low | GitHub #9. Parameter naming fixed (`per_page`), but multisite-specific WP_Query behavior may still cause issues. Needs live verification. |
 
 ## Gaps
 
 | Gap | Priority | Notes |
 |-----|----------|-------|
-| `settings/update` missing front page settings | Medium | `show_on_front`, `page_on_front` not in `$writable_settings` allowlist. Two-line fix. |
-| `content/create` missing `post_name` param | Medium | Cannot set custom slugs at creation time. AI must create then update slug separately. |
+| ~~`settings/update` missing front page settings~~ | ~~Medium~~ | **FIXED** — added `show_on_front`, `page_on_front`, `page_for_posts` to writable allowlist. |
+| ~~`content/create` missing `post_name` param~~ | ~~Medium~~ | **FIXED** — added `post_name` param to input schema and callback. |
 | `content/create` missing taxonomy terms param | Medium | Cannot assign categories/tags at creation time. Requires separate `taxonomies/assign-to-content` call (pro-gated). |
 | Application Passwords abilities | Low | No ability to create/list/revoke Application Passwords. Required for self-service AI agent onboarding. Candidates: `users/create-application-password`, `users/list-application-passwords`, `users/revoke-application-password`. |
 | `plugin/upload-zip` ability | Low | Install plugin from ZIP using Plugin_Upgrader. GitHub #6. |
