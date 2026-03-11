@@ -104,6 +104,9 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( ! class_exists( 'WP_Site_Health' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/class-wp-site-health.php';
 			}
+			if ( ! function_exists( 'wp_check_php_version' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/misc.php';
+			}
 			$test_key = sanitize_text_field( $params['test'] ?? '' );
 			$tests    = WP_Site_Health::get_tests();
 			$direct   = $tests['direct'] ?? array();

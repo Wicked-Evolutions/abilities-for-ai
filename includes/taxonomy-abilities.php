@@ -248,7 +248,7 @@ add_action( 'wp_abilities_api_init', function() {
 					$result[ $taxonomy ] = array();
 				}
 			}
-			return $result;
+			return (object) $result;
 		},
 	) );
 
