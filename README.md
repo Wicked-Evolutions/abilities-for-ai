@@ -1,37 +1,39 @@
 # Abilities for AI
 
-138 native WordPress abilities across 18 modules. Powers AI control through the official Abilities API.
+128 native WordPress abilities across 19 modules. Powers AI control through the official Abilities API.
 
 | | |
 |---|---|
-| **Total abilities** | 138 |
-| **Free tier** | 77 |
-| **Pro tier** | 61 |
-| **Modules** | 18 |
+| **Total abilities** | 128 |
+| **Free tier** | 80 |
+| **Pro tier** | 48 |
+| **Modules** | 19 |
 
 ## Free Tier — The Round-Trip
 
-The free tier gives AI full read access to everything (71 abilities) plus a controlled write round-trip: create something, inspect it, delete it. This lets AI agents prove competence before a site owner commits to Pro.
+The free tier gives AI full read access to everything (65 abilities) plus knowledge docs (3), a status check (1), a controlled write round-trip (5 create + 6 delete). This lets AI agents prove competence before a site owner commits to Pro.
 
-- **Read everything** (71) — browse content, inspect settings, discover capabilities, parse blocks, list users, check site health
-- **Test write** (4) — `content/create`, `taxonomies/create-term`, `plugins/install`, `media/create`
+- **Read everything** (65) — browse content, inspect settings, discover capabilities, parse blocks, list users, check site health
+- **Knowledge** (3) — `knowledge/getting-started`, `knowledge/gutenberg-blocks`, `knowledge/fluent-crm`
+- **Status** (1) — `suite/get-status`
+- **Test write** (5) — `content/create`, `taxonomies/create-term`, `plugins/install`, `media/create`, `users/create`
 - **Delete the test** (6) — `content/delete`, `blocks/remove`, `taxonomies/delete-term`, `menus/delete-menu`, `menus/delete-menu-item`, `media/delete`
 
-**77 free abilities total.** Enough to explore, prototype, and demonstrate value.
+**80 free abilities total.** Enough to explore, prototype, and demonstrate value.
 
 ## Pro Tier — The Juice
 
 Pro unlocks the abilities that build on what exists: update content, modify blocks, bulk search-replace, manage themes, configure settings, assign taxonomies, reorder menus. The operations that turn an AI assistant into an AI operator.
 
-**61 pro abilities.** Everything that modifies, updates, or manages production state.
+**48 pro abilities.** Everything that modifies, updates, or manages production state.
 
 ## Pro Gate
 
-All 138 abilities are registered and visible to AI regardless of license. Pro abilities return a clear 403 with an upgrade URL at execution time. The AI discovers the gate naturally — no hidden capabilities, no surprise walls.
+All 128 abilities are registered and visible to AI regardless of license. Pro abilities return a clear 403 with an upgrade URL at execution time. The AI discovers the gate naturally — no hidden capabilities, no surprise walls.
 
 License validation uses FluentCart API with 24-hour cache and 7-day grace period for renewal gaps.
 
-## 18 Modules
+## 19 Modules
 
 ### Content (11)
 
@@ -247,6 +249,14 @@ License validation uses FluentCart API with 24-hour cache and 7-day grace period
 | `rewrite/list-rules` | Read | Free |
 | `rewrite/flush` | Write | Pro |
 
+### Knowledge (3)
+
+| Ability | Op | Tier |
+|---------|-----|------|
+| `knowledge/getting-started` | Read | Free |
+| `knowledge/gutenberg-blocks` | Read | Free |
+| `knowledge/fluent-crm` | Read | Free |
+
 ### Status (1)
 
 | Ability | Op | Tier |
@@ -265,7 +275,7 @@ WordPress 7.0 (April 2026) ships the JS client for the Abilities API, completing
 
 1. Upload `abilities-for-ai/` to `wp-content/plugins/`
 2. Activate the plugin
-3. All 138 abilities auto-register through the Abilities API
+3. All 128 abilities auto-register through the Abilities API
 4. Connect an MCP-compatible AI client via [Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp)
 
 No Composer dependencies.
@@ -305,7 +315,7 @@ Every ability enforces WordPress capabilities at execution time. The WordPress u
 | Rewrite | `manage_options` | Yes | — |
 | Site Health | `view_site_health_checks` | Yes | — |
 
-**Editor** gives access to 6 content-focused modules — ideal for publishing workflows where AI should write content but not manage infrastructure. **Administrator** unlocks all 18 modules.
+**Editor** gives access to 6 content-focused modules — ideal for publishing workflows where AI should write content but not manage infrastructure. **Administrator** unlocks all 19 modules.
 
 ### Permission Toggles
 

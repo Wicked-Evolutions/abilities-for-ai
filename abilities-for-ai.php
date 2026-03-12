@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Abilities for AI
  * Plugin URI:  https://github.com/Wicked-Evolutions/abilities-for-ai
- * Description: 138 abilities across 18 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, filesystem, and more. Powers AI control through the WordPress Abilities API.
+ * Description: 128 abilities across 19 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, filesystem, knowledge, and more. Powers AI control through the WordPress Abilities API.
  * Version: 1.0.0
  * Author: Wicked Evolutions
  * Author URI: https://wickedevolutions.com
