@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Abilities for AI
  * Plugin URI:  https://github.com/Wicked-Evolutions/abilities-for-ai
- * Description: 128 abilities across 19 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, filesystem, knowledge, and more. Powers AI control through the WordPress Abilities API.
- * Version: 1.0.0
+ * Description: 137 abilities across 21 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, filesystem, knowledge, users, revisions, multisite, and more. Powers AI control through the WordPress Abilities API.
+ * Version: 1.0.2
  * Author: Wicked Evolutions
  * Author URI: https://wickedevolutions.com
  * Copyright: Copyright (C) 2026 Wicked Evolutions
@@ -17,7 +17,7 @@
 defined( 'ABSPATH' ) || exit;
 
 // Define plugin constants
-define( 'ABILITIES_FOR_AI_VERSION', '1.0.0' );
+define( 'ABILITIES_FOR_AI_VERSION', '1.0.2' );
 define( 'ABILITIES_FOR_AI_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ABILITIES_FOR_AI_URL', plugin_dir_url( __FILE__ ) );
 
@@ -81,6 +81,8 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/themes-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/rest-discovery-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/rewrite-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/filesystem-abilities.php';
+require_once ABILITIES_FOR_AI_PATH . 'includes/revision-abilities.php';
+require_once ABILITIES_FOR_AI_PATH . 'includes/multisite-abilities.php';
 
 // Knowledge layer — auto-loads .md docs from knowledge/ as read-only abilities.
 require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-abilities.php';

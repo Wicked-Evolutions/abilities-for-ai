@@ -413,4 +413,201 @@ add_action( 'wp_abilities_api_init', function() {
 			return array( 'success' => true, 'message' => 'User deleted successfully' );
 		},
 	) );
+
+	// ===== APPLICATION PASSWORDS =====
+
+	$reg->read( 'users/list-app-passwords', array(
+		'capability'  => 'edit_users',
+		'label'       => 'List Application Passwords',
+		'description' => 'List all application passwords for a user. Passwords are hashed and cannot be retrieved — only metadata (name, created, last used) is returned.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'user_id' ),
+			'properties' => array(
+				'user_id' => array(
+					'type'        => 'integer',
+					'description' => 'User ID to list application passwords for',
+				),
+			),
+		),
+		'output_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'passwords' => array(
+					'type'  => 'array',
+					'items' => array(
+						'type'       => 'object',
+						'properties' => array(
+							'uuid'      => array( 'type' => 'string' ),
+							'name'      => array( 'type' => 'string' ),
+							'created'   => array( 'type' => 'string' ),
+							'last_used' => array( 'type' => 'string' ),
+							'last_ip'   => array( 'type' => 'string' ),
+						),
+					),
+				),
+				'total' => array( 'type' => 'integer' ),
+			),
+		),
+		'callback' => function( $input ) {
+			$user_id = (int) $input['user_id'];
+			if ( ! get_user_by( 'ID', $user_id ) ) {
+				return new WP_Error( 'not_found', 'User not found' );
+			}
+
+			$passwords = WP_Application_Passwords::get_user_application_passwords( $user_id );
+			$items = array();
+			foreach ( $passwords as $pw ) {
+				$items[] = array(
+					'uuid'      => (string) ( $pw['uuid'] ?? '' ),
+					'name'      => (string) ( $pw['name'] ?? '' ),
+					'created'   => ! empty( $pw['created'] ) ? gmdate( 'Y-m-d H:i:s', $pw['created'] ) : '',
+					'last_used' => ! empty( $pw['last_used'] ) ? gmdate( 'Y-m-d H:i:s', $pw['last_used'] ) : '',
+					'last_ip'   => (string) ( $pw['last_ip'] ?? '' ),
+				);
+			}
+
+			return array(
+				'passwords' => $items,
+				'total'     => count( $items ),
+			);
+		},
+	) );
+
+	$reg->write( 'users/create-app-password', array(
+		'capability'  => 'edit_users',
+		'label'       => 'Create Application Password',
+		'description' => 'Create a new application password for a user. The plaintext password is returned ONCE — it cannot be retrieved later. Use it for REST API / XML-RPC authentication.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'user_id', 'name' ),
+			'properties' => array(
+				'user_id' => array(
+					'type'        => 'integer',
+					'description' => 'User ID to create the password for',
+				),
+				'name' => array(
+					'type'        => 'string',
+					'description' => 'Application name (e.g. "MCP Agent", "CI Deploy")',
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'uuid'     => array( 'type' => 'string' ),
+			'password' => array( 'type' => 'string' ),
+			'name'     => array( 'type' => 'string' ),
+		) ),
+		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
+		'callback' => function( $input ) {
+			$user_id = (int) $input['user_id'];
+			if ( ! get_user_by( 'ID', $user_id ) ) {
+				return new WP_Error( 'not_found', 'User not found' );
+			}
+			if ( ! current_user_can( 'edit_user', $user_id ) ) {
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to manage this user.' );
+			}
+			if ( ! wp_is_application_passwords_available_for_user( $user_id ) ) {
+				return new WP_Error( 'disabled', 'Application passwords are not available for this user.' );
+			}
+
+			$name = sanitize_text_field( $input['name'] );
+			$result = WP_Application_Passwords::create_new_application_password( $user_id, array( 'name' => $name ) );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			// $result = array( plaintext_password, item_array ).
+			list( $password, $item ) = $result;
+
+			return array(
+				'success'  => true,
+				'uuid'     => $item['uuid'],
+				'password' => WP_Application_Passwords::chunk_password( $password ),
+				'name'     => $item['name'],
+			);
+		},
+	) );
+
+	$reg->delete( 'users/delete-app-password', array(
+		'capability'  => 'edit_users',
+		'label'       => 'Delete Application Password',
+		'description' => 'Delete a specific application password by UUID. Use users/list-app-passwords to find the UUID.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'user_id', 'uuid' ),
+			'properties' => array(
+				'user_id' => array(
+					'type'        => 'integer',
+					'description' => 'User ID',
+				),
+				'uuid' => array(
+					'type'        => 'string',
+					'description' => 'Application password UUID',
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'message' => array( 'type' => 'string' ),
+		) ),
+		'callback' => function( $input ) {
+			$user_id = (int) $input['user_id'];
+			if ( ! get_user_by( 'ID', $user_id ) ) {
+				return new WP_Error( 'not_found', 'User not found' );
+			}
+			if ( ! current_user_can( 'edit_user', $user_id ) ) {
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to manage this user.' );
+			}
+
+			$uuid = sanitize_text_field( $input['uuid'] );
+			$result = WP_Application_Passwords::delete_application_password( $user_id, $uuid );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			return array( 'success' => true, 'message' => 'Application password deleted' );
+		},
+	) );
+
+	$reg->delete( 'users/delete-all-app-passwords', array(
+		'capability'  => 'edit_users',
+		'label'       => 'Delete All Application Passwords',
+		'description' => 'Delete ALL application passwords for a user. This revokes all API access for that user. Destructive and cannot be undone.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'user_id' ),
+			'properties' => array(
+				'user_id' => array(
+					'type'        => 'integer',
+					'description' => 'User ID',
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'message' => array( 'type' => 'string' ),
+			'count'   => array( 'type' => 'integer' ),
+		) ),
+		'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => true ),
+		'callback' => function( $input ) {
+			$user_id = (int) $input['user_id'];
+			if ( ! get_user_by( 'ID', $user_id ) ) {
+				return new WP_Error( 'not_found', 'User not found' );
+			}
+			if ( ! current_user_can( 'edit_user', $user_id ) ) {
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to manage this user.' );
+			}
+
+			$existing = WP_Application_Passwords::get_user_application_passwords( $user_id );
+			$count = count( $existing );
+
+			$result = WP_Application_Passwords::delete_all_application_passwords( $user_id );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			return array( 'success' => true, 'message' => "Deleted {$count} application password(s)", 'count' => $count );
+		},
+	) );
 } );

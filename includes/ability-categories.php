@@ -119,5 +119,15 @@ function abilities_for_ai_register_categories() {
         'description' => __( 'Read and write files within the WordPress installation directory.', 'abilities-for-ai' ),
     ));
 
-    error_log( 'Abilities for AI: Registered 18 ability categories' );
+    wp_register_ability_category( 'revisions', array(
+        'label'       => __( 'Revisions', 'abilities-for-ai' ),
+        'description' => __( 'WordPress post revision listing, comparison, restoration, and cleanup.', 'abilities-for-ai' ),
+    ));
+
+    wp_register_ability_category( 'multisite', array(
+        'label'       => __( 'Multisite', 'abilities-for-ai' ),
+        'description' => __( 'WordPress multisite network site management and settings.', 'abilities-for-ai' ),
+    ));
+
+    error_log( 'Abilities for AI: Registered 20 ability categories' );
 }

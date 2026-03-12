@@ -88,7 +88,7 @@ class Abilities_For_AI_Plugin_Updater {
 						return;
 					}
 
-					delete_transient( $this->cache_key );
+					delete_site_transient( $this->cache_key );
 
 					// Disable API-side cache for this request.
 					add_filter( 'fluent_sl/api_request_query_params', function( $params ) {
@@ -128,10 +128,6 @@ class Abilities_For_AI_Plugin_Updater {
 
 		if ( ! is_object( $transient_data ) ) {
 			$transient_data = new stdClass();
-		}
-
-		if ( 'plugins.php' === $pagenow && is_multisite() ) {
-			return $transient_data;
 		}
 
 		if ( ! empty( $transient_data->response ) && ! empty( $transient_data->response[ $this->config['basename'] ] ) ) {
@@ -218,7 +214,7 @@ class Abilities_For_AI_Plugin_Updater {
 			return false;
 		}
 
-		return get_transient( $this->cache_key );
+		return get_site_transient( $this->cache_key );
 	}
 
 	/**
@@ -231,7 +227,7 @@ class Abilities_For_AI_Plugin_Updater {
 			return;
 		}
 
-		set_transient( $this->cache_key, $value, 3 * HOUR_IN_SECONDS );
+		set_site_transient( $this->cache_key, $value, 3 * HOUR_IN_SECONDS );
 	}
 
 	/**

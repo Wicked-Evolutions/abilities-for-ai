@@ -210,6 +210,8 @@ function abilities_for_ai_permission_defaults() {
 		'rest'       => array( 'read' => true ),
 		'rewrite'    => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'filesystem' => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'revisions'  => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'multisite'  => array( 'read' => true, 'write' => true ),
 	);
 }
 
@@ -238,6 +240,8 @@ function abilities_for_ai_module_labels() {
 		'rest'       => 'REST Discovery',
 		'rewrite'    => 'Rewrite Rules',
 		'filesystem' => 'Filesystem',
+		'revisions'  => 'Revisions',
+		'multisite'  => 'Multisite',
 	);
 }
 

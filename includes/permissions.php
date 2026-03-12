@@ -61,6 +61,7 @@ function abilities_for_ai_sanitize_permissions( $input ) {
 		'meta' => 'meta', 'settings' => 'settings', 'site-health' => 'site-health',
 		'cache' => 'cache', 'cron' => 'cron', 'themes' => 'themes',
 		'rest' => 'rest', 'rewrite' => 'rewrite', 'filesystem' => 'filesystem',
+		'revisions' => 'revisions', 'multisite' => 'multisite',
 	);
 	$overrides = array();
 	if ( ! empty( $input['_overrides'] ) && is_array( $input['_overrides'] ) ) {
@@ -132,6 +133,8 @@ function abilities_for_ai_get_ability_counts() {
 		'rest'       => 'rest',
 		'rewrite'    => 'rewrite',
 		'filesystem' => 'filesystem',
+		'revisions'  => 'revisions',
+		'multisite'  => 'multisite',
 	);
 
 	$counts = array();
