@@ -85,6 +85,19 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/filesystem-abilities.php';
 // Knowledge layer — auto-loads .md docs from knowledge/ as read-only abilities.
 require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-abilities.php';
 
+// Load plugin updater — checks FluentCart for new versions.
+require_once ABILITIES_FOR_AI_PATH . 'includes/updater/class-plugin-updater.php';
+
+new Abilities_For_AI_Plugin_Updater( array(
+	'slug'                 => 'abilities-for-ai',
+	'basename'             => plugin_basename( __FILE__ ),
+	'version'              => ABILITIES_FOR_AI_VERSION,
+	'item_id'              => Abilities_For_AI_License_Manager::get_product_id(),
+	'api_url'              => Abilities_For_AI_License_Manager::STORE_URL,
+	'license_key_callback' => array( 'Abilities_For_AI_License_Manager', 'get_license_key' ),
+	'show_check_update'    => true,
+) );
+
 // Load admin dashboard
 if ( is_admin() ) {
     require_once ABILITIES_FOR_AI_PATH . 'admin/dashboard.php';

@@ -2,17 +2,20 @@
 /**
  * License Manager — FluentCart API Integration
  *
- * Validates Abilities for AI Pro licenses via the FluentCart license API
- * on wickedevolutions.com. Uses a 24-hour transient cache for the validation result
- * and a 7-day grace period for API unreachability.
+ * Validates Abilities for AI Pro licenses via the FluentCart license API.
+ * Uses a 24-hour transient cache for the validation result and a 7-day
+ * grace period for API unreachability.
+ *
+ * The FluentCart product ID is hardcoded (PRODUCT_ID constant) because
+ * FluentCart requires item_id on every API call. After activation, the
+ * product_id from the API response is stored locally for future calls.
  *
  * Flow:
- *   1. activate()  — Called when admin saves the license key. POSTs to the
- *                    FluentCart activate_license endpoint. Stores the
- *                    activation_hash returned for future check_license calls.
+ *   1. activate()      — POSTs to activate_license. Stores product_id and
+ *                        activation_hash from the response.
  *   2. is_pro_active() — Returns cached result when fresh. Otherwise POSTs
- *                    to check_license. Falls back to grace period on failure.
- *   3. deactivate() — POSTs deactivate, clears local state.
+ *                        to check_license. Falls back to grace period.
+ *   3. deactivate()    — POSTs deactivate, clears local state.
  *
  * Copyright (C) 2026 Influencentricity | Wicked Evolutions
  * License: GPL-2.0-or-later
@@ -27,26 +30,10 @@ class Abilities_For_AI_License_Manager {
 
 	/**
 	 * FluentCart store URL where the license API lives.
-	 * The licensing module is enabled on the community subsite.
 	 *
 	 * @var string
 	 */
 	const STORE_URL = 'https://community.wickedevolutions.com';
-
-	/**
-	 * FluentCart product ID for "Abilities for AI".
-	 * Used as the item_id parameter in all API calls.
-	 *
-	 * @var int
-	 */
-	const PRODUCT_ID = 66;
-
-	/**
-	 * FluentCart product ID for "Abilities for AI — Multisite".
-	 *
-	 * @var int
-	 */
-	const PRODUCT_ID_MULTISITE = 78;
 
 	/**
 	 * Cache lifetime for a successful validation result (24 hours).
@@ -57,21 +44,54 @@ class Abilities_For_AI_License_Manager {
 
 	/**
 	 * Grace period when the license API is unreachable (7 days).
-	 * Within this window, a previously-valid license continues to grant Pro access.
 	 *
 	 * @var int
 	 */
 	const GRACE_PERIOD = 7 * DAY_IN_SECONDS;
 
+	/**
+	 * FluentCart product ID for Abilities for AI.
+	 *
+	 * Required by every FluentCart license API call. Used as the default
+	 * for initial activation; after activation the response product_id
+	 * is stored locally for subsequent calls.
+	 *
+	 * @var int
+	 */
+	const PRODUCT_ID = 80;
+
 	// WordPress option / transient keys.
 	const OPT_LICENSE_KEY  = 'abilities_for_ai_license_key';
 	const OPT_ACTIV_HASH   = 'abilities_for_ai_activation_hash';
 	const OPT_LAST_VALID   = 'abilities_for_ai_last_valid_ts';
+	const OPT_PRODUCT_ID   = 'abilities_for_ai_product_id';
 	const TRANSIENT_STATUS = 'abilities_for_ai_pro_status';
 
 	// ----------------------------------------------------------------------------
 	// Public API
 	// ----------------------------------------------------------------------------
+
+	/**
+	 * Get the current license key (for update checker).
+	 *
+	 * @return string License key or empty string.
+	 */
+	public static function get_license_key() {
+		return self::get_opt( self::OPT_LICENSE_KEY, '' );
+	}
+
+	/**
+	 * Get the FluentCart product ID.
+	 *
+	 * Returns the stored product ID from a prior activation, or falls
+	 * back to the hardcoded PRODUCT_ID constant for initial activation.
+	 *
+	 * @return int
+	 */
+	public static function get_product_id() {
+		$stored = (int) self::get_opt( self::OPT_PRODUCT_ID, 0 );
+		return $stored ?: self::PRODUCT_ID;
+	}
 
 	/**
 	 * Check if a Pro license is currently active.
@@ -114,8 +134,13 @@ class Abilities_For_AI_License_Manager {
 	/**
 	 * Activate a license key.
 	 *
-	 * Calls the FluentCart activate_license endpoint, which registers this site
-	 * against the key and returns an activation_hash for future checks.
+	 * Sends the key to FluentCart with the hardcoded PRODUCT_ID. FluentCart
+	 * validates the key and returns the product_id, activation_hash, variation
+	 * details, and license status. The product_id from the response is stored
+	 * locally for subsequent check_license and get_license_version calls.
+	 *
+	 * Multisite scope is detected automatically from the variation_title in
+	 * the FluentCart response (e.g. "Multi Site").
 	 *
 	 * @param string $license_key The license key to activate.
 	 * @return true|WP_Error
@@ -126,25 +151,13 @@ class Abilities_For_AI_License_Manager {
 			return new WP_Error( 'invalid_key', __( 'License key cannot be empty.', 'abilities-for-ai' ) );
 		}
 
+		$product_id = self::get_product_id();
+
 		$response = self::remote_request( 'activate_license', array(
 			'license_key' => $license_key,
-			'item_id'     => self::PRODUCT_ID,
+			'item_id'     => $product_id,
 			'site_url'    => home_url(),
 		) );
-
-		// If key_mismatch on single-site product, try the multisite product ID.
-		if (
-			! is_wp_error( $response )
-			&& isset( $response['error_type'] )
-			&& 'key_mismatch' === $response['error_type']
-			&& is_multisite()
-		) {
-			$response = self::remote_request( 'activate_license', array(
-				'license_key' => $license_key,
-				'item_id'     => self::PRODUCT_ID_MULTISITE,
-				'site_url'    => home_url(),
-			) );
-		}
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -155,11 +168,14 @@ class Abilities_For_AI_License_Manager {
 			return new WP_Error( $response['error_type'] ?? 'activation_failed', $message );
 		}
 
-		// Detect license scope from the product ID in the API response.
-		$response_product = (int) ( $response['product_id'] ?? $response['item_id'] ?? self::PRODUCT_ID );
-		$is_network       = is_multisite() && self::PRODUCT_ID_MULTISITE === $response_product;
+		// Store the product_id from the API response — source of truth for future calls.
+		$response_product = (int) ( $response['product_id'] ?? $product_id );
+		self::update_opt( self::OPT_PRODUCT_ID, $response_product );
 
-		// Set scope before storing options so get_opt/update_opt route correctly.
+		// Detect multisite license scope from variation title.
+		$variation_title = $response['variation_title'] ?? '';
+		$is_network      = is_multisite() && stripos( $variation_title, 'multi site' ) !== false;
+
 		if ( $is_network ) {
 			update_site_option( 'abilities_for_ai_license_scope', 'network' );
 		} else {
@@ -187,12 +203,13 @@ class Abilities_For_AI_License_Manager {
 	public static function deactivate() {
 		$license_key = self::get_opt( self::OPT_LICENSE_KEY, '' );
 		$activ_hash  = self::get_opt( self::OPT_ACTIV_HASH, '' );
+		$product_id  = self::get_product_id();
 
-		if ( ! empty( $license_key ) ) {
+		if ( ! empty( $license_key ) && $product_id ) {
 			self::remote_request( 'deactivate_license', array(
 				'license_key'     => $license_key,
 				'activation_hash' => $activ_hash,
-				'item_id'         => self::current_product_id(),
+				'item_id'         => $product_id,
 				'site_url'        => home_url(),
 			) );
 		}
@@ -200,6 +217,7 @@ class Abilities_For_AI_License_Manager {
 		self::delete_opt( self::OPT_LICENSE_KEY );
 		self::delete_opt( self::OPT_ACTIV_HASH );
 		self::delete_opt( self::OPT_LAST_VALID );
+		self::delete_opt( self::OPT_PRODUCT_ID );
 		delete_transient( self::TRANSIENT_STATUS );
 		delete_site_option( 'abilities_for_ai_license_scope' );
 
@@ -227,7 +245,7 @@ class Abilities_For_AI_License_Manager {
 	/**
 	 * Get the current license status details for display in admin UI.
 	 *
-	 * @return array Keys: key (masked), status, expiration, product, activated.
+	 * @return array Keys: key (masked), status, expiration, product_id, activated.
 	 */
 	public static function get_status() {
 		$license_key = self::get_opt( self::OPT_LICENSE_KEY, '' );
@@ -238,6 +256,7 @@ class Abilities_For_AI_License_Manager {
 				'key'        => '',
 				'status'     => 'unlicensed',
 				'expiration' => '',
+				'product_id' => self::get_product_id(),
 				'activated'  => false,
 			);
 		}
@@ -251,6 +270,7 @@ class Abilities_For_AI_License_Manager {
 			'key'        => $masked_key,
 			'status'     => $is_active ? 'active' : 'inactive',
 			'expiration' => '',  // Populated if needed from API response.
+			'product_id' => self::get_product_id(),
 			'activated'  => $is_active,
 			'last_valid' => $last_valid ? gmdate( 'Y-m-d H:i:s', $last_valid ) : '',
 		);
@@ -270,15 +290,6 @@ class Abilities_For_AI_License_Manager {
 			return false;
 		}
 		return 'network' === get_site_option( 'abilities_for_ai_license_scope', '' );
-	}
-
-	/**
-	 * Return the correct FluentCart product ID for API calls.
-	 *
-	 * @return int
-	 */
-	private static function current_product_id() {
-		return self::is_network_license() ? self::PRODUCT_ID_MULTISITE : self::PRODUCT_ID;
 	}
 
 	/**
@@ -322,17 +333,19 @@ class Abilities_For_AI_License_Manager {
 	/**
 	 * POST to the FluentCart check_license endpoint using the activation hash.
 	 *
-	 * Uses activation_hash (not the raw key) for periodic checks — avoids
-	 * re-consuming an activation slot.
-	 *
 	 * @param string $license_key License key.
 	 * @return array|WP_Error Decoded JSON response or WP_Error on failure.
 	 */
 	private static function remote_check( $license_key ) {
 		$activ_hash = self::get_opt( self::OPT_ACTIV_HASH, '' );
+		$product_id = self::get_product_id();
+
+		if ( ! $product_id ) {
+			return new WP_Error( 'no_product_id', 'No product ID stored. Re-activate your license.' );
+		}
 
 		$payload = array(
-			'item_id'  => self::current_product_id(),
+			'item_id'  => $product_id,
 			'site_url' => home_url(),
 		);
 
@@ -348,9 +361,6 @@ class Abilities_For_AI_License_Manager {
 
 	/**
 	 * POST to the FluentCart license API.
-	 *
-	 * The API is a standard WordPress action endpoint:
-	 * POST https://wickedevolutions.com/?fluent-cart={action}
 	 *
 	 * @param string $action  One of: activate_license, check_license, deactivate_license.
 	 * @param array  $payload POST body fields.
