@@ -152,6 +152,10 @@ class Seeder {
 
 	/**
 	 * Seed starter skill/protocol documents.
+	 *
+	 * Content is loaded from seed-content/skills/*.md files to preserve
+	 * full prototype fidelity. Metadata (steps, versions) matches the
+	 * prototype protocols exactly.
 	 */
 	private static function seed_skills() {
 		$skills = array(
@@ -165,7 +169,6 @@ class Seeder {
 					'version' => '0.3.0',
 					'steps'   => array(
 						'connection_check',
-						'suite_get_status',
 						'product_intro',
 						'first_choice',
 						'introduction_course',
@@ -174,7 +177,6 @@ class Seeder {
 					),
 					'pacing' => true,
 				),
-				'content' => "# Initial Read Protocol\n\n> First contact sequence for a new site. Version 0.3.0.\n\n## Steps\n\n1. **Connection Check** — Verify AI can reach the site via abilities\n2. **Suite Status** — Call `suite/get-status` to understand what's available\n3. **Product Introduction** — Introduce Abilities for AI from knowledge, not from discovery output\n4. **First Choice** — Human chooses: guided tour or specific task\n5. **Introduction Course** — Walk through the progressive learning path\n6. **Story Read** — Deep read of the site's content to understand its voice and purpose\n7. **ESSENCE Synthesis** — Build the First Encounter Brief from all gathered data\n\n## Pacing Rule\nNever chain ability calls without the human choosing the next step.",
 			),
 			array(
 				'slug'     => 'health-check',
@@ -184,10 +186,9 @@ class Seeder {
 					'lane'    => 'system',
 					'course'  => 'introduction',
 					'version' => '0.1.0',
-					'steps'   => array( 'environment', 'plugins', 'cron', 'cache', 'security_basics' ),
+					'steps'   => array( 'site_health_info', 'plugins_check', 'cron_check', 'cache_check' ),
 					'pacing'  => true,
 				),
-				'content' => "# Health Check Protocol\n\n> System lane diagnostic. Version 0.1.0.\n\n## Steps\n\n1. **Environment** — PHP version, WordPress version, server software, memory limits\n2. **Plugins** — Active plugin count, update status, known conflicts\n3. **Cron** — Scheduled tasks health, overdue jobs, orphaned events\n4. **Cache** — Object cache status, transient count, page cache detection\n5. **Security Basics** — XML-RPC, debug mode, file editing, login URL\n\n## Outputs\n- Site Identity document (technical facts)\n- Observations logged for any issues found",
 			),
 			array(
 				'slug'     => 'content-structure',
@@ -200,62 +201,79 @@ class Seeder {
 					'steps'   => array( 'content_types', 'taxonomies', 'page_hierarchy', 'commerce' ),
 					'pacing'  => true,
 				),
-				'content' => "# Content Structure Protocol\n\n> Content lane diagnostic. Version 0.2.0.\n\n## Steps\n\n1. **Content Types** — Map all post types, their counts, and public/private status\n2. **Taxonomies** — All taxonomies, term counts, relationships to content types\n3. **Page Hierarchy** — Parent-child page structure, navigation menus\n4. **Commerce** — Products, collections, pricing (if e-commerce active)\n\n## Outputs\n- Diagnostic document with full content map\n- Observations for structural issues or opportunities",
 			),
 			array(
 				'slug'     => 'theme-and-design',
 				'title'    => 'Theme and Design Protocol',
-				'excerpt'  => 'Structure lane diagnostic — theme, templates, patterns, block usage.',
+				'excerpt'  => 'Structure lane diagnostic — active theme, modifications, menus, patterns.',
 				'metadata' => array(
 					'lane'    => 'structure',
 					'course'  => 'introduction',
 					'version' => '0.1.0',
-					'steps'   => array( 'theme_info', 'templates', 'patterns', 'block_usage' ),
+					'steps'   => array( 'active_theme', 'theme_modifications', 'menu_structure', 'patterns' ),
 					'pacing'  => true,
 				),
-				'content' => "# Theme and Design Protocol\n\n> Structure lane diagnostic. Version 0.1.0.\n\n## Steps\n\n1. **Theme Info** — Active theme, parent theme, version, block theme vs classic\n2. **Templates** — Template hierarchy, custom templates, template parts\n3. **Patterns** — Registered patterns, pattern categories, usage\n4. **Block Usage** — Most-used blocks across content, custom blocks\n\n## Outputs\n- Diagnostic document with theme/design analysis\n- Observations for design issues or improvements",
 			),
 			array(
 				'slug'     => 'end-session',
 				'title'    => 'End Session Protocol',
-				'excerpt'  => 'Session continuity — gather state, log session, update site state, present summary.',
+				'excerpt'  => 'Session continuity — gather summary, update site state, write session log, verify, present.',
 				'metadata' => array(
 					'lane'    => 'system',
 					'version' => '1.0.0',
-					'steps'   => array( 'gather_state', 'log_session', 'update_site_state', 'present_summary' ),
+					'steps'   => array(
+						'gather_session_summary',
+						'update_site_state',
+						'write_session_log',
+						'verify_knowledge_files',
+						'present_summary',
+					),
 					'pacing'  => false,
 				),
-				'content' => "# End Session Protocol\n\n> Session continuity protocol. Version 1.0.0.\n\n## Steps\n\n1. **Gather State** — Collect what happened: protocols run, documents modified, findings, observations\n2. **Log Session** — Write session entry to kl_sessions (append-only)\n3. **Update Site State** — Update the site-state document with current status\n4. **Present Summary** — Show human what happened and suggest what's next\n\n## Notes\n- This protocol does NOT follow the Pacing Rule — it runs as a sequence\n- The session log is immutable once written",
 			),
 			array(
 				'slug'     => 'plugin-audit',
 				'title'    => 'Plugin Audit Protocol',
-				'excerpt'  => 'Deep plugin analysis — active/inactive, update status, conflicts, recommendations.',
+				'excerpt'  => 'Deep plugin analysis — active/inactive, update status, redundancy, recommendations.',
 				'metadata' => array(
 					'lane'    => 'system',
 					'version' => '0.1.0',
-					'steps'   => array( 'list_plugins', 'check_updates', 'analyze_conflicts', 'recommend' ),
+					'steps'   => array( 'list_plugins', 'check_updates', 'identify_redundancy', 'recommend' ),
 					'pacing'  => true,
 				),
-				'content' => "# Plugin Audit Protocol\n\n> Deep plugin analysis. Version 0.1.0.\n\n## Steps\n\n1. **List Plugins** — All active and inactive plugins with versions\n2. **Check Updates** — Which plugins have updates available\n3. **Analyze Conflicts** — Known conflicts, duplicate functionality, performance concerns\n4. **Recommend** — Suggestions for cleanup, updates, or replacements\n\n## Outputs\n- Observations for each issue found\n- Severity: info (noting a plugin), attention (outdated), action_needed (conflict/vulnerability)",
 			),
 			array(
 				'slug'     => 'scheduled-tasks',
 				'title'    => 'Scheduled Tasks Protocol',
-				'excerpt'  => 'Cron health analysis — scheduled events, overdue tasks, orphaned hooks.',
+				'excerpt'  => 'Cron health analysis — list events, identify owners, flag anomalies.',
 				'metadata' => array(
 					'lane'    => 'system',
 					'version' => '0.1.0',
-					'steps'   => array( 'list_events', 'check_overdue', 'find_orphans', 'assess_load' ),
+					'steps'   => array( 'list_events', 'identify_owners', 'flag_anomalies' ),
 					'pacing'  => true,
 				),
-				'content' => "# Scheduled Tasks Protocol\n\n> Cron health analysis. Version 0.1.0.\n\n## Steps\n\n1. **List Events** — All scheduled cron events with next run times\n2. **Check Overdue** — Events that should have run but haven't\n3. **Find Orphans** — Hooks registered to plugins that are no longer active\n4. **Assess Load** — Total cron load and frequency analysis\n\n## Outputs\n- Observations for overdue, orphaned, or excessive cron events",
 			),
 		);
 
 		foreach ( $skills as $skill ) {
-			self::seed_doc( array_merge( $skill, array( 'doc_type' => 'skill' ) ) );
+			$skill['content']  = self::load_seed_content( 'skills/' . $skill['slug'] . '.md' );
+			$skill['doc_type'] = 'skill';
+			self::seed_doc( $skill );
 		}
+	}
+
+	/**
+	 * Load seed content from a file in the seed-content/ directory.
+	 *
+	 * @param string $relative_path Path relative to seed-content/ (e.g. 'skills/initial-read.md').
+	 * @return string File contents, or empty string if not found.
+	 */
+	private static function load_seed_content( $relative_path ) {
+		$file = ABILITIES_FOR_AI_PATH . 'seed-content/' . $relative_path;
+		if ( ! file_exists( $file ) ) {
+			return '';
+		}
+		return file_get_contents( $file );
 	}
 
 	/**
@@ -337,6 +355,38 @@ class Seeder {
 				'output_doc_type'    => 'essence',
 			),
 		) );
+	}
+
+	/**
+	 * Update existing seed documents with fresh content from seed files.
+	 *
+	 * Only updates documents where source = 'plugin' and locked = 1.
+	 * This is called during schema migrations to refresh protocol content
+	 * without losing user forks or custom documents.
+	 */
+	public static function update_seeds() {
+		global $wpdb;
+		$table = $wpdb->prefix . 'kl_documents';
+
+		// Get all plugin-seeded skill documents.
+		$seeds = $wpdb->get_results(
+			"SELECT id, doc_type, slug FROM {$table} WHERE source = 'plugin' AND locked = 1 AND doc_type = 'skill'"
+		);
+
+		if ( empty( $seeds ) ) {
+			return;
+		}
+
+		foreach ( $seeds as $seed ) {
+			$file_content = self::load_seed_content( 'skills/' . $seed->slug . '.md' );
+			if ( empty( $file_content ) ) {
+				continue;
+			}
+
+			Document::update( $seed->id, array(
+				'content' => $file_content,
+			) );
+		}
 	}
 
 	/**

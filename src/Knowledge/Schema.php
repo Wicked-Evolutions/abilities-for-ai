@@ -23,7 +23,7 @@ class Schema {
 	/**
 	 * Current schema version. Bump this when tables change.
 	 */
-	const VERSION = '0.1.0';
+	const VERSION = '0.2.0';
 
 	/**
 	 * Option key for stored schema version.
@@ -56,6 +56,19 @@ class Schema {
 		$current = get_option( self::VERSION_KEY, '0' );
 		if ( version_compare( $current, self::VERSION, '<' ) ) {
 			self::up();
+			self::run_migrations( $current );
+		}
+	}
+
+	/**
+	 * Run version-specific migrations.
+	 *
+	 * @param string $from_version Previous schema version.
+	 */
+	private static function run_migrations( $from_version ) {
+		// v0.2.0: Refresh seed document content from prototype files.
+		if ( version_compare( $from_version, '0.2.0', '<' ) ) {
+			Seeder::update_seeds();
 		}
 	}
 
