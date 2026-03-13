@@ -244,6 +244,7 @@ add_action( 'wp_abilities_api_init', function() {
 	// ===== CACHE — DELETE =====
 
 	$reg->delete( 'cache/delete-transient', array(
+		'tier'        => 'free',
 		'label'       => 'Delete Transient',
 		'description' => 'Delete a specific transient.',
 		'input_schema' => array(

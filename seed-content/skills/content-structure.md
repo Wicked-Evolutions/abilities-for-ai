@@ -11,6 +11,9 @@
 - Before major content reorganization
 - When the human asks "what do I have?"
 
+## Multisite Scope
+If the site is a multisite network, the human should have already chosen which sites to include during the Initial Read (Step 1). Run every step in this protocol against each included site. Present results per-site, then summarize differences.
+
 ## Steps
 ### Step 1 — Content Types
 **Ability:** `content/discover-types`
@@ -47,19 +50,47 @@ For 11 pages at `per_page: 100` → 566KB. Unusable for mapping.
 **What it reveals:** Page hierarchy (parent/child), navigation shape, core vs utility pages
 
 **Present:** ASCII tree diagram of page hierarchy. Categorize into: Core, Offerings, System/Utility.
+**Log observations** for: orphan pages (no parent, not top-level), missing expected pages (no About, no Home), deep nesting (3+ levels).
 
 **Pause.** Human chooses: taxonomy terms, commerce collections, or save findings.
 
 ### Step 4 — Taxonomy Terms (optional, per human choice)
 **Ability:** `taxonomies/list-terms` per active taxonomy
 **What it reveals:** How content is grouped, which terms have content, which are empty
+**Log observations** for: empty taxonomies, unused terms, duplicate/overlapping categories.
 
 ### Step 5 — Save and Synthesize
-**Output:**
-- **Summary** → site-identity document Content section (table + key insight)
-- **Detail** → diagnostic document (ASCII diagrams, full tables, observations)
+**Ask the human:** "Want me to save these findings to the Knowledge Layer?"
 
-**Present:** "Here's the shape of your site's content" — narrative, not data dump.
+If yes, write two things:
+
+1. **Diagnostic document** — the full output: ASCII diagrams, page trees, content type tables, taxonomy maps, observations. Use `knowledge/create` with `doc_type: diagnostic`, `slug: content-structure`.
+   - For multisite: include per-site sections and the comparison diagram.
+2. **Site identity update** — a lean summary (content types, page count, key observations) into the site-identity document's Content section. Use `knowledge/update` if the document exists.
+
+**Present:** "Here's the shape of your site's content" — narrative with ASCII diagrams, not a data dump. The diagram should show the site's page hierarchy as a tree, categorized (Core/Story, Commerce, Legal/System).
+
+## Recording Observations
+
+After each step, log notable findings as individual observations using `knowledge/add-observation`:
+
+```
+knowledge/add-observation
+  session_id: (current session ID)
+  category: "content"
+  severity: "info", "attention", or "action_needed"
+  description: what was observed (one finding per call)
+  source_diagnostic: "content-structure"
+```
+
+**What qualifies as an observation:**
+- Missing expected content types or pages
+- Orphan pages, deep nesting, inconsistent hierarchy
+- Empty taxonomies or unused terms
+- Content type/taxonomy mismatches across multisite
+- Large content volumes that need pagination strategy
+
+**NOT observations:** Normal structure, expected counts. Only log what's notable.
 
 ## Pacing Rule
 
@@ -67,4 +98,4 @@ For 11 pages at `per_page: 100` → 566KB. Unusable for mapping.
 
 ---
 
-*v0.2.0 — Tested live against helenawillow.com. Payload issue confirmed and documented.*
+*v0.3.0 — Observation recording added. Tested live against wickedevolutions.com.*

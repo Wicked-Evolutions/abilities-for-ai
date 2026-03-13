@@ -39,6 +39,8 @@ suite/get-status → compact site profile in one call
 Returns: site name, URL, WP version, PHP version, multisite status, hosting,
 abilities tier, active module count — everything needed to orient.
 
+**Multisite check:** If `suite/get-status` shows this is a multisite network, list the available sites and ask the human which sites to include before proceeding to any diagnostics. All subsequent ability calls must target the agreed sites — never assume "main site only."
+
 **NOT `discover-abilities`.** That returns 77KB+ and requires agent parsing.
 The full ability manifest is loaded later, per-lane, when actually needed.
 
@@ -83,6 +85,8 @@ run ability → present findings → PAUSE → offer choices → human picks →
 Every step is a doorway the human walks through, not a corridor they're pulled through.
 
 ### Step 4 — Introduction Course (diagnostic protocols)
+Before running any protocol, call `knowledge/get` with `doc_type: skill` and the protocol's slug to load its full instructions. Never improvise protocol steps.
+
 Based on the human's choice, enter the appropriate protocol:
 
 | Protocol | Lane | What It Fills |
@@ -144,24 +148,33 @@ content/get-text
 ### Step 6 — ESSENCE Synthesis
 After diagnostics + Story Read, the AI synthesizes what it's learned into ESSENCE.
 
-This is NOT an interrogation. The AI presents its understanding:
+**Load the template first:** Call `knowledge/get` with `doc_type: template`, `slug: first-encounter-brief` to get the ESSENCE structure.
+
+The ESSENCE combines narrative understanding with technical facts:
+
+1. **Identity + Voice** — who this site is, what it's about, its tone and themes (from Story Read)
+2. **Technical Profile** — environment, hosting, key plugins (from diagnostics)
+3. **Content Architecture** — content types, page hierarchy as ASCII tree diagrams, taxonomy map (from Content Structure diagnostic)
+4. **Observations** — key findings, gaps, action items (from all diagnostics)
+5. **Infrastructure diagram** — ASCII diagram showing how the site's components relate (multisite structure, plugin ecosystem, content flow)
+
+**Present as narrative first:**
 
 ```
 "Based on what I've seen — your content, your products, your tools,
 and the story your site tells — here's what I think this site is:
 
-[synthesis]
+[narrative synthesis with embedded diagrams]
 
 Does that sound right? What would you add or change?"
 ```
 
-The synthesis draws from:
-- **Diagnostics** — site shape, content types, products, theme
-- **Story Read** — the human words on the About page, Home page, offerings
+The human confirms, corrects, or expands. Then **save** the ESSENCE:
+- Use `knowledge/create` with `doc_type: essence`, `slug: current`
+- Include both the narrative and the structured sections (technical profile, diagrams, observations)
+- This becomes the boot document for returning visits — it must be self-contained
 
-The human confirms, corrects, or expands. This conversation naturally
-leads into deeper identity files: VISION, MISSION, AUDIENCE, PRODUCTS,
-SERVICES, BUSINESSMODEL.
+This conversation naturally leads into deeper identity files: VISION, MISSION, AUDIENCE, PRODUCTS, SERVICES, BUSINESSMODEL.
 
 ### Step 7 — Introduction Complete
 When the human has:

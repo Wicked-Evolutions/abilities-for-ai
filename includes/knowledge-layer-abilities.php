@@ -393,8 +393,11 @@ add_action( 'wp_abilities_api_init', function() {
 				}
 			}
 
-			// Site identity (if built).
+			// Site identity (if built). Try 'current' slug first, fall back to 'site-identity'.
 			$identity = Document::find_by_slug( 'site-identity', 'current' );
+			if ( ! $identity ) {
+				$identity = Document::find_by_slug( 'site-identity', 'site-identity' );
+			}
 			if ( $identity ) {
 				$response['site_identity'] = array(
 					'title'    => $identity->title,
@@ -443,13 +446,27 @@ add_action( 'wp_abilities_api_init', function() {
 					'instruction' => 'Read this protocol fully before doing anything else. It defines how to behave on first contact. Follow it step by step.',
 				);
 			} else {
-				// Returning visit — check for site state.
+				// Returning visit — check for site state first, then fall back.
 				$site_state = Document::find_by_slug( 'site-state', 'current' );
 				if ( $site_state ) {
 					$response['next_action'] = array(
 						'ability'     => 'knowledge/get',
 						'input'       => array( 'doc_type' => 'site-state', 'slug' => 'current' ),
 						'instruction' => 'Read the site state to understand where the last session left off. Present what happened last time and suggest next steps.',
+					);
+				} elseif ( $identity ) {
+					// No site-state yet, but site-identity exists — previous session did work.
+					$response['next_action'] = array(
+						'ability'     => 'knowledge/get',
+						'input'       => array( 'doc_type' => 'site-identity', 'slug' => $identity->slug ),
+						'instruction' => 'A previous session built this site identity. Read it to understand what is already known about this site, then present a summary and ask what the human wants to do next.',
+					);
+				} else {
+					// Returning but nothing persisted — restart onboarding.
+					$response['next_action'] = array(
+						'ability'     => 'knowledge/get',
+						'input'       => array( 'doc_type' => 'skill', 'slug' => 'initial-read' ),
+						'instruction' => 'Previous sessions left no knowledge documents. Start the Introduction Course from the beginning.',
 					);
 				}
 			}
