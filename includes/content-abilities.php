@@ -315,6 +315,206 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	$reg->read( 'content/get-text', array(
+		'label'       => 'Get Content as Plain Text',
+		'description' => 'Get a post\'s readable text content with block markup and HTML stripped. Returns ~2-20KB instead of 50-200KB from content/get. Ideal for Story Read, ESSENCE synthesis, and content analysis where you need what the page says, not how it\'s built.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'id' ),
+			'properties' => array(
+				'id' => array( 'type' => 'integer', 'description' => 'Post ID' ),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'id'         => array( 'type' => 'integer' ),
+			'title'      => array( 'type' => 'string' ),
+			'text'       => array( 'type' => 'string' ),
+			'word_count' => array( 'type' => 'integer' ),
+		) ),
+		'callback' => function( $input ) {
+			$check = abilities_for_ai_require_editable_post( $input['id'] );
+			if ( is_wp_error( $check ) ) return $check;
+
+			$post = $check;
+
+			// Strip block comments (<!-- wp:... --> and <!-- /wp:... -->).
+			$text = preg_replace( '/<!--\s*\/?wp:[^>]*-->/s', '', $post->post_content );
+			// Render shortcodes and embeds.
+			$text = do_shortcode( $text );
+			// Strip remaining HTML tags.
+			$text = wp_strip_all_tags( $text );
+			// Normalize whitespace: collapse runs of whitespace, trim.
+			$text = preg_replace( '/[ \t]+/', ' ', $text );
+			$text = preg_replace( '/\n{3,}/', "\n\n", $text );
+			$text = trim( $text );
+
+			return array(
+				'id'         => $post->ID,
+				'title'      => $post->post_title,
+				'excerpt'    => $post->post_excerpt,
+				'text'       => $text,
+				'word_count' => str_word_count( $text ),
+				'type'       => $post->post_type,
+				'status'     => $post->post_status,
+				'date'       => $post->post_date,
+				'link'       => get_permalink( $post->ID ),
+			);
+		},
+	) );
+
+	$reg->read( 'content/list-structure', array(
+		'label'       => 'List Content Structure',
+		'description' => 'List content metadata without the content field. Returns titles, IDs, slugs, parent, status, and dates — everything needed for site mapping without the 50-200KB Gutenberg payload per post. Supports pagination, filtering by type and status.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'post_type' => array(
+					'type'        => 'string',
+					'description' => 'Post type to list (post, page, or custom post type)',
+					'default'     => 'page',
+				),
+				'per_page' => array(
+					'type'        => 'integer',
+					'description' => 'Number of items to return',
+					'default'     => 100,
+					'minimum'     => 1,
+					'maximum'     => 100,
+				),
+				'paged' => array(
+					'type'        => 'integer',
+					'description' => 'Page number for pagination',
+					'default'     => 1,
+					'minimum'     => 1,
+				),
+				'post_status' => array(
+					'type'        => 'string',
+					'description' => 'Post status (publish, draft, any)',
+					'default'     => 'publish',
+				),
+				'orderby' => array(
+					'type'        => 'string',
+					'description' => 'Order by field (title, date, menu_order, modified)',
+					'default'     => 'title',
+				),
+				'order' => array(
+					'type'        => 'string',
+					'description' => 'Order direction (ASC or DESC)',
+					'default'     => 'ASC',
+					'enum'        => array( 'ASC', 'DESC' ),
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_list_output( 'items', array(
+			'id'     => array( 'type' => 'integer' ),
+			'title'  => array( 'type' => 'string' ),
+			'slug'   => array( 'type' => 'string' ),
+			'parent' => array( 'type' => 'integer' ),
+			'status' => array( 'type' => 'string' ),
+		) ),
+		'callback' => function( $input ) {
+			$post_type     = sanitize_key( $input['post_type'] ?? 'page' );
+			$post_type_obj = get_post_type_object( $post_type );
+			if ( ! $post_type_obj ) {
+				return new WP_Error( 'ability_invalid_input', 'Invalid post type.' );
+			}
+			if ( ! current_user_can( $post_type_obj->cap->edit_posts ) ) {
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to list this post type.' );
+			}
+
+			$query = new WP_Query( array(
+				'post_type'      => $post_type,
+				'posts_per_page' => (int) ( $input['per_page'] ?? 100 ),
+				'paged'          => $input['paged'] ?? 1,
+				'post_status'    => $input['post_status'] ?? 'publish',
+				'orderby'        => $input['orderby'] ?? 'title',
+				'order'          => $input['order'] ?? 'ASC',
+			) );
+
+			$items = array();
+			foreach ( $query->posts as $post ) {
+				if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+					continue;
+				}
+				$items[] = array(
+					'id'         => $post->ID,
+					'title'      => $post->post_title,
+					'slug'       => $post->post_name,
+					'parent'     => $post->post_parent,
+					'status'     => $post->post_status,
+					'type'       => $post->post_type,
+					'date'       => $post->post_date,
+					'modified'   => $post->post_modified,
+					'menu_order' => $post->menu_order,
+					'link'       => get_permalink( $post->ID ),
+				);
+			}
+
+			return array(
+				'total'    => (int) $query->found_posts,
+				'pages'    => max( 1, (int) $query->max_num_pages ),
+				'page'     => (int) ( $input['paged'] ?? 1 ),
+				'per_page' => (int) ( $input['per_page'] ?? 100 ),
+				'items'    => $items,
+			);
+		},
+	) );
+
+	$reg->read( 'content/get-site-map', array(
+		'label'       => 'Get Site Map',
+		'description' => 'Get the full hierarchical page tree in a single call. Returns all pages as a nested tree structure with parent/child relationships resolved. Ideal for understanding site architecture without multiple content/list calls.',
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'total' => array( 'type' => 'integer' ),
+			'tree'  => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => function() {
+			if ( ! current_user_can( 'edit_pages' ) ) {
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to list pages.' );
+			}
+
+			$query = new WP_Query( array(
+				'post_type'      => 'page',
+				'posts_per_page' => 500,
+				'post_status'    => array( 'publish', 'draft', 'pending', 'private' ),
+				'orderby'        => 'menu_order title',
+				'order'          => 'ASC',
+			) );
+
+			// Build flat list keyed by ID.
+			$flat = array();
+			foreach ( $query->posts as $post ) {
+				if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+					continue;
+				}
+				$flat[ $post->ID ] = array(
+					'id'         => $post->ID,
+					'title'      => $post->post_title,
+					'slug'       => $post->post_name,
+					'parent'     => $post->post_parent,
+					'status'     => $post->post_status,
+					'menu_order' => $post->menu_order,
+					'link'       => get_permalink( $post->ID ),
+					'children'   => array(),
+				);
+			}
+
+			// Build tree by assigning children to parents.
+			$tree = array();
+			foreach ( $flat as $id => &$node ) {
+				if ( $node['parent'] && isset( $flat[ $node['parent'] ] ) ) {
+					$flat[ $node['parent'] ]['children'][] = &$node;
+				} else {
+					$tree[] = &$node;
+				}
+			}
+			unset( $node );
+
+			return array(
+				'total' => count( $flat ),
+				'tree'  => $tree,
+			);
+		},
+	) );
+
 	$reg->read( 'content/discover-types', array(
 		'label'       => 'Discover Content Types',
 		'description' => 'Discover all available post types',
