@@ -33,7 +33,7 @@ Update each section of the site-state document with current information:
 | Last Session | Date, time range, agent mode, model, focus |
 | What Happened | Protocols completed, files updated, findings |
 | What's Open | Unresolved items, pending human decisions, flagged observations |
-| What's Next | Suggested follow-up, available protocols, pending confirmations |
+| Items Pending User Decision | Suggested follow-up, available protocols, pending confirmations. The next AI will present these as choices — not execute them. Write them as options, not instructions. |
 | Course Progress | Update completion status for each course/protocol |
 | Observations | Append new observations (never delete previous ones) |
 
@@ -51,7 +51,7 @@ Session entry format:
 - protocols_run: list of protocol slugs executed
 - documents_modified: list of document IDs created/updated
 - findings: key findings
-- whats_next: suggested follow-up for next session
+- pending_user_decisions: suggested follow-up for next session (presented as choices, not executed)
 ```
 
 **Session log is append-only.** Never edit previous entries. The history tells the story.
@@ -82,7 +82,7 @@ Brief summary of what was saved:
   ESSENCE: [status]
   Observations: [count of new observations]
 
-  Next session will pick up from: [what's next]"
+  Pending user decisions: [items the next AI will present as choices]"
 ```
 
 ## Pacing Rule

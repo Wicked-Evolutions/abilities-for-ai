@@ -228,7 +228,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'protocols_run'      => array( 'type' => 'array', 'items' => array( 'type' => 'string' ), 'description' => 'Protocol slugs executed.' ),
 				'documents_modified' => array( 'type' => 'array', 'items' => array( 'type' => 'integer' ), 'description' => 'Document IDs created or updated.' ),
 				'findings'           => array( 'type' => 'array', 'items' => array( 'type' => 'string' ), 'description' => 'Key findings from this session.' ),
-				'whats_next'         => array( 'type' => 'string', 'description' => 'Suggested follow-up for next session.' ),
+				'whats_next'         => array( 'type' => 'string', 'description' => 'Items pending user decision for next session. Write as choices the next AI will present to the user — not as tasks to execute.' ),
 			),
 		),
 		'callback' => function( $input ) {
@@ -353,19 +353,29 @@ add_action( 'wp_abilities_api_init', function() {
 		'label'       => 'Knowledge Layer Boot',
 		'description' => 'AI entry point — call this first when connecting to a site. Returns boot sequence, session history, site identity, ESSENCE, active observations, available agents, and courses. Determines if this is a first visit (bootstrap) or returning visit.',
 		'callback'    => function() {
+			// Mark this session as booted so the MCP Adapter boot gate allows subsequent calls.
+			set_transient( 'kl_session_booted_' . get_current_user_id(), true, HOUR_IN_SECONDS );
+
 			$session_count = Session::count();
 			$is_first      = $session_count === 0;
 
 			$response = array(
-				'is_first_visit'      => $is_first,
-				'session_count'       => $session_count,
-				'boot_sequence'       => null,
-				'last_session'        => null,
-				'site_identity'       => null,
-				'essence'             => null,
-				'active_observations' => Observation::count_open(),
-				'available_agents'    => array(),
-				'available_courses'   => array(),
+				'behavioral_directive' => array(
+					'mode'              => 'inquiry',
+					'allowed'           => array( 'read' ),
+					'restricted'        => array( 'write', 'delete', 'update' ),
+					'restriction_lifts' => 'when the user gives a directive',
+					'first_output'      => 'Present findings to the user and wait for their choice.',
+				),
+				'is_first_visit'       => $is_first,
+				'session_count'        => $session_count,
+				'boot_sequence'        => null,
+				'last_session'         => null,
+				'site_identity'        => null,
+				'essence'              => null,
+				'active_observations'  => Observation::count_open(),
+				'available_agents'     => array(),
+				'available_courses'    => array(),
 			);
 
 			// Boot document.
@@ -388,7 +398,7 @@ add_action( 'wp_abilities_api_init', function() {
 						'started_at' => $latest->started_at,
 						'ended_at'   => $latest->ended_at,
 						'summary'    => $latest->summary,
-						'whats_next' => $latest->whats_next,
+						'pending_user_decisions' => $latest->whats_next,
 					);
 				}
 			}
@@ -441,32 +451,50 @@ add_action( 'wp_abilities_api_init', function() {
 			// Next action — tells the AI exactly what to do next.
 			if ( $is_first ) {
 				$response['next_action'] = array(
-					'ability'     => 'knowledge/get',
-					'input'       => array( 'doc_type' => 'skill', 'slug' => 'initial-read' ),
-					'instruction' => 'Read this protocol fully before doing anything else. It defines how to behave on first contact. Follow it step by step.',
+					'ability'  => 'knowledge/get',
+					'input'    => array( 'doc_type' => 'skill', 'slug' => 'initial-read' ),
+					'sequence' => array(
+						'Read the initial-read protocol.',
+						'Follow it step by step.',
+						'Present findings to the user and wait for their choice before proceeding.',
+					),
 				);
 			} else {
 				// Returning visit — check for site state first, then fall back.
 				$site_state = Document::find_by_slug( 'site-state', 'current' );
 				if ( $site_state ) {
 					$response['next_action'] = array(
-						'ability'     => 'knowledge/get',
-						'input'       => array( 'doc_type' => 'site-state', 'slug' => 'current' ),
-						'instruction' => 'Read the site state to understand where the last session left off. Present what happened last time and suggest next steps.',
+						'ability'  => 'knowledge/get',
+						'input'    => array( 'doc_type' => 'site-state', 'slug' => 'current' ),
+						'sequence' => array(
+							'Read the site state.',
+							'Present a summary of the last session to the user.',
+							'Offer choices: 1. Continue where we left off. 2. Health Check. 3. Pick a direction.',
+							'Wait for the user to choose before calling any further abilities.',
+						),
 					);
 				} elseif ( $identity ) {
 					// No site-state yet, but site-identity exists — previous session did work.
 					$response['next_action'] = array(
-						'ability'     => 'knowledge/get',
-						'input'       => array( 'doc_type' => 'site-identity', 'slug' => $identity->slug ),
-						'instruction' => 'A previous session built this site identity. Read it to understand what is already known about this site, then present a summary and ask what the human wants to do next.',
+						'ability'  => 'knowledge/get',
+						'input'    => array( 'doc_type' => 'site-identity', 'slug' => $identity->slug ),
+						'sequence' => array(
+							'Read the site identity.',
+							'Present a summary of what is known about this site.',
+							'Ask the user what they want to do.',
+							'Wait for the user to choose before calling any further abilities.',
+						),
 					);
 				} else {
 					// Returning but nothing persisted — restart onboarding.
 					$response['next_action'] = array(
-						'ability'     => 'knowledge/get',
-						'input'       => array( 'doc_type' => 'skill', 'slug' => 'initial-read' ),
-						'instruction' => 'Previous sessions left no knowledge documents. Start the Introduction Course from the beginning.',
+						'ability'  => 'knowledge/get',
+						'input'    => array( 'doc_type' => 'skill', 'slug' => 'initial-read' ),
+						'sequence' => array(
+							'Read the initial-read protocol.',
+							'Follow it step by step.',
+							'Present findings to the user and wait for their choice before proceeding.',
+						),
 					);
 				}
 			}

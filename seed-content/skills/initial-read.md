@@ -76,7 +76,8 @@ Offer a recommended starting point:
 ```
 
 **The Pacing Rule:** Never chain ability calls without the human choosing
-the next step. Every diagnostic is:
+the next step. Never call any write, delete, or update ability until the human
+gives you a directive. Every diagnostic is:
 
 ```
 run ability → present findings → PAUSE → offer choices → human picks → repeat
