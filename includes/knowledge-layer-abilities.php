@@ -435,6 +435,25 @@ add_action( 'wp_abilities_api_init', function() {
 				);
 			}
 
+			// Next action — tells the AI exactly what to do next.
+			if ( $is_first ) {
+				$response['next_action'] = array(
+					'ability'     => 'knowledge/get',
+					'input'       => array( 'doc_type' => 'skill', 'slug' => 'initial-read' ),
+					'instruction' => 'Read this protocol fully before doing anything else. It defines how to behave on first contact. Follow it step by step.',
+				);
+			} else {
+				// Returning visit — check for site state.
+				$site_state = Document::find_by_slug( 'site-state', 'current' );
+				if ( $site_state ) {
+					$response['next_action'] = array(
+						'ability'     => 'knowledge/get',
+						'input'       => array( 'doc_type' => 'site-state', 'slug' => 'current' ),
+						'instruction' => 'Read the site state to understand where the last session left off. Present what happened last time and suggest next steps.',
+					);
+				}
+			}
+
 			return $response;
 		},
 	) );
