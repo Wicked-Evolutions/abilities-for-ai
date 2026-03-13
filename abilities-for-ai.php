@@ -84,8 +84,11 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/filesystem-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/revision-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/multisite-abilities.php';
 
-// Knowledge layer — auto-loads .md docs from knowledge/ as read-only abilities.
+// Knowledge layer — auto-loads .md docs from knowledge/ as read-only abilities (v0.0.1 fallback).
 require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-abilities.php';
+
+// Knowledge Layer v0.0.2 — CRUD abilities backed by kl_* database tables.
+require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-layer-abilities.php';
 
 // Load plugin updater — checks FluentCart for new versions.
 require_once ABILITIES_FOR_AI_PATH . 'includes/updater/class-plugin-updater.php';
@@ -111,13 +114,16 @@ register_activation_hook( __FILE__, function( $network_wide = false ) {
     if ( is_multisite() && $network_wide ) {
         update_site_option( 'abilities_for_ai_version', ABILITIES_FOR_AI_VERSION );
 
-        // Iterate all sites to set per-site permissions.
+        // Iterate all sites to set per-site permissions + Knowledge Layer tables.
         $site_ids = get_sites( array( 'fields' => 'ids', 'number' => 0 ) );
         foreach ( $site_ids as $site_id ) {
             switch_to_blog( $site_id );
             if ( false === get_option( 'abilities_for_ai_permissions' ) ) {
                 update_option( 'abilities_for_ai_permissions', abilities_for_ai_permission_defaults() );
             }
+            // Knowledge Layer: create tables + seed per site.
+            \WickedEvolutions\AbilitiesForAI\Knowledge\Schema::up();
+            \WickedEvolutions\AbilitiesForAI\Knowledge\Seeder::seed();
             restore_current_blog();
         }
     } else {
@@ -127,6 +133,10 @@ register_activation_hook( __FILE__, function( $network_wide = false ) {
         if ( false === get_option( 'abilities_for_ai_permissions' ) ) {
             update_option( 'abilities_for_ai_permissions', abilities_for_ai_permission_defaults() );
         }
+
+        // Knowledge Layer: create tables + seed.
+        \WickedEvolutions\AbilitiesForAI\Knowledge\Schema::up();
+        \WickedEvolutions\AbilitiesForAI\Knowledge\Seeder::seed();
     }
 
     // Flush cache
@@ -141,6 +151,11 @@ register_deactivation_hook( __FILE__, function() {
     error_log( 'Abilities for AI: Deactivated' );
 });
 
+// Knowledge Layer: check for schema migrations on plugin update (no reactivation needed).
+add_action( 'plugins_loaded', function() {
+    \WickedEvolutions\AbilitiesForAI\Knowledge\Schema::maybe_migrate();
+}, 5 );
+
 // New multisite subsite: set default permissions automatically.
 add_action( 'wp_initialize_site', function( $new_site ) {
     $site_id = $new_site->blog_id;
@@ -148,5 +163,8 @@ add_action( 'wp_initialize_site', function( $new_site ) {
     if ( false === get_option( 'abilities_for_ai_permissions' ) ) {
         update_option( 'abilities_for_ai_permissions', abilities_for_ai_permission_defaults() );
     }
+    // Knowledge Layer: create tables + seed for new subsite.
+    \WickedEvolutions\AbilitiesForAI\Knowledge\Schema::up();
+    \WickedEvolutions\AbilitiesForAI\Knowledge\Seeder::seed();
     restore_current_blog();
 }, 200 ); // Priority 200: run after WordPress core finishes site setup.

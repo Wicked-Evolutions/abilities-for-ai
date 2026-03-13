@@ -29,9 +29,21 @@ add_action( 'wp_abilities_api_categories_init', function() {
 
 /**
  * Register knowledge abilities from .md files.
+ *
+ * v0.0.2+: If Knowledge Layer database tables exist, the CRUD abilities in
+ * knowledge-layer-abilities.php handle everything. This filesystem loader
+ * only runs as a fallback for sites that haven't upgraded yet.
  */
 add_action( 'wp_abilities_api_init', function() {
 
+	// v0.0.2+: database tables exist — CRUD abilities handle knowledge docs.
+	if ( class_exists( '\WickedEvolutions\AbilitiesForAI\Knowledge\Schema' )
+		&& \WickedEvolutions\AbilitiesForAI\Knowledge\Schema::tables_exist()
+	) {
+		return;
+	}
+
+	// Fallback: load from filesystem (v0.0.1 behavior).
 	$knowledge_dir = ABILITIES_FOR_AI_PATH . 'knowledge/';
 
 	if ( ! is_dir( $knowledge_dir ) ) {
@@ -109,6 +121,6 @@ add_action( 'wp_abilities_api_init', function() {
 	// Log registration count.
 	$count = count( $files );
 	if ( $count > 0 ) {
-		error_log( sprintf( 'Abilities for AI: Registered %d knowledge abilities', $count ) );
+		error_log( sprintf( 'Abilities for AI: Registered %d knowledge abilities (filesystem fallback)', $count ) );
 	}
 } );

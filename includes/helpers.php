@@ -212,6 +212,7 @@ function abilities_for_ai_permission_defaults() {
 		'filesystem' => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'revisions'  => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'multisite'  => array( 'read' => true, 'write' => true ),
+		'knowledge'  => array( 'read' => true, 'write' => true, 'delete' => false ),
 	);
 }
 
@@ -242,6 +243,7 @@ function abilities_for_ai_module_labels() {
 		'filesystem' => 'Filesystem',
 		'revisions'  => 'Revisions',
 		'multisite'  => 'Multisite',
+		'knowledge'  => 'Knowledge Layer',
 	);
 }
 
