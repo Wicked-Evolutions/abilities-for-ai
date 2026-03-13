@@ -24,29 +24,15 @@ If the site is a multisite network, the human should have already chosen which s
 
 ### Step 2 — Content Counts + Taxonomy Map (parallel)
 **Abilities:**
-- `content/list` per type with `per_page: 1` — gets total count from response metadata
+- `content/list-structure` per type — returns metadata only (title, ID, slug, parent, status, dates) without the heavy content field. Default 100 items per page.
 - `taxonomies/discover` — all registered taxonomies
-
-**PAYLOAD WARNING:**
-`content/list` returns **full post content** (Gutenberg block markup).
-Even `per_page: 1` for pages returned 200KB+ in testing.
-For 11 pages at `per_page: 100` → 566KB. Unusable for mapping.
-
-**Workaround (until diagnostic-weight abilities exist):**
-- Use `per_page: 1` to get counts from response `total` field
-- NEVER request `per_page: 100` for pages — content payload explodes
-- For page structure mapping, use `per_page: 5` and extract only title/ID/parent/slug via post-processing
-
-**Needed (not yet built):**
-- `content/list-structure` — metadata only, no content field
-- `content/get-site-map` — hierarchical tree, one call
 
 **Present:** Content type table with counts. Taxonomy table with term counts. ASCII diagram of site shape.
 
 **Pause.** Human chooses: explore page structure, explore taxonomy terms, or continue.
 
 ### Step 3 — Page Structure (if pages are primary content)
-**Ability:** `content/list` with `per_page: 5`, paginated, post-processed for structure
+**Ability:** `content/get-site-map` — returns the full hierarchical page tree in a single call with parent/child relationships resolved into a nested structure.
 **What it reveals:** Page hierarchy (parent/child), navigation shape, core vs utility pages
 
 **Present:** ASCII tree diagram of page hierarchy. Categorize into: Core, Offerings, System/Utility.

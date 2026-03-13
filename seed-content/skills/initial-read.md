@@ -124,26 +124,13 @@ SKIP: Checkout, Dashboard, Cookie Policy, system pages
 
 **Size safety for any site:**
 - AI proposes which 3-5 pages to read based on titles
-- Human confirms before any `content/get` calls
+- Human confirms before any reading calls
 - Large sites: AI picks the most story-relevant pages, never bulk-reads
 - Each page read independently — if one is too large, skip to next
 
-**PAYLOAD WARNING:**
-`content/get` returns full Gutenberg block markup. A page with 2KB of readable
-text produces 50-200KB of JSON (block attributes, responsive settings, styling).
-
-**Workaround (until `content/get-text` ability exists):**
-AI must post-process with text extraction (strip block comments + HTML tags)
-to get readable content. This works but breaks conversational flow.
-
-**Needed (not yet built):**
-```
-content/get-text
-  Input:  id (post ID)
-  Output: {id, title, text_content, excerpt, word_count}
-  Weight: ~2-20KB (actual text only)
-  Use:    Story Read, ESSENCE synthesis, content analysis
-```
+**Use `content/get-text`** (not `content/get`) for Story Read. It strips block markup
+and HTML, returning only readable text (~2-20KB vs 50-200KB from `content/get`).
+The response includes `word_count` so you can gauge page size before presenting.
 
 ### Step 6 — ESSENCE Synthesis
 After diagnostics + Story Read, the AI synthesizes what it's learned into ESSENCE.
