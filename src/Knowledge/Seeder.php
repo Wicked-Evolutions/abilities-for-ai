@@ -383,9 +383,18 @@ class Seeder {
 				continue;
 			}
 
-			Document::update( $seed->id, array(
-				'content' => $file_content,
-			) );
+			// Direct DB update — bypasses Document::update() lock check.
+			// This is intentional: plugin seeds are system-managed content.
+			$wpdb->update(
+				$table,
+				array(
+					'content'    => $file_content,
+					'updated_at' => current_time( 'mysql', true ),
+				),
+				array( 'id' => $seed->id ),
+				array( '%s', '%s' ),
+				array( '%d' )
+			);
 		}
 	}
 
