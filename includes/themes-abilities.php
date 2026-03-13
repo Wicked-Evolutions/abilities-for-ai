@@ -174,6 +174,106 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	));
 
+	$reg->read( 'themes/design-snapshot', array(
+		'label'       => 'Design Snapshot',
+		'description' => 'Single-call design overview: active theme info, theme.json settings (colors, typography, spacing, layout), custom CSS, template list, and global styles. Everything an AI needs to understand the site\'s visual identity without multiple tool calls.',
+		'capability'  => 'edit_theme_options',
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'theme'      => array( 'type' => 'object' ),
+			'colors'     => array( 'type' => 'object' ),
+			'typography' => array( 'type' => 'object' ),
+			'spacing'    => array( 'type' => 'object' ),
+			'layout'     => array( 'type' => 'object' ),
+			'custom_css' => array( 'type' => 'string' ),
+			'templates'  => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => function() {
+			$theme_obj = wp_get_theme();
+
+			// Active theme summary.
+			$theme = array(
+				'name'        => $theme_obj->get( 'Name' ),
+				'slug'        => $theme_obj->get_stylesheet(),
+				'version'     => $theme_obj->get( 'Version' ),
+				'parent'      => $theme_obj->parent() ? $theme_obj->parent()->get( 'Name' ) : null,
+				'block_theme' => $theme_obj->is_block_theme(),
+			);
+
+			// Theme.json data (merged).
+			$colors     = array();
+			$typography = array();
+			$spacing    = array();
+			$layout     = array();
+
+			if ( class_exists( 'WP_Theme_JSON_Resolver' ) ) {
+				$merged = WP_Theme_JSON_Resolver::get_merged_data();
+				$data   = $merged->get_raw_data();
+
+				$settings = $data['settings'] ?? array();
+				$styles   = $data['styles'] ?? array();
+
+				// Colors: palette + any style-level color settings.
+				$colors = array(
+					'palette' => $settings['color']['palette'] ?? array(),
+					'gradients' => $settings['color']['gradients'] ?? array(),
+					'background' => $styles['color']['background'] ?? null,
+					'text'       => $styles['color']['text'] ?? null,
+				);
+
+				// Typography: font families, sizes, and style defaults.
+				$typography = array(
+					'fontFamilies' => $settings['typography']['fontFamilies'] ?? array(),
+					'fontSizes'    => $settings['typography']['fontSizes'] ?? array(),
+					'lineHeight'   => $styles['typography']['lineHeight'] ?? null,
+					'fontFamily'   => $styles['typography']['fontFamily'] ?? null,
+					'fontSize'     => $styles['typography']['fontSize'] ?? null,
+				);
+
+				// Spacing.
+				$spacing = array(
+					'spacingSizes' => $settings['spacing']['spacingSizes'] ?? array(),
+					'units'        => $settings['spacing']['units'] ?? array(),
+					'padding'      => $styles['spacing']['padding'] ?? null,
+					'margin'       => $styles['spacing']['margin'] ?? null,
+					'blockGap'     => $styles['spacing']['blockGap'] ?? null,
+				);
+
+				// Layout.
+				$layout = array(
+					'contentSize' => $settings['layout']['contentSize'] ?? null,
+					'wideSize'    => $settings['layout']['wideSize'] ?? null,
+				);
+			}
+
+			// Custom CSS (Customizer additional CSS).
+			$custom_css = wp_get_custom_css();
+
+			// Templates (block themes).
+			$templates = array();
+			if ( $theme_obj->is_block_theme() ) {
+				$block_templates = get_block_templates( array(), 'wp_template' );
+				foreach ( $block_templates as $tmpl ) {
+					$templates[] = array(
+						'slug'   => $tmpl->slug,
+						'title'  => $tmpl->title,
+						'source' => $tmpl->source,
+						'type'   => $tmpl->type,
+					);
+				}
+			}
+
+			return array(
+				'theme'      => $theme,
+				'colors'     => $colors,
+				'typography' => $typography,
+				'spacing'    => $spacing,
+				'layout'     => $layout,
+				'custom_css' => $custom_css,
+				'templates'  => $templates,
+			);
+		},
+	));
+
 	// ===== THEMES — WRITE =====
 
 	$reg->write( 'themes/activate', array(

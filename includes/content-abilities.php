@@ -1073,6 +1073,118 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	// ===== CONTENT — BATCH =====
+
+	$reg->write( 'content/batch-update', array(
+		'label'       => 'Batch Update Content',
+		'description' => 'Update multiple posts in a single call. Each operation specifies a post ID and the fields to update. Supports title, content, status, excerpt, and author. Returns per-item results with success/error.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'operations' ),
+			'properties' => array(
+				'operations' => array(
+					'type'        => 'array',
+					'description' => 'Array of update operations',
+					'items'       => array(
+						'type'       => 'object',
+						'required'   => array( 'id' ),
+						'properties' => array(
+							'id'      => array( 'type' => 'integer', 'description' => 'Post ID' ),
+							'title'   => array( 'type' => 'string', 'description' => 'Post title' ),
+							'content' => array( 'type' => 'string', 'description' => 'Post content' ),
+							'status'  => array( 'type' => 'string', 'description' => 'Post status' ),
+							'excerpt' => array( 'type' => 'string', 'description' => 'Post excerpt' ),
+							'author'  => array( 'type' => 'integer', 'description' => 'Author user ID' ),
+						),
+					),
+					'maxItems' => 50,
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'processed' => array( 'type' => 'integer' ),
+			'failed'    => array( 'type' => 'integer' ),
+			'results'   => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => function( $input ) {
+			$results   = array();
+			$processed = 0;
+			$failed    = 0;
+
+			foreach ( $input['operations'] as $op ) {
+				$post_id = $op['id'];
+
+				$check = abilities_for_ai_require_editable_post( $post_id );
+				if ( is_wp_error( $check ) ) {
+					++$failed;
+					$results[] = array(
+						'id'      => $post_id,
+						'success' => false,
+						'error'   => $check->get_error_message(),
+					);
+					continue;
+				}
+
+				$post          = $check;
+				$post_type_obj = get_post_type_object( $post->post_type );
+
+				if ( isset( $op['status'] ) && in_array( $op['status'], array( 'publish', 'future' ), true ) ) {
+					if ( $post->post_status !== $op['status'] && ! current_user_can( $post_type_obj->cap->publish_posts ) ) {
+						++$failed;
+						$results[] = array(
+							'id'      => $post_id,
+							'success' => false,
+							'error'   => 'You do not have permission to publish this post type.',
+						);
+						continue;
+					}
+				}
+
+				$post_data = array( 'ID' => $post_id );
+				if ( isset( $op['title'] ) )   $post_data['post_title']   = $op['title'];
+				if ( isset( $op['content'] ) ) $post_data['post_content'] = $op['content'];
+				if ( isset( $op['status'] ) )  $post_data['post_status']  = $op['status'];
+				if ( isset( $op['excerpt'] ) ) $post_data['post_excerpt'] = $op['excerpt'];
+				if ( isset( $op['author'] ) ) {
+					$author_id = (int) $op['author'];
+					if ( ! get_userdata( $author_id ) ) {
+						++$failed;
+						$results[] = array(
+							'id'      => $post_id,
+							'success' => false,
+							'error'   => "User ID {$author_id} does not exist.",
+						);
+						continue;
+					}
+					$post_data['post_author'] = $author_id;
+				}
+
+				$result = wp_update_post( $post_data );
+				if ( is_wp_error( $result ) ) {
+					++$failed;
+					$results[] = array(
+						'id'      => $post_id,
+						'success' => false,
+						'error'   => $result->get_error_message(),
+					);
+				} else {
+					++$processed;
+					$results[] = array(
+						'id'      => $post_id,
+						'success' => true,
+					);
+				}
+			}
+
+			return array(
+				'success'   => $failed === 0,
+				'processed' => $processed,
+				'failed'    => $failed,
+				'results'   => $results,
+			);
+		},
+	) );
+
 	// ===== CONTENT — DELETE =====
 
 	// content/delete is free — round-trip: create → test → delete the test.

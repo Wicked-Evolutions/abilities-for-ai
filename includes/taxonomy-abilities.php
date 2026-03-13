@@ -445,6 +445,111 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	// ===== TAXONOMIES — BATCH =====
+
+	$reg->write( 'taxonomies/batch-assign', array(
+		'tier'        => 'free',
+		'capability'  => 'edit_posts',
+		'label'       => 'Batch Assign Terms',
+		'description' => 'Assign one or more terms to multiple posts in a single call. Supports append or replace mode per post.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'taxonomy', 'operations' ),
+			'properties' => array(
+				'taxonomy' => array(
+					'type'        => 'string',
+					'description' => 'Taxonomy name (e.g. category, post_tag)',
+				),
+				'operations' => array(
+					'type'        => 'array',
+					'description' => 'Array of assignment operations',
+					'items'       => array(
+						'type'       => 'object',
+						'required'   => array( 'post_id', 'terms' ),
+						'properties' => array(
+							'post_id' => array( 'type' => 'integer', 'description' => 'Post ID' ),
+							'terms'   => array(
+								'type'  => 'array',
+								'items' => array(
+									'oneOf' => array(
+										array( 'type' => 'integer' ),
+										array( 'type' => 'string' ),
+									),
+								),
+								'description' => 'Term IDs or names to assign',
+							),
+							'append' => array(
+								'type'    => 'boolean',
+								'default' => false,
+								'description' => 'Append terms instead of replacing',
+							),
+						),
+					),
+					'maxItems' => 50,
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'processed' => array( 'type' => 'integer' ),
+			'failed'    => array( 'type' => 'integer' ),
+			'results'   => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
+		'callback' => function( $input ) {
+			$taxonomy = $input['taxonomy'];
+			$tax_obj  = get_taxonomy( $taxonomy );
+			if ( ! $tax_obj ) {
+				return new WP_Error( 'ability_invalid_input', 'Invalid taxonomy.' );
+			}
+			if ( ! current_user_can( $tax_obj->cap->assign_terms ) ) {
+				return new WP_Error( 'rest_forbidden', "You do not have permission to assign terms in \"{$taxonomy}\"." );
+			}
+
+			$results   = array();
+			$processed = 0;
+			$failed    = 0;
+
+			foreach ( $input['operations'] as $op ) {
+				$post_id = $op['post_id'];
+
+				$check = abilities_for_ai_require_editable_post( $post_id );
+				if ( is_wp_error( $check ) ) {
+					++$failed;
+					$results[] = array(
+						'post_id' => $post_id,
+						'success' => false,
+						'error'   => $check->get_error_message(),
+					);
+					continue;
+				}
+
+				$result = wp_set_object_terms( $post_id, $op['terms'], $taxonomy, $op['append'] ?? false );
+				if ( is_wp_error( $result ) ) {
+					++$failed;
+					$results[] = array(
+						'post_id' => $post_id,
+						'success' => false,
+						'error'   => $result->get_error_message(),
+					);
+				} else {
+					++$processed;
+					$results[] = array(
+						'post_id'           => $post_id,
+						'success'           => true,
+						'term_taxonomy_ids' => $result,
+					);
+				}
+			}
+
+			return array(
+				'success'   => $failed === 0,
+				'processed' => $processed,
+				'failed'    => $failed,
+				'results'   => $results,
+			);
+		},
+	) );
+
 	// ===== TAXONOMIES — DELETE =====
 
 	// taxonomies/delete-term is free — round-trip: create → test → delete the test.

@@ -147,6 +147,106 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	));
 
+	$reg->read( 'site-health/pulse', array(
+		'label'       => 'Site Pulse',
+		'description' => 'Single-call site health overview: WordPress version, PHP version, active theme, plugin count, content counts by type, site health status, disk usage estimate, and recent activity. Ideal for quick orientation without multiple tool calls.',
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'wordpress'     => array( 'type' => 'object' ),
+			'theme'         => array( 'type' => 'object' ),
+			'plugins'       => array( 'type' => 'object' ),
+			'content'       => array( 'type' => 'object' ),
+			'health'        => array( 'type' => 'object' ),
+			'recent'        => array( 'type' => 'object' ),
+		) ),
+		'callback' => function() {
+			// WordPress + PHP.
+			$wp = array(
+				'version'   => get_bloginfo( 'version' ),
+				'php'       => PHP_VERSION,
+				'multisite' => is_multisite(),
+				'site_url'  => get_site_url(),
+				'home_url'  => get_home_url(),
+				'language'  => get_locale(),
+				'timezone'  => wp_timezone_string(),
+				'memory_limit' => WP_MEMORY_LIMIT,
+			);
+
+			// Active theme.
+			$theme_obj = wp_get_theme();
+			$theme = array(
+				'name'        => $theme_obj->get( 'Name' ),
+				'version'     => $theme_obj->get( 'Version' ),
+				'parent'      => $theme_obj->parent() ? $theme_obj->parent()->get( 'Name' ) : null,
+				'block_theme' => $theme_obj->is_block_theme(),
+			);
+
+			// Plugins.
+			if ( ! function_exists( 'get_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+			$all_plugins    = get_plugins();
+			$active_plugins = get_option( 'active_plugins', array() );
+			$plugins = array(
+				'total'  => count( $all_plugins ),
+				'active' => count( $active_plugins ),
+			);
+
+			// Content counts by post type.
+			$public_types = get_post_types( array( 'public' => true ), 'names' );
+			$content = array();
+			foreach ( $public_types as $type ) {
+				$counts = wp_count_posts( $type );
+				$content[ $type ] = array(
+					'publish' => (int) ( $counts->publish ?? 0 ),
+					'draft'   => (int) ( $counts->draft ?? 0 ),
+					'total'   => (int) ( $counts->publish ?? 0 ) + (int) ( $counts->draft ?? 0 ) + (int) ( $counts->pending ?? 0 ) + (int) ( $counts->private ?? 0 ),
+				);
+			}
+
+			// Health status (cached from site health).
+			$health  = array( 'good' => 0, 'recommended' => 0, 'critical' => 0 );
+			$cached  = get_transient( 'health-check-site-status-result' );
+			if ( $cached ) {
+				$parsed = json_decode( $cached, true );
+				if ( is_array( $parsed ) ) {
+					$health = array(
+						'good'        => intval( $parsed['good'] ?? 0 ),
+						'recommended' => intval( $parsed['recommended'] ?? 0 ),
+						'critical'    => intval( $parsed['critical'] ?? 0 ),
+					);
+				}
+			}
+
+			// Recent activity.
+			$recent_posts = get_posts( array(
+				'post_type'      => 'any',
+				'post_status'    => array( 'publish', 'draft' ),
+				'posts_per_page' => 5,
+				'orderby'        => 'modified',
+				'order'          => 'DESC',
+			) );
+			$recent = array();
+			foreach ( $recent_posts as $rp ) {
+				$recent[] = array(
+					'id'       => $rp->ID,
+					'title'    => $rp->post_title,
+					'type'     => $rp->post_type,
+					'status'   => $rp->post_status,
+					'modified' => $rp->post_modified,
+				);
+			}
+
+			return array(
+				'wordpress' => $wp,
+				'theme'     => $theme,
+				'plugins'   => $plugins,
+				'content'   => $content,
+				'health'    => $health,
+				'recent'    => $recent,
+			);
+		},
+	));
+
 	$reg->read( 'site-health/info', array(
 		'label'       => 'Site Health Info',
 		'description' => 'Get comprehensive debug information (PHP, DB, server, WordPress versions, active plugins, theme).',
