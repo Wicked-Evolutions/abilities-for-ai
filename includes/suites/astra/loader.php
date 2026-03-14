@@ -43,5 +43,8 @@ add_action( 'wp_abilities_api_init', function() {
 	require_once __DIR__ . '/custom-layout-abilities.php';
 	require_once __DIR__ . '/pro-abilities.php';
 	require_once __DIR__ . '/global-styles-abilities.php';
+	require_once __DIR__ . '/blog-archive-abilities.php';
+	require_once __DIR__ . '/breadcrumb-scroll-perf-abilities.php';
+	require_once __DIR__ . '/page-header-abilities.php';
 
 }, 5 ); // Priority 5: run before default (10) so other hooks can see our abilities.
