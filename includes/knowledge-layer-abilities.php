@@ -353,7 +353,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'label'       => 'Knowledge Layer Boot',
 		'description' => 'AI entry point — call this first when connecting to a site. Returns boot sequence, session history, site identity, ESSENCE, active observations, available agents, and courses. Determines if this is a first visit (bootstrap) or returning visit.',
 		'callback'    => function() {
-			// Mark this session as booted so the MCP Adapter boot gate allows subsequent calls.
+			// Mark this session as booted (used for session tracking).
 			set_transient( 'kl_session_booted_' . get_current_user_id(), true, HOUR_IN_SECONDS );
 
 			$session_count = Session::count();
@@ -498,6 +498,28 @@ add_action( 'wp_abilities_api_init', function() {
 					);
 				}
 			}
+
+			// Self-check directive — machine-readable, replaces the removed hard boot gate.
+			$current_user = wp_get_current_user();
+			$roles        = $current_user->roles;
+
+			$response['first_output_to_human'] = array(
+				'include'  => 'boot_status_check',
+				'template' => array(
+					'status'           => 'booted',
+					'message_to_human' => sprintf(
+						'Connected to %s as %s (%s). Session %d.',
+						$response['site_identity']['title'] ?? get_bloginfo( 'name' ),
+						$current_user->display_name,
+						! empty( $roles ) ? reset( $roles ) : 'none',
+						$session_count + 1
+					),
+					'options'          => array(
+						1 => 'I did not complete the boot sequence — let me re-run it now.',
+						2 => 'Boot complete. Here is what I found.',
+					),
+				),
+			);
 
 			return $response;
 		},

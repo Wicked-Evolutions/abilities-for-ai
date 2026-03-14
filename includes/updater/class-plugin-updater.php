@@ -67,6 +67,7 @@ class Abilities_For_AI_Plugin_Updater {
 	private function init_hooks() {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_plugin_update' ) );
 		add_filter( 'plugins_api', array( $this, 'plugins_api_filter' ), 10, 3 );
+		add_filter( 'upgrader_pre_download', array( $this, 'pre_download' ), 10, 3 );
 
 		if ( $this->config['show_check_update'] ) {
 			$get_param = 'wevo_check_update_' . $this->config['slug'];
@@ -182,6 +183,41 @@ class Abilities_For_AI_Plugin_Updater {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Pre-download the package before WordPress enables maintenance mode.
+	 *
+	 * When the update server is hosted on the same WordPress installation,
+	 * maintenance mode returns HTTP 503 to the download request. This hook
+	 * fires before maintenance mode, so the download succeeds.
+	 *
+	 * @param bool|WP_Error $reply   Whether to short-circuit. Default false.
+	 * @param string        $package The package URL.
+	 * @param WP_Upgrader   $upgrader The upgrader instance.
+	 * @return string|bool|WP_Error Local path to the downloaded file, or passthrough.
+	 */
+	public function pre_download( $reply, $package, $upgrader ) {
+		if ( false !== $reply ) {
+			return $reply;
+		}
+
+		if ( empty( $this->config['api_url'] ) || empty( $package ) ) {
+			return $reply;
+		}
+
+		// Only handle downloads from our own update server.
+		if ( strpos( $package, wp_parse_url( $this->config['api_url'], PHP_URL_HOST ) ) === false ) {
+			return $reply;
+		}
+
+		$tmpfile = download_url( $package, 300 );
+
+		if ( is_wp_error( $tmpfile ) ) {
+			return $tmpfile;
+		}
+
+		return $tmpfile;
 	}
 
 	/**
