@@ -5,8 +5,9 @@
  * Post-deployment validation and cache management.
  *
  * Abilities:
- *   - spectra/validate-page (read)
- *   - spectra/flush-caches  (write)
+ *   - spectra/validate-page   (read)
+ *   - spectra/flush-caches    (write)
+ *   - spectra/validate-markup (read) — P2
  *
  * @package Abilities_For_AI
  */
@@ -231,6 +232,143 @@ add_action( 'wp_abilities_api_init', function() {
 			return array(
 				'success' => true,
 				'actions' => $actions,
+			);
+		},
+	));
+
+	// ===== VALIDATE MARKUP =====
+
+	$reg->read( 'spectra/validate-markup', array(
+		'label'        => 'Validate Block Markup',
+		'description'  => 'Validate block markup before inserting it into a post. Checks for valid block structure, required Spectra attributes, and common errors that cause "Resolve Block" in the editor.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'markup' ),
+			'properties' => array(
+				'markup' => array(
+					'type'        => 'string',
+					'description' => 'The Gutenberg block markup to validate',
+				),
+			),
+		),
+		'output_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'valid'         => array( 'type' => 'boolean' ),
+				'block_count'   => array( 'type' => 'integer' ),
+				'error_count'   => array( 'type' => 'integer' ),
+				'warning_count' => array( 'type' => 'integer' ),
+				'issues'        => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+				'blocks'        => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+			),
+		),
+		'callback' => function( $input ) {
+			$parsed = parse_blocks( $input['markup'] );
+
+			$named = array_values( array_filter( $parsed, function( $b ) {
+				return ! empty( $b['blockName'] );
+			}));
+
+			if ( empty( $named ) ) {
+				return new WP_Error( 'no_blocks', 'No valid blocks found in the provided markup.' );
+			}
+
+			$issues   = array();
+			$flat     = spectra_abilities_flatten_blocks( $parsed );
+			$seen_ids = array();
+
+			foreach ( $flat as $block ) {
+				$name  = $block['blockName'];
+				$attrs = $block['attrs'] ?? array();
+				$is_uagb = ( strpos( $name, 'uagb/' ) === 0 );
+
+				// Check 1: Spectra blocks must have block_id.
+				if ( $is_uagb && empty( $attrs['block_id'] ) ) {
+					$issues[] = array(
+						'severity'   => 'error',
+						'check'      => 'missing_block_id',
+						'block_name' => $name,
+						'message'    => $name . ' is missing required block_id attribute. This will cause targeting issues.',
+						'suggestion' => 'Add a unique block_id string (e.g., "my-section-header").',
+					);
+				}
+
+				// Check 2: Duplicate block_ids.
+				if ( ! empty( $attrs['block_id'] ) ) {
+					$bid = $attrs['block_id'];
+					if ( isset( $seen_ids[ $bid ] ) ) {
+						$issues[] = array(
+							'severity'   => 'error',
+							'check'      => 'duplicate_block_id',
+							'block_id'   => $bid,
+							'block_name' => $name,
+							'message'    => 'Duplicate block_id "' . $bid . '" — also used by ' . $seen_ids[ $bid ],
+						);
+					} else {
+						$seen_ids[ $bid ] = $name;
+					}
+				}
+
+				// Check 3: Spectra blocks should have classMigrate.
+				if ( $is_uagb && ! isset( $attrs['classMigrate'] ) ) {
+					$issues[] = array(
+						'severity'   => 'warning',
+						'check'      => 'missing_classMigrate',
+						'block_name' => $name,
+						'block_id'   => $attrs['block_id'] ?? '(none)',
+						'message'    => $name . ' is missing classMigrate attribute',
+						'suggestion' => 'Add "classMigrate": true for modern CSS class format.',
+					);
+				}
+
+				// Check 4: Block name must be registered.
+				$registered = WP_Block_Type_Registry::get_instance()->get_registered( $name );
+				if ( null === $registered ) {
+					$issues[] = array(
+						'severity'   => 'warning',
+						'check'      => 'unregistered_block',
+						'block_name' => $name,
+						'message'    => 'Block type "' . $name . '" is not registered on this server. May cause "Resolve Block" in editor.',
+						'suggestion' => 'Verify the block name is correct and the plugin providing it is active.',
+					);
+				}
+
+				// Check 5: innerHTML consistency — comment delimiter should contain valid JSON attrs.
+				if ( $is_uagb && ! empty( $attrs ) ) {
+					// Check that the comment delimiter can round-trip.
+					$re_encoded = wp_json_encode( $attrs, JSON_UNESCAPED_SLASHES );
+					if ( false === $re_encoded ) {
+						$issues[] = array(
+							'severity'   => 'error',
+							'check'      => 'invalid_attrs_json',
+							'block_name' => $name,
+							'block_id'   => $attrs['block_id'] ?? '(none)',
+							'message'    => 'Block attributes cannot be serialized to valid JSON.',
+						);
+					}
+				}
+			}
+
+			$error_count   = count( array_filter( $issues, function( $i ) { return 'error' === $i['severity']; } ) );
+			$warning_count = count( array_filter( $issues, function( $i ) { return 'warning' === $i['severity']; } ) );
+
+			// Build a summary of what was parsed.
+			$block_summary = array();
+			foreach ( $named as $b ) {
+				$block_summary[] = array(
+					'name'     => $b['blockName'],
+					'block_id' => $b['attrs']['block_id'] ?? null,
+					'has_inner' => ! empty( $b['innerBlocks'] ),
+				);
+			}
+
+			return array(
+				'valid'         => 0 === $error_count,
+				'block_count'   => count( $flat ),
+				'error_count'   => $error_count,
+				'warning_count' => $warning_count,
+				'issues'        => $issues,
+				'blocks'        => $block_summary,
 			);
 		},
 	));

@@ -228,3 +228,110 @@ if ( ! function_exists( 'spectra_abilities_rebuild_inner_content' ) ) {
 		return $inner_content;
 	}
 }
+
+if ( ! function_exists( 'spectra_abilities_update_block_attrs' ) ) {
+	/**
+	 * Find a block by block_id and merge new attributes into it.
+	 *
+	 * @param array  $blocks    Parsed blocks.
+	 * @param string $block_id  The block_id to find.
+	 * @param array  $new_attrs Attributes to merge (existing keys overwritten, new keys added).
+	 * @return array { 'blocks' => array, 'found' => bool, 'old_attrs' => array|null }
+	 */
+	function spectra_abilities_update_block_attrs( $blocks, $block_id, $new_attrs ) {
+		foreach ( $blocks as $index => $block ) {
+			if ( isset( $block['attrs']['block_id'] ) && $block['attrs']['block_id'] === $block_id ) {
+				$old_attrs = $block['attrs'];
+				$blocks[ $index ]['attrs'] = array_merge( $old_attrs, $new_attrs );
+
+				// Re-serialize innerHTML to reflect attribute changes in the comment delimiter.
+				$blocks[ $index ]['innerHTML'] = null;
+				$blocks[ $index ]['innerContent'] = spectra_abilities_rebuild_block_content( $blocks[ $index ] );
+
+				return array( 'blocks' => $blocks, 'found' => true, 'old_attrs' => $old_attrs );
+			}
+
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$inner_result = spectra_abilities_update_block_attrs( $block['innerBlocks'], $block_id, $new_attrs );
+				if ( $inner_result['found'] ) {
+					$blocks[ $index ]['innerBlocks'] = $inner_result['blocks'];
+					$blocks[ $index ]['innerContent'] = spectra_abilities_rebuild_inner_content( $blocks[ $index ] );
+					return array( 'blocks' => $blocks, 'found' => true, 'old_attrs' => $inner_result['old_attrs'] );
+				}
+			}
+		}
+
+		return array( 'blocks' => $blocks, 'found' => false, 'old_attrs' => null );
+	}
+}
+
+if ( ! function_exists( 'spectra_abilities_rebuild_block_content' ) ) {
+	/**
+	 * Rebuild a single block's innerContent after attribute changes.
+	 * For blocks with inner blocks, delegates to rebuild_inner_content.
+	 * For leaf blocks, preserves existing innerContent (attributes live in the comment delimiter,
+	 * which serialize_blocks() regenerates from the attrs array).
+	 *
+	 * @param array $block The block with updated attrs.
+	 * @return array The innerContent array.
+	 */
+	function spectra_abilities_rebuild_block_content( $block ) {
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			return spectra_abilities_rebuild_inner_content( $block );
+		}
+		return $block['innerContent'] ?? array();
+	}
+}
+
+if ( ! function_exists( 'spectra_abilities_extract_block' ) ) {
+	/**
+	 * Extract (remove) a block by block_id from the tree, returning both
+	 * the extracted block and the modified tree.
+	 *
+	 * @param array  $blocks   Parsed blocks.
+	 * @param string $block_id The block_id to extract.
+	 * @return array { 'blocks' => array, 'extracted' => array|null }
+	 */
+	function spectra_abilities_extract_block( $blocks, $block_id ) {
+		foreach ( $blocks as $index => $block ) {
+			if ( isset( $block['attrs']['block_id'] ) && $block['attrs']['block_id'] === $block_id ) {
+				$extracted = $block;
+				array_splice( $blocks, $index, 1 );
+				return array( 'blocks' => $blocks, 'extracted' => $extracted );
+			}
+
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$inner_result = spectra_abilities_extract_block( $block['innerBlocks'], $block_id );
+				if ( null !== $inner_result['extracted'] ) {
+					$blocks[ $index ]['innerBlocks'] = $inner_result['blocks'];
+					$blocks[ $index ]['innerContent'] = spectra_abilities_rebuild_inner_content( $blocks[ $index ] );
+					return array( 'blocks' => $blocks, 'extracted' => $inner_result['extracted'] );
+				}
+			}
+		}
+
+		return array( 'blocks' => $blocks, 'extracted' => null );
+	}
+}
+
+if ( ! function_exists( 'spectra_abilities_clone_block_ids' ) ) {
+	/**
+	 * Deep-clone a block, generating new unique block_ids for it and all inner blocks.
+	 *
+	 * @param array $block The block to clone.
+	 * @return array The cloned block with fresh block_ids.
+	 */
+	function spectra_abilities_clone_block_ids( $block ) {
+		if ( isset( $block['attrs']['block_id'] ) ) {
+			$block['attrs']['block_id'] = substr( md5( uniqid( '', true ) ), 0, 8 );
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			foreach ( $block['innerBlocks'] as $i => $inner ) {
+				$block['innerBlocks'][ $i ] = spectra_abilities_clone_block_ids( $inner );
+			}
+		}
+
+		return $block;
+	}
+}
