@@ -19,8 +19,15 @@ add_action( 'plugins_loaded', function() {
 
 	define( 'ABILITIES_FOR_AI_SUITE_SURECART_PATH', __DIR__ . '/' );
 
-	// Category 'surecart' is registered in ability-categories.php (must happen
-	// during wp_abilities_api_categories_init which fires before suite auto-loader).
+	// Register suite category. This add_action runs inside plugins_loaded (priority 99),
+	// which fires BEFORE init. The abilities category hook is lazy — fires on first
+	// registry access after init — so this callback will be registered in time.
+	add_action( 'wp_abilities_api_categories_init', function() {
+		wp_register_ability_category( 'surecart', array(
+			'label'       => __( 'SureCart', 'abilities-for-ai' ),
+			'description' => __( 'E-commerce abilities for SureCart — products, orders, customers, subscriptions, and store management. This is an independent integration and is not affiliated with or endorsed by SureCart Inc.', 'abilities-for-ai' ),
+		));
+	});
 
 	// Load helpers.
 	require_once __DIR__ . '/helpers.php';

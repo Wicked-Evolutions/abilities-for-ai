@@ -150,13 +150,7 @@ function abilities_for_ai_register_categories() {
         ));
     }
 
-    // SureCart — e-commerce.
-    if ( defined( 'SURECART_PLUGIN_FILE' ) ) {
-        wp_register_ability_category( 'surecart', array(
-            'label'       => __( 'SureCart', 'abilities-for-ai' ),
-            'description' => __( 'E-commerce abilities for SureCart — products, orders, customers, subscriptions, and store management. This is an independent integration and is not affiliated with or endorsed by SureCart Inc.', 'abilities-for-ai' ),
-        ));
-    }
+    // SureCart — registered in includes/suites/surecart/loader.php (self-contained suite).
 
     // Astra — theme configuration.
     if ( defined( 'ASTRA_THEME_VERSION' ) ) {
