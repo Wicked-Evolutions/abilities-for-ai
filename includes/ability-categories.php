@@ -129,5 +129,40 @@ function abilities_for_ai_register_categories() {
         'description' => __( 'WordPress multisite network site management and settings.', 'abilities-for-ai' ),
     ));
 
-    error_log( 'Abilities for AI: Registered 20 ability categories' );
+    // === THIRD-PARTY SUITE CATEGORIES ===
+    // Suite categories MUST be registered here (during wp_abilities_api_categories_init).
+    // WP core rejects wp_register_ability_category() calls outside this hook.
+    // Each category is gated by plugin/theme detection so it only registers when relevant.
+
+    // Presto Player — video and media player.
+    if ( class_exists( 'PrestoPlayer\Plugin' ) ) {
+        wp_register_ability_category( 'presto-player', array(
+            'label'       => __( 'Presto Player', 'abilities-for-ai' ),
+            'description' => __( 'Video and media player abilities for Presto Player — videos, presets, analytics, and player configuration. This is an independent integration and is not affiliated with or endorsed by Starter Starter LLC.', 'abilities-for-ai' ),
+        ));
+    }
+
+    // Spectra — block operations.
+    if ( class_exists( 'UAGB_Loader' ) ) {
+        wp_register_ability_category( 'spectra', array(
+            'label'       => __( 'Spectra', 'abilities-for-ai' ),
+            'description' => __( 'Block operation abilities for Spectra — parse, inspect, validate, insert, and manage Spectra blocks in page content. This is an independent integration and is not affiliated with or endorsed by Brainstorm Force.', 'abilities-for-ai' ),
+        ));
+    }
+
+    // SureCart — e-commerce.
+    if ( defined( 'SURECART_PLUGIN_FILE' ) ) {
+        wp_register_ability_category( 'surecart', array(
+            'label'       => __( 'SureCart', 'abilities-for-ai' ),
+            'description' => __( 'E-commerce abilities for SureCart — products, orders, customers, subscriptions, and store management. This is an independent integration and is not affiliated with or endorsed by SureCart Inc.', 'abilities-for-ai' ),
+        ));
+    }
+
+    // Astra — theme configuration.
+    if ( defined( 'ASTRA_THEME_VERSION' ) ) {
+        wp_register_ability_category( 'astra', array(
+            'label'       => __( 'Astra', 'abilities-for-ai' ),
+            'description' => __( 'Theme configuration abilities for Astra — design tokens, layouts, headers, footers, and Pro modules. This is an independent integration and is not affiliated with or endorsed by Brainstorm Force.', 'abilities-for-ai' ),
+        ));
+    }
 }

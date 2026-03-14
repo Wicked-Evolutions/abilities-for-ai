@@ -22,13 +22,11 @@ defined( 'ABSPATH' ) || exit;
 // define( 'ABILITIES_FOR_AI_SUITE_EXAMPLE_PATH', __DIR__ . '/' );
 
 // === CATEGORY REGISTRATION ===
-// Register suite-specific ability categories.
-// add_action( 'wp_abilities_api_categories_init', function() {
-//     wp_register_ability_category( 'example', array(
-//         'label'       => __( 'Example Suite', 'abilities-for-ai' ),
-//         'description' => __( 'Abilities for the Example plugin.', 'abilities-for-ai' ),
-//     ));
-// });
+// IMPORTANT: Suite categories MUST be registered in includes/ability-categories.php
+// (inside abilities_for_ai_register_categories()), NOT here. WP core only allows
+// wp_register_ability_category() during the wp_abilities_api_categories_init hook,
+// which fires BEFORE the suite auto-loader runs. Add your category there with
+// a detection guard (class_exists / defined check).
 
 // === MODULE LOADING ===
 // require_once __DIR__ . '/product-abilities.php';

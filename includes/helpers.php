@@ -213,6 +213,8 @@ function abilities_for_ai_permission_defaults() {
 		'revisions'  => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'multisite'  => array( 'read' => true, 'write' => true ),
 		'knowledge'  => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'astra'      => array( 'read' => true, 'write' => true, 'delete' => false ),
+		'surecart'   => array( 'read' => true, 'write' => true, 'delete' => false ),
 	);
 }
 
@@ -244,6 +246,8 @@ function abilities_for_ai_module_labels() {
 		'revisions'  => 'Revisions',
 		'multisite'  => 'Multisite',
 		'knowledge'  => 'Knowledge Layer',
+		'astra'      => 'Astra Theme',
+		'surecart'   => 'SureCart',
 	);
 }
 
