@@ -90,6 +90,14 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-abilities.php';
 // Knowledge Layer v0.0.2 — CRUD abilities backed by kl_* database tables.
 require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-layer-abilities.php';
 
+// Auto-load third-party plugin suites.
+// Each suite lives in includes/suites/{slug}/loader.php and handles
+// its own detection (class_exists / defined checks). If the parent
+// plugin is not active, the loader returns early — zero runtime cost.
+foreach ( glob( ABILITIES_FOR_AI_PATH . 'includes/suites/*/loader.php' ) as $suite_loader ) {
+	require_once $suite_loader;
+}
+
 // Load plugin updater — checks FluentCart for new versions.
 require_once ABILITIES_FOR_AI_PATH . 'includes/updater/class-plugin-updater.php';
 
