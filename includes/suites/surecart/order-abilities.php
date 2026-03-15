@@ -166,4 +166,63 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	));
 
+	// ===== GET ORDER STATS =====
+	$reg->read( 'surecart/get-order-stats', array(
+		'label'       => 'Get SureCart Order Statistics',
+		'description' => 'Returns aggregate order statistics (revenue, counts, etc.).',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'period' => array( 'type' => 'string', 'description' => 'Time period: today, week, month, year, all_time. Default: month.' ),
+			),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$args = array();
+				if ( ! empty( $input['period'] ) ) $args['period'] = $input['period'];
+
+				$result = \SureCart\Models\Order::stats( $args );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				return abilities_for_ai_surecart_format_model( $result );
+			}, 'get-order-stats' );
+		},
+	));
+
+	// ===== LIST ABANDONED CHECKOUTS =====
+	$reg->read( 'surecart/list-abandoned-checkouts', array(
+		'label'       => 'List SureCart Abandoned Checkouts',
+		'description' => 'Returns a paginated list of abandoned checkout sessions.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array_merge(
+				abilities_for_ai_surecart_pagination_schema(),
+				array(
+					'customer_id' => array( 'type' => 'string', 'description' => 'Filter by customer ID.' ),
+				)
+			),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$query = array();
+				if ( ! empty( $input['customer_id'] ) ) $query['customer_ids'] = array( $input['customer_id'] );
+
+				$result = \SureCart\Models\AbandonedCheckout::where( $query )
+					->paginate( array(
+						'page'     => $input['page'] ?? 1,
+						'per_page' => min( $input['per_page'] ?? 20, 100 ),
+					) );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				return abilities_for_ai_surecart_format_paginated( $result );
+			}, 'list-abandoned-checkouts' );
+		},
+	));
+
 });

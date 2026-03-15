@@ -275,4 +275,315 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	));
 
+	// ===== GET PRICE =====
+	$reg->read( 'surecart/get-price', array(
+		'label'       => 'Get SureCart Price',
+		'description' => 'Returns a single price by ID.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Price ID (e.g. price_abc123).' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$price = \SureCart\Models\Price::find( $input['id'] );
+
+				if ( is_wp_error( $price ) ) {
+					return $price;
+				}
+
+				return abilities_for_ai_surecart_format_model( $price );
+			}, 'get-price' );
+		},
+	));
+
+	// ===== CREATE PRICE =====
+	$reg->write( 'surecart/create-price', array(
+		'label'       => 'Create SureCart Price',
+		'description' => 'Creates a new price for a product.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'product_id'       => array( 'type' => 'string', 'description' => 'Product ID this price belongs to.' ),
+				'amount'           => array( 'type' => 'integer', 'description' => 'Price amount in cents (e.g. 1999 = $19.99).' ),
+				'currency'         => array( 'type' => 'string', 'description' => 'Currency code (e.g. usd). Default: store currency.' ),
+				'recurring_interval'       => array( 'type' => 'string', 'description' => 'Billing interval: day, week, month, year.' ),
+				'recurring_interval_count' => array( 'type' => 'integer', 'description' => 'Number of intervals between billings (e.g. 1 = every month).' ),
+				'trial_duration_days'      => array( 'type' => 'integer', 'description' => 'Trial period in days.' ),
+				'ad_hoc'           => array( 'type' => 'boolean', 'description' => 'Whether this is a pay-what-you-want price.' ),
+				'name'             => array( 'type' => 'string', 'description' => 'Price name (optional label).' ),
+			),
+			'required' => array( 'product_id', 'amount' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$attrs = array(
+					'product' => $input['product_id'],
+					'amount'  => $input['amount'],
+				);
+				if ( isset( $input['currency'] ) )                 $attrs['currency']                 = $input['currency'];
+				if ( isset( $input['recurring_interval'] ) )       $attrs['recurring_interval']       = $input['recurring_interval'];
+				if ( isset( $input['recurring_interval_count'] ) ) $attrs['recurring_interval_count'] = $input['recurring_interval_count'];
+				if ( isset( $input['trial_duration_days'] ) )      $attrs['trial_duration_days']      = $input['trial_duration_days'];
+				if ( isset( $input['ad_hoc'] ) )                   $attrs['ad_hoc']                   = $input['ad_hoc'];
+				if ( isset( $input['name'] ) )                     $attrs['name']                     = $input['name'];
+
+				$price = \SureCart\Models\Price::create( $attrs );
+
+				if ( is_wp_error( $price ) ) {
+					return $price;
+				}
+
+				return abilities_for_ai_surecart_format_model( $price );
+			}, 'create-price' );
+		},
+	));
+
+	// ===== UPDATE PRICE =====
+	$reg->write( 'surecart/update-price', array(
+		'label'       => 'Update SureCart Price',
+		'description' => 'Updates an existing price.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id'       => array( 'type' => 'string', 'description' => 'Price ID.' ),
+				'amount'   => array( 'type' => 'integer', 'description' => 'Price amount in cents.' ),
+				'name'     => array( 'type' => 'string', 'description' => 'Price name.' ),
+				'ad_hoc'   => array( 'type' => 'boolean', 'description' => 'Whether this is a pay-what-you-want price.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$attrs = array( 'id' => $input['id'] );
+				if ( isset( $input['amount'] ) ) $attrs['amount'] = $input['amount'];
+				if ( isset( $input['name'] ) )   $attrs['name']   = $input['name'];
+				if ( isset( $input['ad_hoc'] ) ) $attrs['ad_hoc'] = $input['ad_hoc'];
+
+				$price = \SureCart\Models\Price::update( $attrs );
+
+				if ( is_wp_error( $price ) ) {
+					return $price;
+				}
+
+				return abilities_for_ai_surecart_format_model( $price );
+			}, 'update-price' );
+		},
+	));
+
+	// ===== DELETE PRICE =====
+	$reg->delete( 'surecart/delete-price', array(
+		'label'       => 'Delete SureCart Price',
+		'description' => 'Deletes a price. This action cannot be undone.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Price ID to delete.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$result = \SureCart\Models\Price::delete( $input['id'] );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				return array( 'deleted' => true, 'id' => $input['id'] );
+			}, 'delete-price' );
+		},
+	));
+
+	// ===== GET VARIANT =====
+	$reg->read( 'surecart/get-variant', array(
+		'label'       => 'Get SureCart Variant',
+		'description' => 'Returns a single product variant by ID.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Variant ID.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$variant = \SureCart\Models\Variant::find( $input['id'] );
+
+				if ( is_wp_error( $variant ) ) {
+					return $variant;
+				}
+
+				return abilities_for_ai_surecart_format_model( $variant );
+			}, 'get-variant' );
+		},
+	));
+
+	// ===== LIST VARIANT OPTIONS =====
+	$reg->read( 'surecart/list-variant-options', array(
+		'label'       => 'List SureCart Variant Options',
+		'description' => 'Returns variant options (size, color, etc.) for a product.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'product_id' => array( 'type' => 'string', 'description' => 'Product ID to list variant options for.' ),
+			),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$query = array();
+				if ( ! empty( $input['product_id'] ) ) {
+					$query['product_ids'] = array( $input['product_id'] );
+				}
+
+				$result = \SureCart\Models\VariantOption::where( $query )->get();
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				$items = array();
+				if ( is_array( $result ) ) {
+					foreach ( $result as $model ) {
+						$items[] = abilities_for_ai_surecart_format_model( $model );
+					}
+				}
+
+				return array( 'data' => $items );
+			}, 'list-variant-options' );
+		},
+	));
+
+	// ===== GET PRODUCT COLLECTION =====
+	$reg->read( 'surecart/get-product-collection', array(
+		'label'       => 'Get SureCart Product Collection',
+		'description' => 'Returns a single product collection by ID.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Product collection ID.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$collection = \SureCart\Models\ProductCollection::find( $input['id'] );
+
+				if ( is_wp_error( $collection ) ) {
+					return $collection;
+				}
+
+				return abilities_for_ai_surecart_format_model( $collection );
+			}, 'get-product-collection' );
+		},
+	));
+
+	// ===== CREATE PRODUCT COLLECTION =====
+	$reg->write( 'surecart/create-product-collection', array(
+		'label'       => 'Create SureCart Product Collection',
+		'description' => 'Creates a new product collection.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'name'        => array( 'type' => 'string', 'description' => 'Collection name.' ),
+				'description' => array( 'type' => 'string', 'description' => 'Collection description.' ),
+			),
+			'required' => array( 'name' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$attrs = array( 'name' => $input['name'] );
+				if ( isset( $input['description'] ) ) $attrs['description'] = $input['description'];
+
+				$collection = \SureCart\Models\ProductCollection::create( $attrs );
+
+				if ( is_wp_error( $collection ) ) {
+					return $collection;
+				}
+
+				return abilities_for_ai_surecart_format_model( $collection );
+			}, 'create-product-collection' );
+		},
+	));
+
+	// ===== UPDATE PRODUCT COLLECTION =====
+	$reg->write( 'surecart/update-product-collection', array(
+		'label'       => 'Update SureCart Product Collection',
+		'description' => 'Updates an existing product collection.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id'          => array( 'type' => 'string', 'description' => 'Product collection ID.' ),
+				'name'        => array( 'type' => 'string', 'description' => 'Collection name.' ),
+				'description' => array( 'type' => 'string', 'description' => 'Collection description.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$attrs = array( 'id' => $input['id'] );
+				if ( isset( $input['name'] ) )        $attrs['name']        = $input['name'];
+				if ( isset( $input['description'] ) ) $attrs['description'] = $input['description'];
+
+				$collection = \SureCart\Models\ProductCollection::update( $attrs );
+
+				if ( is_wp_error( $collection ) ) {
+					return $collection;
+				}
+
+				return abilities_for_ai_surecart_format_model( $collection );
+			}, 'update-product-collection' );
+		},
+	));
+
+	// ===== DELETE PRODUCT COLLECTION =====
+	$reg->delete( 'surecart/delete-product-collection', array(
+		'label'       => 'Delete SureCart Product Collection',
+		'description' => 'Deletes a product collection. This action cannot be undone.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Product collection ID to delete.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$result = \SureCart\Models\ProductCollection::delete( $input['id'] );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				return array( 'deleted' => true, 'id' => $input['id'] );
+			}, 'delete-product-collection' );
+		},
+	));
+
+	// ===== DUPLICATE PRODUCT =====
+	$reg->write( 'surecart/duplicate-product', array(
+		'label'       => 'Duplicate SureCart Product',
+		'description' => 'Creates a copy of an existing product.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Product ID to duplicate.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$product = \SureCart\Models\Product::duplicate( $input['id'] );
+
+				if ( is_wp_error( $product ) ) {
+					return $product;
+				}
+
+				return abilities_for_ai_surecart_format_model( $product );
+			}, 'duplicate-product' );
+		},
+	));
+
 });

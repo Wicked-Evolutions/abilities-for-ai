@@ -157,4 +157,151 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	));
 
+	// ===== RENEW SUBSCRIPTION =====
+	$reg->write( 'surecart/renew-subscription', array(
+		'label'       => 'Renew SureCart Subscription',
+		'description' => 'Renews a subscription, triggering a new billing cycle.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Subscription ID to renew.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$result = \SureCart\Models\Subscription::renew( $input['id'] );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				return abilities_for_ai_surecart_format_model( $result );
+			}, 'renew-subscription' );
+		},
+	));
+
+	// ===== GET SUBSCRIPTION STATS =====
+	$reg->read( 'surecart/get-subscription-stats', array(
+		'label'       => 'Get SureCart Subscription Statistics',
+		'description' => 'Returns aggregate subscription statistics (active count, MRR, churn, etc.).',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'period' => array( 'type' => 'string', 'description' => 'Time period: today, week, month, year, all_time. Default: month.' ),
+			),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$args = array();
+				if ( ! empty( $input['period'] ) ) $args['period'] = $input['period'];
+
+				$result = \SureCart\Models\Subscription::stats( $args );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				return abilities_for_ai_surecart_format_model( $result );
+			}, 'get-subscription-stats' );
+		},
+	));
+
+	// ===== PREVIEW UPCOMING PERIOD =====
+	$reg->read( 'surecart/preview-upcoming-period', array(
+		'label'       => 'Preview SureCart Upcoming Period',
+		'description' => 'Previews the next billing period for a subscription (amount, date, etc.).',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Subscription ID.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$result = \SureCart\Models\Subscription::upcomingPeriod( array( 'id' => $input['id'] ) );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				return abilities_for_ai_surecart_format_model( $result );
+			}, 'preview-upcoming-period' );
+		},
+	));
+
+	// ===== GET PURCHASE =====
+	$reg->read( 'surecart/get-purchase', array(
+		'label'       => 'Get SureCart Purchase',
+		'description' => 'Returns a single purchase (entitlement) by ID.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Purchase ID.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$purchase = \SureCart\Models\Purchase::with( array( 'product', 'price', 'customer' ) )
+					->find( $input['id'] );
+
+				if ( is_wp_error( $purchase ) ) {
+					return $purchase;
+				}
+
+				return abilities_for_ai_surecart_format_model( $purchase );
+			}, 'get-purchase' );
+		},
+	));
+
+	// ===== REVOKE PURCHASE =====
+	$reg->write( 'surecart/revoke-purchase', array(
+		'label'       => 'Revoke SureCart Purchase',
+		'description' => 'Revokes a purchase, removing the customer\'s access to the product.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Purchase ID to revoke.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$result = \SureCart\Models\Purchase::revoke( $input['id'] );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				return abilities_for_ai_surecart_format_model( $result );
+			}, 'revoke-purchase' );
+		},
+	));
+
+	// ===== INVOKE PURCHASE =====
+	$reg->write( 'surecart/invoke-purchase', array(
+		'label'       => 'Invoke SureCart Purchase',
+		'description' => 'Invokes (re-activates) a previously revoked purchase.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Purchase ID to invoke.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$result = \SureCart\Models\Purchase::invoke( $input['id'] );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				return abilities_for_ai_surecart_format_model( $result );
+			}, 'invoke-purchase' );
+		},
+	));
+
 });

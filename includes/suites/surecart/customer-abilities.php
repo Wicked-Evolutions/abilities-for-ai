@@ -145,4 +145,88 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	));
 
+	// ===== FIND CUSTOMER BY EMAIL =====
+	$reg->read( 'surecart/find-customer-by-email', array(
+		'label'       => 'Find SureCart Customer by Email',
+		'description' => 'Looks up a customer by their email address.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'email' => array( 'type' => 'string', 'description' => 'Customer email address.' ),
+			),
+			'required' => array( 'email' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$result = \SureCart\Models\Customer::where( array( 'email' => $input['email'] ) )->first();
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				if ( empty( $result ) ) {
+					return new \WP_Error( 'not_found', 'No customer found with that email address.', array( 'status' => 404 ) );
+				}
+
+				return abilities_for_ai_surecart_format_model( $result );
+			}, 'find-customer-by-email' );
+		},
+	));
+
+	// ===== CREATE CUSTOMER =====
+	$reg->write( 'surecart/create-customer', array(
+		'label'       => 'Create SureCart Customer',
+		'description' => 'Creates a new customer in SureCart.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'email'    => array( 'type' => 'string', 'description' => 'Customer email address.' ),
+				'name'     => array( 'type' => 'string', 'description' => 'Customer name.' ),
+				'phone'    => array( 'type' => 'string', 'description' => 'Customer phone number.' ),
+				'metadata' => array( 'type' => 'object', 'description' => 'Custom metadata key-value pairs.' ),
+			),
+			'required' => array( 'email' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$attrs = array( 'email' => $input['email'] );
+				if ( isset( $input['name'] ) )     $attrs['name']     = $input['name'];
+				if ( isset( $input['phone'] ) )    $attrs['phone']    = $input['phone'];
+				if ( isset( $input['metadata'] ) ) $attrs['metadata'] = $input['metadata'];
+
+				$customer = \SureCart\Models\Customer::create( $attrs );
+
+				if ( is_wp_error( $customer ) ) {
+					return $customer;
+				}
+
+				return abilities_for_ai_surecart_format_model( $customer );
+			}, 'create-customer' );
+		},
+	));
+
+	// ===== DELETE CUSTOMER =====
+	$reg->delete( 'surecart/delete-customer', array(
+		'label'       => 'Delete SureCart Customer',
+		'description' => 'Deletes a customer. This action cannot be undone.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'id' => array( 'type' => 'string', 'description' => 'Customer ID to delete.' ),
+			),
+			'required' => array( 'id' ),
+		),
+		'callback' => function( $input ) {
+			return abilities_for_ai_surecart_call( function() use ( $input ) {
+				$result = \SureCart\Models\Customer::delete( $input['id'] );
+
+				if ( is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				return array( 'deleted' => true, 'id' => $input['id'] );
+			}, 'delete-customer' );
+		},
+	));
+
 });

@@ -25,10 +25,18 @@ add_action( 'plugins_loaded', function() {
 	// Load helpers.
 	require_once __DIR__ . '/helpers.php';
 
-	// Load P0 ability modules.
+	// Load ability modules.
 	require_once __DIR__ . '/product-abilities.php';
 	require_once __DIR__ . '/order-abilities.php';
 	require_once __DIR__ . '/customer-abilities.php';
 	require_once __DIR__ . '/subscription-abilities.php';
+	require_once __DIR__ . '/coupon-abilities.php';
+	require_once __DIR__ . '/payment-abilities.php';
+	require_once __DIR__ . '/fulfillment-abilities.php';
+	require_once __DIR__ . '/license-abilities.php';
+	require_once __DIR__ . '/settings-abilities.php';
+	require_once __DIR__ . '/shipping-abilities.php';
+	require_once __DIR__ . '/webhook-abilities.php';
+	require_once __DIR__ . '/extras-abilities.php';
 
 }, 99 ); // Late priority — after most plugins have loaded.
