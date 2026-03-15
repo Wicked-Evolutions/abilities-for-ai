@@ -79,7 +79,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return new \WP_Error( 'not_found', 'Document not found.' );
 			}
 
-			return (array) $doc;
+			return abilities_for_ai_safe_value( (array) $doc );
 		},
 	) );
 
@@ -105,7 +105,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
-			return (array) $result;
+			return abilities_for_ai_safe_value( (array) $result );
 		},
 	) );
 
@@ -130,7 +130,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
-			return (array) $result;
+			return abilities_for_ai_safe_value( (array) $result );
 		},
 	) );
 
@@ -170,7 +170,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
-			return (array) $result;
+			return abilities_for_ai_safe_value( (array) $result );
 		},
 	) );
 
@@ -208,7 +208,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( ! $session ) {
 				return new \WP_Error( 'not_found', 'Session not found.' );
 			}
-			return (array) $session;
+			return abilities_for_ai_safe_value( (array) $session );
 		},
 	) );
 
@@ -236,7 +236,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
-			return (array) $result;
+			return abilities_for_ai_safe_value( (array) $result );
 		},
 	) );
 
@@ -279,7 +279,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
-			return (array) $result;
+			return abilities_for_ai_safe_value( (array) $result );
 		},
 	) );
 
@@ -300,7 +300,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
-			return (array) $result;
+			return abilities_for_ai_safe_value( (array) $result );
 		},
 	) );
 
@@ -343,7 +343,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
-			return (array) $result;
+			return abilities_for_ai_safe_value( (array) $result );
 		},
 	) );
 

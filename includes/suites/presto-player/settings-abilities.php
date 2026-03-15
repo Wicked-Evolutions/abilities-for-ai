@@ -42,6 +42,7 @@ $reg->read( 'presto-player/get-settings', array(
 		'required' => array( 'group' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$group    = sanitize_text_field( $input['group'] );
 		$settings = \PrestoPlayer\Models\Setting::getGroup( $group );
 		return array(
@@ -93,6 +94,7 @@ $reg->write( 'presto-player/update-setting', array(
 		'required' => array( 'group', 'name', 'value' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$group = sanitize_text_field( $input['group'] );
 		$name  = sanitize_text_field( $input['name'] );
 		$value = $input['value'];

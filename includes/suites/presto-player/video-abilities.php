@@ -41,6 +41,7 @@ $reg->read( 'presto-player/list-videos', array(
 		),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$video = new \PrestoPlayer\Models\Video();
 		$args  = array(
 			'per_page' => min( (int) ( $input['per_page'] ?? 20 ), 100 ),
@@ -79,6 +80,7 @@ $reg->read( 'presto-player/get-video', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$video = new \PrestoPlayer\Models\Video( $input['id'] );
 		$data  = $video->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {
@@ -124,6 +126,7 @@ $reg->write( 'presto-player/create-video', array(
 		'required' => array( 'title', 'type' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$args = array(
 			'title' => sanitize_text_field( $input['title'] ),
 			'type'  => sanitize_text_field( $input['type'] ),
@@ -190,6 +193,7 @@ $reg->write( 'presto-player/update-video', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$video = new \PrestoPlayer\Models\Video( $input['id'] );
 		$data  = $video->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {
@@ -243,6 +247,7 @@ $reg->delete( 'presto-player/delete-video', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$video = new \PrestoPlayer\Models\Video( $input['id'] );
 		$data  = $video->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {
@@ -282,6 +287,7 @@ if ( class_exists( 'PrestoPlayer\Pro\Models\Visit' ) ) {
 			'required' => array( 'video_id' ),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$visit = new \PrestoPlayer\Pro\Models\Visit();
 			$args  = array( 'video_id' => (int) $input['video_id'] );
 			if ( ! empty( $input['start'] ) ) {

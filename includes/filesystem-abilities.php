@@ -37,6 +37,32 @@ function wp_abilities_filesystem_validate_path( $relative_path, $must_exist = tr
 		return wp_abilities_error( 'ability_invalid_input', 'Path traversal (../) is not allowed.' );
 	}
 
+	// Denylist: sensitive files that must never be read or exposed.
+	$basename = strtolower( basename( $relative_path ) );
+	$denied_files = array(
+		'wp-config.php',
+		'.htaccess',
+		'.htpasswd',
+		'.env',
+		'.user.ini',
+		'php.ini',
+	);
+	$denied_extensions = array( 'sql', 'pem', 'key', 'crt' );
+	$denied_patterns   = array( 'debug.log', 'error_log', 'error.log' );
+
+	if ( in_array( $basename, $denied_files, true ) ) {
+		return wp_abilities_error( 'rest_forbidden', "Access to '{$basename}' is denied. This file contains sensitive configuration data." );
+	}
+
+	$ext = strtolower( pathinfo( $basename, PATHINFO_EXTENSION ) );
+	if ( in_array( $ext, $denied_extensions, true ) ) {
+		return wp_abilities_error( 'rest_forbidden', "Access to .{$ext} files is denied. These files may contain sensitive data." );
+	}
+
+	if ( in_array( $basename, $denied_patterns, true ) ) {
+		return wp_abilities_error( 'rest_forbidden', "Access to '{$basename}' is denied. Log files may contain sensitive information." );
+	}
+
 	$normalized = wp_normalize_path( ABSPATH . ltrim( $relative_path, '/' ) );
 
 	if ( $must_exist ) {

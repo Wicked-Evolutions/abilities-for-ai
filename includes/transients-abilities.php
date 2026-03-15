@@ -114,7 +114,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$timeout = get_option( '_transient_timeout_' . $name );
 			return array(
 				'name'    => $name,
-				'value'   => $value,
+				'value'   => abilities_for_ai_safe_value( $value ),
 				'expires' => $timeout ? date( 'Y-m-d H:i:s', $timeout ) : 'never',
 			);
 		},

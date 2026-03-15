@@ -46,6 +46,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			global $wpdb;
 
 			$args = array(
@@ -129,6 +130,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$block_post = get_post( $input['id'] );
 			if ( ! $block_post || 'wp_block' !== $block_post->post_type ) {
 				return new WP_Error( 'not_found', 'Reusable block not found: ' . $input['id'] );
@@ -194,6 +196,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$parsed = parse_blocks( $input['content'] );
 			$named  = array_filter( $parsed, function( $b ) {
 				return ! empty( $b['blockName'] );
@@ -257,6 +260,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$block_post = get_post( $input['id'] );
 			if ( ! $block_post || 'wp_block' !== $block_post->post_type ) {
 				return new WP_Error( 'not_found', 'Reusable block not found: ' . $input['id'] );
@@ -334,6 +338,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			global $wpdb;
 
 			$block_post = get_post( $input['id'] );

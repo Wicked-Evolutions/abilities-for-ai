@@ -36,6 +36,7 @@ $reg->read( 'presto-player/list-email-collections', array(
 		),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$model  = new \PrestoPlayer\Models\EmailCollection();
 		$result = $model->fetch( array(
 			'per_page' => min( (int) ( $input['per_page'] ?? 20 ), 100 ),
@@ -70,6 +71,7 @@ $reg->read( 'presto-player/get-email-collection', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$model = new \PrestoPlayer\Models\EmailCollection( $input['id'] );
 		$data  = $model->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {
@@ -118,6 +120,7 @@ $reg->write( 'presto-player/create-email-collection', array(
 		),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$args = array();
 		foreach ( $input as $key => $value ) {
 			if ( is_string( $value ) ) {
@@ -179,6 +182,7 @@ $reg->write( 'presto-player/update-email-collection', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$model = new \PrestoPlayer\Models\EmailCollection( $input['id'] );
 		$data  = $model->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {

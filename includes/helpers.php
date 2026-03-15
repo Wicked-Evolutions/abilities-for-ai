@@ -100,6 +100,29 @@ function abilities_for_ai_require_editable_post( $post_id, $capability = 'edit_p
     return $post;
 }
 
+/**
+ * Safely convert any value to a JSON-serializable form.
+ *
+ * Handles serialized PHP objects from get_post_meta(), maybe_unserialize(),
+ * wp_get_nav_menu_items(), and other WordPress functions that can return
+ * non-scalar, non-array types that crash wp_json_encode().
+ *
+ * @param mixed $value The value to sanitize.
+ * @return mixed Plain array, scalar, or null.
+ */
+function abilities_for_ai_safe_value( $value ) {
+	if ( is_null( $value ) ) return null;
+	if ( is_scalar( $value ) ) return $value;
+	if ( is_object( $value ) && method_exists( $value, 'toArray' ) ) {
+		$value = $value->toArray();
+	}
+	if ( is_object( $value ) ) {
+		$value = (array) $value;
+	}
+	if ( ! is_array( $value ) ) return null;
+	return array_map( 'abilities_for_ai_safe_value', $value );
+}
+
 // ============================================================
 // Menu helpers (absorbed from menu-abilities v1.0.0)
 // ============================================================

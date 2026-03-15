@@ -89,7 +89,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'forbidden', 'You cannot access this revision' );
 			}
 
-			return array(
+			return abilities_for_ai_safe_value( array(
 				'id'           => (int) $revision->ID,
 				'parent_id'    => (int) $revision->post_parent,
 				'author'       => (int) $revision->post_author,
@@ -99,7 +99,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'title'        => (string) $revision->post_title,
 				'content'      => (string) $revision->post_content,
 				'excerpt'      => (string) $revision->post_excerpt,
-			);
+			) );
 		},
 	) );
 

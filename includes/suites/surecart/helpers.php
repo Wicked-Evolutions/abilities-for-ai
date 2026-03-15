@@ -62,7 +62,7 @@ function abilities_for_ai_surecart_format_paginated( $collection ) {
 	$pagination = $collection->pagination ?? (object) array();
 
 	return array(
-		'data'       => $items,
+		'data'       => abilities_for_ai_safe_value( $items ),
 		'pagination' => array(
 			'total'       => (int) ( $pagination->count ?? 0 ),
 			'page'        => (int) ( $pagination->page ?? 1 ),
@@ -81,7 +81,7 @@ function abilities_for_ai_surecart_format_paginated( $collection ) {
  */
 function abilities_for_ai_surecart_format_model( $model ) {
 	if ( is_object( $model ) && method_exists( $model, 'toArray' ) ) {
-		return $model->toArray();
+		return abilities_for_ai_safe_value( $model->toArray() );
 	}
-	return (array) $model;
+	return abilities_for_ai_safe_value( (array) $model );
 }

@@ -184,22 +184,34 @@ add_action( 'wp_abilities_api_init', function() {
 	// ===== GET SUBSCRIPTION STATS =====
 	$reg->read( 'surecart/get-subscription-stats', array(
 		'label'       => 'Get SureCart Subscription Statistics',
-		'description' => 'Returns aggregate subscription statistics (active count, MRR, churn, etc.).',
+		'description' => 'Returns aggregate subscription statistics for a date range. Requires SureCart plan with stats API access.',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'period' => array( 'type' => 'string', 'description' => 'Time period: today, week, month, year, all_time. Default: month.' ),
+				'start_at' => array( 'type' => 'string', 'description' => 'Start date (YYYY-MM-DD). Default: 30 days ago.' ),
+				'end_at'   => array( 'type' => 'string', 'description' => 'End date (YYYY-MM-DD). Default: today.' ),
+				'interval' => array( 'type' => 'string', 'description' => 'Grouping interval: hour, day, week, month. Default: day.', 'enum' => array( 'hour', 'day', 'week', 'month' ) ),
 			),
 		),
 		'callback' => function( $input ) {
 			return abilities_for_ai_surecart_call( function() use ( $input ) {
-				$args = array();
-				if ( ! empty( $input['period'] ) ) $args['period'] = $input['period'];
+				if ( ! method_exists( '\SureCart\Models\Subscription', 'stats' ) ) {
+					return new \WP_Error( 'surecart_unsupported', 'Subscription::stats() is not available in this SureCart version.' );
+				}
+				$args = array(
+					'start_at' => $input['start_at'] ?? gmdate( 'Y-m-d', strtotime( '-30 days' ) ),
+					'end_at'   => $input['end_at'] ?? gmdate( 'Y-m-d' ),
+					'interval' => $input['interval'] ?? 'day',
+				);
 
-				$result = \SureCart\Models\Subscription::stats( $args );
+				try {
+					$result = \SureCart\Models\Subscription::stats( $args );
+				} catch ( \Throwable $e ) {
+					return new \WP_Error( 'surecart_stats_error', 'Subscription stats request failed: ' . $e->getMessage() );
+				}
 
 				if ( is_wp_error( $result ) ) {
-					return $result;
+					return new \WP_Error( 'surecart_stats_unavailable', 'Subscription stats are not available. This may require a higher SureCart plan or the stats API is not enabled for this stat type.' );
 				}
 
 				return abilities_for_ai_surecart_format_model( $result );
@@ -210,7 +222,7 @@ add_action( 'wp_abilities_api_init', function() {
 	// ===== PREVIEW UPCOMING PERIOD =====
 	$reg->read( 'surecart/preview-upcoming-period', array(
 		'label'       => 'Preview SureCart Upcoming Period',
-		'description' => 'Previews the next billing period for a subscription (amount, date, etc.).',
+		'description' => 'Previews the next billing period for a subscription (amount, date, etc.). The subscription must be active with a recurring price.',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -220,10 +232,18 @@ add_action( 'wp_abilities_api_init', function() {
 		),
 		'callback' => function( $input ) {
 			return abilities_for_ai_surecart_call( function() use ( $input ) {
-				$result = \SureCart\Models\Subscription::upcomingPeriod( array( 'id' => $input['id'] ) );
+				if ( ! method_exists( '\SureCart\Models\Subscription', 'upcomingPeriod' ) ) {
+					return new \WP_Error( 'surecart_unsupported', 'Subscription::upcomingPeriod() is not available in this SureCart version.' );
+				}
+
+				try {
+					$result = \SureCart\Models\Subscription::upcomingPeriod( array( 'id' => $input['id'] ) );
+				} catch ( \Throwable $e ) {
+					return new \WP_Error( 'surecart_preview_error', 'Upcoming period preview failed: ' . $e->getMessage() );
+				}
 
 				if ( is_wp_error( $result ) ) {
-					return $result;
+					return new \WP_Error( 'surecart_preview_unavailable', 'Upcoming period preview is not available for this subscription. The subscription may not be active or may not have a recurring billing period.' );
 				}
 
 				return abilities_for_ai_surecart_format_model( $result );

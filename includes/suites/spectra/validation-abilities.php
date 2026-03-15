@@ -49,6 +49,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$post = get_post( $input['post_id'] );
 			if ( ! $post ) {
 				return new WP_Error( 'not_found', 'Post not found.' );
@@ -193,6 +194,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$actions = array();
 			$post_id = $input['post_id'] ?? null;
 
@@ -263,6 +265,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$parsed = parse_blocks( $input['markup'] );
 
 			$named = array_values( array_filter( $parsed, function( $b ) {

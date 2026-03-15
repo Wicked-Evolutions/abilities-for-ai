@@ -36,6 +36,7 @@ $reg->read( 'presto-player/list-audio-presets', array(
 		),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$preset = new \PrestoPlayer\Models\AudioPreset();
 		$result = $preset->fetch( array(
 			'per_page' => min( (int) ( $input['per_page'] ?? 20 ), 100 ),
@@ -70,6 +71,7 @@ $reg->read( 'presto-player/get-audio-preset', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$preset = new \PrestoPlayer\Models\AudioPreset( $input['id'] );
 		$data   = $preset->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {
@@ -154,6 +156,7 @@ $reg->write( 'presto-player/create-audio-preset', array(
 		'required' => array( 'name' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$args = array();
 		foreach ( $input as $key => $value ) {
 			if ( is_string( $value ) ) {
@@ -251,6 +254,7 @@ $reg->write( 'presto-player/update-audio-preset', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$preset = new \PrestoPlayer\Models\AudioPreset( $input['id'] );
 		$data   = $preset->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {
@@ -296,6 +300,7 @@ $reg->delete( 'presto-player/delete-audio-preset', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$preset = new \PrestoPlayer\Models\AudioPreset( $input['id'] );
 		$data   = $preset->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {

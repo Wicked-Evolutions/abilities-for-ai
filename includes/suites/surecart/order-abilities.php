@@ -169,19 +169,31 @@ add_action( 'wp_abilities_api_init', function() {
 	// ===== GET ORDER STATS =====
 	$reg->read( 'surecart/get-order-stats', array(
 		'label'       => 'Get SureCart Order Statistics',
-		'description' => 'Returns aggregate order statistics (revenue, counts, etc.).',
+		'description' => 'Returns aggregate order statistics (revenue, counts, etc.) for a date range.',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'period' => array( 'type' => 'string', 'description' => 'Time period: today, week, month, year, all_time. Default: month.' ),
+				'start_at' => array( 'type' => 'string', 'description' => 'Start date (YYYY-MM-DD). Default: 30 days ago.' ),
+				'end_at'   => array( 'type' => 'string', 'description' => 'End date (YYYY-MM-DD). Default: today.' ),
+				'interval' => array( 'type' => 'string', 'description' => 'Grouping interval: hour, day, week, month. Default: day.', 'enum' => array( 'hour', 'day', 'week', 'month' ) ),
 			),
 		),
 		'callback' => function( $input ) {
 			return abilities_for_ai_surecart_call( function() use ( $input ) {
-				$args = array();
-				if ( ! empty( $input['period'] ) ) $args['period'] = $input['period'];
+				if ( ! method_exists( '\SureCart\Models\Order', 'stats' ) ) {
+					return new \WP_Error( 'surecart_unsupported', 'Order::stats() is not available in this SureCart version.' );
+				}
+				$args = array(
+					'start_at' => $input['start_at'] ?? gmdate( 'Y-m-d', strtotime( '-30 days' ) ),
+					'end_at'   => $input['end_at'] ?? gmdate( 'Y-m-d' ),
+					'interval' => $input['interval'] ?? 'day',
+				);
 
-				$result = \SureCart\Models\Order::stats( $args );
+				try {
+					$result = \SureCart\Models\Order::stats( $args );
+				} catch ( \Throwable $e ) {
+					return new \WP_Error( 'surecart_stats_error', 'Order stats request failed: ' . $e->getMessage() );
+				}
 
 				if ( is_wp_error( $result ) ) {
 					return $result;

@@ -36,6 +36,7 @@ $reg->read( 'presto-player/list-presets', array(
 		),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$preset = new \PrestoPlayer\Models\Preset();
 		$result = $preset->fetch( array(
 			'per_page' => min( (int) ( $input['per_page'] ?? 20 ), 100 ),
@@ -70,6 +71,7 @@ $reg->read( 'presto-player/get-preset', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$preset = new \PrestoPlayer\Models\Preset( $input['id'] );
 		$data   = $preset->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {
@@ -170,6 +172,7 @@ $reg->write( 'presto-player/create-preset', array(
 		'required' => array( 'name' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$args = array();
 		foreach ( $input as $key => $value ) {
 			if ( is_string( $value ) ) {
@@ -271,6 +274,7 @@ $reg->write( 'presto-player/update-preset', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$preset = new \PrestoPlayer\Models\Preset( $input['id'] );
 		$data   = $preset->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {
@@ -316,6 +320,7 @@ $reg->delete( 'presto-player/delete-preset', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$preset = new \PrestoPlayer\Models\Preset( $input['id'] );
 		$data   = $preset->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {

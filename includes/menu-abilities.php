@@ -154,7 +154,7 @@ add_action( 'wp_abilities_api_init', function() {
 			}
 			$items = wp_get_nav_menu_items( $menu_id );
 			$tree  = $items ? abilities_for_ai_menu_build_tree( $items ) : array();
-			return array( 'id' => (int) $menu->term_id, 'name' => $menu->name, 'slug' => $menu->slug, 'items' => $tree );
+			return array( 'id' => (int) $menu->term_id, 'name' => $menu->name, 'slug' => $menu->slug, 'items' => abilities_for_ai_safe_value( $tree ) );
 		},
 	) );
 

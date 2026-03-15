@@ -73,6 +73,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$attachment_id = $input['attachment_id'];
 			$size_slug     = $input['size_slug'] ?? 'full';
 

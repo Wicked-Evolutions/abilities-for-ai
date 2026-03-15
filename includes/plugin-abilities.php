@@ -542,6 +542,12 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( ! function_exists( 'delete_plugins' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/file.php';
 			}
+			if ( ! function_exists( 'request_filesystem_credentials' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+			}
+			if ( ! function_exists( 'request_filesystem_credentials' ) ) {
+				return new WP_Error( 'filesystem_unavailable', 'Plugin deletion requires filesystem credentials which are not available in this hosting environment.' );
+			}
 
 			$plugin_file = $input['plugin'];
 			$all_plugins = get_plugins();

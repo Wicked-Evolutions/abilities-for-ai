@@ -43,6 +43,7 @@ $pagination_props = array(
 
 // Helper to build sanitized date args.
 $build_date_args = function( $input ) {
+	$input = (array) $input;
 	$args = array();
 	if ( ! empty( $input['start'] ) ) {
 		$args['start'] = sanitize_text_field( $input['start'] );
@@ -68,6 +69,7 @@ $reg->read( 'presto-player/top-videos', array(
 		)),
 	),
 	'callback' => function( $input ) use ( $build_date_args ) {
+		$input = (array) $input;
 		$visit = new \PrestoPlayer\Pro\Models\Visit();
 		$args  = $build_date_args( $input );
 		$args['per_page'] = min( (int) ( $input['per_page'] ?? 20 ), 100 );
@@ -90,6 +92,7 @@ $reg->read( 'presto-player/top-users', array(
 		'properties' => array_merge( $date_range_props, $pagination_props ),
 	),
 	'callback' => function( $input ) use ( $build_date_args ) {
+		$input = (array) $input;
 		$visit = new \PrestoPlayer\Pro\Models\Visit();
 		$args  = $build_date_args( $input );
 		$args['per_page'] = min( (int) ( $input['per_page'] ?? 20 ), 100 );
@@ -109,6 +112,7 @@ $reg->read( 'presto-player/watch-time-by-day', array(
 		'properties' => $date_range_props,
 	),
 	'callback' => function( $input ) use ( $build_date_args ) {
+		$input = (array) $input;
 		$visit  = new \PrestoPlayer\Pro\Models\Visit();
 		$args   = $build_date_args( $input );
 		$result = $visit->totalWatchTimeByDay( $args );
@@ -126,6 +130,7 @@ $reg->read( 'presto-player/views-by-day', array(
 		'properties' => $date_range_props,
 	),
 	'callback' => function( $input ) use ( $build_date_args ) {
+		$input = (array) $input;
 		$visit  = new \PrestoPlayer\Pro\Models\Visit();
 		$args   = $build_date_args( $input );
 		$result = $visit->totalViewsByDay( $args );
@@ -149,6 +154,7 @@ $reg->read( 'presto-player/video-timeline', array(
 		'required' => array( 'video_id' ),
 	),
 	'callback' => function( $input ) use ( $build_date_args ) {
+		$input = (array) $input;
 		$visit = new \PrestoPlayer\Pro\Models\Visit();
 		$args  = $build_date_args( $input );
 		$args['video_id'] = (int) $input['video_id'];
@@ -176,6 +182,7 @@ $reg->read( 'presto-player/user-video-stats', array(
 		'required' => array( 'user_id' ),
 	),
 	'callback' => function( $input ) use ( $build_date_args ) {
+		$input = (array) $input;
 		$visit = new \PrestoPlayer\Pro\Models\Visit();
 		$args  = $build_date_args( $input );
 		$args['user_id'] = (int) $input['user_id'];

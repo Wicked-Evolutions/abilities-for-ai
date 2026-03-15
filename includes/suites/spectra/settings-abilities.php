@@ -47,6 +47,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$section = $input['section'] ?? 'all';
 
 			$version    = defined( 'UAGB_VER' ) ? UAGB_VER : 'unknown';
@@ -128,6 +129,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$settings = $input['settings'];
 
 			// Allowlist of safe-to-modify Spectra options.
@@ -192,6 +194,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$registry = WP_Block_Patterns_Registry::get_instance();
 			$all      = $registry->get_all_registered();
 

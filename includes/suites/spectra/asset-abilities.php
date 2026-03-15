@@ -44,6 +44,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$post = get_post( $input['post_id'] );
 			if ( ! $post ) {
 				return new WP_Error( 'not_found', 'Post not found.' );
@@ -97,6 +98,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			if ( ! class_exists( 'UAGB_Post_Assets' ) ) {
 				return new WP_Error( 'spectra_missing', 'UAGB_Post_Assets class not found.' );
 			}
@@ -172,6 +174,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input = (array) $input;
 			$post = get_post( $input['post_id'] );
 			if ( ! $post ) {
 				return new WP_Error( 'not_found', 'Post not found.' );

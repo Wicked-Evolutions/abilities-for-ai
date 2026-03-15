@@ -69,24 +69,37 @@ add_action( 'wp_abilities_api_init', function() {
 	// ===== GET STATISTICS =====
 	$reg->read( 'surecart/get-statistics', array(
 		'label'       => 'Get SureCart Statistics',
-		'description' => 'Returns aggregate store statistics (revenue, orders, customers, etc.).',
+		'description' => 'Returns aggregate store statistics for a date range. Currently only "orders" type is supported by the SureCart API on most plans.',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'type'   => array( 'type' => 'string', 'description' => 'Statistics type: revenue, orders, customers, subscriptions.' ),
-				'period' => array( 'type' => 'string', 'description' => 'Time period: today, week, month, year, all_time. Default: month.' ),
+				'type'     => array( 'type' => 'string', 'description' => 'Statistics type: orders, revenue, customers, subscriptions. Default: orders.' ),
+				'start_at' => array( 'type' => 'string', 'description' => 'Start date (YYYY-MM-DD). Default: 30 days ago.' ),
+				'end_at'   => array( 'type' => 'string', 'description' => 'End date (YYYY-MM-DD). Default: today.' ),
+				'interval' => array( 'type' => 'string', 'description' => 'Grouping interval: hour, day, week, month. Default: day.', 'enum' => array( 'hour', 'day', 'week', 'month' ) ),
 			),
 		),
 		'callback' => function( $input ) {
 			return abilities_for_ai_surecart_call( function() use ( $input ) {
-				$args = array();
-				if ( ! empty( $input['period'] ) ) $args['period'] = $input['period'];
+				if ( ! class_exists( '\SureCart\Models\Statistic' ) ) {
+					return new \WP_Error( 'surecart_unsupported', 'SureCart Statistic model is not available in this SureCart version.' );
+				}
+				$args = array(
+					'start_at' => $input['start_at'] ?? gmdate( 'Y-m-d', strtotime( '-30 days' ) ),
+					'end_at'   => $input['end_at'] ?? gmdate( 'Y-m-d' ),
+					'interval' => $input['interval'] ?? 'day',
+				);
 
-				$type   = ! empty( $input['type'] ) ? $input['type'] : 'revenue';
-				$result = \SureCart\Models\Statistic::where( $args )->find( $type );
+				$type = ! empty( $input['type'] ) ? $input['type'] : 'orders';
+
+				try {
+					$result = \SureCart\Models\Statistic::where( $args )->find( $type );
+				} catch ( \Throwable $e ) {
+					return new \WP_Error( 'surecart_stats_error', "Statistics request for '{$type}' failed: " . $e->getMessage() );
+				}
 
 				if ( is_wp_error( $result ) ) {
-					return $result;
+					return new \WP_Error( 'surecart_stats_unavailable', "Statistics for '{$type}' are not available. This stat type may require a higher SureCart plan or is not supported by the current API." );
 				}
 
 				return abilities_for_ai_surecart_format_model( $result );

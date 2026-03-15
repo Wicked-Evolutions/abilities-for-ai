@@ -627,18 +627,19 @@ add_action( 'wp_abilities_api_init', function() {
 			$query = new WP_Query( array(
 				'name'           => $input['slug'],
 				'post_type'      => $input['post_type'] ?? 'post',
+				'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
 				'posts_per_page' => 1,
 			) );
 
 			if ( ! $query->have_posts() ) {
-				return new WP_Error( 'not_found', 'No content found with this slug' );
+				return new WP_Error( 'not_found', 'No content found with this slug.' );
 			}
 
 			$check = abilities_for_ai_require_editable_post( $query->posts[0]->ID );
 			if ( is_wp_error( $check ) ) return $check;
 
 			$post = $check;
-			return array(
+			return abilities_for_ai_safe_value( array(
 				'id'             => $post->ID,
 				'title'          => $post->post_title,
 				'content'        => $post->post_content,
@@ -651,7 +652,7 @@ add_action( 'wp_abilities_api_init', function() {
 				'slug'           => $post->post_name,
 				'link'           => get_permalink( $post->ID ),
 				'featured_image' => get_post_thumbnail_id( $post->ID ),
-			);
+			) );
 		},
 	) );
 

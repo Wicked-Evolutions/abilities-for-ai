@@ -35,6 +35,7 @@ $reg->read( 'presto-player/list-webhooks', array(
 		),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$model  = new \PrestoPlayer\Models\Webhook();
 		$result = $model->fetch( array(
 			'per_page' => min( (int) ( $input['per_page'] ?? 20 ), 100 ),
@@ -69,6 +70,7 @@ $reg->read( 'presto-player/get-webhook', array(
 		'required' => array( 'id' ),
 	),
 	'callback' => function( $input ) {
+		$input = (array) $input;
 		$model = new \PrestoPlayer\Models\Webhook( $input['id'] );
 		$data  = $model->toArray();
 		if ( empty( $data ) || empty( $data['id'] ) ) {

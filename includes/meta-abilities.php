@@ -40,7 +40,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$meta    = get_post_meta( $post_id );
 			$result  = array();
 			foreach ( $meta as $key => $values ) {
-				$result[] = array( 'key' => $key, 'values' => $values, 'count' => count( $values ) );
+				$result[] = array( 'key' => $key, 'values' => abilities_for_ai_safe_value( $values ), 'count' => count( $values ) );
 			}
 			return array( 'post_id' => $post_id, 'meta_count' => count( $result ), 'meta' => $result );
 		},
@@ -69,7 +69,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$post_id = $check->ID;
 			$single  = $params['single'] ?? true;
 			$value   = get_post_meta( $post_id, sanitize_text_field( $params['meta_key'] ), $single );
-			return array( 'post_id' => $post_id, 'key' => $params['meta_key'], 'value' => $value );
+			return array( 'post_id' => $post_id, 'key' => $params['meta_key'], 'value' => abilities_for_ai_safe_value( $value ) );
 		},
 	));
 
@@ -98,7 +98,7 @@ add_action( 'wp_abilities_api_init', function() {
 			$meta   = get_term_meta( $term_id );
 			$result = array();
 			foreach ( $meta as $key => $values ) {
-				$result[] = array( 'key' => $key, 'values' => $values, 'count' => count( $values ) );
+				$result[] = array( 'key' => $key, 'values' => abilities_for_ai_safe_value( $values ), 'count' => count( $values ) );
 			}
 			return array( 'term_id' => $term_id, 'meta_count' => count( $result ), 'meta' => $result );
 		},
@@ -130,7 +130,7 @@ add_action( 'wp_abilities_api_init', function() {
 			}
 			$single = $params['single'] ?? true;
 			$value  = get_term_meta( $term_id, sanitize_text_field( $params['meta_key'] ), $single );
-			return array( 'term_id' => $term_id, 'key' => $params['meta_key'], 'value' => $value );
+			return array( 'term_id' => $term_id, 'key' => $params['meta_key'], 'value' => abilities_for_ai_safe_value( $value ) );
 		},
 	));
 
@@ -169,7 +169,7 @@ add_action( 'wp_abilities_api_init', function() {
 				if ( in_array( $key, $sensitive_keys, true ) ) {
 					$result[] = array( 'key' => $key, 'values' => array( '[REDACTED]' ), 'count' => 1 );
 				} else {
-					$result[] = array( 'key' => $key, 'values' => $values, 'count' => count( $values ) );
+					$result[] = array( 'key' => $key, 'values' => abilities_for_ai_safe_value( $values ), 'count' => count( $values ) );
 				}
 			}
 			return array( 'user_id' => $user_id, 'meta_count' => count( $result ), 'meta' => $result );
@@ -209,7 +209,7 @@ add_action( 'wp_abilities_api_init', function() {
 			}
 			$single = $params['single'] ?? true;
 			$value  = get_user_meta( $user_id, $key, $single );
-			return array( 'user_id' => $user_id, 'key' => $key, 'value' => $value );
+			return array( 'user_id' => $user_id, 'key' => $key, 'value' => abilities_for_ai_safe_value( $value ) );
 		},
 	));
 

@@ -345,23 +345,39 @@ add_action( 'wp_abilities_api_init', function() {
 
 			$slug = sanitize_text_field( $input['slug'] );
 
-			$api = themes_api( 'theme_information', array(
-				'slug'   => $slug,
-				'fields' => array( 'sections' => false, 'description' => false ),
-			) );
+			try {
+				$api = themes_api( 'theme_information', array(
+					'slug'   => $slug,
+					'fields' => array( 'sections' => false, 'description' => false ),
+				) );
+			} catch ( \Throwable $e ) {
+				return new WP_Error( 'themes_api_error', 'Theme API request failed: ' . $e->getMessage() . '. This may be caused by hosting environment network restrictions.' );
+			}
 
 			if ( is_wp_error( $api ) ) {
-				return $api;
+				return new WP_Error(
+					$api->get_error_code(),
+					$api->get_error_message() . '. If the theme slug is correct, this may be caused by hosting environment restrictions blocking WordPress.org API requests.'
+				);
+			}
+
+			if ( empty( $api->download_link ) ) {
+				return new WP_Error( 'themes_api_failed', "Theme '{$slug}' was found but no download link is available. This may be caused by hosting environment restrictions." );
 			}
 
 			$upgrader = new Theme_Upgrader( new WP_Ajax_Upgrader_Skin() );
-			$result   = $upgrader->install( $api->download_link );
+
+			try {
+				$result = $upgrader->install( $api->download_link );
+			} catch ( \Throwable $e ) {
+				return new WP_Error( 'theme_install_error', 'Theme installation failed: ' . $e->getMessage() . '. This may be caused by hosting environment filesystem restrictions.' );
+			}
 
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
 			if ( ! $result ) {
-				return new WP_Error( 'ability_invalid_input', 'Theme installation failed' );
+				return new WP_Error( 'ability_invalid_input', 'Theme installation failed. This may be caused by hosting environment filesystem restrictions (e.g., CageFS/CloudLinux).' );
 			}
 
 			$response = array(
