@@ -309,7 +309,9 @@ add_action( 'wp_abilities_api_init', function() {
 				preg_match_all( '/\.(' . $escaped_prefix . '[\w-]+)/', $css_content, $matches );
 				$class_names    = array_unique( $matches[1] );
 				sort( $class_names );
-				$result_classes = $class_names;
+				$result_classes = array_map( function( $name ) {
+					return array( 'name' => $name );
+				}, array_values( $class_names ) );
 			}
 
 			return array(
