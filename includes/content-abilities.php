@@ -1229,4 +1229,108 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	// ===== CONTENT — DUPLICATE =====
+
+	$reg->write( 'content/duplicate', array(
+		'label'       => 'Duplicate Content',
+		'description' => 'Duplicate a post, page, or custom post type. Copies content, excerpt, meta, and taxonomy terms. Creates the duplicate as a draft.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'source_id' ),
+			'properties' => array(
+				'source_id' => array(
+					'type'        => 'integer',
+					'description' => 'Post ID to duplicate',
+				),
+				'title' => array(
+					'type'        => 'string',
+					'description' => 'Title for the duplicate. Defaults to "Copy of {original title}".',
+				),
+				'status' => array(
+					'type'        => 'string',
+					'description' => 'Status for the duplicate',
+					'default'     => 'draft',
+					'enum'        => array( 'publish', 'draft', 'pending', 'private' ),
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'id'          => array( 'type' => 'integer' ),
+			'link'        => array( 'type' => 'string' ),
+			'source_id'   => array( 'type' => 'integer' ),
+			'title'       => array( 'type' => 'string' ),
+			'meta_copied' => array( 'type' => 'integer' ),
+			'terms_copied' => array( 'type' => 'integer' ),
+		) ),
+		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
+		'callback' => function( $input ) {
+			$source = get_post( $input['source_id'] );
+			if ( ! $source ) {
+				return new WP_Error( 'ability_invalid_input', 'Source post not found.' );
+			}
+
+			$post_type_obj = get_post_type_object( $source->post_type );
+			if ( ! $post_type_obj || ! current_user_can( $post_type_obj->cap->create_posts ) ) {
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to create this post type.' );
+			}
+
+			$new_title = $input['title'] ?? 'Copy of ' . $source->post_title;
+			$status    = $input['status'] ?? 'draft';
+
+			$post_data = array(
+				'post_title'     => $new_title,
+				'post_content'   => $source->post_content,
+				'post_excerpt'   => $source->post_excerpt,
+				'post_type'      => $source->post_type,
+				'post_status'    => $status,
+				'post_parent'    => $source->post_parent,
+				'menu_order'     => $source->menu_order,
+				'post_password'  => $source->post_password,
+				'comment_status' => $source->comment_status,
+				'ping_status'    => $source->ping_status,
+			);
+
+			$new_id = wp_insert_post( $post_data );
+			if ( is_wp_error( $new_id ) ) {
+				return $new_id;
+			}
+
+			// Copy post meta.
+			$meta_copied = 0;
+			$meta = get_post_meta( $source->ID );
+			if ( $meta ) {
+				foreach ( $meta as $key => $values ) {
+					if ( '_edit_lock' === $key || '_edit_last' === $key ) {
+						continue;
+					}
+					foreach ( $values as $value ) {
+						add_post_meta( $new_id, $key, maybe_unserialize( $value ) );
+						$meta_copied++;
+					}
+				}
+			}
+
+			// Copy taxonomy terms.
+			$terms_copied = 0;
+			$taxonomies = get_object_taxonomies( $source->post_type );
+			foreach ( $taxonomies as $taxonomy ) {
+				$terms = wp_get_object_terms( $source->ID, $taxonomy, array( 'fields' => 'ids' ) );
+				if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+					wp_set_object_terms( $new_id, $terms, $taxonomy );
+					$terms_copied += count( $terms );
+				}
+			}
+
+			return array(
+				'success'      => true,
+				'id'           => $new_id,
+				'link'         => get_permalink( $new_id ),
+				'source_id'    => $source->ID,
+				'title'        => $new_title,
+				'meta_copied'  => $meta_copied,
+				'terms_copied' => $terms_copied,
+			);
+		},
+	) );
+
 } );
