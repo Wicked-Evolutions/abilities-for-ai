@@ -3,7 +3,7 @@
  * Plugin Name: Abilities for AI
  * Plugin URI:  https://github.com/Wicked-Evolutions/abilities-for-ai
  * Description: 137 abilities across 21 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, filesystem, knowledge, users, revisions, multisite, and more. Powers AI control through the WordPress Abilities API.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: Wicked Evolutions
  * Author URI: https://wickedevolutions.com
  * Copyright: Copyright (C) 2026 Wicked Evolutions
@@ -16,10 +16,16 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// Define plugin constants
-define( 'ABILITIES_FOR_AI_VERSION', '1.2.0' );
-define( 'ABILITIES_FOR_AI_PATH', plugin_dir_path( __FILE__ ) );
-define( 'ABILITIES_FOR_AI_URL', plugin_dir_url( __FILE__ ) );
+// Define plugin constants (guarded — WordPress updater can re-include this file).
+if ( ! defined( 'ABILITIES_FOR_AI_VERSION' ) ) {
+	define( 'ABILITIES_FOR_AI_VERSION', '1.3.0' );
+}
+if ( ! defined( 'ABILITIES_FOR_AI_PATH' ) ) {
+	define( 'ABILITIES_FOR_AI_PATH', plugin_dir_path( __FILE__ ) );
+}
+if ( ! defined( 'ABILITIES_FOR_AI_URL' ) ) {
+	define( 'ABILITIES_FOR_AI_URL', plugin_dir_url( __FILE__ ) );
+}
 
 // PSR-4 autoloader (composer-generated, with graceful fallback).
 $autoloader = ABILITIES_FOR_AI_PATH . 'vendor/autoload.php';
@@ -78,6 +84,7 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/site-health-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/transients-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/cron-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/themes-abilities.php';
+require_once ABILITIES_FOR_AI_PATH . 'includes/theme-enqueue-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/rest-discovery-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/rewrite-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/filesystem-abilities.php';
