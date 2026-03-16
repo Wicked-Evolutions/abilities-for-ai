@@ -1,13 +1,11 @@
 # Abilities for AI
 
-128 native WordPress abilities across 19 modules. Powers AI control through the official Abilities API.
+Native WordPress abilities for AI agents. Powers AI control through the official Abilities API.
 
 | | |
 |---|---|
-| **Total abilities** | 128 |
-| **Free tier** | 80 |
-| **Pro tier** | 48 |
-| **Modules** | 19 |
+| **Modules** | 21 (19 core + 4 third-party suites) |
+| **Requires** | WordPress 6.9+, PHP 8.0+ |
 
 ## Free Tier — The Round-Trip
 
@@ -345,7 +343,31 @@ Candidate abilities: `users/create-application-password`, `users/list-applicatio
 
 ## Version
 
-**Current:** 1.0.0
+**Current:** 1.3.0
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.3.0 | 2026-03-16 | `theme/enqueue-asset`, `theme/dequeue-asset`, `theme/list-enqueued-assets` — load CSS/JS without PHP file writes |
+| 1.2.0 | 2026-03-15 | Serialization safety (`abilities_for_ai_safe_value()`), security hardening (filesystem denylist for wp-config.php etc.), suite-wide stdClass→array fix for Presto Player and Spectra |
+| 1.1.1 | 2026-03-15 | Spectra `get-theme-classes` output schema alignment |
+| 1.1.0 | 2026-03-14 | SureCart suite complete (91 abilities across 14 domains), permission defaults fix, category double-registration fix |
+| 1.0.5 | 2026-03-13 | License manager, plugin updater, network admin UI, boot self-check, pre-download fix |
+| 1.0.4 | 2026-03-12 | Batch abilities (`content/batch-update`), site pulse (`content/get-site-map`, `content/list-structure`, `content/get-text`), design snapshot |
+| 1.0.3 | 2026-03-11 | Knowledge Layer v0.0.2 — database tables, models, 15 CRUD abilities, seed system, observation system |
+| 1.0.2 | 2026-03-10 | Revisions + multisite modules, app password abilities, updater fix for multisite |
+| 1.0.1 | 2026-03-09 | Filesystem abilities (4), knowledge auto-loading, `get-content-terms` object cast, `run-test` fix |
+| 1.0.0 | 2026-03-08 | Rename from WP Abilities Suite → Abilities for AI. 19 core modules. |
+
+### Third-Party Suites (added v1.0.5–v1.1.0)
+
+| Suite | Abilities | Added |
+|-------|-----------|-------|
+| SureCart | 91 | v1.1.0 |
+| Astra | 36 | v1.0.5 |
+| Presto Player | 33 | v1.0.5 |
+| Spectra | 25 | v1.0.5 |
 
 ## License
 
