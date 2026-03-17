@@ -50,6 +50,7 @@ if ( file_exists( $autoloader ) ) {
 // Load shared helpers and schema builders.
 require_once ABILITIES_FOR_AI_PATH . 'includes/helpers.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/schemas.php';
+require_once ABILITIES_FOR_AI_PATH . 'includes/block-helpers.php';
 
 // Load permission toggles system.
 require_once ABILITIES_FOR_AI_PATH . 'includes/permissions.php';

@@ -193,7 +193,7 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'blocks/find-in-post', array(
 		'label'       => 'Find Block in Post',
-		'description' => 'Find blocks by name or attribute value within a post. Returns matching blocks with their index positions.',
+		'description' => 'Find blocks by name or attribute value within a post. Returns matching blocks with their index positions. Set recursive=true to search nested blocks and return path arrays.',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
@@ -201,6 +201,8 @@ add_action( 'wp_abilities_api_init', function() {
 				'block_name'      => array( 'type' => 'string', 'description' => 'Block type name to find (e.g. "core/paragraph")' ),
 				'attribute_key'   => array( 'type' => 'string', 'description' => 'Attribute key to match' ),
 				'attribute_value' => array( 'type' => 'string', 'description' => 'Attribute value to match' ),
+				'class_name'      => array( 'type' => 'string', 'description' => 'Substring match on className attribute (recursive mode only)' ),
+				'recursive'       => array( 'type' => 'boolean', 'description' => 'Search nested blocks and return path arrays instead of flat index (default: false)', 'default' => false ),
 			),
 			'required' => array( 'post_id' ),
 		),
@@ -212,7 +214,40 @@ add_action( 'wp_abilities_api_init', function() {
 			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
 			if ( is_wp_error( $check ) ) return $check;
 
-			$blocks  = parse_blocks( $check->post_content );
+			$blocks    = parse_blocks( $check->post_content );
+			$recursive = ! empty( $params['recursive'] );
+
+			if ( $recursive ) {
+				$criteria = array();
+				if ( ! empty( $params['block_name'] ) ) {
+					$criteria['block_name'] = $params['block_name'];
+				}
+				if ( ! empty( $params['attribute_key'] ) ) {
+					$criteria['attribute_key'] = $params['attribute_key'];
+					if ( isset( $params['attribute_value'] ) ) {
+						$criteria['attribute_value'] = $params['attribute_value'];
+					}
+				}
+				if ( ! empty( $params['class_name'] ) ) {
+					$criteria['class_name'] = $params['class_name'];
+				}
+
+				$results = abilities_for_ai_find_blocks_recursive( $blocks, $criteria );
+
+				// Lightweight output — strip innerHTML/innerContent from results.
+				$matches = array();
+				foreach ( $results as $r ) {
+					$matches[] = array(
+						'path'      => $r['path'],
+						'blockName' => $r['block']['blockName'],
+						'attrs'     => $r['block']['attrs'] ?? array(),
+					);
+				}
+
+				return array( 'found' => count( $matches ), 'matches' => $matches );
+			}
+
+			// Original flat search (backward compatible).
 			$matches = array();
 			$index   = 0;
 
@@ -273,7 +308,7 @@ add_action( 'wp_abilities_api_init', function() {
 			if ( is_wp_error( $check ) ) return $check;
 			$post_id    = $check->ID;
 			$existing   = parse_blocks( $check->post_content );
-			$new_blocks = $params['blocks'];
+			$new_blocks = array_map( 'abilities_for_ai_normalize_block', $params['blocks'] );
 			$position   = intval( $params['position'] ?? -1 );
 
 			if ( $position === -1 || $position >= count( $existing ) ) {
@@ -329,7 +364,7 @@ add_action( 'wp_abilities_api_init', function() {
 			}
 
 			$old_name         = $blocks[ $index ]['blockName'] ?? '(empty)';
-			$blocks[ $index ] = $params['block'];
+			$blocks[ $index ] = abilities_for_ai_normalize_block( $params['block'] );
 
 			$result = wp_update_post( array(
 				'ID'           => $post_id,
