@@ -283,7 +283,264 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	));
 
+	$reg->read( 'blocks/get-at-path', array(
+		'label'       => 'Get Block at Path',
+		'description' => 'Get a single block by integer path array. Use blocks/find-nested or blocks/find-in-post (recursive) to discover paths first.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'post_id' => array( 'type' => 'integer', 'description' => 'Post ID to read from' ),
+				'path'    => array( 'type' => 'array', 'description' => 'Integer path array, e.g. [0, 2, 1]', 'items' => array( 'type' => 'integer' ) ),
+			),
+			'required' => array( 'post_id', 'path' ),
+		),
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'block'             => array( 'type' => 'object' ),
+			'path'              => array( 'type' => 'array', 'items' => array( 'type' => 'integer' ) ),
+			'depth'             => array( 'type' => 'integer' ),
+			'inner_block_count' => array( 'type' => 'integer' ),
+		) ),
+		'callback' => function( $params ) {
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+
+			$blocks = parse_blocks( $check->post_content );
+			$path   = $params['path'] ?? array();
+			$block  = abilities_for_ai_get_block_at_path( $blocks, $path );
+			if ( is_wp_error( $block ) ) return $block;
+
+			return array(
+				'block'             => $block,
+				'path'              => $path,
+				'depth'             => count( $path ),
+				'inner_block_count' => count( $block['innerBlocks'] ?? array() ),
+			);
+		},
+	));
+
+	$reg->read( 'blocks/find-nested', array(
+		'tier'        => 'free',
+		'label'       => 'Find Nested Blocks',
+		'description' => 'Find blocks at any depth by name, attribute, or CSS class. Returns path arrays for use with get-at-path, update-attributes, etc.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'post_id'         => array( 'type' => 'integer', 'description' => 'Post ID to search within' ),
+				'block_name'      => array( 'type' => 'string', 'description' => 'Block type name to find (e.g. "core/group")' ),
+				'attribute_key'   => array( 'type' => 'string', 'description' => 'Attribute key to match' ),
+				'attribute_value' => array( 'type' => 'string', 'description' => 'Attribute value to match (requires attribute_key)' ),
+				'class_name'      => array( 'type' => 'string', 'description' => 'Substring match on className attribute' ),
+				'max_results'     => array( 'type' => 'integer', 'description' => 'Maximum results to return (default: 20)', 'default' => 20 ),
+			),
+			'required' => array( 'post_id' ),
+		),
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'found'   => array( 'type' => 'integer' ),
+			'matches' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => function( $params ) {
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+
+			$blocks  = parse_blocks( $check->post_content );
+			$criteria = array();
+			if ( ! empty( $params['block_name'] ) )    $criteria['block_name']      = $params['block_name'];
+			if ( ! empty( $params['attribute_key'] ) )  $criteria['attribute_key']   = $params['attribute_key'];
+			if ( isset( $params['attribute_value'] ) )  $criteria['attribute_value'] = $params['attribute_value'];
+			if ( ! empty( $params['class_name'] ) )     $criteria['class_name']      = $params['class_name'];
+
+			$results     = abilities_for_ai_find_blocks_recursive( $blocks, $criteria );
+			$max_results = max( 1, intval( $params['max_results'] ?? 20 ) );
+			$results     = array_slice( $results, 0, $max_results );
+
+			// Lightweight output — no innerHTML/innerContent.
+			$matches = array();
+			foreach ( $results as $r ) {
+				$matches[] = array(
+					'path'      => $r['path'],
+					'blockName' => $r['block']['blockName'],
+					'attrs'     => $r['block']['attrs'] ?? array(),
+				);
+			}
+
+			return array( 'found' => count( $matches ), 'matches' => $matches );
+		},
+	));
+
 	// ===== BLOCKS — WRITE =====
+
+	$reg->write( 'blocks/update-attributes', array(
+		'label'       => 'Update Block Attributes',
+		'description' => 'Merge new attributes into a block at a path. The surgical edit — change one attribute on a deeply nested block without touching the rest of the post.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'post_id'    => array( 'type' => 'integer', 'description' => 'Post ID containing the block' ),
+				'path'       => array( 'type' => 'array', 'description' => 'Integer path array to the block', 'items' => array( 'type' => 'integer' ) ),
+				'attributes' => array( 'type' => 'object', 'description' => 'Attributes to merge into the block (not replaced — merged)' ),
+			),
+			'required' => array( 'post_id', 'path', 'attributes' ),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'post_id'      => array( 'type' => 'integer' ),
+			'path'         => array( 'type' => 'array', 'items' => array( 'type' => 'integer' ) ),
+			'block_name'   => array( 'type' => 'string' ),
+			'updated_keys' => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+		) ),
+		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ),
+		'callback' => function( $params ) {
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+			$post_id = $check->ID;
+
+			$blocks    = parse_blocks( $check->post_content );
+			$path      = $params['path'] ?? array();
+			$new_attrs = $params['attributes'] ?? array();
+
+			$block = abilities_for_ai_get_block_at_path( $blocks, $path );
+			if ( is_wp_error( $block ) ) return $block;
+
+			$block_name = $block['blockName'];
+
+			// Deep merge: array_replace_recursive preserves nested structures like style.spacing.padding.
+			$block['attrs'] = array_replace_recursive( $block['attrs'] ?? array(), $new_attrs );
+
+			$blocks = abilities_for_ai_set_block_at_path( $blocks, $path, $block );
+			if ( is_wp_error( $blocks ) ) return $blocks;
+
+			$result = wp_update_post( array(
+				'ID'           => $post_id,
+				'post_content' => serialize_blocks( $blocks ),
+			), true );
+
+			if ( is_wp_error( $result ) ) return $result;
+
+			return array(
+				'post_id'      => $post_id,
+				'path'         => $path,
+				'block_name'   => $block_name,
+				'updated_keys' => array_keys( $new_attrs ),
+			);
+		},
+	));
+
+	$reg->write( 'blocks/update-at-path', array(
+		'label'       => 'Update Block at Path',
+		'description' => 'Replace a full block at a path with a new block. For attribute-only changes, prefer blocks/update-attributes.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'post_id' => array( 'type' => 'integer', 'description' => 'Post ID containing the block' ),
+				'path'    => array( 'type' => 'array', 'description' => 'Integer path array to the block', 'items' => array( 'type' => 'integer' ) ),
+				'block'   => array( 'type' => 'object', 'description' => 'The replacement block' ),
+			),
+			'required' => array( 'post_id', 'path', 'block' ),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'post_id'   => array( 'type' => 'integer' ),
+			'path'      => array( 'type' => 'array', 'items' => array( 'type' => 'integer' ) ),
+			'replaced'  => array( 'type' => 'string' ),
+			'new_block' => array( 'type' => 'string' ),
+		) ),
+		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => true ),
+		'callback' => function( $params ) {
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+			$post_id = $check->ID;
+
+			$blocks = parse_blocks( $check->post_content );
+			$path   = $params['path'] ?? array();
+
+			$old_block = abilities_for_ai_get_block_at_path( $blocks, $path );
+			if ( is_wp_error( $old_block ) ) return $old_block;
+
+			$old_name    = $old_block['blockName'];
+			$replacement = abilities_for_ai_normalize_block( $params['block'] );
+
+			$blocks = abilities_for_ai_set_block_at_path( $blocks, $path, $replacement );
+			if ( is_wp_error( $blocks ) ) return $blocks;
+
+			$result = wp_update_post( array(
+				'ID'           => $post_id,
+				'post_content' => serialize_blocks( $blocks ),
+			), true );
+
+			if ( is_wp_error( $result ) ) return $result;
+
+			return array(
+				'post_id'   => $post_id,
+				'path'      => $path,
+				'replaced'  => $old_name,
+				'new_block' => $params['block']['blockName'] ?? 'unknown',
+			);
+		},
+	));
+
+	$reg->write( 'blocks/append-inner', array(
+		'label'       => 'Append Inner Blocks',
+		'description' => 'Add innerBlocks to an existing block at a path. Inserts children without rebuilding the whole container.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'post_id'  => array( 'type' => 'integer', 'description' => 'Post ID containing the parent block' ),
+				'path'     => array( 'type' => 'array', 'description' => 'Integer path to the parent block', 'items' => array( 'type' => 'integer' ) ),
+				'blocks'   => array( 'type' => 'array', 'description' => 'Blocks to append as children', 'items' => array( 'type' => 'object' ) ),
+				'position' => array( 'type' => 'integer', 'description' => 'Position within innerBlocks (-1 = end, 0 = beginning)', 'default' => -1 ),
+			),
+			'required' => array( 'post_id', 'path', 'blocks' ),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'post_id'            => array( 'type' => 'integer' ),
+			'path'               => array( 'type' => 'array', 'items' => array( 'type' => 'integer' ) ),
+			'appended'           => array( 'type' => 'integer' ),
+			'total_inner_blocks' => array( 'type' => 'integer' ),
+		) ),
+		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
+		'callback' => function( $params ) {
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+			$post_id = $check->ID;
+
+			$blocks = parse_blocks( $check->post_content );
+			$path   = $params['path'] ?? array();
+
+			$parent = abilities_for_ai_get_block_at_path( $blocks, $path );
+			if ( is_wp_error( $parent ) ) return $parent;
+
+			$new_children = array_map( 'abilities_for_ai_normalize_block', $params['blocks'] );
+			$position     = intval( $params['position'] ?? -1 );
+
+			if ( ! isset( $parent['innerBlocks'] ) || ! is_array( $parent['innerBlocks'] ) ) {
+				$parent['innerBlocks'] = array();
+			}
+
+			if ( $position === -1 || $position >= count( $parent['innerBlocks'] ) ) {
+				$parent['innerBlocks'] = array_merge( $parent['innerBlocks'], $new_children );
+			} elseif ( $position === 0 ) {
+				$parent['innerBlocks'] = array_merge( $new_children, $parent['innerBlocks'] );
+			} else {
+				array_splice( $parent['innerBlocks'], $position, 0, $new_children );
+			}
+
+			// Rebuild parent — set_block_at_path normalizes innerContent up the tree.
+			$blocks = abilities_for_ai_set_block_at_path( $blocks, $path, $parent );
+			if ( is_wp_error( $blocks ) ) return $blocks;
+
+			$result = wp_update_post( array(
+				'ID'           => $post_id,
+				'post_content' => serialize_blocks( $blocks ),
+			), true );
+
+			if ( is_wp_error( $result ) ) return $result;
+
+			return array(
+				'post_id'            => $post_id,
+				'path'               => $path,
+				'appended'           => count( $new_children ),
+				'total_inner_blocks' => count( $parent['innerBlocks'] ),
+			);
+		},
+	));
 
 	$reg->write( 'blocks/insert', array(
 		'label'       => 'Insert Block',

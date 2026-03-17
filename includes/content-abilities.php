@@ -1229,6 +1229,62 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	// ===== CONTENT — APPEND =====
+
+	$reg->write( 'content/append', array(
+		'label'       => 'Append Content',
+		'description' => 'Append block markup to the end of a post without parsing or re-serializing existing content. Safer for large pages — no risk of parse→serialize round-trip altering existing content.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'post_id' => array( 'type' => 'integer', 'description' => 'Post ID to append to' ),
+				'blocks'  => array( 'type' => 'array', 'description' => 'Block objects to append (normalized + serialized automatically)', 'items' => array( 'type' => 'object' ) ),
+				'content' => array( 'type' => 'string', 'description' => 'Raw block markup to append (alternative to blocks)' ),
+			),
+			'required' => array( 'post_id' ),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'post_id'      => array( 'type' => 'integer' ),
+			'appended'     => array( 'type' => 'integer' ),
+			'total_length' => array( 'type' => 'integer' ),
+		) ),
+		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
+		'callback' => function( $params ) {
+			$check = abilities_for_ai_require_editable_post( $params['post_id'] ?? 0 );
+			if ( is_wp_error( $check ) ) return $check;
+			$post_id = $check->ID;
+
+			$existing_content = $check->post_content;
+
+			if ( ! empty( $params['blocks'] ) && is_array( $params['blocks'] ) ) {
+				$new_content = serialize_blocks(
+					array_map( 'abilities_for_ai_normalize_block', $params['blocks'] )
+				);
+				$appended = count( $params['blocks'] );
+			} elseif ( ! empty( $params['content'] ) ) {
+				$new_content = $params['content'];
+				$appended    = strlen( $new_content );
+			} else {
+				return wp_abilities_error( 'ability_invalid_input', 'Provide blocks array or content string.' );
+			}
+
+			$combined = $existing_content . "\n\n" . $new_content;
+
+			$result = wp_update_post( array(
+				'ID'           => $post_id,
+				'post_content' => $combined,
+			), true );
+
+			if ( is_wp_error( $result ) ) return $result;
+
+			return array(
+				'post_id'      => $post_id,
+				'appended'     => $appended,
+				'total_length' => strlen( $combined ),
+			);
+		},
+	));
+
 	// ===== CONTENT — DUPLICATE =====
 
 	$reg->write( 'content/duplicate', array(
