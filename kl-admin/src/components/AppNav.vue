@@ -16,6 +16,15 @@
         {{ item.label }}
       </router-link>
     </nav>
+    <div class="kl-theme-toggle">
+      <button
+        class="kl-theme-btn"
+        :class="{ active: theme === 'dark' }"
+        @click="$emit('toggle-theme')"
+      >
+        {{ theme === 'dark' ? '☀ Light' : '🌙 Dark' }}
+      </button>
+    </div>
     <div class="kl-sidebar-footer">
       v{{ version }}
     </div>
@@ -25,15 +34,21 @@
 <script setup>
 import { useRoute } from 'vue-router'
 
+defineProps({
+  theme: { type: String, default: 'dark' },
+})
+
+defineEmits(['toggle-theme'])
+
 const route = useRoute()
 const version = window.abilitiesKL?.version || '0.1.0'
 
 const navItems = [
-  { to: '/documents', label: 'Documents', icon: '📄', match: '/documents' },
-  { to: '/sessions', label: 'Sessions', icon: '🔄', match: '/sessions' },
-  { to: '/observations', label: 'Observations', icon: '👁', match: '/observations' },
-  { to: '/tags', label: 'Tags', icon: '🏷', match: '/tags' },
-  { to: '/dashboard', label: 'Dashboard', icon: '📊', match: '/dashboard' },
+  { to: '/documents', label: 'Documents', icon: '◧', match: '/documents' },
+  { to: '/sessions', label: 'Sessions', icon: '▤', match: '/sessions' },
+  { to: '/observations', label: 'Observations', icon: '◉', match: '/observations' },
+  { to: '/tags', label: 'Tags', icon: '⬡', match: '/tags' },
+  { to: '/dashboard', label: 'Dashboard', icon: '◫', match: '/dashboard' },
 ]
 
 function isActive(item) {

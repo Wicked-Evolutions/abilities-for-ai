@@ -5,18 +5,19 @@ export const useTagsStore = defineStore('tags', {
   state: () => ({
     items: [],
     total: 0,
-    page: 1,
-    perPage: 50,
     loading: false,
+    fetched: false,
   }),
 
   actions: {
-    async fetchTags() {
+    async fetchTags(force = false) {
+      if (this.fetched && !force) return
       this.loading = true
       try {
-        const data = await api.get('tags', { page: this.page, per_page: this.perPage })
+        const data = await api.get('tags', { per_page: 100 })
         this.items = data.items || []
         this.total = data.total || 0
+        this.fetched = true
       } finally {
         this.loading = false
       }

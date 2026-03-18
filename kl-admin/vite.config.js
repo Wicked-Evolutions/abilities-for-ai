@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
+  base: '/wp-content/plugins/abilities-for-ai/admin/kl/',
   build: {
     outDir: '../admin/kl',
     emptyOutDir: true,

@@ -23,6 +23,7 @@ class Abilities_For_AI_Knowledge_Layer {
 		add_action( 'admin_menu', array( $this, 'add_submenu' ) );
 		add_action( 'network_admin_menu', array( $this, 'add_submenu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_filter( 'script_loader_tag', array( $this, 'add_module_type' ), 10, 3 );
 	}
 
 	/**
@@ -100,6 +101,21 @@ class Abilities_For_AI_Knowledge_Layer {
 		) );
 
 		wp_enqueue_script( 'abilities-kl-app' );
+	}
+
+	/**
+	 * Add type="module" to our ES module scripts.
+	 *
+	 * @param string $tag    The script tag HTML.
+	 * @param string $handle The script handle.
+	 * @param string $src    The script source URL.
+	 * @return string Modified script tag.
+	 */
+	public function add_module_type( $tag, $handle, $src ) {
+		if ( in_array( $handle, array( 'abilities-kl-vendor', 'abilities-kl-app' ), true ) ) {
+			$tag = str_replace( '<script ', '<script type="module" ', $tag );
+		}
+		return $tag;
 	}
 }
 
