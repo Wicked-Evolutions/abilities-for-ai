@@ -119,9 +119,10 @@ new Abilities_For_AI_Plugin_Updater( array(
 	'show_check_update'    => true,
 ) );
 
-// Load admin dashboard
+// Load admin pages
 if ( is_admin() ) {
     require_once ABILITIES_FOR_AI_PATH . 'admin/dashboard.php';
+    require_once ABILITIES_FOR_AI_PATH . 'admin/knowledge-layer.php';
 }
 
 // Activation hook
