@@ -1,0 +1,1 @@
+import{o,c as a,a as s}from"./vendor.js";const l={class:"kl-view"},c={__name:"Sessions",setup(t){return(n,e)=>(o(),a("div",l,[...e[0]||(e[0]=[s("div",{class:"kl-page-header"},[s("h1",{class:"kl-page-title"},"Sessions")],-1),s("div",{class:"kl-view-body"},[s("p",null,"Sessions coming soon.")],-1)])]))}};export{c as default};

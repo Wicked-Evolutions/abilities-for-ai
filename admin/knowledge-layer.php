@@ -58,19 +58,30 @@ class Abilities_For_AI_Knowledge_Layer {
 			return;
 		}
 
+		$kl_url = ABILITIES_FOR_AI_URL . 'admin/kl/';
+
+		// Vue SPA styles (Element Plus + app styles bundled together).
 		wp_enqueue_style(
-			'abilities-kl-admin',
-			ABILITIES_FOR_AI_URL . 'admin/kl/css/knowledge-layer.css',
+			'abilities-kl-app',
+			$kl_url . 'css/main.css',
 			array(),
 			ABILITIES_FOR_AI_VERSION
 		);
 
-		// Register a placeholder script handle for wp_localize_script.
-		// The Vue SPA build will replace this with the actual JS bundle.
+		// Vendor JS (Vue + Element Plus + Pinia + Vue Router).
+		wp_register_script(
+			'abilities-kl-vendor',
+			$kl_url . 'js/vendor.js',
+			array(),
+			ABILITIES_FOR_AI_VERSION,
+			true
+		);
+
+		// App JS — depends on vendor.
 		wp_register_script(
 			'abilities-kl-app',
-			ABILITIES_FOR_AI_URL . 'admin/kl/js/knowledge-layer.js',
-			array(),
+			$kl_url . 'js/app.js',
+			array( 'abilities-kl-vendor' ),
 			ABILITIES_FOR_AI_VERSION,
 			true
 		);

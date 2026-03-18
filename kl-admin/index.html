@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knowledge Layer — Dev</title>
+</head>
+<body>
+  <div class="wrap" id="abilities-kl-app"></div>
+  <script>
+    // Mock the WordPress global for dev mode.
+    window.abilitiesKL = {
+      rest: { url: '/wp-json/abilities-kl/v1', nonce: 'dev-nonce' },
+      admin_url: '#/',
+      auth: { user_id: 1, can_edit: true },
+      version: '0.1.0-dev',
+    }
+  </script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

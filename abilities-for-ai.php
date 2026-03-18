@@ -101,6 +101,9 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-layer-abilities.php';
 // Knowledge Layer v0.3.1 — Tag CRUD + assign/unassign abilities.
 require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-tag-abilities.php';
 
+// Knowledge Layer REST API — admin SPA controllers under abilities-kl/v1.
+require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-rest.php';
+
 // Auto-load third-party plugin suites.
 // Each suite lives in includes/suites/{slug}/loader.php and handles
 // its own detection (class_exists / defined checks). If the parent

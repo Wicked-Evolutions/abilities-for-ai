@@ -86,6 +86,11 @@ class Observation {
 			$values[] = $args['severity'];
 		}
 
+		if ( ! empty( $args['session_id'] ) ) {
+			$where[]  = 'session_id = %s';
+			$values[] = $args['session_id'];
+		}
+
 		$per_page = min( 100, max( 1, intval( $args['per_page'] ?? 20 ) ) );
 		$page     = max( 1, intval( $args['page'] ?? 1 ) );
 		$offset   = ( $page - 1 ) * $per_page;
