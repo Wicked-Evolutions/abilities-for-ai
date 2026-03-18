@@ -20,6 +20,8 @@ use WickedEvolutions\AbilitiesForAI\Knowledge\Session;
 use WickedEvolutions\AbilitiesForAI\Knowledge\Observation;
 use WickedEvolutions\AbilitiesForAI\Knowledge\Revision;
 use WickedEvolutions\AbilitiesForAI\Knowledge\Schema;
+use WickedEvolutions\AbilitiesForAI\Knowledge\Search\Fulltext_Search_Provider;
+use WickedEvolutions\AbilitiesForAI\Knowledge\Search\KL_Search_Provider;
 
 /**
  * Register abilities only if Knowledge Layer tables exist.
@@ -171,6 +173,33 @@ add_action( 'wp_abilities_api_init', function() {
 				return $result;
 			}
 			return abilities_for_ai_safe_value( (array) $result );
+		},
+	) );
+
+	// ─── Search ───────────────────────────────────────────────
+
+	$reg->read( 'knowledge/search', array(
+		'label'        => 'Search Knowledge Documents',
+		'description'  => 'FULLTEXT search across knowledge layer documents with optional filters. Returns relevance-ranked results. Falls back to filtered listing when no query is provided.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'query'    => array( 'type' => 'string', 'description' => 'Search query. If empty, returns filtered document list.' ),
+				'doc_type' => array( 'type' => 'string', 'description' => 'Filter by document type: ' . implode( ', ', Document::TYPES ) ),
+				'status'   => array( 'type' => 'string', 'description' => 'Filter by status (active, draft, seed, all). Default: active.' ),
+				'tags'     => array( 'type' => 'array', 'items' => array( 'type' => 'string' ), 'description' => 'Filter by tag slugs (all must match).' ),
+				'per_page' => array( 'type' => 'integer', 'description' => 'Items per page (1-100). Default: 20.' ),
+				'page'     => array( 'type' => 'integer', 'description' => 'Page number. Default: 1.' ),
+			),
+		),
+		'callback' => function( $input = null ) {
+			$input = $input ?? array();
+			$query = $input['query'] ?? '';
+
+			/** @var KL_Search_Provider $provider */
+			$provider = apply_filters( 'kl_search_provider', new Fulltext_Search_Provider() );
+
+			return $provider->search( $query, $input );
 		},
 	) );
 
