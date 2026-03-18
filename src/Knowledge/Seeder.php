@@ -30,6 +30,7 @@ class Seeder {
 		self::seed_courses();
 		self::seed_config();
 		self::seed_templates();
+		self::seed_tags();
 		self::migrate_v001();
 	}
 
@@ -355,6 +356,59 @@ class Seeder {
 				'output_doc_type'    => 'essence',
 			),
 		) );
+	}
+
+	/**
+	 * Seed default tags into kl_tags.
+	 *
+	 * 14 tags across 4 groups: lane, function, product, tier.
+	 * Only inserts if no tags exist yet (fresh install or migration).
+	 * Tags are editable (locked=0) with source='plugin'.
+	 */
+	public static function seed_tags() {
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'kl_tags';
+
+		// Skip if tags already exist.
+		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+		if ( $count > 0 ) {
+			return;
+		}
+
+		$now = current_time( 'mysql', true );
+
+		$tags = array(
+			// Lane tags.
+			array( 'title' => 'System',    'slug' => 'system',    'description' => 'System lane — health, plugins, cron, cache, environment.',    'color' => '#3b82f6' ),
+			array( 'title' => 'Content',   'slug' => 'content',   'description' => 'Content lane — posts, pages, media, taxonomies.',              'color' => '#10b981' ),
+			array( 'title' => 'Structure', 'slug' => 'structure', 'description' => 'Structure lane — themes, templates, patterns, blocks.',        'color' => '#8b5cf6' ),
+			array( 'title' => 'Creative',  'slug' => 'creative',  'description' => 'Creative lane — voice, brand, design patterns.',               'color' => '#f59e0b' ),
+			array( 'title' => 'Ecosystem', 'slug' => 'ecosystem', 'description' => 'Ecosystem lane — integrations, APIs, external services, CRM.', 'color' => '#ec4899' ),
+			// Function tags.
+			array( 'title' => 'Diagnostic',  'slug' => 'diagnostic',  'description' => 'Diagnostic function — analysis and observation.',    'color' => '#06b6d4' ),
+			array( 'title' => 'Onboarding',  'slug' => 'onboarding',  'description' => 'Onboarding function — first-contact sequences.',     'color' => '#84cc16' ),
+			array( 'title' => 'Continuity',  'slug' => 'continuity',  'description' => 'Continuity function — session persistence.',          'color' => '#6366f1' ),
+			array( 'title' => 'Security',    'slug' => 'security',    'description' => 'Security function — hardening and access control.',   'color' => '#ef4444' ),
+			array( 'title' => 'Testing',     'slug' => 'testing',     'description' => 'Testing function — verification and QA.',             'color' => '#14b8a6' ),
+			// Product tags.
+			array( 'title' => 'Abilities for AI',             'slug' => 'abilities-for-ai',             'description' => 'Related to the Abilities for AI product.',             'color' => '#7c3aed' ),
+			array( 'title' => 'Abilities for Fluent Plugins', 'slug' => 'abilities-for-fluent-plugins', 'description' => 'Related to the Abilities for Fluent Plugins product.', 'color' => '#2563eb' ),
+			// Tier tags.
+			array( 'title' => 'Free', 'slug' => 'free', 'description' => 'Free tier content or feature.', 'color' => '#22c55e' ),
+			array( 'title' => 'Pro',  'slug' => 'pro',  'description' => 'Pro tier content or feature.',  'color' => '#eab308' ),
+		);
+
+		foreach ( $tags as $tag ) {
+			$wpdb->insert( $table, array(
+				'title'       => $tag['title'],
+				'slug'        => $tag['slug'],
+				'description' => $tag['description'],
+				'color'       => $tag['color'],
+				'created_at'  => $now,
+				'updated_at'  => $now,
+			) );
+		}
 	}
 
 	/**

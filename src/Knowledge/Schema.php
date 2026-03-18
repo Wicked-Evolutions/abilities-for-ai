@@ -2,7 +2,7 @@
 /**
  * Knowledge Layer — Database Schema.
  *
- * Creates and migrates the 5 Knowledge Layer tables via dbDelta().
+ * Creates and migrates the 7 Knowledge Layer tables via dbDelta().
  * Follows Fluent plugin patterns: kl_ prefix, bigint unsigned IDs,
  * varchar status fields, JSON metadata columns, utf8mb4.
  *
@@ -23,7 +23,7 @@ class Schema {
 	/**
 	 * Current schema version. Bump this when tables change.
 	 */
-	const VERSION = '0.2.7';
+	const VERSION = '0.3.1';
 
 	/**
 	 * Option key for stored schema version.
@@ -70,6 +70,37 @@ class Schema {
 		if ( version_compare( $from_version, '0.2.7', '<' ) ) {
 			Seeder::update_seeds();
 		}
+
+		// v0.3.0: Add FULLTEXT index for search (dbDelta doesn't handle FULLTEXT).
+		if ( version_compare( $from_version, '0.3.0', '<' ) ) {
+			self::add_fulltext_index();
+		}
+
+		// v0.3.1: Seed default tags for the tagging system.
+		if ( version_compare( $from_version, '0.3.1', '<' ) ) {
+			Seeder::seed_tags();
+		}
+	}
+
+	/**
+	 * Add FULLTEXT index on title, content, excerpt for search.
+	 *
+	 * Runs as ALTER TABLE because dbDelta() does not support FULLTEXT indexes.
+	 * Safe to call multiple times — checks for existing index first.
+	 */
+	private static function add_fulltext_index() {
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'kl_documents';
+
+		// Check if index already exists.
+		$existing = $wpdb->get_results( "SHOW INDEX FROM `{$table}` WHERE Key_name = 'idx_fulltext'" );
+		if ( ! empty( $existing ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix.
+		$wpdb->query( "ALTER TABLE `{$table}` ADD FULLTEXT INDEX idx_fulltext (title, content, excerpt)" );
 	}
 
 	/**
@@ -84,7 +115,7 @@ class Schema {
 	}
 
 	/**
-	 * Generate the full SQL for all 5 tables.
+	 * Generate the full SQL for all 7 tables.
 	 *
 	 * @param string $prefix           WordPress table prefix.
 	 * @param string $charset_collate  Charset/collation string.
@@ -186,6 +217,33 @@ class Schema {
 			PRIMARY KEY  (id),
 			KEY idx_document_ver (document_id, version),
 			KEY idx_created (created_at)
+		) {$charset_collate};";
+
+		// 6. kl_tags — flat tagging system for knowledge layer entities.
+		$tables[] = "CREATE TABLE {$prefix}kl_tags (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			title varchar(191) NOT NULL,
+			slug varchar(191) NOT NULL,
+			description text DEFAULT NULL,
+			color varchar(7) DEFAULT NULL,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id),
+			UNIQUE KEY idx_slug (slug),
+			KEY idx_title (title)
+		) {$charset_collate};";
+
+		// 7. kl_taggables — polymorphic pivot for tag assignments.
+		$tables[] = "CREATE TABLE {$prefix}kl_taggables (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			tag_id bigint(20) unsigned NOT NULL,
+			taggable_id bigint(20) unsigned NOT NULL,
+			taggable_type varchar(50) NOT NULL,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id),
+			UNIQUE KEY idx_unique_tagging (tag_id, taggable_id, taggable_type),
+			KEY idx_taggable (taggable_type, taggable_id),
+			KEY idx_tag (tag_id)
 		) {$charset_collate};";
 
 		return implode( "\n", $tables );
