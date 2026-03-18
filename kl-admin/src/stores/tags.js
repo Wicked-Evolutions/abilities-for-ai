@@ -22,5 +22,25 @@ export const useTagsStore = defineStore('tags', {
         this.loading = false
       }
     },
+
+    async createTag(data) {
+      const tag = await api.post('tags', data)
+      this.fetched = false
+      await this.fetchTags(true)
+      return tag
+    },
+
+    async updateTag(id, data) {
+      const tag = await api.put(`tags/${id}`, data)
+      this.fetched = false
+      await this.fetchTags(true)
+      return tag
+    },
+
+    async deleteTag(id) {
+      await api.del(`tags/${id}`)
+      this.fetched = false
+      await this.fetchTags(true)
+    },
   },
 })

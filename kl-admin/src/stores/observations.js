@@ -31,5 +31,24 @@ export const useObservationsStore = defineStore('observations', {
         this.loading = false
       }
     },
+
+    async resolveObservation(id, note = '') {
+      await api.put(`observations/${id}/resolve`, { note })
+      await this.fetchObservations()
+    },
+
+    async bulkAction(action, ids) {
+      await api.post('observations/bulk-action', { action, ids })
+      await this.fetchObservations()
+    },
+
+    setFilter(key, value) {
+      this.filters[key] = value
+      this.page = 1
+    },
+
+    setPage(page) {
+      this.page = page
+    },
   },
 })
