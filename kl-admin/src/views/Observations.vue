@@ -52,33 +52,58 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="obs in store.items"
-            :key="obs.id"
-            :style="{ opacity: isResolved(obs) ? 0.6 : 1 }"
-          >
-            <td class="col-check" @click.stop>
-              <input type="checkbox" :checked="selectedIds.includes(obs.id)" @change="toggleSelect(obs.id)" />
-            </td>
-            <td><span class="kl-badge" :class="`badge-${obs.severity || 'info'}`">{{ obs.severity || 'info' }}</span></td>
-            <td><span class="kl-badge badge-agent-type">{{ obs.category || 'general' }}</span></td>
-            <td>{{ obs.title || obs.content }}</td>
-            <td><span class="kl-badge" :class="`badge-${obs.status || 'open'}`">{{ obs.status || 'open' }}</span></td>
-            <td class="kl-cell-mono">#{{ (obs.session_id || '').toString().substring(0, 6) }}</td>
-            <td class="kl-cell-mono kl-cell-muted">{{ formatDate(obs.created_at) }}</td>
-            <td>
-              <div v-if="obs.status === 'open'" style="display:flex; gap:6px;">
-                <button class="kl-btn kl-btn-sm kl-btn-success" @click="openResolve(obs)">Resolve</button>
-                <button class="kl-btn kl-btn-sm kl-btn-ghost" @click="deferObs(obs)">Defer</button>
-              </div>
-              <div v-else-if="obs.status === 'resolved'">
-                <span style="font-family:var(--font-mono); font-size:.75rem; color:var(--status-active);">&#10003; {{ formatDate(obs.resolved_at) }}</span>
-              </div>
-              <div v-else>
-                <span style="font-family:var(--font-mono); font-size:.75rem; color:var(--text-muted);">— {{ formatDate(obs.resolved_at || obs.updated_at) }}</span>
-              </div>
-            </td>
-          </tr>
+          <template v-for="obs in store.items" :key="obs.id">
+            <tr
+              :style="{ opacity: isResolved(obs) ? 0.6 : 1 }"
+              @click="toggleExpand(obs.id)"
+            >
+              <td class="col-check" @click.stop>
+                <input type="checkbox" :checked="selectedIds.includes(obs.id)" @change="toggleSelect(obs.id)" />
+              </td>
+              <td><span class="kl-badge" :class="`badge-${obs.severity || 'info'}`">{{ obs.severity || 'info' }}</span></td>
+              <td><span class="kl-badge badge-agent-type">{{ obs.category || 'general' }}</span></td>
+              <td>{{ truncate(obs.title || obs.content || obs.description, 80) }}</td>
+              <td><span class="kl-badge" :class="`badge-${obs.status || 'open'}`">{{ obs.status || 'open' }}</span></td>
+              <td class="kl-cell-mono">#{{ (obs.session_id || '').toString().substring(0, 6) }}</td>
+              <td class="kl-cell-mono kl-cell-muted">{{ formatDate(obs.created_at) }}</td>
+              <td @click.stop>
+                <div v-if="obs.status === 'open'" style="display:flex; gap:6px;">
+                  <button class="kl-btn kl-btn-sm kl-btn-success" @click="openResolve(obs)">Resolve</button>
+                  <button class="kl-btn kl-btn-sm kl-btn-ghost" @click="deferObs(obs)">Defer</button>
+                </div>
+                <div v-else-if="obs.status === 'resolved'">
+                  <span style="font-family:var(--font-mono); font-size:.75rem; color:var(--status-active);">&#10003; {{ formatDate(obs.resolved_at) }}</span>
+                </div>
+                <div v-else>
+                  <span style="font-family:var(--font-mono); font-size:.75rem; color:var(--text-muted);">— {{ formatDate(obs.resolved_at || obs.updated_at) }}</span>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="expandedId === obs.id" class="kl-expand-row">
+              <td colspan="8">
+                <div class="kl-expand-content">
+                  <strong>Description</strong>
+                  {{ obs.description || obs.content || obs.title || 'No description.' }}
+                  <template v-if="obs.source_diagnostic">
+                    <strong>Source Diagnostic</strong>
+                    {{ obs.source_diagnostic }}
+                  </template>
+                  <template v-if="obs.resolution_note">
+                    <strong>Resolution Note</strong>
+                    {{ obs.resolution_note }}
+                  </template>
+                  <strong>Session</strong>
+                  #{{ obs.session_id || '—' }}
+                  <strong>Created</strong>
+                  {{ formatFullDate(obs.created_at) }}
+                  <template v-if="obs.resolved_at">
+                    <strong>Resolved</strong>
+                    {{ formatFullDate(obs.resolved_at) }}
+                  </template>
+                </div>
+              </td>
+            </tr>
+          </template>
           <tr v-if="!store.loading && store.items.length === 0">
             <td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">No observations found.</td>
           </tr>
@@ -112,11 +137,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useObservationsStore } from '../stores/observations.js'
+import { useObservationsStore } from '../stores/index.js'
 import Pagination from '../components/Pagination.vue'
 
 const store = useObservationsStore()
 const selectedIds = ref([])
+const expandedId = ref(null)
 const showResolve = ref(false)
 const resolveTarget = ref(null)
 const resolveNote = ref('')
@@ -181,10 +207,26 @@ async function bulkWontFix() {
   selectedIds.value = []
 }
 
+function toggleExpand(id) {
+  expandedId.value = expandedId.value === id ? null : id
+}
+
+function truncate(str, len) {
+  if (!str) return '—'
+  return str.length > len ? str.substring(0, len) + '…' : str
+}
+
 function formatDate(dateStr) {
   if (!dateStr) return '—'
   const d = new Date(dateStr)
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function formatFullDate(dateStr) {
+  if (!dateStr) return '—'
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' +
+    d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
 onMounted(() => store.fetchObservations())

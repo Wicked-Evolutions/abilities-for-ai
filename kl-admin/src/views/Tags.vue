@@ -88,7 +88,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useTagsStore } from '../stores/tags.js'
+import { useTagsStore } from '../stores/index.js'
 
 const store = useTagsStore()
 

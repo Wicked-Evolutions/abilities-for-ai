@@ -15,8 +15,8 @@ export const useTagsStore = defineStore('tags', {
       this.loading = true
       try {
         const data = await api.get('tags', { per_page: 100 })
-        this.items = data.items || []
-        this.total = data.total || 0
+        this.items = Array.isArray(data) ? data : (data.items || [])
+        this.total = Array.isArray(data) ? data.length : (data.total || 0)
         this.fetched = true
       } finally {
         this.loading = false

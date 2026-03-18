@@ -133,7 +133,7 @@ class Document {
 		$total     = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, array_merge( array( $table ), $values ) ) );
 
 		// Fetch page.
-		$query_sql = "SELECT id, slug, doc_type, title, excerpt, status, source, version, locked, author_id, parent_id, created_at, updated_at FROM %i WHERE {$where_sql} ORDER BY updated_at DESC LIMIT %d OFFSET %d";
+		$query_sql = "SELECT id, slug, doc_type, title, excerpt, status, source, version, locked, author_id, parent_id, wp_post_id, created_at, updated_at FROM %i WHERE {$where_sql} ORDER BY updated_at DESC LIMIT %d OFFSET %d";
 		$rows      = $wpdb->get_results( $wpdb->prepare( $query_sql, array_merge( array( $table ), $values, array( $per_page, $offset ) ) ) );
 
 		return array(
@@ -310,6 +310,22 @@ class Document {
 	}
 
 	/**
+	 * Set the WordPress post ID for a published document.
+	 *
+	 * @param int $id         Document ID.
+	 * @param int $wp_post_id WordPress post ID.
+	 * @return bool
+	 */
+	public static function set_wp_post_id( $id, $wp_post_id ) {
+		global $wpdb;
+		return false !== $wpdb->update(
+			self::table(),
+			array( 'wp_post_id' => $wp_post_id ),
+			array( 'id' => $id )
+		);
+	}
+
+	/**
 	 * Decode metadata JSON on a row object.
 	 *
 	 * @param object $row Database row.
@@ -323,7 +339,8 @@ class Document {
 		$row->version   = (int) $row->version;
 		$row->locked    = (bool) $row->locked;
 		$row->author_id = (int) $row->author_id;
-		$row->parent_id = $row->parent_id ? (int) $row->parent_id : null;
+		$row->parent_id  = $row->parent_id ? (int) $row->parent_id : null;
+		$row->wp_post_id = isset( $row->wp_post_id ) ? ( $row->wp_post_id ? (int) $row->wp_post_id : null ) : null;
 		return $row;
 	}
 }

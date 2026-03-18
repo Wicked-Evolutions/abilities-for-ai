@@ -7,21 +7,20 @@ export default defineConfig({
   build: {
     outDir: '../admin/kl',
     emptyOutDir: true,
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 1500,
+    cssCodeSplit: false,
     rollupOptions: {
       input: 'src/main.js',
       output: {
+        format: 'iife',
         entryFileNames: 'js/app.js',
-        chunkFileNames: 'js/[name].js',
         assetFileNames: (assetInfo) => {
           if (assetInfo.names?.[0]?.endsWith('.css')) {
             return 'css/[name][extname]'
           }
           return 'assets/[name][extname]'
         },
-        manualChunks: {
-          vendor: ['vue', 'vue-router', 'pinia', 'element-plus'],
-        },
+        inlineDynamicImports: true,
       },
     },
   },

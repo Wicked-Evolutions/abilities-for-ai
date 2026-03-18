@@ -23,7 +23,7 @@ class Schema {
 	/**
 	 * Current schema version. Bump this when tables change.
 	 */
-	const VERSION = '0.3.1';
+	const VERSION = '0.4.0';
 
 	/**
 	 * Option key for stored schema version.
@@ -80,6 +80,9 @@ class Schema {
 		if ( version_compare( $from_version, '0.3.1', '<' ) ) {
 			Seeder::seed_tags();
 		}
+
+		// v0.4.0: Add wp_post_id column (handled by dbDelta via get_sql).
+		// No additional migration logic needed — dbDelta adds the column.
 	}
 
 	/**
@@ -139,6 +142,7 @@ class Schema {
 			metadata longtext DEFAULT NULL,
 			author_id bigint(20) unsigned NOT NULL DEFAULT 0,
 			parent_id bigint(20) unsigned DEFAULT NULL,
+			wp_post_id bigint(20) unsigned DEFAULT NULL,
 			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id),
@@ -146,7 +150,8 @@ class Schema {
 			KEY idx_type_status (doc_type, status),
 			KEY idx_source (source),
 			KEY idx_parent (parent_id),
-			KEY idx_updated (updated_at)
+			KEY idx_updated (updated_at),
+			KEY idx_wp_post (wp_post_id)
 		) {$charset_collate};";
 
 		// 2. kl_sessions — append-only session log.

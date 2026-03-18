@@ -38,7 +38,7 @@
           <span v-if="!doc.locked" class="kl-tag-add" title="Add tag" @click="showTagPicker = true">+</span>
         </div>
         <div style="margin-top:14px; display:flex; gap:10px;">
-          <button class="kl-btn kl-btn-secondary kl-btn-sm" @click="showPublish = true">📤 Publish to Blog</button>
+          <button class="kl-btn kl-btn-secondary kl-btn-sm" @click="openPublish">{{ doc.wp_post_id ? '📤 Update Post' : '📤 Publish to Blog' }}</button>
           <button class="kl-btn kl-btn-secondary kl-btn-sm">📋 Export</button>
         </div>
       </div>
@@ -207,37 +207,68 @@
       <transition name="slide">
         <div v-if="showPublish" class="kl-publish-sidebar" style="display:flex">
           <div class="kl-publish-header">
-            <h3>📤 Publish to Blog</h3>
+            <h3>📤 {{ doc.wp_post_id ? 'Update Post' : 'Publish to Blog' }}</h3>
             <button class="kl-btn kl-btn-sm kl-btn-ghost" @click="showPublish = false">✕</button>
           </div>
           <div class="kl-publish-body">
+            <!-- Post-publish success state -->
+            <div v-if="publishResult" style="margin-bottom:12px;">
+              <div style="background:rgba(102,187,106,0.12); border:1px solid rgba(102,187,106,0.25); border-radius:var(--radius-md); padding:12px 16px; color:var(--status-active);">
+                <strong style="display:block; margin-bottom:4px;">&#10003; {{ publishResult.is_update ? 'Post updated' : 'Published' }} successfully</strong>
+                <div style="font-size:.8125rem;">
+                  Post ID: {{ publishResult.post_id }} · Status: {{ publishResult.post_status }}
+                </div>
+                <a v-if="publishResult.permalink" :href="publishResult.permalink" target="_blank" style="display:inline-block; margin-top:8px; font-size:.8125rem;">View Post →</a>
+              </div>
+            </div>
+
             <div class="kl-field-group">
               <label class="kl-field-label">Title</label>
-              <input type="text" class="kl-field-input" :value="doc.title" />
+              <input type="text" class="kl-field-input" v-model="pubTitle" />
             </div>
             <div class="kl-field-group">
               <label class="kl-field-label">Content</label>
               <div style="background:var(--bg-raised); border:1px solid var(--border-default); border-radius:6px; padding:12px; font-size:.8125rem; color:var(--text-muted);">
-                <code style="font-size:.75rem;">&#123;&#123;document.content||md_to_blocks&#125;&#125;</code>
+                <code style="font-size:.75rem;">md_to_blocks</code>
                 <div style="margin-top:6px; font-size:.75rem;">Markdown → Gutenberg blocks at publish time</div>
               </div>
             </div>
             <div class="kl-field-group">
               <label class="kl-field-label">Excerpt</label>
-              <textarea class="kl-field-textarea" rows="3" :value="doc.excerpt || ''"></textarea>
+              <textarea class="kl-field-textarea" rows="3" v-model="pubExcerpt"></textarea>
             </div>
             <div class="kl-field-group">
               <label class="kl-field-label">Post Status</label>
-              <select class="kl-filter" style="width:100%">
-                <option>Draft</option>
-                <option>Publish</option>
-                <option>Private</option>
-              </select>
+              <div style="display:flex; gap:16px; padding:4px 0;">
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:.875rem; color:var(--text-secondary);">
+                  <input type="radio" v-model="pubStatus" value="draft" style="accent-color:var(--accent);" /> Draft
+                </label>
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:.875rem; color:var(--text-secondary);">
+                  <input type="radio" v-model="pubStatus" value="publish" style="accent-color:var(--accent);" /> Publish
+                </label>
+                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:.875rem; color:var(--text-secondary);">
+                  <input type="radio" v-model="pubStatus" value="private" style="accent-color:var(--accent);" /> Private
+                </label>
+              </div>
+            </div>
+            <div class="kl-field-group">
+              <label class="kl-field-label">Tags</label>
+              <div class="kl-tags-row">
+                <TagChip
+                  v-for="tag in (doc.tags || [])"
+                  :key="tag.id || tag.slug"
+                  :label="tag.name || tag.slug"
+                  :color="tag.color || ''"
+                />
+              </div>
+              <div style="font-size:.6875rem; color:var(--text-muted); font-family:var(--font-mono); margin-top:4px;">KL tags auto-mapped to WordPress tags</div>
             </div>
           </div>
           <div class="kl-publish-footer">
             <button class="kl-btn kl-btn-secondary" @click="showPublish = false">Cancel</button>
-            <button class="kl-btn kl-btn-primary">Publish</button>
+            <button class="kl-btn kl-btn-primary" @click="publishDoc" :disabled="publishing">
+              {{ publishing ? 'Publishing…' : (doc.wp_post_id ? 'Update Post' : 'Publish') }}
+            </button>
           </div>
         </div>
       </transition>
@@ -248,8 +279,8 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useDocumentsStore } from '../stores/documents.js'
-import { useTagsStore } from '../stores/tags.js'
+import { api } from '../api.js'
+import { useDocumentsStore, useTagsStore } from '../stores/index.js'
 import TypeBadge from '../components/TypeBadge.vue'
 import TagChip from '../components/TagChip.vue'
 
@@ -264,6 +295,11 @@ const editContent = ref('')
 const showTagPicker = ref(false)
 const tagToAdd = ref('')
 const showPublish = ref(false)
+const publishing = ref(false)
+const publishResult = ref(null)
+const pubTitle = ref('')
+const pubExcerpt = ref('')
+const pubStatus = ref('draft')
 
 const tabs = [
   { key: 'content', label: 'Content' },
@@ -351,6 +387,33 @@ async function restoreRevision(rev) {
 
 function resolveObservation(obs) {
   // Placeholder — observations resolve endpoint TBD
+}
+
+function openPublish() {
+  pubTitle.value = doc.value.title
+  pubExcerpt.value = doc.value.excerpt || ''
+  pubStatus.value = 'draft'
+  publishResult.value = null
+  showPublish.value = true
+}
+
+async function publishDoc() {
+  publishing.value = true
+  try {
+    const method = doc.value.wp_post_id ? 'put' : 'post'
+    const result = await api[method](`documents/${route.params.id}/publish`, {
+      post_title: pubTitle.value,
+      post_excerpt: pubExcerpt.value,
+      post_status: pubStatus.value,
+    })
+    publishResult.value = result
+    // Refresh document to get wp_post_id
+    await store.fetchDocument(route.params.id)
+  } catch (e) {
+    publishResult.value = { error: e.message }
+  } finally {
+    publishing.value = false
+  }
 }
 
 function formatFullDate(dateStr) {

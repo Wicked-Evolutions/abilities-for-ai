@@ -14,6 +14,7 @@
 namespace WickedEvolutions\AbilitiesForAI\Knowledge\REST;
 
 use WickedEvolutions\AbilitiesForAI\Knowledge\Document;
+use WickedEvolutions\AbilitiesForAI\Knowledge\MarkdownToBlocks;
 use WickedEvolutions\AbilitiesForAI\Knowledge\Revision;
 use WickedEvolutions\AbilitiesForAI\Knowledge\Tag;
 use WickedEvolutions\AbilitiesForAI\Knowledge\Taggable;
@@ -87,6 +88,24 @@ class DocumentsController extends \WP_REST_Controller {
 			'methods'             => \WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'bulk_action' ),
 			'permission_callback' => array( $this, 'admin_check' ),
+		) );
+
+		// POST|PUT /documents/{id}/publish
+		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)/publish', array(
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'publish_item' ),
+				'permission_callback' => function() {
+					return current_user_can( 'publish_posts' );
+				},
+			),
+			array(
+				'methods'             => \WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'publish_item' ),
+				'permission_callback' => function() {
+					return current_user_can( 'publish_posts' );
+				},
+			),
 		) );
 	}
 
@@ -335,6 +354,149 @@ class DocumentsController extends \WP_REST_Controller {
 		}
 
 		return rest_ensure_response( $results );
+	}
+
+	/**
+	 * POST|PUT /documents/{id}/publish — publish as WordPress post.
+	 *
+	 * POST creates a new post. PUT updates existing (if wp_post_id set).
+	 * Converts markdown to Gutenberg blocks, maps categories and tags.
+	 */
+	public function publish_item( $request ) {
+		$id   = (int) $request->get_param( 'id' );
+		$body = $request->get_json_params();
+		$doc  = Document::find( $id );
+
+		if ( ! $doc ) {
+			return new \WP_Error( 'not_found', 'Document not found.', array( 'status' => 404 ) );
+		}
+
+		// Convert markdown content to Gutenberg blocks.
+		$block_content = MarkdownToBlocks::convert( $doc->content );
+
+		// Determine post status.
+		$post_status = $body['post_status'] ?? 'draft';
+		if ( ! in_array( $post_status, array( 'draft', 'publish', 'private' ), true ) ) {
+			$post_status = 'draft';
+		}
+
+		// Build post data.
+		$post_data = array(
+			'post_title'   => $body['post_title'] ?? $doc->title,
+			'post_content' => $block_content,
+			'post_excerpt' => $body['post_excerpt'] ?? $doc->excerpt,
+			'post_name'    => $doc->slug,
+			'post_status'  => $post_status,
+			'post_type'    => 'post',
+		);
+
+		// Author.
+		if ( ! empty( $body['post_author'] ) ) {
+			$post_data['post_author'] = (int) $body['post_author'];
+		}
+
+		// Category: use provided or auto-map from doc_type.
+		$category_ids = array();
+		if ( ! empty( $body['post_category'] ) ) {
+			$category_ids = array_map( 'intval', (array) $body['post_category'] );
+		} else {
+			$auto_cat = $this->get_category_for_type( $doc->doc_type );
+			if ( $auto_cat ) {
+				$category_ids = array( $auto_cat );
+			}
+		}
+		if ( ! empty( $category_ids ) ) {
+			$post_data['post_category'] = $category_ids;
+		}
+
+		// Determine if create or update.
+		$is_update = ! empty( $doc->wp_post_id ) && get_post( $doc->wp_post_id );
+
+		if ( $is_update ) {
+			$post_data['ID'] = $doc->wp_post_id;
+			$post_id = wp_update_post( $post_data, true );
+		} else {
+			$post_id = wp_insert_post( $post_data, true );
+		}
+
+		if ( is_wp_error( $post_id ) ) {
+			return $post_id;
+		}
+
+		// Map tags: KL tags → WordPress tags.
+		$wp_tags = array();
+		if ( ! empty( $body['post_tags'] ) ) {
+			$wp_tags = (array) $body['post_tags'];
+		} else {
+			// Auto-map from KL tags.
+			$kl_tags = Taggable::getFor( $id, 'document' );
+			foreach ( $kl_tags as $tag ) {
+				$wp_tags[] = $tag->title ?? $tag->name ?? $tag->slug;
+			}
+		}
+		if ( ! empty( $wp_tags ) ) {
+			wp_set_post_tags( $post_id, $wp_tags );
+		}
+
+		// Store wp_post_id back on the KL document.
+		if ( ! $is_update ) {
+			Document::set_wp_post_id( $id, $post_id );
+		}
+
+		$post      = get_post( $post_id );
+		$permalink = get_permalink( $post_id );
+		$edit_url  = get_edit_post_link( $post_id, 'raw' );
+
+		return rest_ensure_response( array(
+			'post_id'     => $post_id,
+			'post_status' => $post->post_status,
+			'permalink'   => $permalink,
+			'edit_url'    => $edit_url,
+			'is_update'   => $is_update,
+			'document_id' => $id,
+		) );
+	}
+
+	/**
+	 * Auto-map doc_type to a WordPress category ID.
+	 * Creates the category if it doesn't exist.
+	 *
+	 * @param string $doc_type Document type.
+	 * @return int|null Category ID or null.
+	 */
+	private function get_category_for_type( $doc_type ) {
+		$map = array(
+			'skill'         => 'SKILLs',
+			'agent'         => 'Agents',
+			'knowledge'     => 'Knowledge',
+			'course'        => 'Courses',
+			'config'        => 'Protocols',
+			'template'      => 'Templates',
+			'boot'          => 'System',
+			'diagnostic'    => 'Diagnostics',
+			'essence'       => 'About',
+			'site-identity' => 'About',
+			'site-state'    => 'System',
+			'capabilities'  => 'System',
+		);
+
+		$cat_name = $map[ $doc_type ] ?? null;
+		if ( ! $cat_name ) {
+			return null;
+		}
+
+		$term = get_term_by( 'name', $cat_name, 'category' );
+		if ( $term ) {
+			return (int) $term->term_id;
+		}
+
+		// Create the category.
+		$result = wp_insert_term( $cat_name, 'category' );
+		if ( is_wp_error( $result ) ) {
+			return null;
+		}
+
+		return (int) $result['term_id'];
 	}
 
 	/**

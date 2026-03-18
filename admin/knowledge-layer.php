@@ -23,7 +23,6 @@ class Abilities_For_AI_Knowledge_Layer {
 		add_action( 'admin_menu', array( $this, 'add_submenu' ) );
 		add_action( 'network_admin_menu', array( $this, 'add_submenu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_filter( 'script_loader_tag', array( $this, 'add_module_type' ), 10, 3 );
 	}
 
 	/**
@@ -64,25 +63,16 @@ class Abilities_For_AI_Knowledge_Layer {
 		// Vue SPA styles (Element Plus + app styles bundled together).
 		wp_enqueue_style(
 			'abilities-kl-app',
-			$kl_url . 'css/main.css',
+			$kl_url . 'css/style.css',
 			array(),
 			ABILITIES_FOR_AI_VERSION
 		);
 
-		// Vendor JS (Vue + Element Plus + Pinia + Vue Router).
-		wp_register_script(
-			'abilities-kl-vendor',
-			$kl_url . 'js/vendor.js',
-			array(),
-			ABILITIES_FOR_AI_VERSION,
-			true
-		);
-
-		// App JS — depends on vendor.
+		// App JS — single IIFE bundle (Vue + Element Plus + Pinia + Router + app).
 		wp_register_script(
 			'abilities-kl-app',
 			$kl_url . 'js/app.js',
-			array( 'abilities-kl-vendor' ),
+			array(),
 			ABILITIES_FOR_AI_VERSION,
 			true
 		);
@@ -101,21 +91,6 @@ class Abilities_For_AI_Knowledge_Layer {
 		) );
 
 		wp_enqueue_script( 'abilities-kl-app' );
-	}
-
-	/**
-	 * Add type="module" to our ES module scripts.
-	 *
-	 * @param string $tag    The script tag HTML.
-	 * @param string $handle The script handle.
-	 * @param string $src    The script source URL.
-	 * @return string Modified script tag.
-	 */
-	public function add_module_type( $tag, $handle, $src ) {
-		if ( in_array( $handle, array( 'abilities-kl-vendor', 'abilities-kl-app' ), true ) ) {
-			$tag = str_replace( '<script ', '<script type="module" ', $tag );
-		}
-		return $tag;
 	}
 }
 

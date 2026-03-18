@@ -90,7 +90,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useSessionsStore } from '../stores/sessions.js'
+import { useSessionsStore } from '../stores/index.js'
 import Pagination from '../components/Pagination.vue'
 
 const store = useSessionsStore()

@@ -23,8 +23,8 @@ export const useSessionsStore = defineStore('sessions', {
         if (this.filters.date_range) params.date_range = this.filters.date_range
 
         const data = await api.get('sessions', params)
-        this.items = data.items || []
-        this.total = data.total || 0
+        this.items = Array.isArray(data) ? data : (data.items || [])
+        this.total = Array.isArray(data) ? data.length : (data.total || 0)
       } finally {
         this.loading = false
       }

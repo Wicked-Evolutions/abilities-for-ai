@@ -33,13 +33,13 @@ export const useDocumentsStore = defineStore('documents', {
           order: this.order,
         }
         if (this.filters.doc_type) params.doc_type = this.filters.doc_type
-        if (this.filters.status) params.status = this.filters.status
+        params.status = this.filters.status || 'all'
         if (this.filters.search) params.search = this.filters.search
         if (this.filters.tags) params.tags = this.filters.tags
 
         const data = await api.get('documents', params)
-        this.items = data.items || []
-        this.total = data.total || 0
+        this.items = Array.isArray(data) ? data : (data.items || [])
+        this.total = Array.isArray(data) ? data.length : (data.total || 0)
       } finally {
         this.loading = false
       }

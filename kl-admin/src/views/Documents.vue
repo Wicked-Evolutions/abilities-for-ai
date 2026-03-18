@@ -144,8 +144,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useDocumentsStore } from '../stores/documents.js'
-import { useTagsStore } from '../stores/tags.js'
+import { useDocumentsStore, useTagsStore } from '../stores/index.js'
 import TypeBadge from '../components/TypeBadge.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import TagChip from '../components/TagChip.vue'
