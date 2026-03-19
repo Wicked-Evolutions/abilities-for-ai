@@ -97,8 +97,8 @@ function wp_abilities_filesystem_validate_path( $relative_path, $must_exist = tr
  * @return true|WP_Error True if allowed, WP_Error if blocked.
  */
 function wp_abilities_filesystem_check_extension( $path ) {
-	$allowed = array( 'css', 'js', 'json', 'md', 'txt', 'html' );
-	$blocked  = array( 'php', 'phtml', 'htaccess', 'sh', 'exe', 'bat' );
+	$allowed = array( 'css', 'js', 'json', 'md', 'txt', 'html', 'php' );
+	$blocked  = array( 'phtml', 'htaccess', 'sh', 'exe', 'bat' );
 	$ext      = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
 
 	if ( in_array( $ext, $blocked, true ) ) {
@@ -219,7 +219,7 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'filesystem/write-file', array(
 		'label'       => 'Write File',
-		'description' => 'Write or append content to a file within the WordPress installation. Restricted to safe extensions (css, js, json, md, txt, html). PHP files are blocked.',
+		'description' => 'Write or append content to a file within the WordPress installation. Allowed extensions: css, js, json, md, txt, html, php.',
 		'input_schema' => array(
 			'type'       => 'object',
 			'required'   => array( 'path', 'content' ),
@@ -338,11 +338,115 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	$reg->write( 'filesystem/create-directory', array(
+		'label'       => 'Create Directory',
+		'description' => 'Create a directory within the WordPress installation. Creates parent directories recursively (like mkdir -p). Permissions set to 0755.',
+		'tier'        => 'free',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'path' ),
+			'properties' => array(
+				'path' => array( 'type' => 'string', 'description' => 'Relative path from ABSPATH' ),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'path'    => array( 'type' => 'string' ),
+			'created' => array( 'type' => 'boolean' ),
+		) ),
+		'callback' => function( $params ) {
+			if ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) {
+				return wp_abilities_error( 'rest_forbidden', 'File modifications are disabled (DISALLOW_FILE_MODS is set in wp-config.php).' );
+			}
+
+			$path = $params['path'] ?? '';
+			if ( empty( $path ) || ! is_string( $path ) ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Path is required and must be a string.' );
+			}
+
+			if ( preg_match( '#(^|[/\\\\])\.\.([/\\\\]|$)#', $path ) ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Path traversal (../) is not allowed.' );
+			}
+
+			$normalized = wp_normalize_path( ABSPATH . ltrim( $path, '/' ) );
+			$abspath    = wp_normalize_path( ABSPATH );
+
+			if ( strpos( $normalized, $abspath ) !== 0 ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Path resolves outside the WordPress installation.' );
+			}
+
+			if ( is_dir( $normalized ) ) {
+				return array( 'success' => true, 'path' => $path, 'created' => false );
+			}
+
+			$result = wp_mkdir_p( $normalized );
+			if ( ! $result ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Could not create directory. Check permissions.' );
+			}
+
+			return array( 'success' => true, 'path' => $path, 'created' => true );
+		},
+	) );
+
+	$reg->write( 'filesystem/write-binary', array(
+		'label'       => 'Write Binary File',
+		'description' => 'Write base64-encoded binary content to a file within the WordPress installation. Allowed extensions: woff2, woff, ttf, otf, eot, ico, png, jpg, jpeg, webp, gif, svg, avif.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'path', 'content' ),
+			'properties' => array(
+				'path'    => array( 'type' => 'string', 'description' => 'Relative path from ABSPATH' ),
+				'content' => array( 'type' => 'string', 'description' => 'Base64-encoded binary content' ),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'bytes_written' => array( 'type' => 'integer' ),
+			'path'          => array( 'type' => 'string' ),
+		) ),
+		'callback' => function( $params ) {
+			if ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) {
+				return wp_abilities_error( 'rest_forbidden', 'File modifications are disabled (DISALLOW_FILE_MODS is set in wp-config.php).' );
+			}
+			if ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT ) {
+				return wp_abilities_error( 'rest_forbidden', 'File editing is disabled (DISALLOW_FILE_EDIT is set in wp-config.php).' );
+			}
+
+			$path    = $params['path'] ?? '';
+			$content = $params['content'] ?? '';
+
+			$allowed_binary = array( 'woff2', 'woff', 'ttf', 'otf', 'eot', 'ico', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'avif' );
+			$ext            = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
+			if ( ! in_array( $ext, $allowed_binary, true ) ) {
+				return wp_abilities_error( 'ability_invalid_input', "Extension .{$ext} is not in the allowed binary list: " . implode( ', ', $allowed_binary ) );
+			}
+
+			$abs = wp_abilities_filesystem_validate_path( $path, false );
+			if ( is_wp_error( $abs ) ) {
+				return $abs;
+			}
+
+			$decoded = base64_decode( $content, true );
+			if ( $decoded === false ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Content is not valid base64.' );
+			}
+
+			$result = @file_put_contents( $abs, $decoded );
+			if ( $result === false ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Could not write to file. Check permissions.' );
+			}
+
+			return array(
+				'success'       => true,
+				'bytes_written' => $result,
+				'path'          => $path,
+			);
+		},
+	) );
+
 	// ===== FILESYSTEM — DELETE =====
 
 	$reg->delete( 'filesystem/delete-file', array(
 		'label'       => 'Delete File',
-		'description' => 'Delete a file within the WordPress installation. Restricted to safe extensions (css, js, json, md, txt, html). PHP files are blocked.',
+		'description' => 'Delete a file within the WordPress installation. Allowed extensions: css, js, json, md, txt, html, php.',
 		'input_schema' => array(
 			'type'       => 'object',
 			'required'   => array( 'path' ),
