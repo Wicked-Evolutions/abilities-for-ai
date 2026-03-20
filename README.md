@@ -161,9 +161,19 @@ Per-module Read/Write/Delete toggles provide additional control. Pro abilities r
 - [Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp) — MCP bridge for AI clients (`npx @wickedevolutions/abilities-mcp`)
 - [Abilities for Fluent Plugins](https://github.com/Wicked-Evolutions/abilities-for-fluent-plugins) — FluentCRM, Community, Cart, Support, Boards, Booking, and more
 
+## Evolving Knowledge
+
+We continuously add knowledge docs, skills, and agent patterns to [knowledge.wickedevolutions.com](https://knowledge.wickedevolutions.com). We don't know every use case that humans and AI agents will discover together — the ecosystem grows from real usage.
+
 ## Version History
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete version history.
+
+## Disclaimer
+
+Humans make mistakes — as we know from the present day and history. Humans trained AI. AI acts accordingly. AI predicts probability based on the context window it holds. It is trained to sound certain, as if everything is truth, and to "fix" everything so the human becomes satisfied.
+
+Learn how to communicate with AI. You are fully responsible for using AI in your life, business, and projects. Using these products is your personal responsibility to learn and own.
 
 ## License
 

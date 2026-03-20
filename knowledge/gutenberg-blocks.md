@@ -1,21 +1,6 @@
-# WordPress Block Editor — AI Knowledge Doc
+# WordPress Block Editor Reference
 
-> You are building pages and posts for a human. WordPress has a native block editor with 100+ blocks. Your job is to USE these blocks, never to write custom HTML/PHP/CSS to replicate what a block already does.
-
----
-
-## Rule Zero
-
-**NEVER write custom code to achieve something a core block already does.**
-
-If the human asks for "an accordion" → use `core/details` (or `core/accordion` in WP 7.0+).
-If the human asks for "a two-column layout" → use `core/columns`.
-If the human asks for "a hero section with text over an image" → use `core/cover`.
-If the human asks for "a FAQ section" → use `core/details` blocks inside a `core/group`.
-If the human asks for "show latest blog posts" → use `core/query` loop or `core/latest-posts`.
-If the human asks for "a table of contents" → use `core/table-of-contents`.
-
-**Check this list before writing a single line of code.**
+> WordPress has a native block editor with 100+ blocks. This reference helps you use them effectively when building pages and posts.
 
 ---
 
@@ -30,7 +15,7 @@ Blocks are stored as HTML comments in post content:
 <!-- /wp:paragraph -->
 ```
 
-You create and modify content by composing blocks via the content abilities (`content/create`, `content/update`). The block markup is the content body.
+You create and modify content by composing blocks via the content abilities (`content/create`, `content/update`, `content/append`). The block markup is the content body.
 
 ### Key Concepts
 
@@ -41,15 +26,21 @@ You create and modify content by composing blocks via the content abilities (`co
 - **Supports**: What the block can do — alignment, colors, typography, spacing, borders. Theme controls what's available.
 - **Patterns**: Pre-composed block arrangements. The site may have registered patterns.
 
+### Blocks First
+
+WordPress provides blocks for most common UI patterns — columns, accordions, hero sections, FAQ layouts, dynamic post lists, buttons, tables, and more. Before writing custom HTML, check whether a core block already handles what the human is asking for. The block approach gives the human visual editing control in the editor, which custom markup doesn't.
+
+That said, there are legitimate cases where custom code is the right choice — complex interactivity, integrations with external APIs, or patterns that blocks genuinely don't cover. Use your judgment, and when in doubt, ask the human.
+
 ---
 
-## Core Blocks — Complete Reference
+## Core Blocks Reference
 
 ### Layout and Structure
 
 | Block | Name | Use for | Key attributes |
 |-------|------|---------|---------------|
-| Group | `core/group` | Any container — wraps blocks for shared styling, background, spacing | `tagName` (div/section/article/aside/main/header/footer), `layout` (constrained/flex/grid) |
+| Group | `core/group` | Container — wraps blocks for shared styling, background, spacing | `tagName` (div/section/article/aside/main/header/footer), `layout` (constrained/flex/grid) |
 | Columns | `core/columns` | Multi-column layouts | Contains `core/column` children, each with `width` attribute. Stacks on mobile automatically. |
 | Column | `core/column` | Single column inside Columns | `width` (e.g., "66.66%"), `verticalAlignment` |
 | Cover | `core/cover` | Hero sections — image/video with overlay text | `url`, `dimRatio` (overlay opacity 0-100), `overlayColor`, `minHeight`, `contentPosition` |
@@ -69,7 +60,7 @@ You create and modify content by composing blocks via the content abilities (`co
 | Heading | `core/heading` | Section headings | `level` (1-6), `textAlign`, `anchor` (for linking) |
 | List | `core/list` | Ordered/unordered lists | `ordered` (boolean). Contains `core/list-item` children. |
 | Quote | `core/quote` | Block quotes | `citation` attribute for attribution |
-| Details | `core/details` | Accordion/disclosure — collapsible content | `showContent` (default open/closed), `summary` (the clickable title). **Use this for FAQ.** |
+| Details | `core/details` | Accordion/disclosure — collapsible content | `showContent` (default open/closed), `summary` (the clickable title). Works well for FAQ sections. |
 | Table | `core/table` | Data tables | `hasFixedLayout`, `head`, `body`, `foot` arrays. Styles: `default`, `stripes` |
 | Code | `core/code` | Code snippets | Monospaced, no syntax highlighting by default |
 | Preformatted | `core/preformatted` | Whitespace-preserved text | Like Code but for non-code |
@@ -78,7 +69,7 @@ You create and modify content by composing blocks via the content abilities (`co
 
 | Block | Name | Use for | Key attributes |
 |-------|------|---------|---------------|
-| Image | `core/image` | Single image | `url`, `alt` (ALWAYS set for accessibility), `caption`, `sizeSlug` (thumbnail/medium/large/full), `linkDestination`. Styles: `default`, `rounded` |
+| Image | `core/image` | Single image | `url`, `alt` (important for accessibility), `caption`, `sizeSlug` (thumbnail/medium/large/full), `linkDestination`. Styles: `default`, `rounded` |
 | Gallery | `core/gallery` | Multi-image grid | Contains `core/image` children. `columns` (1-8), `imageCrop` (boolean), `fixedHeight` |
 | Media and Text | `core/media-text` | Side-by-side media + text | `mediaPosition` (left/right), `mediaWidth` (percent), `mediaType`, `isStackedOnMobile` |
 | Video | `core/video` | Video player | `src`, `poster`, `autoplay`, `loop`, `muted`, `controls` |
@@ -95,7 +86,7 @@ You create and modify content by composing blocks via the content abilities (`co
 
 ### Dynamic Content (Query Loop)
 
-This is how you display posts, pages, or any post type dynamically. **Do not hardcode post lists — use Query Loop.**
+The Query Loop is how you display posts, pages, or any post type dynamically. It keeps content fresh — when new posts are published, they appear automatically.
 
 | Block | Name | Use for |
 |-------|------|---------|
@@ -140,25 +131,15 @@ This is how you display posts, pages, or any post type dynamically. **Do not har
 | Navigation | `core/navigation` | Full site navigation menu |
 | Site Logo | `core/site-logo` | The site's logo |
 | Site Title | `core/site-title` | The site's name |
-| Breadcrumbs | `core/breadcrumbs` | Breadcrumb trail |
 | Table of Contents | `core/table-of-contents` | Auto-generated from headings on the page |
 | Search | `core/search` | Search form |
 | Social Links | `core/social-links` | Row of social media icons |
-
-### New in WordPress 7.0+
-
-| Block | Name | Use for |
-|-------|------|---------|
-| Accordion | `core/accordion` | Native accordion (multi-item) |
-| Tabs | `core/tab` + `core/tab-panel` | Tabbed content sections |
-| Icon | `core/icon` | SVG icon display |
-| Form | `core/form` | Native form builder |
 
 ### Widget Blocks
 
 | Block | Name | Use for |
 |-------|------|---------|
-| Latest Posts | `core/latest-posts` | Simple recent posts list (for sidebars — use Query Loop for main content) |
+| Latest Posts | `core/latest-posts` | Simple recent posts list (for sidebars — Query Loop is better for main content areas) |
 | Categories | `core/categories` | Category list/dropdown |
 | Archives | `core/archives` | Monthly archive links |
 | Calendar | `core/calendar` | Post calendar |
@@ -166,74 +147,64 @@ This is how you display posts, pages, or any post type dynamically. **Do not har
 
 ---
 
-## Common Page Patterns (Block Compositions)
+## Common Page Compositions
 
 ### Landing Page
 ```
-Group (constrained) → Cover (hero) → Heading + Paragraph + Buttons
-Group (constrained) → Columns (3) → [Image + Heading + Paragraph] × 3
-Group (constrained) → Heading + Query Loop (latest posts, grid 3)
-Group (constrained) → Heading + Paragraph + Buttons (final CTA)
+Group (constrained) -> Cover (hero) -> Heading + Paragraph + Buttons
+Group (constrained) -> Columns (3) -> [Image + Heading + Paragraph] x 3
+Group (constrained) -> Heading + Query Loop (latest posts, grid 3)
+Group (constrained) -> Heading + Paragraph + Buttons (final CTA)
 ```
 
 ### Blog Archive
 ```
-Query Loop (post type: post, per_page: 10) →
-  Post Template (grid or list) →
+Query Loop (post type: post, per_page: 10) ->
+  Post Template (grid or list) ->
     Post Featured Image + Post Title + Post Excerpt + Post Date
   Query Pagination
 ```
 
 ### FAQ Page
 ```
-Group (constrained) → Heading "Frequently Asked Questions"
-  Details (summary: "Question 1") → Paragraph (answer)
-  Details (summary: "Question 2") → Paragraph (answer)
-  Details (summary: "Question 3") → Paragraph (answer)
-```
-
-### About Page
-```
-Cover (hero with portrait) → Heading + Paragraph
-Group → Media and Text (image left, bio right)
-Group → Columns (3) → [values/highlights]
-Group → Heading + Paragraph + Buttons (contact CTA)
+Group (constrained) -> Heading "Frequently Asked Questions"
+  Details (summary: "Question 1") -> Paragraph (answer)
+  Details (summary: "Question 2") -> Paragraph (answer)
+  Details (summary: "Question 3") -> Paragraph (answer)
 ```
 
 ---
 
-## What To Always Set
+## Good Practices
 
-1. **Image alt text** — every image needs `alt` for accessibility. Describe what's in the image.
-2. **Heading hierarchy** — H1 is the page title (usually one per page). Use H2 for sections, H3 for subsections. Never skip levels.
-3. **Button links** — every button needs a `url`. Don't create buttons without destinations.
-4. **Featured images** — most themes expect posts to have featured images. Set them via post meta, not as the first image block.
-
-## What To Never Do
-
-1. **Never write raw HTML** to create layouts, columns, buttons, accordions, or any UI element that has a block equivalent.
-2. **Never hardcode post lists** — use Query Loop so content stays dynamic.
-3. **Never use Classic Editor block** (`core/freeform`) in new content.
-4. **Never skip the Group wrapper** — when sections need shared styling (background, padding), wrap blocks in a Group.
-5. **Never assume block availability** — new blocks (accordion, tabs, icon) require WordPress 7.0+. Check the site's WP version if using these.
+1. **Image alt text** — describe what's in the image for accessibility
+2. **Heading hierarchy** — H1 for the page title (usually one per page), H2 for sections, H3 for subsections
+3. **Button destinations** — buttons work best when they link somewhere
+4. **Featured images** — most themes expect posts to have featured images, set via post meta
+5. **Group wrappers** — when sections need shared styling (background, padding), wrapping blocks in a Group keeps things organized
 
 ---
 
-## Available Abilities for Content
+## Content Abilities
 
 | Ability | What it does |
 |---------|-------------|
 | `content/list` | List posts, pages, or any post type |
 | `content/get` | Get a single post's full content (block markup) |
+| `content/get-text` | Get readable text without block markup |
 | `content/create` | Create a new post/page with block content |
 | `content/update` | Update content, title, status, featured image |
+| `content/append` | Append blocks to existing content without reading the full post |
 | `content/delete` | Trash or permanently delete content |
 | `content/find-by-url` | Find content by its URL |
 | `content/get-by-slug` | Find content by its slug |
 | `content/discover-types` | See all registered post types on the site |
+| `blocks/parse` | Parse block markup into structured data |
+| `blocks/find-in-post` | Find specific blocks within a post |
+| `blocks/insert` | Insert blocks at a specific position |
 | `media/upload` | Upload images/files to use in blocks |
 | `media/list` | Browse the media library |
 
 ---
 
-*Source: WordPress/gutenberg trunk (2026-03). Block names and attributes from block.json schema files.*
+*Source: WordPress/gutenberg trunk (2026-03). Block names and attributes from block.json schema files. This is a seed document — it can be updated through the Knowledge Layer admin UI. More knowledge, skills, and agent patterns at [knowledge.wickedevolutions.com](https://knowledge.wickedevolutions.com).*
