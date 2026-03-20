@@ -58,6 +58,13 @@ class Schema {
 			self::up();
 			self::run_migrations( $current );
 		}
+
+		// Safety net: ensure seed tags exist even if the version-gated migration
+		// was skipped (e.g., version was bumped before tags table was created).
+		// seed_tags() is idempotent — it bails if any tags already exist.
+		if ( self::tables_exist() ) {
+			Seeder::seed_tags();
+		}
 	}
 
 	/**

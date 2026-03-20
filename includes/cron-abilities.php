@@ -18,11 +18,21 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'cron/list-events', array(
 		'label'       => 'List Cron Events',
-		'description' => 'List all scheduled cron events with next run times, recurrence, and arguments.',
+		'description' => 'List scheduled cron events with next run times, recurrence, and arguments. Paginated — returns up to 100 events per page.',
 		'input_schema' => array(
 			'type'       => 'object',
 			'properties' => array(
-				'search' => abilities_for_ai_schema_search( 'Filter by hook name (partial match)' ),
+				'search'   => abilities_for_ai_schema_search( 'Filter by hook name (partial match)' ),
+				'per_page' => array(
+					'type'        => 'integer',
+					'description' => 'Events per page (default 100, max 200).',
+					'default'     => 100,
+				),
+				'page' => array(
+					'type'        => 'integer',
+					'description' => 'Page number (default 1).',
+					'default'     => 1,
+				),
 			),
 		),
 		'output_schema' => abilities_for_ai_schema_collection_output( 'events', array(
@@ -35,23 +45,32 @@ add_action( 'wp_abilities_api_init', function() {
 		'callback' => function( $params ) {
 			$crons = _get_cron_array();
 			if ( ! $crons ) {
-				return array( 'events' => array(), 'total' => 0 );
+				return array( 'events' => array(), 'total' => 0, 'page' => 1, 'pages' => 0 );
 			}
 
 			$events = array();
 			foreach ( $crons as $timestamp => $hooks ) {
+				if ( ! is_array( $hooks ) ) {
+					continue;
+				}
 				foreach ( $hooks as $hook => $schedules ) {
+					if ( ! is_array( $schedules ) ) {
+						continue;
+					}
 					if ( ! empty( $params['search'] ) && stripos( $hook, $params['search'] ) === false ) {
 						continue;
 					}
 					foreach ( $schedules as $key => $data ) {
+						if ( ! is_array( $data ) ) {
+							continue;
+						}
+						$schedule = $data['schedule'] ?? false;
 						$events[] = array(
-							'hook'       => $hook,
-							'next_run'   => date( 'Y-m-d H:i:s', $timestamp ),
-							'timestamp'  => $timestamp,
-							'schedule'   => $data['schedule'] ?? false,
-							'interval'   => $data['interval'] ?? null,
-							'args'       => '[stripped for security]',
+							'hook'       => (string) $hook,
+							'next_run'   => gmdate( 'Y-m-d H:i:s', $timestamp ),
+							'timestamp'  => (int) $timestamp,
+							'schedule'   => $schedule ? (string) $schedule : 'single',
+							'interval'   => isset( $data['interval'] ) ? (int) $data['interval'] : null,
 						);
 					}
 				}
@@ -61,7 +80,14 @@ add_action( 'wp_abilities_api_init', function() {
 				return $a['timestamp'] - $b['timestamp'];
 			});
 
-			return array( 'events' => $events, 'total' => count( $events ) );
+			$total    = count( $events );
+			$per_page = min( max( (int) ( $params['per_page'] ?? 100 ), 1 ), 200 );
+			$page     = max( (int) ( $params['page'] ?? 1 ), 1 );
+			$pages    = (int) ceil( $total / $per_page );
+			$offset   = ( $page - 1 ) * $per_page;
+			$events   = array_slice( $events, $offset, $per_page );
+
+			return array( 'events' => $events, 'total' => $total, 'page' => $page, 'pages' => $pages );
 		},
 	));
 

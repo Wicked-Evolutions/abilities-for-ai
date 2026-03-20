@@ -148,6 +148,90 @@ function astra_abilities_deep_merge( $base, $override ) {
 }
 
 /**
+ * Map Custom Layout input fields to Astra post meta keys.
+ *
+ * Used by create and update callbacks. On create ($is_update=false), all applicable
+ * meta keys are returned with defaults. On update ($is_update=true), only keys
+ * present in $input are returned.
+ *
+ * @param array  $input       Ability input parameters.
+ * @param string $layout_type Layout type (hooks, header, footer, content, template, 404).
+ * @param bool   $is_update   True for update (sparse), false for create (full defaults).
+ * @return array Associative array of meta_key => value.
+ */
+function astra_abilities_map_input_to_meta( $input, $layout_type, $is_update ) {
+	$meta = array();
+
+	// Layout type — always set on create.
+	if ( ! $is_update || isset( $input['layout_type'] ) ) {
+		$meta['ast-advanced-hook-layout'] = $layout_type;
+	}
+
+	// Hook action (for hooks layout type).
+	if ( isset( $input['hook'] ) ) {
+		$meta['ast-advanced-hook-action'] = sanitize_text_field( $input['hook'] );
+	} elseif ( ! $is_update ) {
+		$meta['ast-advanced-hook-action'] = '';
+	}
+
+	// Priority.
+	if ( isset( $input['priority'] ) ) {
+		$meta['ast-advanced-hook-priority'] = (int) $input['priority'];
+	} elseif ( ! $is_update ) {
+		$meta['ast-advanced-hook-priority'] = 10;
+	}
+
+	// Editor type.
+	if ( isset( $input['editor_type'] ) ) {
+		$meta['editor_type'] = sanitize_text_field( $input['editor_type'] );
+	} elseif ( ! $is_update ) {
+		$meta['editor_type'] = '';
+	}
+
+	// PHP code (for code_editor).
+	if ( isset( $input['php_code'] ) ) {
+		$meta['ast-advanced-hook-php-code'] = $input['php_code'];
+	}
+
+	// Template type (for template layout type).
+	if ( isset( $input['template_type'] ) ) {
+		$meta['ast-advanced-hook-template-type'] = sanitize_text_field( $input['template_type'] );
+	} elseif ( ! $is_update && 'template' === $layout_type ) {
+		$meta['ast-advanced-hook-template-type'] = 'single';
+	}
+
+	// Display rules.
+	if ( isset( $input['display_rules'] ) ) {
+		$meta['ast-advanced-hook-location'] = $input['display_rules'];
+	} elseif ( ! $is_update ) {
+		$meta['ast-advanced-hook-location'] = array();
+	}
+
+	// Exclusion rules.
+	if ( isset( $input['exclusion_rules'] ) ) {
+		$meta['ast-advanced-hook-exclusion'] = $input['exclusion_rules'];
+	} elseif ( ! $is_update ) {
+		$meta['ast-advanced-hook-exclusion'] = array();
+	}
+
+	// User roles.
+	if ( isset( $input['user_roles'] ) ) {
+		$meta['ast-advanced-hook-users'] = $input['user_roles'];
+	} elseif ( ! $is_update ) {
+		$meta['ast-advanced-hook-users'] = array();
+	}
+
+	// Devices.
+	if ( isset( $input['devices'] ) ) {
+		$meta['ast-advanced-display-device'] = $input['devices'];
+	} elseif ( ! $is_update ) {
+		$meta['ast-advanced-display-device'] = array( 'desktop', 'tablet', 'mobile' );
+	}
+
+	return $meta;
+}
+
+/**
  * Return valid page meta keys and their allowed values.
  *
  * @return array

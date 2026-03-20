@@ -117,7 +117,16 @@ class Registrar {
 		$original_cb  = $callback;
 		$callback     = static function( $input = null ) use ( $original_cb, $ability_name, $module, $op_type ) {
 			if ( ! abilities_for_ai_ability_enabled( $ability_name, $module, $op_type ) ) {
-				return new \WP_Error( 'ability_disabled', sprintf( 'Ability "%s" is disabled by permission settings.', $ability_name ), array( 'status' => 403 ) );
+				$op_label = ucfirst( $op_type );
+				return new \WP_Error(
+					'ability_disabled',
+					sprintf(
+						'%s permission is disabled for the %s module. Enable it in Abilities for AI → Permissions.',
+						$op_label,
+						$module
+					),
+					array( 'status' => 403, 'ability' => $ability_name, 'module' => $module, 'operation' => $op_type )
+				);
 			}
 			return $original_cb( $input );
 		};

@@ -145,11 +145,18 @@ $reg->write( 'presto-player/create-video', array(
 		}
 
 		$video  = new \PrestoPlayer\Models\Video();
-		$result = $video->createAndGet( $args );
+		$result = $video->create( $args );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
-		return $result->toArray();
+
+		// create() returns the insert ID — fetch the full record.
+		$created = new \PrestoPlayer\Models\Video( $result );
+		$data    = $created->toArray();
+		if ( empty( $data ) || empty( $data['id'] ) ) {
+			return new \WP_Error( 'create_failed', 'Video was inserted but could not be retrieved.', array( 'status' => 500 ) );
+		}
+		return $data;
 	},
 ));
 

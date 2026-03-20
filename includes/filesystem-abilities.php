@@ -273,12 +273,12 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'theme/update-asset', array(
 		'label'       => 'Update Theme Asset',
-		'description' => "Write a file to the active theme's assets/ directory. Restricted to css, js, json, md extensions.",
+		'description' => "Write a file to the active theme's assets/ directory. Restricted to css, js, json, md extensions. Asset type is auto-detected from the filename extension if not provided.",
 		'input_schema' => array(
 			'type'       => 'object',
-			'required'   => array( 'asset_type', 'filename', 'content' ),
+			'required'   => array( 'filename', 'content' ),
 			'properties' => array(
-				'asset_type' => array( 'type' => 'string', 'description' => 'Asset type: css, js, json, or md' ),
+				'asset_type' => array( 'type' => 'string', 'description' => 'Asset type: css, js, json, or md. Optional — auto-detected from filename extension if omitted.' ),
 				'filename'   => array( 'type' => 'string', 'description' => 'Filename (e.g., custom.css)' ),
 				'content'    => array( 'type' => 'string', 'description' => 'File content to write' ),
 			),
@@ -295,16 +295,18 @@ add_action( 'wp_abilities_api_init', function() {
 				return wp_abilities_error( 'rest_forbidden', 'File editing is disabled (DISALLOW_FILE_EDIT is set in wp-config.php).' );
 			}
 
-			$asset_type    = sanitize_text_field( $params['asset_type'] ?? '' );
 			$filename      = sanitize_file_name( $params['filename'] ?? '' );
 			$content       = $params['content'] ?? '';
 			$allowed_types = array( 'css', 'js', 'json', 'md' );
+			$ext           = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
+
+			// Auto-detect asset_type from extension if not provided.
+			$asset_type = sanitize_text_field( $params['asset_type'] ?? $ext );
 
 			if ( ! in_array( $asset_type, $allowed_types, true ) ) {
 				return wp_abilities_error( 'ability_invalid_input', 'Asset type must be: ' . implode( ', ', $allowed_types ) );
 			}
 
-			$ext = strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
 			if ( $ext !== $asset_type ) {
 				return wp_abilities_error( 'ability_invalid_input', "Filename extension .{$ext} does not match asset_type '{$asset_type}'." );
 			}
