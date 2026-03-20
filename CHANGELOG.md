@@ -2,6 +2,11 @@
 
 All notable changes to Abilities for AI will be documented in this file.
 
+## [1.7.1] - 2026-03-20
+
+### Fixed
+- **Multisite permissions self-heal:** Sites where `abilities_for_ai_permissions` option was never seeded (missed activation hook, file-copy deploy, or subsites created during edge conditions) now auto-seed defaults on first ability call. Prevents silent `delete: false` on subsites that appear fully enabled in the UI on other sites.
+
 ## [1.7.0] - 2026-03-20
 
 ### Fixed

@@ -287,7 +287,11 @@ function abilities_for_ai_module_labels() {
 function abilities_for_ai_get_permissions( $module ) {
 	static $perms = null;
 	if ( $perms === null ) {
-		$perms = get_option( 'abilities_for_ai_permissions', array() );
+		$perms = get_option( 'abilities_for_ai_permissions', false );
+		if ( $perms === false ) {
+			$perms = abilities_for_ai_permission_defaults();
+			update_option( 'abilities_for_ai_permissions', $perms, true );
+		}
 	}
 	$defaults = abilities_for_ai_permission_defaults();
 	$module_defaults = $defaults[ $module ] ?? array( 'read' => true );
@@ -311,7 +315,11 @@ function abilities_for_ai_get_permissions( $module ) {
 function abilities_for_ai_ability_enabled( $ability_name, $module, $op ) {
 	static $perms = null;
 	if ( $perms === null ) {
-		$perms = get_option( 'abilities_for_ai_permissions', array() );
+		$perms = get_option( 'abilities_for_ai_permissions', false );
+		if ( $perms === false ) {
+			$perms = abilities_for_ai_permission_defaults();
+			update_option( 'abilities_for_ai_permissions', $perms, true );
+		}
 	}
 
 	$overrides = $perms['_overrides'] ?? array();
