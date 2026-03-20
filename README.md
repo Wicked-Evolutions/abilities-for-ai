@@ -1,380 +1,172 @@
 # Abilities for AI
 
-Native WordPress abilities for AI agents. Powers AI control through the official Abilities API.
+Native WordPress abilities for AI agents. Powers AI control through the official [WordPress Abilities API](https://developer.wordpress.org/reference/functions/wp_register_ability/).
 
 | | |
 |---|---|
-| **Modules** | 21 (19 core + 4 third-party suites) |
 | **Requires** | WordPress 6.9+, PHP 8.0+ |
+| **License** | GPL-2.0-or-later |
+| **Author** | [Wicked Evolutions](https://wickedevolutions.com) |
 
-## Free Tier — The Round-Trip
+## What It Does
 
-The free tier gives AI full read access to everything (65 abilities) plus knowledge docs (3), a status check (1), a controlled write round-trip (5 create + 6 delete). This lets AI agents prove competence before a site owner commits to Pro.
+Registers abilities across WordPress core and supported third-party plugins. Each ability is a named operation that AI agents can discover, validate, and execute through the MCP protocol.
 
-- **Read everything** (65) — browse content, inspect settings, discover capabilities, parse blocks, list users, check site health
-- **Knowledge** (3) — `knowledge/getting-started`, `knowledge/gutenberg-blocks`, `knowledge/fluent-crm`
-- **Status** (1) — `suite/get-status`
-- **Test write** (5) — `content/create`, `taxonomies/create-term`, `plugins/install`, `media/create`, `users/create`
-- **Delete the test** (6) — `content/delete`, `blocks/remove`, `taxonomies/delete-term`, `menus/delete-menu`, `menus/delete-menu-item`, `media/delete`
+Ability counts grow with every release — check the [CHANGELOG](#version-history) for the latest numbers, or call `suite/get-status` on your site for the live count.
 
-**80 free abilities total.** Enough to explore, prototype, and demonstrate value.
+## Install
 
-## Pro Tier — The Juice
+### From our store
 
-Pro unlocks the abilities that build on what exists: update content, modify blocks, bulk search-replace, manage themes, configure settings, assign taxonomies, reorder menus. The operations that turn an AI assistant into an AI operator.
+Download from [community.wickedevolutions.com/item/abilities-for-ai/](https://community.wickedevolutions.com/item/abilities-for-ai/), then upload via **Plugins → Add New → Upload Plugin**.
 
-**48 pro abilities.** Everything that modifies, updates, or manages production state.
+### From GitHub
 
-## Pro Gate
+```bash
+cd wp-content/plugins/
+git clone https://github.com/Wicked-Evolutions/abilities-for-ai.git
+```
 
-All 128 abilities are registered and visible to AI regardless of license. Pro abilities return a clear 403 with an upgrade URL at execution time. The AI discovers the gate naturally — no hidden capabilities, no surprise walls.
+### You also need
 
-License validation uses FluentCart API with 24-hour cache and 7-day grace period for renewal gaps.
+1. **[Abilities MCP Adapter](https://community.wickedevolutions.com/item/abilities-mcp-adapter/)** — exposes abilities as MCP tools via REST API
+2. **[Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp)** bridge — connects your AI client to WordPress (`npx @wickedevolutions/abilities-mcp`)
 
-## 19 Modules
+See [docs/getting-started.md](docs/getting-started.md) for the full setup guide.
 
-### Content (11)
+## Free and Pro
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `content/list` | Read | Free |
-| `content/get` | Read | Free |
-| `content/get-snapshot` | Read | Free |
-| `content/discover-types` | Read | Free |
-| `content/find-by-url` | Read | Free |
-| `content/get-by-slug` | Read | Free |
-| `content/create` | Write | Free |
-| `content/update` | Write | Pro |
-| `content/change-type` | Write | Pro |
-| `content/search-replace` | Write | Pro |
-| `content/delete` | Delete | Free |
+**Free** — full read access across all modules, plus a controlled write round-trip (create + delete) so AI agents can prove competence before a site owner commits to Pro.
 
-### Blocks (8)
+**Pro** — unlocks write and delete abilities: update content, modify blocks, bulk search-replace, manage themes, configure settings, assign taxonomies, reorder menus. The operations that turn an AI assistant into an AI operator.
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `blocks/parse` | Read | Free |
-| `blocks/serialize` | Read | Free |
-| `blocks/list-types` | Read | Free |
-| `blocks/get-type` | Read | Free |
-| `blocks/find-in-post` | Read | Free |
-| `blocks/insert` | Write | Pro |
-| `blocks/replace` | Write | Pro |
-| `blocks/remove` | Delete | Free |
+All abilities are registered and visible to AI regardless of license. Pro abilities return a clear 403 with an upgrade path at execution time. No hidden capabilities, no surprise walls.
 
-### Taxonomies (8)
+## WordPress Core Modules
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `taxonomies/discover` | Read | Free |
-| `taxonomies/list-terms` | Read | Free |
-| `taxonomies/get-term` | Read | Free |
-| `taxonomies/get-content-terms` | Read | Free |
-| `taxonomies/create-term` | Write | Free |
-| `taxonomies/update-term` | Write | Pro |
-| `taxonomies/assign-to-content` | Write | Pro |
-| `taxonomies/delete-term` | Delete | Free |
+These modules cover WordPress's native functionality. Available on every WordPress 6.9+ site.
 
-### Menus (12)
+### Content
+`content/list` · `content/get` · `content/get-snapshot` · `content/get-text` · `content/list-structure` · `content/get-site-map` · `content/discover-types` · `content/find-by-url` · `content/get-by-slug` · `content/create` · `content/update` · `content/append` · `content/duplicate` · `content/change-type` · `content/search-replace` · `content/batch-update` · `content/delete`
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `menus/list-menus` | Read | Free |
-| `menus/get-menu` | Read | Free |
-| `menus/list-menu-items` | Read | Free |
-| `menus/list-locations` | Read | Free |
-| `menus/create-menu` | Write | Pro |
-| `menus/add-menu-item` | Write | Pro |
-| `menus/update-menu-item` | Write | Pro |
-| `menus/reorder-menu-items` | Write | Pro |
-| `menus/assign-location` | Write | Pro |
-| `menus/unassign-location` | Write | Pro |
-| `menus/delete-menu` | Delete | Free |
-| `menus/delete-menu-item` | Delete | Free |
+### Blocks
+`blocks/parse` · `blocks/serialize` · `blocks/list-types` · `blocks/get-type` · `blocks/find-in-post` · `blocks/get-at-path` · `blocks/find-nested` · `blocks/insert` · `blocks/replace` · `blocks/remove` · `blocks/update-attributes` · `blocks/update-at-path` · `blocks/append-inner`
 
-### Meta (13)
+### Taxonomies
+`taxonomies/discover` · `taxonomies/list-terms` · `taxonomies/get-term` · `taxonomies/get-content-terms` · `taxonomies/create-term` · `taxonomies/update-term` · `taxonomies/assign-to-content` · `taxonomies/batch-assign` · `taxonomies/delete-term`
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `meta/list-post-meta` | Read | Free |
-| `meta/get-post-meta` | Read | Free |
-| `meta/list-term-meta` | Read | Free |
-| `meta/get-term-meta` | Read | Free |
-| `meta/list-user-meta` | Read | Free |
-| `meta/get-user-meta` | Read | Free |
-| `meta/list-registered` | Read | Free |
-| `meta/update-post-meta` | Write | Pro |
-| `meta/update-term-meta` | Write | Pro |
-| `meta/update-user-meta` | Write | Pro |
-| `meta/delete-post-meta` | Delete | Pro |
-| `meta/delete-term-meta` | Delete | Pro |
-| `meta/delete-user-meta` | Delete | Pro |
+### Media
+`media/list` · `media/get` · `media/create` · `media/upload` · `media/update` · `media/delete`
 
-### Cache (7)
+### Menus
+`menus/list-menus` · `menus/get-menu` · `menus/list-menu-items` · `menus/list-locations` · `menus/create-menu` · `menus/add-menu-item` · `menus/update-menu-item` · `menus/reorder-menu-items` · `menus/assign-location` · `menus/unassign-location` · `menus/delete-menu` · `menus/delete-menu-item`
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `cache/list-transients` | Read | Free |
-| `cache/get-transient` | Read | Free |
-| `cache/object-cache-status` | Read | Free |
-| `cache/set-transient` | Write | Pro |
-| `cache/flush-page-cache` | Write | Pro |
-| `cache/delete-transient` | Delete | Pro |
-| `cache/flush` | Delete | Pro |
+### Users
+`users/list` · `users/get` · `users/create` · `users/update` · `users/delete` · `users/list-app-passwords` · `users/create-app-password` · `users/delete-app-password` · `users/delete-all-app-passwords`
 
-### Plugins (7)
+### Meta
+`meta/list-post-meta` · `meta/get-post-meta` · `meta/list-term-meta` · `meta/get-term-meta` · `meta/list-user-meta` · `meta/get-user-meta` · `meta/list-registered` · `meta/update-post-meta` · `meta/update-term-meta` · `meta/update-user-meta` · `meta/delete-post-meta` · `meta/delete-term-meta` · `meta/delete-user-meta`
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `plugins/list` | Read | Free |
-| `plugins/get` | Read | Free |
-| `plugins/search-repository` | Read | Free |
-| `plugins/install` | Write | Free |
-| `plugins/activate` | Write | Pro |
-| `plugins/deactivate` | Write | Pro |
-| `plugins/delete` | Delete | Pro |
+### Comments
+`comments/list` · `comments/get` · `comments/create` · `comments/update` · `comments/delete`
 
-### Media (6)
+### Themes
+`themes/list` · `themes/get-active` · `themes/list-mods` · `themes/get-mod` · `themes/get-theme-json` · `themes/design-snapshot` · `themes/activate` · `themes/install` · `themes/set-mod` · `themes/delete` · `themes/delete-mod`
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `media/list` | Read | Free |
-| `media/get` | Read | Free |
-| `media/create` | Write | Free |
-| `media/upload` | Write | Pro |
-| `media/update` | Write | Pro |
-| `media/delete` | Delete | Free |
+### Plugins
+`plugins/list` · `plugins/get` · `plugins/search-repository` · `plugins/install` · `plugins/activate` · `plugins/deactivate` · `plugins/delete`
 
-### Users (5)
+### Settings
+`settings/list` · `settings/get` · `settings/get-group` · `settings/get-permalink-structure` · `settings/update` · `settings/delete`
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `users/list` | Read | Free |
-| `users/get` | Read | Free |
-| `users/create` | Write | Free |
-| `users/update` | Write | Pro |
-| `users/delete` | Delete | Pro |
+### Patterns
+`patterns/list` · `patterns/get` · `patterns/list-categories` · `patterns/register` · `patterns/unregister`
 
-### Comments (5)
+### Cache
+`cache/list-transients` · `cache/get-transient` · `cache/object-cache-status` · `cache/set-transient` · `cache/flush-page-cache` · `cache/delete-transient` · `cache/flush`
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `comments/list` | Read | Free |
-| `comments/get` | Read | Free |
-| `comments/create` | Write | Pro |
-| `comments/update` | Write | Pro |
-| `comments/delete` | Delete | Pro |
+### Cron
+`cron/list-events` · `cron/list-schedules` · `cron/get-event` · `cron/create-event` · `cron/delete-event`
 
-### Patterns (5)
+### Filesystem
+`filesystem/list-directory` · `filesystem/read-file` · `filesystem/write-file` · `filesystem/write-binary` · `filesystem/create-directory` · `filesystem/delete-file` · `theme/update-asset` · `theme/enqueue-asset` · `theme/dequeue-asset` · `theme/list-enqueued-assets`
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `patterns/list` | Read | Free |
-| `patterns/get` | Read | Free |
-| `patterns/list-categories` | Read | Free |
-| `patterns/register` | Write | Pro |
-| `patterns/unregister` | Delete | Pro |
+### Site Health
+`site-health/status` · `site-health/pulse` · `site-health/list-tests` · `site-health/run-test` · `site-health/info`
 
-### Settings (6)
+### Revisions
+`revisions/list` · `revisions/get` · `revisions/restore` · `revisions/delete` · `revisions/purge`
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `settings/list` | Read | Free |
-| `settings/get` | Read | Free |
-| `settings/get-group` | Read | Free |
-| `settings/get-permalink-structure` | Read | Free |
-| `settings/update` | Write | Pro |
-| `settings/delete` | Delete | Pro |
+### Rewrite
+`rewrite/get-structure` · `rewrite/list-rules` · `rewrite/flush`
 
-### Themes (10)
+### REST Discovery
+`rest/list-namespaces` · `rest/list-routes` · `rest/get-route-schema` · `rest/get-index`
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `themes/list` | Read | Free |
-| `themes/get-active` | Read | Free |
-| `themes/list-mods` | Read | Free |
-| `themes/get-mod` | Read | Free |
-| `themes/get-theme-json` | Read | Free |
-| `themes/activate` | Write | Pro |
-| `themes/install` | Write | Pro |
-| `themes/set-mod` | Write | Pro |
-| `themes/delete` | Delete | Pro |
-| `themes/delete-mod` | Delete | Pro |
+### Multisite
+`multisite/list-sites` · `multisite/get-site` · `multisite/update-site` · `multisite/get-network-settings`
 
-### Site Health (4)
+### Knowledge Layer
+`knowledge/list` · `knowledge/get` · `knowledge/create` · `knowledge/update` · `knowledge/delete` · `knowledge/fork` · `knowledge/search` · `knowledge/log-session` · `knowledge/list-sessions` · `knowledge/get-session` · `knowledge/add-observation` · `knowledge/list-observations` · `knowledge/resolve-observation` · `knowledge/get-revisions` · `knowledge/restore-revision`
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `site-health/status` | Read | Free |
-| `site-health/list-tests` | Read | Free |
-| `site-health/run-test` | Read | Free |
-| `site-health/info` | Read | Free |
+### Status
+`suite/get-status`
 
-### Filesystem (5)
+## Supported Third-Party Plugins
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `filesystem/list-directory` | Read | Free |
-| `filesystem/read-file` | Read | Free |
-| `filesystem/write-file` | Write | Pro |
-| `theme/update-asset` | Write | Pro |
-| `filesystem/delete-file` | Delete | Pro |
+These modules register automatically when the corresponding plugin is active. No configuration needed.
 
-### REST Discovery (4)
+### Astra Theme
+Customizer settings, layouts, typography, colors, and CPT options. See [docs/suites/astra.md](docs/suites/astra.md) for the full ability list.
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `rest/list-namespaces` | Read | Free |
-| `rest/list-routes` | Read | Free |
-| `rest/get-route-schema` | Read | Free |
-| `rest/get-index` | Read | Free |
+### Spectra (UAG)
+Block CSS, theme classes, and Spectra-specific block settings. See [docs/suites/spectra.md](docs/suites/spectra.md) for the full ability list.
 
-### Cron (5)
+### Presto Player
+Video management, presets, audio presets, email collection, stats, webhooks, and settings. See [docs/suites/presto-player.md](docs/suites/presto-player.md) for the full ability list.
 
-| Ability | Op | Tier |
-|---------|-----|------|
-| `cron/list-events` | Read | Free |
-| `cron/list-schedules` | Read | Free |
-| `cron/get-event` | Read | Free |
-| `cron/create-event` | Write | Pro |
-| `cron/delete-event` | Delete | Pro |
-
-### Rewrite (3)
-
-| Ability | Op | Tier |
-|---------|-----|------|
-| `rewrite/get-structure` | Read | Free |
-| `rewrite/list-rules` | Read | Free |
-| `rewrite/flush` | Write | Pro |
-
-### Knowledge (3)
-
-| Ability | Op | Tier |
-|---------|-----|------|
-| `knowledge/getting-started` | Read | Free |
-| `knowledge/gutenberg-blocks` | Read | Free |
-| `knowledge/fluent-crm` | Read | Free |
-
-### Status (1)
-
-| Ability | Op | Tier |
-|---------|-----|------|
-| `suite/get-status` | Read | Free |
-
-## Requirements
-
-- WordPress 6.9+ (Abilities API in core)
-- PHP 8.0+
-- [Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter) (for MCP integration)
-
-WordPress 7.0 (April 2026) ships the JS client for the Abilities API, completing the server-client loop.
-
-## Installation
-
-1. Upload `abilities-for-ai/` to `wp-content/plugins/`
-2. Activate the plugin
-3. All 128 abilities auto-register through the Abilities API
-4. Connect an MCP-compatible AI client via [Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp)
-
-No Composer dependencies.
+### SureCart
+Products, prices, orders, subscriptions, customers, coupons, bumps, shipping, tax, licenses, affiliates, and more. See [docs/suites/surecart.md](docs/suites/surecart.md) for the full ability list.
 
 ## Admin Dashboard
 
-**Settings > Abilities for AI** provides a unified dashboard with two tabs:
+**Settings → Abilities for AI** provides:
 
-**Abilities Explorer** — Browse all registered abilities with inline Read/Write/Delete toggles per module. Filter by module, operation type, or tier. See exactly what AI can and cannot do on your site.
-
-**License** — Enter and validate your Pro license key. Network-wide license available for multisite ($199 LTD).
+- **Abilities Explorer** — browse all registered abilities with inline Read/Write/Delete toggles per module
+- **License** — enter and validate your Pro license key (network-wide for multisite)
 
 ## Security Model
 
-### Capability Checks
+Every ability enforces WordPress capabilities at execution time. The WordPress user role assigned to your AI agent determines access:
 
-Every ability enforces WordPress capabilities at execution time. The WordPress user role assigned to your AI agent determines which modules are accessible:
+| Role | Access |
+|------|--------|
+| **Administrator** | All modules |
+| **Editor** | Content, Blocks, Taxonomies, Patterns, Meta, Media |
 
-| Module | Capability | Administrator | Editor |
-|--------|-----------|:---:|:---:|
-| Content | `edit_posts` | Yes | Yes |
-| Blocks | `edit_posts` | Yes | Yes |
-| Taxonomies | `edit_posts` | Yes | Yes |
-| Patterns | `edit_posts` | Yes | Yes |
-| Meta | `edit_posts` | Yes | Yes |
-| Media | `upload_files` | Yes | Yes |
-| Comments | `moderate_comments` | Yes | — |
-| Menus | `edit_theme_options` | Yes | — |
-| Themes | `switch_themes` | Yes | — |
-| Users | `list_users` | Yes | — |
-| Plugins | `activate_plugins` | Yes | — |
-| Settings | `manage_options` | Yes | — |
-| Cache | `manage_options` | Yes | — |
-| Cron | `manage_options` | Yes | — |
-| Filesystem | `manage_options` | Yes | — |
-| REST Discovery | `manage_options` | Yes | — |
-| Rewrite | `manage_options` | Yes | — |
-| Site Health | `view_site_health_checks` | Yes | — |
+Per-module Read/Write/Delete toggles provide additional control. Pro abilities require both the permission toggle AND a valid license.
 
-**Editor** gives access to 6 content-focused modules — ideal for publishing workflows where AI should write content but not manage infrastructure. **Administrator** unlocks all 19 modules.
+## Documentation
 
-### Permission Toggles
-
-Per-module Read/Write/Delete toggles in the admin dashboard. Disabled abilities are not registered — they do not appear in the API at all. Progressive disclosure: start read-only, enable write when comfortable, enable delete when confident.
-
-### Pro Gate
-
-Pro abilities are always visible but return 403 at execution time without a valid license. Both the permission toggle AND the license must pass — neither alone is sufficient.
-
-## Multisite Support
-
-Network activation supported. Network-wide license at $199 LTD covers all subsites.
-
-## Known Gaps
-
-| Gap | Description | Workaround |
-|-----|-------------|------------|
-| Application Passwords | No ability to create, list, or revoke WordPress Application Passwords (`wp-json/wp/v2/users/{id}/application-passwords`). Required for self-service AI agent onboarding. | WP-CLI: `wp user application-password create <user> <name>` or WordPress Admin UI |
-
-Candidate abilities: `users/create-application-password`, `users/list-application-passwords`, `users/revoke-application-password`.
+- [Getting Started](docs/getting-started.md) — installation + AI agent onboarding
+- [Abilities API Architecture](docs/abilities-api-architecture.md) — how registration and execution work
+- [Glossary](docs/glossary.md) — key terms
+- [Register an Ability](docs/guides/register-an-ability.md) — build your own
+- [Register a Category](docs/guides/register-a-category.md) — group abilities
 
 ## Links
 
-- [Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp) — MCP bridge for AI clients
-- [Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter) — WordPress-side MCP protocol handler
-- [Product home](https://wickedevolutions.com)
-
-## Version
-
-**Current:** 1.3.0
+- [Product page](https://community.wickedevolutions.com/item/abilities-for-ai/)
+- [Abilities MCP Adapter](https://community.wickedevolutions.com/item/abilities-mcp-adapter/) — WordPress-side MCP protocol handler
+- [Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp) — MCP bridge for AI clients (`npx @wickedevolutions/abilities-mcp`)
+- [Abilities for Fluent Plugins](https://github.com/Wicked-Evolutions/abilities-for-fluent-plugins) — FluentCRM, Community, Cart, Support, Boards, Booking, and more
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.3.0 | 2026-03-16 | `theme/enqueue-asset`, `theme/dequeue-asset`, `theme/list-enqueued-assets` — load CSS/JS without PHP file writes |
-| 1.2.0 | 2026-03-15 | Serialization safety (`abilities_for_ai_safe_value()`), security hardening (filesystem denylist for wp-config.php etc.), suite-wide stdClass→array fix for Presto Player and Spectra |
-| 1.1.1 | 2026-03-15 | Spectra `get-theme-classes` output schema alignment |
-| 1.1.0 | 2026-03-14 | SureCart suite complete (91 abilities across 14 domains), permission defaults fix, category double-registration fix |
-| 1.0.5 | 2026-03-13 | License manager, plugin updater, network admin UI, boot self-check, pre-download fix |
-| 1.0.4 | 2026-03-12 | Batch abilities (`content/batch-update`), site pulse (`content/get-site-map`, `content/list-structure`, `content/get-text`), design snapshot |
-| 1.0.3 | 2026-03-11 | Knowledge Layer v0.0.2 — database tables, models, 15 CRUD abilities, seed system, observation system |
-| 1.0.2 | 2026-03-10 | Revisions + multisite modules, app password abilities, updater fix for multisite |
-| 1.0.1 | 2026-03-09 | Filesystem abilities (4), knowledge auto-loading, `get-content-terms` object cast, `run-test` fix |
-| 1.0.0 | 2026-03-08 | Rename from WP Abilities Suite → Abilities for AI. 19 core modules. |
-
-### Third-Party Suites (added v1.0.5–v1.1.0)
-
-| Suite | Abilities | Added |
-|-------|-----------|-------|
-| SureCart | 91 | v1.1.0 |
-| Astra | 36 | v1.0.5 |
-| Presto Player | 33 | v1.0.5 |
-| Spectra | 25 | v1.0.5 |
+See [CHANGELOG.md](CHANGELOG.md) for the complete version history.
 
 ## License
 
 GPL-2.0-or-later
 
-Copyright Influencentricity | Wicked Evolutions
-
-## Author
-
-[Influencentricity](https://influencentricity.com)
+Copyright 2026 Wicked Evolutions
