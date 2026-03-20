@@ -2,6 +2,104 @@
 
 All notable changes to Abilities for AI will be documented in this file.
 
+## [1.7.0] - 2026-03-20
+
+### Fixed
+- **#46 (FATAL):** Implemented `astra_abilities_map_input_to_meta()` helper — maps input fields to Astra post meta keys for Custom Layout create/update
+- **#47:** Confirmed `astra/update-cpt-layout-defaults` is fully implemented — false positive from testing without Astra active
+- **#53:** Made `asset_type` optional in `theme/update-asset` — auto-detects from filename extension
+- **#52:** Fixed `presto-player/create-video` — changed `createAndGet()` to `create()` + fetch (Presto Player model API)
+- **#50:** Improved permission error messages in both Registrars — now includes module name, required permission, and settings path
+- **#49:** Added pagination (100/page, max 200), type guards, and normalized schedule values in `cron/list-events`
+- **#70:** Added safety net in KL `Schema::maybe_migrate()` — unconditionally calls `seed_tags()` when tables exist
+
+## [1.6.1] - 2026-03-20
+
+### Added
+- GitHub Releases auto-update fallback — users who install from GitHub get update notifications in wp-admin without a FluentCart license
+- Store product page URLs (community.wickedevolutions.com)
+
+## [1.6.0] - 2026-03-19
+
+### Added
+- `filesystem/create-directory` and `filesystem/write-binary` abilities
+- Unblocked PHP extension whitelist for theme development (#73, #74, #75)
+
+### Changed
+- `content/append` refactored to clean string-only API
+
+## [1.5.0] - 2026-03-17
+
+### Added
+- **Block API v2** — 6 nested block abilities: `blocks/get-at-path`, `blocks/find-nested`, `blocks/update-attributes`, `blocks/update-at-path`, `blocks/append-inner`
+- `innerContent` normalizer for block insert/replace operations (#54)
+
+## [1.4.0] - 2026-03-16
+
+### Added
+- `content/duplicate` ability
+
+## [1.3.0] - 2026-03-16
+
+### Added
+- `theme/enqueue-asset`, `theme/dequeue-asset`, `theme/list-enqueued-assets` — runtime CSS/JS management without filesystem writes
+
+## [1.2.0] - 2026-03-15
+
+### Fixed
+- Serialization safety — `abilities_for_ai_safe_value()` applied across all callbacks
+- Security hardening — filesystem denylist for wp-config.php and sensitive files
+- Suite-wide stdClass to array fix for Presto Player and Spectra callbacks
+
+## [1.1.1] - 2026-03-15
+
+### Fixed
+- Spectra `get-theme-classes` output schema alignment
+
+## [1.1.0] - 2026-03-14
+
+### Added
+- **SureCart suite** — 91 abilities across 14 domains
+- **Astra suite** — 36 abilities
+- **Spectra suite** — 25 abilities
+- **Presto Player suite** — 33 abilities
+- Suite auto-loader for third-party plugin integrations
+- Permission defaults for presto-player and spectra modules (#36)
+
+### Fixed
+- SureCart category double-registration (#39)
+
+## [1.0.5] - 2026-03-14
+
+### Added
+- License manager with FluentCart integration
+- Plugin updater for auto-updates
+- Network admin UI for multisite
+
+## [1.0.4] - 2026-03-12
+
+### Added
+- `content/batch-update`, `content/get-site-map`, `content/list-structure`, `content/get-text`
+- `suite/get-status` site pulse
+
+## [1.0.3] - 2026-03-11
+
+### Added
+- Knowledge Layer v0.0.2 — database tables, models, 15 CRUD abilities, seed system
+
+## [1.0.2] - 2026-03-10
+
+### Added
+- Revisions module, Multisite module, Application Password abilities
+
+## [1.0.1] - 2026-03-09
+
+### Added
+- Filesystem abilities (4)
+
+### Fixed
+- `get-content-terms` object cast, `run-test` missing include
+
 ## [1.0.0] - 2026-03-11
 
 ### Changed
