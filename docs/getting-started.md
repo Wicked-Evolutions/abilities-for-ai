@@ -6,28 +6,28 @@
 
 ## Install
 
-### Option 1: Download from our store (recommended)
+### Option 1: Install from our product pages
 
-Visit [wickedevolutions.com/abilities-for-ai](https://wickedevolutions.com/abilities-for-ai) to download:
+Download the plugins from our store and upload via **Plugins → Add New → Upload Plugin**:
 
-- **Free tier** — read abilities across all modules (content, media, plugins, themes, settings, site health, and more)
-- **Pro tier** — adds write and delete abilities, Knowledge Layer, and third-party plugin integrations
+- **[Abilities for AI](https://community.wickedevolutions.com/item/abilities-for-ai/)** — WordPress abilities for content, media, plugins, themes, settings, site health, and more
+- **[Abilities MCP Adapter](https://community.wickedevolutions.com/item/abilities-mcp-adapter/)** — exposes abilities as MCP tools via REST API
 
-Upload the zip via **Plugins → Add New → Upload Plugin** in your WordPress admin.
+Both plugins are available as free downloads. Pro features (write/delete abilities, Knowledge Layer, third-party integrations) are available with a Pro license.
 
 ### Option 2: Install from GitHub
 
-Clone the repo directly into your plugins directory:
+Clone directly into your plugins directory:
 
 ```bash
 cd wp-content/plugins/
 git clone https://github.com/Wicked-Evolutions/abilities-for-ai.git
+git clone https://github.com/Wicked-Evolutions/abilities-mcp-adapter.git
 ```
 
 ### You also need
 
-1. **[Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter)** — exposes abilities as MCP tools via REST API. Install the same way.
-2. **[Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp)** (bridge) — connects your AI client to WordPress. Install via npm:
+**[Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp)** (bridge) — connects your AI client to WordPress. Install via npm:
    ```bash
    npx @wickedevolutions/abilities-mcp
    ```
