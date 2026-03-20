@@ -122,6 +122,7 @@ new Abilities_For_AI_Plugin_Updater( array(
 	'item_id'              => Abilities_For_AI_License_Manager::get_product_id(),
 	'api_url'              => Abilities_For_AI_License_Manager::STORE_URL,
 	'license_key_callback' => array( 'Abilities_For_AI_License_Manager', 'get_license_key' ),
+	'github_repo'          => 'Wicked-Evolutions/abilities-for-ai',
 	'show_check_update'    => true,
 ) );
 

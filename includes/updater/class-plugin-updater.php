@@ -1,9 +1,10 @@
 <?php
 /**
- * Plugin Updater — FluentCart License API Integration
+ * Plugin Updater — FluentCart + GitHub Releases
  *
- * Checks for plugin updates via the FluentCart `get_license_version` endpoint
- * and integrates with WordPress's native plugin update system.
+ * Checks for plugin updates via FluentCart (licensed users) with automatic
+ * fallback to GitHub Releases (open-source users). Integrates with
+ * WordPress's native plugin update system.
  *
  * Based on FluentCart Pro's PluginUpdater pattern (GPL-2.0-or-later).
  * Adapted for Wicked Evolutions product distribution.
@@ -40,6 +41,7 @@ class Abilities_For_AI_Plugin_Updater {
 	 *     @type string $api_url  FluentCart store URL.
 	 *     @type string $license_key          Optional license key.
 	 *     @type callable $license_key_callback Optional callback to retrieve license key.
+	 *     @type string $github_repo           GitHub repo (e.g. 'Wicked-Evolutions/abilities-for-ai').
 	 *     @type bool   $show_check_update     Show "Check Update" link in plugin row.
 	 * }
 	 */
@@ -52,6 +54,7 @@ class Abilities_For_AI_Plugin_Updater {
 			'api_url'              => '',
 			'license_key'          => '',
 			'license_key_callback' => '',
+			'github_repo'          => '',
 			'show_check_update'    => true,
 		);
 
@@ -188,10 +191,6 @@ class Abilities_For_AI_Plugin_Updater {
 	/**
 	 * Pre-download the package before WordPress enables maintenance mode.
 	 *
-	 * When the update server is hosted on the same WordPress installation,
-	 * maintenance mode returns HTTP 503 to the download request. This hook
-	 * fires before maintenance mode, so the download succeeds.
-	 *
 	 * @param bool|WP_Error $reply   Whether to short-circuit. Default false.
 	 * @param string        $package The package URL.
 	 * @param WP_Upgrader   $upgrader The upgrader instance.
@@ -267,11 +266,32 @@ class Abilities_For_AI_Plugin_Updater {
 	}
 
 	/**
-	 * Fetch version info from the FluentCart `get_license_version` endpoint.
+	 * Fetch version info from FluentCart, falling back to GitHub Releases.
 	 *
 	 * @return object|false Version info object or false on failure.
 	 */
 	private function get_remote_version_info() {
+		// Try FluentCart first (requires license for download URL).
+		$version_info = $this->get_fluentcart_version_info();
+
+		// Fall back to GitHub Releases if FluentCart fails or has no license.
+		if ( false === $version_info && ! empty( $this->config['github_repo'] ) ) {
+			$version_info = $this->get_github_version_info();
+		}
+
+		return $version_info;
+	}
+
+	/**
+	 * Fetch version info from the FluentCart `get_license_version` endpoint.
+	 *
+	 * @return object|false Version info object or false on failure.
+	 */
+	private function get_fluentcart_version_info() {
+		if ( empty( $this->config['api_url'] ) || empty( $this->config['item_id'] ) ) {
+			return false;
+		}
+
 		$url = add_query_arg(
 			apply_filters( 'fluent_sl/api_request_query_params', array(
 				'fluent-cart' => 'get_license_version',
@@ -299,11 +319,7 @@ class Abilities_For_AI_Plugin_Updater {
 			'body'      => $payload,
 		) );
 
-		if ( is_wp_error( $response ) ) {
-			return false;
-		}
-
-		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return false;
 		}
 
@@ -313,14 +329,81 @@ class Abilities_For_AI_Plugin_Updater {
 		}
 
 		$version_info = json_decode( $body );
-		if ( null === $version_info || ! is_object( $version_info ) ) {
+		if ( null === $version_info || ! is_object( $version_info ) || ! isset( $version_info->new_version ) ) {
 			return false;
 		}
 
-		if ( ! isset( $version_info->new_version ) ) {
+		return $this->normalize_version_info( $version_info );
+	}
+
+	/**
+	 * Fetch version info from GitHub Releases API.
+	 *
+	 * Uses the public GitHub API (no auth required for public repos).
+	 * Falls back here when FluentCart fails — ensures users who installed
+	 * from GitHub still get update notifications.
+	 *
+	 * @return object|false Version info object or false on failure.
+	 */
+	private function get_github_version_info() {
+		$repo = $this->config['github_repo'];
+
+		$response = wp_remote_get( "https://api.github.com/repos/{$repo}/releases/latest", array(
+			'timeout'   => 15,
+			'sslverify' => true,
+			'headers'   => array(
+				'Accept'     => 'application/vnd.github.v3+json',
+				'User-Agent' => 'WordPress/' . get_bloginfo( 'version' ) . '; ' . home_url(),
+			),
+		) );
+
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return false;
 		}
 
+		$release = json_decode( wp_remote_retrieve_body( $response ) );
+		if ( ! $release || ! isset( $release->tag_name ) ) {
+			return false;
+		}
+
+		// Strip 'v' prefix from tag (v1.6.0 → 1.6.0).
+		$new_version = ltrim( $release->tag_name, 'v' );
+
+		// Find the zip asset attached to the release.
+		$download_url = '';
+		if ( ! empty( $release->assets ) ) {
+			foreach ( $release->assets as $asset ) {
+				if ( substr( $asset->name, -4 ) === '.zip' ) {
+					$download_url = $asset->browser_download_url;
+					break;
+				}
+			}
+		}
+
+		if ( empty( $download_url ) ) {
+			return false;
+		}
+
+		$version_info = (object) array(
+			'new_version' => $new_version,
+			'package'     => $download_url,
+			'url'         => "https://github.com/{$repo}/releases/tag/{$release->tag_name}",
+			'sections'    => array(
+				'changelog'   => ! empty( $release->body ) ? $release->body : '',
+				'description' => $this->config['slug'] . ' update from GitHub.',
+			),
+		);
+
+		return $this->normalize_version_info( $version_info );
+	}
+
+	/**
+	 * Add standard WordPress update fields to version info.
+	 *
+	 * @param object $version_info Raw version info.
+	 * @return object Normalized version info.
+	 */
+	private function normalize_version_info( $version_info ) {
 		$version_info->plugin = $this->config['basename'];
 		$version_info->slug   = $this->config['slug'];
 
