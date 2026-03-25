@@ -135,6 +135,12 @@ function abilities_for_ai_register_categories() {
         'description' => __( 'Compiled diagnostic scripts for single-call site assessment.', 'abilities-for-ai' ),
     ));
 
+    // Editorial — content analysis and editorial intelligence.
+    wp_register_ability_category( 'editorial', array(
+        'label'       => __( 'Editorial', 'abilities-for-ai' ),
+        'description' => __( 'Content analysis and editorial intelligence scripts.', 'abilities-for-ai' ),
+    ));
+
     // === THIRD-PARTY SUITE CATEGORIES ===
     // Suite categories MUST be registered here (during wp_abilities_api_categories_init).
     // WP core rejects wp_register_ability_category() calls outside this hook.
