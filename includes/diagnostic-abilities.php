@@ -156,6 +156,34 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'callback' => 'abilities_for_ai_diagnostic_content_narrative',
 	));
+
+	if ( is_multisite() ) {
+		$reg->read( 'diagnostic/multisite-map', array(
+			'label'       => 'Multisite Content Map',
+			'description' => 'Compiled network content architecture. Maps what each subsite is, what content it holds, what plugins it runs, and what role it plays in the network.',
+			'input_schema' => array(
+				'type'       => 'object',
+				'properties' => array(
+					'max_sites' => array(
+						'type'        => 'integer',
+						'description' => 'Maximum sites to map (default: 20, max: 50).',
+					),
+					'include_page_tree' => array(
+						'type'        => 'boolean',
+						'description' => 'Include page hierarchy per subsite (default: true).',
+					),
+				),
+			),
+			'output_schema' => abilities_for_ai_schema_item_output( array(
+				'generated_at' => array( 'type' => 'string' ),
+				'network'      => array( 'type' => 'object' ),
+				'sites'        => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+				'flags'        => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+			) ),
+			'callback' => 'abilities_for_ai_diagnostic_multisite_map',
+		));
+	}
+
 });
 
 // ============================================================
@@ -949,6 +977,243 @@ function abilities_for_ai_diagnostic_security_posture( $input = null ) {
 	$result['flags'] = $flags;
 
 	return $result;
+}
+
+// ============================================================
+// Multisite map diagnostic
+// ============================================================
+
+/**
+ * Compiled multisite content map callback.
+ *
+ * @param array|null $input Optional input.
+ * @return array|WP_Error Multisite map report.
+ */
+function abilities_for_ai_diagnostic_multisite_map( $input = null ) {
+	if ( ! is_multisite() ) {
+		return new WP_Error( 'not_multisite', 'This ability is only available on multisite installations.' );
+	}
+
+	$max_sites      = min( intval( $input['max_sites'] ?? 20 ), 50 );
+	$include_pages  = $input['include_page_tree'] ?? true;
+
+	$sites = get_sites( array( 'number' => $max_sites, 'orderby' => 'id', 'order' => 'ASC' ) );
+
+	// Network-activated plugins.
+	$network_plugins_raw = get_site_option( 'active_sitewide_plugins', array() );
+	if ( ! function_exists( 'get_plugins' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+	}
+	$all_plugins = get_plugins();
+	$network_plugin_names = array();
+	foreach ( array_keys( $network_plugins_raw ) as $file ) {
+		$network_plugin_names[] = $all_plugins[ $file ]['Name'] ?? $file;
+	}
+
+	$result = array(
+		'generated_at' => gmdate( 'Y-m-d H:i:s' ),
+		'network'      => array(),
+		'sites'        => array(),
+	);
+
+	$flags          = array();
+	$total_content  = 0;
+	$site_content   = array();
+	$themes_used    = array();
+	$all_site_data  = array();
+
+	foreach ( $sites as $site ) {
+		$blog_id = (int) $site->blog_id;
+		switch_to_blog( $blog_id );
+
+		try {
+			$theme_obj    = wp_get_theme();
+			$theme_name   = $theme_obj->get( 'Name' );
+			$themes_used[] = $theme_name;
+
+			// Content counts.
+			$public_types = get_post_types( array( 'public' => true ), 'names' );
+			$content_counts = array();
+			$site_total = 0;
+			foreach ( $public_types as $type ) {
+				$counts  = wp_count_posts( $type );
+				$publish = (int) ( $counts->publish ?? 0 );
+				$draft   = (int) ( $counts->draft ?? 0 );
+				$total   = $publish + $draft;
+				if ( $total > 0 ) {
+					$content_counts[ $type ] = array( 'publish' => $publish, 'draft' => $draft );
+					$site_total += $publish;
+				}
+			}
+			$total_content += $site_total;
+
+			// Categories.
+			$cats = get_terms( array( 'taxonomy' => 'category', 'hide_empty' => false, 'number' => 50 ) );
+			$cat_summary = array();
+			if ( ! is_wp_error( $cats ) ) {
+				foreach ( $cats as $cat ) {
+					if ( (int) $cat->count > 0 ) {
+						$cat_summary[] = array( 'name' => $cat->name, 'count' => (int) $cat->count );
+					}
+				}
+			}
+
+			// Page tree.
+			$page_tree = array();
+			if ( $include_pages ) {
+				$pages = get_pages( array( 'sort_column' => 'menu_order,post_title', 'number' => 50 ) );
+				if ( $pages ) {
+					foreach ( $pages as $pg ) {
+						$page_tree[] = array(
+							'title'  => $pg->post_title,
+							'slug'   => $pg->post_name,
+							'parent' => (int) $pg->post_parent,
+						);
+					}
+				}
+			}
+
+			// Active plugins (site-level only, not network).
+			$active_slugs = get_option( 'active_plugins', array() );
+			$site_plugins = array();
+			foreach ( $active_slugs as $file ) {
+				if ( isset( $all_plugins[ $file ] ) ) {
+					$site_plugins[] = array( 'name' => $all_plugins[ $file ]['Name'], 'version' => $all_plugins[ $file ]['Version'] );
+				}
+			}
+
+			// Role heuristic.
+			$role = abilities_for_ai_diagnostic_site_role( $site_total, $active_slugs, $content_counts );
+
+			$entry = array(
+				'blog_id'        => $blog_id,
+				'url'            => get_site_url(),
+				'name'           => get_bloginfo( 'name' ),
+				'tagline'        => get_option( 'blogdescription', '' ),
+				'registered'     => $site->registered,
+				'theme'          => $theme_name,
+				'block_theme'    => $theme_obj->is_block_theme(),
+				'content'        => $content_counts,
+				'categories'     => $cat_summary,
+				'pages'          => $page_tree,
+				'active_plugins' => $site_plugins,
+				'plugin_count'   => count( $site_plugins ),
+				'role'           => $role,
+			);
+
+			$result['sites'][] = $entry;
+			$site_content[ $blog_id ] = $site_total;
+			$all_site_data[] = $entry;
+
+			if ( $site_total === 0 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'content', 'message' => sprintf( 'Subsite %s has no published content.', get_site_url() ) );
+			}
+		} catch ( \Throwable $e ) {
+			$result['sites'][] = array( 'blog_id' => $blog_id, 'url' => get_site_url(), 'error' => $e->getMessage() );
+		}
+
+		restore_current_blog();
+	}
+
+	// Network summary.
+	$unique_themes = array_unique( $themes_used );
+	$result['network'] = array(
+		'site_count'        => get_blog_count(),
+		'mapped_count'      => count( $sites ),
+		'total_content'     => $total_content,
+		'shared_theme'      => count( $unique_themes ) === 1 ? $unique_themes[0] : null,
+		'themes'            => count( $unique_themes ) > 1 ? $unique_themes : null,
+		'network_plugins'   => $network_plugin_names,
+		'content_distribution' => array(),
+	);
+
+	// Content distribution percentages.
+	if ( $total_content > 0 ) {
+		foreach ( $result['sites'] as $s ) {
+			$sid = $s['blog_id'] ?? null;
+			$sc  = $site_content[ $sid ] ?? 0;
+			$result['network']['content_distribution'][] = array(
+				'blog_id'    => $sid,
+				'url'        => $s['url'] ?? '',
+				'percentage' => round( $sc / $total_content * 100, 1 ),
+			);
+		}
+	}
+
+	// Network-level flags.
+	if ( count( $unique_themes ) > 1 ) {
+		$flags[] = array( 'severity' => 'info', 'area' => 'themes', 'message' => sprintf( 'Mixed themes across subsites: %s.', implode( ', ', $unique_themes ) ) );
+	}
+	if ( $total_content > 0 ) {
+		foreach ( $site_content as $bid => $sc ) {
+			if ( $sc / $total_content > 0.8 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'content', 'message' => sprintf( 'Blog ID %d holds %.0f%% of total network content.', $bid, $sc / $total_content * 100 ) );
+			}
+		}
+	}
+
+	// Plugin sprawl.
+	if ( count( $all_site_data ) >= 2 ) {
+		$pcounts = array_column( $all_site_data, 'plugin_count' );
+		$avg     = array_sum( $pcounts ) / count( $pcounts );
+		foreach ( $all_site_data as $sd ) {
+			if ( $sd['plugin_count'] > $avg * 2 && $sd['plugin_count'] > 5 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'plugins', 'message' => sprintf( '%s has %d site-activated plugins — significantly above network average (%.0f).', $sd['url'], $sd['plugin_count'], $avg ) );
+			}
+		}
+	}
+
+	// Orphan subsites.
+	foreach ( $all_site_data as $sd ) {
+		if ( ( $site_content[ $sd['blog_id'] ] ?? 0 ) === 0 && $sd['plugin_count'] === 0 ) {
+			$flags[] = array( 'severity' => 'warning', 'area' => 'architecture', 'message' => sprintf( 'Subsite %s appears orphaned — no content, no site-activated plugins.', $sd['url'] ) );
+		}
+	}
+
+	$result['flags'] = $flags;
+
+	return $result;
+}
+
+/**
+ * Heuristic role for a subsite based on content and plugins.
+ *
+ * @param int   $content_count Total published content.
+ * @param array $active_slugs  Active plugin file slugs.
+ * @param array $content_counts Per-type content counts.
+ * @return string Role label.
+ */
+function abilities_for_ai_diagnostic_site_role( $content_count, $active_slugs, $content_counts ) {
+	$slugs_str = implode( '|', $active_slugs );
+
+	if ( strpos( $slugs_str, 'fluent-community' ) !== false ) {
+		return 'community';
+	}
+	if ( strpos( $slugs_str, 'fluent-cart' ) !== false || strpos( $slugs_str, 'surecart' ) !== false ) {
+		return 'commerce';
+	}
+	if ( strpos( $slugs_str, 'fluent-booking' ) !== false ) {
+		return 'booking';
+	}
+
+	// Content-based heuristics.
+	$page_count = ( $content_counts['page']['publish'] ?? 0 );
+	$post_count = ( $content_counts['post']['publish'] ?? 0 );
+
+	if ( $content_count === 0 ) {
+		return 'empty/staging';
+	}
+	if ( $post_count === 0 && $page_count > 0 ) {
+		return 'knowledge base';
+	}
+	if ( $post_count > 20 ) {
+		return 'content hub';
+	}
+	if ( $content_count <= 5 ) {
+		return 'minimal';
+	}
+
+	return 'general';
 }
 
 // ============================================================
