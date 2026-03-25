@@ -129,6 +129,12 @@ function abilities_for_ai_register_categories() {
         'description' => __( 'WordPress multisite network site management and settings.', 'abilities-for-ai' ),
     ));
 
+    // Diagnostics — compiled scripts.
+    wp_register_ability_category( 'diagnostic', array(
+        'label'       => __( 'Diagnostics', 'abilities-for-ai' ),
+        'description' => __( 'Compiled diagnostic scripts for single-call site assessment.', 'abilities-for-ai' ),
+    ));
+
     // === THIRD-PARTY SUITE CATEGORIES ===
     // Suite categories MUST be registered here (during wp_abilities_api_categories_init).
     // WP core rejects wp_register_ability_category() calls outside this hook.

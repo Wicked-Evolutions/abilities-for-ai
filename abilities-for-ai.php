@@ -92,6 +92,9 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/filesystem-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/revision-abilities.php';
 require_once ABILITIES_FOR_AI_PATH . 'includes/multisite-abilities.php';
 
+// Diagnostic scripts — compiled multi-module reports.
+require_once ABILITIES_FOR_AI_PATH . 'includes/diagnostic-abilities.php';
+
 // Knowledge layer — auto-loads .md docs from knowledge/ as read-only abilities (v0.0.1 fallback).
 require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-abilities.php';
 
