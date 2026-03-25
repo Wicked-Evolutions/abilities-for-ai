@@ -68,6 +68,31 @@ add_action( 'wp_abilities_api_init', function() {
 			'callback' => 'abilities_for_ai_diagnostic_network_overview',
 		));
 	}
+
+	$reg->read( 'diagnostic/taxonomy-health', array(
+		'label'       => 'Taxonomy Health Diagnostic',
+		'description' => 'Compiled single-call taxonomy health assessment. Discovers all taxonomies, counts terms and content assignments, identifies empty terms, orphan terms, deep hierarchies, and overlapping terms.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'taxonomies' => array(
+					'type'        => 'array',
+					'items'       => array( 'type' => 'string' ),
+					'description' => 'Optional: only analyze these taxonomy slugs. Omit for all public taxonomies.',
+				),
+				'max_terms_per_taxonomy' => array(
+					'type'        => 'integer',
+					'description' => 'Maximum terms to analyze per taxonomy (default: 200, max: 500).',
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'generated_at' => array( 'type' => 'string' ),
+			'taxonomies'   => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+			'flags'        => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => 'abilities_for_ai_diagnostic_taxonomy_health',
+	));
 });
 
 // ============================================================
@@ -419,6 +444,131 @@ function abilities_for_ai_diagnostic_network_flags( $sites ) {
 	}
 
 	return $flags;
+}
+
+// ============================================================
+// Taxonomy health diagnostic
+// ============================================================
+
+/**
+ * Compiled taxonomy health diagnostic callback.
+ *
+ * @param array|null $input Optional input with 'taxonomies' and 'max_terms_per_taxonomy'.
+ * @return array Taxonomy health report.
+ */
+function abilities_for_ai_diagnostic_taxonomy_health( $input = null ) {
+	$result    = array( 'generated_at' => gmdate( 'Y-m-d H:i:s' ) );
+	$flags     = array();
+	$max_terms = min( intval( $input['max_terms_per_taxonomy'] ?? 200 ), 500 );
+	$tax_filter = ! empty( $input['taxonomies'] ) ? $input['taxonomies'] : null;
+
+	$all_taxonomies = get_taxonomies( array( 'public' => true ), 'objects' );
+	$tax_reports    = array();
+
+	foreach ( $all_taxonomies as $slug => $tax_obj ) {
+		if ( $tax_filter && ! in_array( $slug, $tax_filter, true ) ) {
+			continue;
+		}
+
+		try {
+			$total_terms     = (int) wp_count_terms( array( 'taxonomy' => $slug, 'hide_empty' => false ) );
+			$non_empty_terms = (int) wp_count_terms( array( 'taxonomy' => $slug, 'hide_empty' => true ) );
+			$empty_terms     = $total_terms - $non_empty_terms;
+
+			$report = array(
+				'slug'            => $slug,
+				'label'           => $tax_obj->label,
+				'hierarchical'    => $tax_obj->hierarchical,
+				'post_types'      => (array) $tax_obj->object_type,
+				'total_terms'     => $total_terms,
+				'non_empty_terms' => $non_empty_terms,
+				'empty_terms'     => $empty_terms,
+			);
+
+			// Detailed term analysis (bounded).
+			$terms = array();
+			$max_depth = 0;
+			$single_post_count = 0;
+
+			if ( $total_terms > 0 ) {
+				$term_objects = get_terms( array(
+					'taxonomy'   => $slug,
+					'hide_empty' => false,
+					'number'     => $max_terms,
+				) );
+
+				if ( ! is_wp_error( $term_objects ) ) {
+					foreach ( $term_objects as $term ) {
+						// Only include empty/orphan terms or a summary.
+						if ( (int) $term->count === 0 ) {
+							$terms[] = array(
+								'name'   => $term->name,
+								'slug'   => $term->slug,
+								'count'  => 0,
+								'parent' => (int) $term->parent,
+							);
+						}
+						if ( (int) $term->count === 1 ) {
+							$single_post_count++;
+						}
+
+						// Hierarchy depth.
+						if ( $tax_obj->hierarchical && (int) $term->parent > 0 ) {
+							$depth  = 1;
+							$parent = (int) $term->parent;
+							while ( $parent > 0 && $depth < 10 ) {
+								$parent_term = get_term( $parent, $slug );
+								if ( ! $parent_term || is_wp_error( $parent_term ) ) {
+									break;
+								}
+								$parent = (int) $parent_term->parent;
+								$depth++;
+							}
+							$max_depth = max( $max_depth, $depth );
+						}
+					}
+				}
+			}
+
+			$report['max_depth'] = $tax_obj->hierarchical ? $max_depth : null;
+			// Cap empty term list to 20 for compact output.
+			$report['empty_term_list'] = array_slice( $terms, 0, 20 );
+
+			$tax_reports[] = $report;
+
+			// --- Flags ---
+			if ( $total_terms === 0 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => $slug, 'message' => sprintf( 'Taxonomy "%s" has no terms (unused).', $tax_obj->label ) );
+			}
+			if ( $total_terms > 0 && $empty_terms / $total_terms > 0.5 ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => $slug, 'message' => sprintf( 'High orphan ratio in "%s": %d of %d terms have no posts (%.0f%%).', $tax_obj->label, $empty_terms, $total_terms, ( $empty_terms / $total_terms ) * 100 ) );
+			}
+			if ( $max_depth > 3 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => $slug, 'message' => sprintf( 'Deep hierarchy in "%s": %d levels.', $tax_obj->label, $max_depth ) );
+			}
+			if ( $total_terms > 0 && $single_post_count / $total_terms > 0.3 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => $slug, 'message' => sprintf( 'Many single-post terms in "%s": %d of %d (%.0f%%).', $tax_obj->label, $single_post_count, $total_terms, ( $single_post_count / $total_terms ) * 100 ) );
+			}
+			if ( $total_terms > 100 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => $slug, 'message' => sprintf( 'Large taxonomy "%s": %d terms.', $tax_obj->label, $total_terms ) );
+			}
+
+			// Uncategorized default check.
+			if ( $slug === 'category' ) {
+				$uncat = get_term_by( 'slug', 'uncategorized', 'category' );
+				if ( $uncat && (int) $uncat->count > 0 ) {
+					$flags[] = array( 'severity' => 'info', 'area' => 'category', 'message' => sprintf( 'Default "Uncategorized" category has %d post(s).', $uncat->count ) );
+				}
+			}
+		} catch ( \Throwable $e ) {
+			$tax_reports[] = array( 'slug' => $slug, 'error' => $e->getMessage() );
+		}
+	}
+
+	$result['taxonomies'] = $tax_reports;
+	$result['flags']      = $flags;
+
+	return $result;
 }
 
 // ============================================================
