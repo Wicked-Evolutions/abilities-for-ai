@@ -41,6 +41,49 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'callback' => 'abilities_for_ai_editorial_site_voice',
 	));
+
+	$reg->read( 'editorial/content-samples', array(
+		'label'       => 'Content Samples',
+		'description' => 'Selective deep reading. Returns full plaintext content (block markup stripped) for a curated sample of posts. Use after editorial/site-voice to read representative content.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'strategy' => array(
+					'type'        => 'string',
+					'enum'        => array( 'recent_per_series', 'longest_per_series', 'by_ids', 'recent_overall' ),
+					'description' => 'Selection strategy. recent_per_series: N most recent per category. longest_per_series: single longest per category. by_ids: specific post IDs. recent_overall: N most recent posts. Default: recent_per_series.',
+				),
+				'post_ids' => array(
+					'type'        => 'array',
+					'items'       => array( 'type' => 'integer' ),
+					'description' => 'Specific post IDs to read. Only used with strategy=by_ids.',
+				),
+				'posts_per_series' => array(
+					'type'        => 'integer',
+					'description' => 'Posts per series/category for recent_per_series strategy (default: 2, max: 5).',
+				),
+				'max_words_per_post' => array(
+					'type'        => 'integer',
+					'description' => 'Maximum words to return per post (default: 1000, max: 3000). Content truncated with [...] marker.',
+				),
+				'max_total_posts' => array(
+					'type'        => 'integer',
+					'description' => 'Hard cap on total posts returned (default: 15, max: 30).',
+				),
+				'post_type' => array(
+					'type'        => 'string',
+					'description' => 'Post type (default: post).',
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'generated_at' => array( 'type' => 'string' ),
+			'strategy'     => array( 'type' => 'string' ),
+			'total_posts'  => array( 'type' => 'integer' ),
+			'samples'      => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => 'abilities_for_ai_editorial_content_samples',
+	));
 });
 
 // ============================================================
@@ -379,5 +422,162 @@ function abilities_for_ai_editorial_site_voice( $input = null ) {
 		'series'       => $series_output,
 		'depth'        => $depth_output,
 		'structure'    => $structure_output,
+	);
+}
+
+// ============================================================
+// Content samples — selective deep reading
+// ============================================================
+
+/**
+ * Compiled content samples callback.
+ *
+ * @param array|null $input Optional input.
+ * @return array Content samples.
+ */
+function abilities_for_ai_editorial_content_samples( $input = null ) {
+	$strategy       = $input['strategy'] ?? 'recent_per_series';
+	$post_type      = $input['post_type'] ?? 'post';
+	$max_words      = min( intval( $input['max_words_per_post'] ?? 1000 ), 3000 );
+	$max_total      = min( intval( $input['max_total_posts'] ?? 15 ), 30 );
+	$per_series     = min( intval( $input['posts_per_series'] ?? 2 ), 5 );
+
+	$selected_posts = array();
+
+	switch ( $strategy ) {
+		case 'by_ids':
+			$ids = ! empty( $input['post_ids'] ) ? array_map( 'intval', $input['post_ids'] ) : array();
+			if ( ! empty( $ids ) ) {
+				$selected_posts = get_posts( array(
+					'post_type'      => $post_type,
+					'post_status'    => 'publish',
+					'post__in'       => array_slice( $ids, 0, $max_total ),
+					'orderby'        => 'post__in',
+					'posts_per_page' => $max_total,
+				) );
+			}
+			break;
+
+		case 'recent_overall':
+			$selected_posts = get_posts( array(
+				'post_type'      => $post_type,
+				'post_status'    => 'publish',
+				'posts_per_page' => $max_total,
+				'orderby'        => 'date',
+				'order'          => 'DESC',
+			) );
+			break;
+
+		case 'longest_per_series':
+			$categories = get_terms( array( 'taxonomy' => 'category', 'hide_empty' => true, 'number' => $max_total ) );
+			if ( ! is_wp_error( $categories ) ) {
+				foreach ( $categories as $cat ) {
+					if ( count( $selected_posts ) >= $max_total ) break;
+					// Get posts in this category, sorted by content length (approximate).
+					$cat_posts = get_posts( array(
+						'post_type'      => $post_type,
+						'post_status'    => 'publish',
+						'category'       => $cat->term_id,
+						'posts_per_page' => 10,
+						'orderby'        => 'date',
+						'order'          => 'DESC',
+					) );
+					if ( ! empty( $cat_posts ) ) {
+						// Find the longest by word count.
+						$longest     = null;
+						$longest_wc  = 0;
+						foreach ( $cat_posts as $cp ) {
+							$wc = str_word_count( abilities_for_ai_editorial_strip( $cp->post_content ) );
+							if ( $wc > $longest_wc ) {
+								$longest    = $cp;
+								$longest_wc = $wc;
+							}
+						}
+						if ( $longest ) {
+							$selected_posts[] = $longest;
+						}
+					}
+				}
+			}
+			break;
+
+		case 'recent_per_series':
+		default:
+			$categories = get_terms( array( 'taxonomy' => 'category', 'hide_empty' => true, 'number' => 50 ) );
+			if ( ! is_wp_error( $categories ) ) {
+				foreach ( $categories as $cat ) {
+					if ( count( $selected_posts ) >= $max_total ) break;
+					$cat_posts = get_posts( array(
+						'post_type'      => $post_type,
+						'post_status'    => 'publish',
+						'category'       => $cat->term_id,
+						'posts_per_page' => $per_series,
+						'orderby'        => 'date',
+						'order'          => 'DESC',
+					) );
+					foreach ( $cat_posts as $cp ) {
+						if ( count( $selected_posts ) >= $max_total ) break;
+						// Avoid duplicates (post in multiple categories).
+						$already = false;
+						foreach ( $selected_posts as $sp ) {
+							if ( $sp->ID === $cp->ID ) {
+								$already = true;
+								break;
+							}
+						}
+						if ( ! $already ) {
+							$selected_posts[] = $cp;
+						}
+					}
+				}
+			}
+			break;
+	}
+
+	// Build samples.
+	$samples      = array();
+	$author_cache = array();
+
+	foreach ( $selected_posts as $post ) {
+		$text       = abilities_for_ai_editorial_strip( $post->post_content );
+		$word_array = explode( ' ', $text );
+		$word_count = $text === '' ? 0 : count( $word_array );
+		$truncated  = false;
+
+		if ( $word_count > $max_words ) {
+			$text      = implode( ' ', array_slice( $word_array, 0, $max_words ) ) . ' [...]';
+			$truncated = true;
+		}
+
+		// Author.
+		$author_id = (int) $post->post_author;
+		if ( ! isset( $author_cache[ $author_id ] ) ) {
+			$user = get_userdata( $author_id );
+			$author_cache[ $author_id ] = $user ? $user->display_name : "User $author_id";
+		}
+
+		// Series (primary category).
+		$cats = wp_get_post_categories( $post->ID, array( 'fields' => 'names' ) );
+		$series = ( ! is_wp_error( $cats ) && ! empty( $cats ) ) ? $cats[0] : null;
+
+		$samples[] = array(
+			'id'         => $post->ID,
+			'title'      => $post->post_title,
+			'date'       => substr( $post->post_date, 0, 10 ),
+			'author'     => $author_cache[ $author_id ],
+			'series'     => $series,
+			'word_count' => $word_count,
+			'truncated'  => $truncated,
+			'text'       => $text,
+		);
+	}
+
+	return array(
+		'generated_at'       => gmdate( 'Y-m-d H:i:s' ),
+		'strategy'           => $strategy,
+		'posts_per_series'   => $strategy === 'recent_per_series' ? $per_series : null,
+		'max_words_per_post' => $max_words,
+		'total_posts'        => count( $samples ),
+		'samples'            => $samples,
 	);
 }
