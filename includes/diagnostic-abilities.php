@@ -184,6 +184,35 @@ add_action( 'wp_abilities_api_init', function() {
 		));
 	}
 
+	$reg->read( 'diagnostic/content-health', array(
+		'label'       => 'Content Health Audit',
+		'description' => 'Compiled single-call content health assessment. Identifies missing metadata, stale drafts, orphan pages, thin content, uncategorised posts, and missing featured images. Returns summary counts plus worst offenders via server-side SQL aggregation.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'post_types' => array(
+					'type'        => 'array',
+					'items'       => array( 'type' => 'string' ),
+					'description' => 'Optional: only audit these post types. Omit for all public types.',
+				),
+				'max_flagged_per_issue' => array(
+					'type'        => 'integer',
+					'description' => 'Maximum flagged items to list per issue type (default: 10, max: 25).',
+				),
+				'stale_days' => array(
+					'type'        => 'integer',
+					'description' => 'Days since last edit to consider a draft "stale" (default: 30).',
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'generated_at' => array( 'type' => 'string' ),
+			'summary'      => array( 'type' => 'object' ),
+			'checks'       => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+			'flags'        => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => 'abilities_for_ai_diagnostic_content_health',
+	));
 });
 
 // ============================================================
@@ -1214,6 +1243,342 @@ function abilities_for_ai_diagnostic_site_role( $content_count, $active_slugs, $
 	}
 
 	return 'general';
+}
+
+// ============================================================
+// Content health diagnostic
+// ============================================================
+
+/**
+ * Compiled content health audit callback — server-side SQL aggregation.
+ *
+ * @param array|null $input Optional input.
+ * @return array Content health report.
+ */
+function abilities_for_ai_diagnostic_content_health( $input = null ) {
+	global $wpdb;
+
+	$result     = array( 'generated_at' => gmdate( 'Y-m-d H:i:s' ) );
+	$flags      = array();
+	$max_flagged = min( intval( $input['max_flagged_per_issue'] ?? 10 ), 25 );
+	$stale_days  = max( 1, intval( $input['stale_days'] ?? 30 ) );
+	$checks      = array();
+
+	// Determine post types.
+	$type_filter = ! empty( $input['post_types'] ) ? $input['post_types'] : array_values( get_post_types( array( 'public' => true ), 'names' ) );
+	$type_placeholders = implode( ',', array_fill( 0, count( $type_filter ), '%s' ) );
+
+	// Summary counts.
+	$total_published = (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ($type_placeholders)",
+			...$type_filter
+		)
+	);
+	$total_drafts = (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'draft' AND post_type IN ($type_placeholders)",
+			...$type_filter
+		)
+	);
+
+	// --- 1. Uncategorised posts ---
+	try {
+		if ( in_array( 'post', $type_filter, true ) ) {
+			$uncat_term = get_term_by( 'slug', 'uncategorized', 'category' );
+			$uncat_id   = $uncat_term ? (int) $uncat_term->term_taxonomy_id : 0;
+
+			// Posts with NO category or only in Uncategorized.
+			$uncat_count = (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(DISTINCT p.ID) FROM {$wpdb->posts} p
+				 LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+				 LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'category'
+				 WHERE p.post_status = 'publish' AND p.post_type = 'post'
+				 AND (tt.term_taxonomy_id IS NULL OR (tt.term_taxonomy_id = %d AND (
+				     SELECT COUNT(*) FROM {$wpdb->term_relationships} tr2
+				     JOIN {$wpdb->term_taxonomy} tt2 ON tr2.term_taxonomy_id = tt2.term_taxonomy_id AND tt2.taxonomy = 'category'
+				     WHERE tr2.object_id = p.ID AND tt2.term_taxonomy_id != %d
+				 ) = 0))",
+				$uncat_id, $uncat_id
+			) );
+
+			$uncat_items = array();
+			if ( $uncat_count > 0 ) {
+				$rows = $wpdb->get_results( $wpdb->prepare(
+					"SELECT DISTINCT p.ID, p.post_title, p.post_date FROM {$wpdb->posts} p
+					 LEFT JOIN {$wpdb->term_relationships} tr ON p.ID = tr.object_id
+					 LEFT JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id AND tt.taxonomy = 'category'
+					 WHERE p.post_status = 'publish' AND p.post_type = 'post'
+					 AND (tt.term_taxonomy_id IS NULL OR (tt.term_taxonomy_id = %d AND (
+					     SELECT COUNT(*) FROM {$wpdb->term_relationships} tr2
+					     JOIN {$wpdb->term_taxonomy} tt2 ON tr2.term_taxonomy_id = tt2.term_taxonomy_id AND tt2.taxonomy = 'category'
+					     WHERE tr2.object_id = p.ID AND tt2.term_taxonomy_id != %d
+					 ) = 0))
+					 ORDER BY p.post_date DESC LIMIT %d",
+					$uncat_id, $uncat_id, $max_flagged
+				) );
+				foreach ( $rows as $r ) {
+					$uncat_items[] = array( 'id' => (int) $r->ID, 'title' => $r->post_title, 'date' => substr( $r->post_date, 0, 10 ) );
+				}
+			}
+
+			if ( $uncat_count > 0 ) {
+				$checks[] = array( 'check' => 'uncategorised_posts', 'severity' => 'warning', 'count' => $uncat_count, 'items' => $uncat_items );
+				$flags[]  = array( 'severity' => 'warning', 'area' => 'content', 'message' => sprintf( '%d published post(s) have no real category.', $uncat_count ) );
+			}
+		}
+	} catch ( \Throwable $e ) {
+		$checks[] = array( 'check' => 'uncategorised_posts', 'error' => $e->getMessage() );
+	}
+
+	// --- 2. Missing featured images ---
+	try {
+		$no_thumb_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} p
+				 LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_thumbnail_id'
+				 WHERE p.post_status = 'publish' AND p.post_type IN ($type_placeholders)
+				 AND pm.meta_id IS NULL",
+				...$type_filter
+			)
+		);
+
+		$no_thumb_items = array();
+		if ( $no_thumb_count > 0 ) {
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT p.ID, p.post_title, p.post_date FROM {$wpdb->posts} p
+					 LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_thumbnail_id'
+					 WHERE p.post_status = 'publish' AND p.post_type IN ($type_placeholders)
+					 AND pm.meta_id IS NULL
+					 ORDER BY p.post_date DESC LIMIT %d",
+					...array_merge( $type_filter, array( $max_flagged ) )
+				)
+			);
+			foreach ( $rows as $r ) {
+				$no_thumb_items[] = array( 'id' => (int) $r->ID, 'title' => $r->post_title, 'date' => substr( $r->post_date, 0, 10 ) );
+			}
+		}
+
+		if ( $no_thumb_count > 0 ) {
+			$checks[] = array( 'check' => 'missing_featured_image', 'severity' => 'info', 'count' => $no_thumb_count, 'items' => $no_thumb_items );
+			$flags[]  = array( 'severity' => 'info', 'area' => 'content', 'message' => sprintf( '%d published item(s) missing featured images.', $no_thumb_count ) );
+		}
+	} catch ( \Throwable $e ) {
+		$checks[] = array( 'check' => 'missing_featured_image', 'error' => $e->getMessage() );
+	}
+
+	// --- 3. Stale drafts ---
+	try {
+		$cutoff = gmdate( 'Y-m-d H:i:s', time() - ( $stale_days * 86400 ) );
+		$stale_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts}
+				 WHERE post_status = 'draft' AND post_type IN ($type_placeholders)
+				 AND post_modified < %s",
+				...array_merge( $type_filter, array( $cutoff ) )
+			)
+		);
+
+		$stale_items = array();
+		if ( $stale_count > 0 ) {
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT ID, post_title, post_modified FROM {$wpdb->posts}
+					 WHERE post_status = 'draft' AND post_type IN ($type_placeholders)
+					 AND post_modified < %s
+					 ORDER BY post_modified ASC LIMIT %d",
+					...array_merge( $type_filter, array( $cutoff, $max_flagged ) )
+				)
+			);
+			foreach ( $rows as $r ) {
+				$days = (int) ( ( time() - strtotime( $r->post_modified ) ) / 86400 );
+				$stale_items[] = array( 'id' => (int) $r->ID, 'title' => $r->post_title, 'days_stale' => $days );
+			}
+		}
+
+		if ( $stale_count > 0 ) {
+			$checks[] = array( 'check' => 'stale_drafts', 'severity' => 'info', 'count' => $stale_count, 'items' => $stale_items );
+			$flags[]  = array( 'severity' => 'info', 'area' => 'content', 'message' => sprintf( '%d draft(s) not edited in %d+ days.', $stale_count, $stale_days ) );
+		}
+	} catch ( \Throwable $e ) {
+		$checks[] = array( 'check' => 'stale_drafts', 'error' => $e->getMessage() );
+	}
+
+	// --- 4. Thin content (< 300 words, approximate) ---
+	try {
+		// Rough word count: count spaces in stripped content. MySQL CHAR_LENGTH minus stripped-space length.
+		$thin_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts}
+				 WHERE post_status = 'publish' AND post_type IN ($type_placeholders)
+				 AND (CHAR_LENGTH(post_content) - CHAR_LENGTH(REPLACE(post_content, ' ', '')) + 1) < 300
+				 AND CHAR_LENGTH(post_content) > 0",
+				...$type_filter
+			)
+		);
+
+		$thin_items = array();
+		if ( $thin_count > 0 ) {
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT ID, post_title,
+					        (CHAR_LENGTH(post_content) - CHAR_LENGTH(REPLACE(post_content, ' ', '')) + 1) as approx_words
+					 FROM {$wpdb->posts}
+					 WHERE post_status = 'publish' AND post_type IN ($type_placeholders)
+					 AND (CHAR_LENGTH(post_content) - CHAR_LENGTH(REPLACE(post_content, ' ', '')) + 1) < 300
+					 AND CHAR_LENGTH(post_content) > 0
+					 ORDER BY approx_words ASC LIMIT %d",
+					...array_merge( $type_filter, array( $max_flagged ) )
+				)
+			);
+			foreach ( $rows as $r ) {
+				$thin_items[] = array( 'id' => (int) $r->ID, 'title' => $r->post_title, 'approx_words' => (int) $r->approx_words );
+			}
+		}
+
+		if ( $thin_count > 0 ) {
+			$checks[] = array( 'check' => 'thin_content', 'severity' => 'info', 'count' => $thin_count, 'items' => $thin_items );
+			$flags[]  = array( 'severity' => 'info', 'area' => 'content', 'message' => sprintf( '%d published item(s) with fewer than 300 words.', $thin_count ) );
+		}
+	} catch ( \Throwable $e ) {
+		$checks[] = array( 'check' => 'thin_content', 'error' => $e->getMessage() );
+	}
+
+	// --- 5. Orphan pages (not in any menu) ---
+	try {
+		if ( in_array( 'page', $type_filter, true ) ) {
+			$orphan_count = (int) $wpdb->get_var(
+				"SELECT COUNT(*) FROM {$wpdb->posts} p
+				 WHERE p.post_status = 'publish' AND p.post_type = 'page'
+				 AND p.ID NOT IN (
+				     SELECT CAST(pm.meta_value AS UNSIGNED) FROM {$wpdb->postmeta} pm
+				     JOIN {$wpdb->posts} mi ON pm.post_id = mi.ID
+				     WHERE pm.meta_key = '_menu_item_object_id'
+				     AND mi.post_type = 'nav_menu_item'
+				 )"
+			);
+
+			$orphan_items = array();
+			if ( $orphan_count > 0 ) {
+				$rows = $wpdb->get_results( $wpdb->prepare(
+					"SELECT p.ID, p.post_title FROM {$wpdb->posts} p
+					 WHERE p.post_status = 'publish' AND p.post_type = 'page'
+					 AND p.ID NOT IN (
+					     SELECT CAST(pm.meta_value AS UNSIGNED) FROM {$wpdb->postmeta} pm
+					     JOIN {$wpdb->posts} mi ON pm.post_id = mi.ID
+					     WHERE pm.meta_key = '_menu_item_object_id'
+					     AND mi.post_type = 'nav_menu_item'
+					 )
+					 ORDER BY p.post_title LIMIT %d",
+					$max_flagged
+				) );
+				foreach ( $rows as $r ) {
+					$orphan_items[] = array( 'id' => (int) $r->ID, 'title' => $r->post_title );
+				}
+			}
+
+			if ( $orphan_count > 0 ) {
+				$checks[] = array( 'check' => 'orphan_pages', 'severity' => 'info', 'count' => $orphan_count, 'items' => $orphan_items );
+				$flags[]  = array( 'severity' => 'info', 'area' => 'content', 'message' => sprintf( '%d published page(s) not linked in any menu.', $orphan_count ) );
+			}
+		}
+	} catch ( \Throwable $e ) {
+		$checks[] = array( 'check' => 'orphan_pages', 'error' => $e->getMessage() );
+	}
+
+	// --- 6. Missing excerpts ---
+	try {
+		$no_excerpt_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts}
+				 WHERE post_status = 'publish' AND post_type IN ($type_placeholders)
+				 AND (post_excerpt = '' OR post_excerpt IS NULL)",
+				...$type_filter
+			)
+		);
+
+		$no_excerpt_items = array();
+		if ( $no_excerpt_count > 0 ) {
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT ID, post_title FROM {$wpdb->posts}
+					 WHERE post_status = 'publish' AND post_type IN ($type_placeholders)
+					 AND (post_excerpt = '' OR post_excerpt IS NULL)
+					 ORDER BY post_date DESC LIMIT %d",
+					...array_merge( $type_filter, array( $max_flagged ) )
+				)
+			);
+			foreach ( $rows as $r ) {
+				$no_excerpt_items[] = array( 'id' => (int) $r->ID, 'title' => $r->post_title );
+			}
+		}
+
+		if ( $no_excerpt_count > 0 ) {
+			$checks[] = array( 'check' => 'missing_excerpts', 'severity' => 'info', 'count' => $no_excerpt_count, 'items' => $no_excerpt_items );
+		}
+	} catch ( \Throwable $e ) {
+		$checks[] = array( 'check' => 'missing_excerpts', 'error' => $e->getMessage() );
+	}
+
+	// --- 7. Posts without tags ---
+	try {
+		if ( in_array( 'post', $type_filter, true ) ) {
+			// Only run if tags are actually used on the site.
+			$tag_count = (int) wp_count_terms( array( 'taxonomy' => 'post_tag', 'hide_empty' => false ) );
+			if ( $tag_count > 0 ) {
+				$no_tags_count = (int) $wpdb->get_var(
+					"SELECT COUNT(*) FROM {$wpdb->posts} p
+					 WHERE p.post_status = 'publish' AND p.post_type = 'post'
+					 AND p.ID NOT IN (
+					     SELECT tr.object_id FROM {$wpdb->term_relationships} tr
+					     JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+					     WHERE tt.taxonomy = 'post_tag'
+					 )"
+				);
+
+				$no_tags_items = array();
+				if ( $no_tags_count > 0 ) {
+					$rows = $wpdb->get_results( $wpdb->prepare(
+						"SELECT p.ID, p.post_title FROM {$wpdb->posts} p
+						 WHERE p.post_status = 'publish' AND p.post_type = 'post'
+						 AND p.ID NOT IN (
+						     SELECT tr.object_id FROM {$wpdb->term_relationships} tr
+						     JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+						     WHERE tt.taxonomy = 'post_tag'
+						 )
+						 ORDER BY p.post_date DESC LIMIT %d",
+						$max_flagged
+					) );
+					foreach ( $rows as $r ) {
+						$no_tags_items[] = array( 'id' => (int) $r->ID, 'title' => $r->post_title );
+					}
+
+					$checks[] = array( 'check' => 'posts_without_tags', 'severity' => 'info', 'count' => $no_tags_count, 'items' => $no_tags_items );
+				}
+			}
+		}
+	} catch ( \Throwable $e ) {
+		$checks[] = array( 'check' => 'posts_without_tags', 'error' => $e->getMessage() );
+	}
+
+	$issues_found    = count( $checks );
+	$total_flagged   = 0;
+	foreach ( $checks as $c ) {
+		$total_flagged += $c['count'] ?? 0;
+	}
+
+	$result['summary'] = array(
+		'total_published'     => $total_published,
+		'total_drafts'        => $total_drafts,
+		'post_types_audited'  => $type_filter,
+		'issues_found'        => $issues_found,
+		'total_flagged_items' => $total_flagged,
+	);
+	$result['checks'] = $checks;
+	$result['flags']  = $flags;
+
+	return $result;
 }
 
 // ============================================================
