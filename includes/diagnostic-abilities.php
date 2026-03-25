@@ -133,6 +133,29 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'callback' => 'abilities_for_ai_diagnostic_theme_audit',
 	));
+
+	$reg->read( 'diagnostic/content-narrative', array(
+		'label'       => 'Content Narrative',
+		'description' => 'Compiled site story — what this site is about, who it is for, how content is organised, and the publication timeline. The AI onboarding script.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'include_key_pages' => array(
+					'type'        => 'boolean',
+					'description' => 'Include first 200 chars of About/Home/Start Here page content (default: true).',
+				),
+				'max_recent_posts' => array(
+					'type'        => 'integer',
+					'description' => 'Number of recent posts to include (default: 10, max: 25). Titles + dates + categories only.',
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'generated_at' => array( 'type' => 'string' ),
+			'flags'        => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => 'abilities_for_ai_diagnostic_content_narrative',
+	));
 });
 
 // ============================================================
@@ -921,6 +944,278 @@ function abilities_for_ai_diagnostic_security_posture( $input = null ) {
 		} catch ( \Throwable $e ) {
 			$result['filesystem'] = array( 'error' => $e->getMessage() );
 		}
+	}
+
+	$result['flags'] = $flags;
+
+	return $result;
+}
+
+// ============================================================
+// Content narrative diagnostic
+// ============================================================
+
+/**
+ * Compiled content narrative callback — the AI onboarding script.
+ *
+ * @param array|null $input Optional input.
+ * @return array Site narrative report.
+ */
+function abilities_for_ai_diagnostic_content_narrative( $input = null ) {
+	$result = array( 'generated_at' => gmdate( 'Y-m-d H:i:s' ) );
+	$flags  = array();
+
+	$include_key_pages = $input['include_key_pages'] ?? true;
+	$max_recent        = min( intval( $input['max_recent_posts'] ?? 10 ), 25 );
+
+	// --- 1. Site Identity ---
+	try {
+		$theme_obj = wp_get_theme();
+		$description = get_option( 'blogdescription', '' );
+
+		$result['identity'] = array(
+			'name'        => get_option( 'blogname', '' ),
+			'tagline'     => $description,
+			'site_url'    => get_site_url(),
+			'home_url'    => get_home_url(),
+			'theme'       => $theme_obj->get( 'Name' ),
+			'block_theme' => $theme_obj->is_block_theme(),
+		);
+
+		if ( empty( $description ) || $description === 'Just another WordPress site' ) {
+			$flags[] = array( 'severity' => 'info', 'area' => 'identity', 'message' => 'Site description is empty or default.' );
+		}
+	} catch ( \Throwable $e ) {
+		$result['identity'] = array( 'error' => $e->getMessage() );
+	}
+
+	// --- 2. Content Structure ---
+	try {
+		$public_types = get_post_types( array( 'public' => true ), 'objects' );
+		$type_counts  = array();
+		foreach ( $public_types as $slug => $obj ) {
+			$counts  = wp_count_posts( $slug );
+			$publish = (int) ( $counts->publish ?? 0 );
+			$draft   = (int) ( $counts->draft ?? 0 );
+			if ( $publish > 0 || $draft > 0 ) {
+				$type_counts[ $slug ] = array(
+					'label'   => $obj->label,
+					'publish' => $publish,
+					'draft'   => $draft,
+				);
+			}
+		}
+
+		// Category tree.
+		$categories = get_terms( array( 'taxonomy' => 'category', 'hide_empty' => false, 'number' => 100 ) );
+		$cat_tree   = array();
+		if ( ! is_wp_error( $categories ) ) {
+			foreach ( $categories as $cat ) {
+				$cat_tree[] = array(
+					'name'        => $cat->name,
+					'slug'        => $cat->slug,
+					'description' => $cat->description ? mb_substr( $cat->description, 0, 100 ) : null,
+					'count'       => (int) $cat->count,
+					'parent'      => (int) $cat->parent,
+				);
+			}
+		}
+
+		$has_descriptions = false;
+		foreach ( $cat_tree as $c ) {
+			if ( ! empty( $c['description'] ) ) {
+				$has_descriptions = true;
+				break;
+			}
+		}
+
+		$result['content_structure'] = array(
+			'post_types'  => $type_counts,
+			'categories'  => $cat_tree,
+		);
+
+		if ( ! empty( $cat_tree ) && ! $has_descriptions ) {
+			$flags[] = array( 'severity' => 'info', 'area' => 'content_structure', 'message' => 'Categories exist but none have descriptions.' );
+		}
+	} catch ( \Throwable $e ) {
+		$result['content_structure'] = array( 'error' => $e->getMessage() );
+	}
+
+	// --- 3. Key Pages ---
+	if ( $include_key_pages ) {
+		try {
+			$key_slugs = array( 'about', 'home', 'start-here', 'start', 'contact' );
+			$key_pages = array();
+
+			foreach ( $key_slugs as $slug ) {
+				$page = get_page_by_path( $slug );
+				if ( $page && $page->post_status === 'publish' ) {
+					$plain = wp_strip_all_tags( strip_shortcodes( $page->post_content ) );
+					$plain = preg_replace( '/<!--.*?-->/s', '', $plain );
+					$plain = preg_replace( '/\s+/', ' ', trim( $plain ) );
+					$key_pages[] = array(
+						'slug'    => $slug,
+						'title'   => $page->post_title,
+						'excerpt' => mb_substr( $plain, 0, 200 ),
+					);
+				}
+			}
+
+			// Also check the front page.
+			$front_page_id = (int) get_option( 'page_on_front', 0 );
+			if ( $front_page_id > 0 ) {
+				$front = get_post( $front_page_id );
+				if ( $front && $front->post_status === 'publish' ) {
+					$already = false;
+					foreach ( $key_pages as $kp ) {
+						if ( $kp['slug'] === $front->post_name ) {
+							$already = true;
+							break;
+						}
+					}
+					if ( ! $already ) {
+						$plain = wp_strip_all_tags( strip_shortcodes( $front->post_content ) );
+						$plain = preg_replace( '/<!--.*?-->/s', '', $plain );
+						$plain = preg_replace( '/\s+/', ' ', trim( $plain ) );
+						array_unshift( $key_pages, array(
+							'slug'    => $front->post_name,
+							'title'   => $front->post_title . ' (Front Page)',
+							'excerpt' => mb_substr( $plain, 0, 200 ),
+						));
+					}
+				}
+			}
+
+			$result['key_pages'] = $key_pages;
+
+			$slugs_found = array_column( $key_pages, 'slug' );
+			if ( ! in_array( 'about', $slugs_found, true ) ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'key_pages', 'message' => 'No About page found (slug: about).' );
+			}
+		} catch ( \Throwable $e ) {
+			$result['key_pages'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- 4. Publication Timeline ---
+	try {
+		global $wpdb;
+		$first = $wpdb->get_var( "SELECT MIN(post_date) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type = 'post'" );
+		$last  = $wpdb->get_var( "SELECT MAX(post_date) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type = 'post'" );
+		$total_posts = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type = 'post'" );
+
+		$span_days = 0;
+		$avg_per_week = 0;
+		if ( $first && $last ) {
+			$span_days = max( 1, (int) ( ( strtotime( $last ) - strtotime( $first ) ) / 86400 ) );
+			$avg_per_week = round( $total_posts / max( 1, $span_days / 7 ), 1 );
+		}
+
+		// Most active month.
+		$active_month = $wpdb->get_var( "SELECT DATE_FORMAT(post_date, '%Y-%m') as m FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type = 'post' GROUP BY m ORDER BY COUNT(*) DESC LIMIT 1" );
+
+		$result['timeline'] = array(
+			'first_published'  => $first,
+			'last_published'   => $last,
+			'span_days'        => $span_days,
+			'total_posts'      => $total_posts,
+			'avg_per_week'     => $avg_per_week,
+			'most_active_month' => $active_month,
+		);
+
+		if ( $last && ( time() - strtotime( $last ) ) > 30 * 86400 ) {
+			$days_ago = (int) ( ( time() - strtotime( $last ) ) / 86400 );
+			$flags[] = array( 'severity' => 'warning', 'area' => 'timeline', 'message' => sprintf( 'No posts published in the last %d days.', $days_ago ) );
+		}
+	} catch ( \Throwable $e ) {
+		$result['timeline'] = array( 'error' => $e->getMessage() );
+	}
+
+	// --- 5. Authors ---
+	try {
+		global $wpdb;
+		$authors_raw = $wpdb->get_results(
+			"SELECT p.post_author, COUNT(*) as post_count
+			 FROM {$wpdb->posts} p
+			 WHERE p.post_status = 'publish' AND p.post_type = 'post'
+			 GROUP BY p.post_author
+			 ORDER BY post_count DESC
+			 LIMIT 20"
+		);
+
+		$authors = array();
+		foreach ( $authors_raw as $a ) {
+			$user = get_userdata( (int) $a->post_author );
+			if ( $user ) {
+				$authors[] = array(
+					'name'       => $user->display_name,
+					'post_count' => (int) $a->post_count,
+					'role'       => implode( ', ', $user->roles ),
+				);
+			}
+		}
+
+		$result['authors'] = $authors;
+
+		if ( count( $authors ) === 1 ) {
+			$flags[] = array( 'severity' => 'info', 'area' => 'authors', 'message' => 'All content is by a single author.' );
+		}
+	} catch ( \Throwable $e ) {
+		$result['authors'] = array( 'error' => $e->getMessage() );
+	}
+
+	// --- 6. Navigation ---
+	try {
+		$menus = wp_get_nav_menus();
+		$nav   = array();
+		if ( ! empty( $menus ) ) {
+			// Get the first menu (usually primary).
+			$menu_items = wp_get_nav_menu_items( $menus[0]->term_id );
+			if ( $menu_items ) {
+				foreach ( $menu_items as $item ) {
+					if ( (int) $item->menu_item_parent === 0 ) {
+						$nav[] = array( 'label' => $item->title, 'url' => $item->url );
+					}
+				}
+			}
+		}
+
+		$result['navigation'] = array(
+			'menu_count'     => count( $menus ),
+			'primary_items'  => $nav,
+		);
+
+		if ( empty( $menus ) ) {
+			$flags[] = array( 'severity' => 'warning', 'area' => 'navigation', 'message' => 'No navigation menus registered.' );
+		}
+	} catch ( \Throwable $e ) {
+		$result['navigation'] = array( 'error' => $e->getMessage() );
+	}
+
+	// --- 7. Recent Activity ---
+	try {
+		$recent_posts = get_posts( array(
+			'post_type'      => 'post',
+			'post_status'    => 'publish',
+			'posts_per_page' => $max_recent,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+		) );
+
+		$recent = array();
+		foreach ( $recent_posts as $p ) {
+			$cats = wp_get_post_categories( $p->ID, array( 'fields' => 'names' ) );
+			$recent[] = array(
+				'title'      => $p->post_title,
+				'date'       => $p->post_date,
+				'categories' => is_wp_error( $cats ) ? array() : $cats,
+				'author'     => get_the_author_meta( 'display_name', $p->post_author ),
+			);
+		}
+
+		$result['recent_activity'] = $recent;
+	} catch ( \Throwable $e ) {
+		$result['recent_activity'] = array( 'error' => $e->getMessage() );
 	}
 
 	$result['flags'] = $flags;
