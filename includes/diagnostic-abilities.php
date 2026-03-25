@@ -93,6 +93,26 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'callback' => 'abilities_for_ai_diagnostic_taxonomy_health',
 	));
+
+	$reg->read( 'diagnostic/security-posture', array(
+		'label'       => 'Security Posture Diagnostic',
+		'description' => 'Compiled single-call security assessment. Evaluates user configuration, plugin hygiene, exposed settings, authentication state, and filesystem indicators. Read-only and non-invasive.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'sections' => array(
+					'type'        => 'array',
+					'items'       => array( 'type' => 'string' ),
+					'description' => 'Optional section filter. Values: users, plugins, settings, authentication, filesystem. Omit for full assessment.',
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'generated_at' => array( 'type' => 'string' ),
+			'flags'        => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => 'abilities_for_ai_diagnostic_security_posture',
+	));
 });
 
 // ============================================================
@@ -444,6 +464,194 @@ function abilities_for_ai_diagnostic_network_flags( $sites ) {
 	}
 
 	return $flags;
+}
+
+// ============================================================
+// Security posture diagnostic
+// ============================================================
+
+/**
+ * Compiled security posture diagnostic callback.
+ *
+ * @param array|null $input Optional input with 'sections' filter.
+ * @return array Security posture report.
+ */
+function abilities_for_ai_diagnostic_security_posture( $input = null ) {
+	$result  = array( 'generated_at' => gmdate( 'Y-m-d H:i:s' ) );
+	$flags   = array();
+	$include = ! empty( $input['sections'] ) ? $input['sections'] : null;
+
+	// --- Users ---
+	if ( ! $include || in_array( 'users', $include, true ) ) {
+		try {
+			$user_counts  = count_users();
+			$admin_count  = 0;
+			$no_role      = 0;
+			foreach ( $user_counts['avail_roles'] as $role => $count ) {
+				if ( $role === 'none' ) {
+					$no_role = (int) $count;
+				}
+			}
+			// Count users with manage_options (real admins).
+			$admins = get_users( array( 'capability' => 'manage_options', 'fields' => 'ID' ) );
+			$admin_count = count( $admins );
+
+			$app_passwords_available = function_exists( 'wp_is_application_passwords_available' ) && wp_is_application_passwords_available();
+
+			$result['users'] = array(
+				'total'                    => $user_counts['total_users'],
+				'by_role'                  => $user_counts['avail_roles'],
+				'admin_count'              => $admin_count,
+				'no_role_count'            => $no_role,
+				'application_passwords'    => $app_passwords_available,
+			);
+
+			if ( $admin_count > 3 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'users', 'message' => sprintf( '%d users have administrator privileges.', $admin_count ) );
+			}
+			if ( $no_role > 0 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'users', 'message' => sprintf( '%d user(s) have no role assigned.', $no_role ) );
+			}
+		} catch ( \Throwable $e ) {
+			$result['users'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Plugins ---
+	if ( ! $include || in_array( 'plugins', $include, true ) ) {
+		try {
+			if ( ! function_exists( 'get_plugins' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+			$all_plugins   = get_plugins();
+			$active_slugs  = get_option( 'active_plugins', array() );
+			$active_count  = count( $active_slugs );
+			$total_count   = count( $all_plugins );
+			$inactive_count = $total_count - $active_count;
+
+			$inactive_list = array();
+			foreach ( $all_plugins as $file => $data ) {
+				if ( ! in_array( $file, $active_slugs, true ) ) {
+					$inactive_list[] = array( 'name' => $data['Name'], 'version' => $data['Version'], 'file' => $file );
+				}
+			}
+			// Cap to 20 for compact output.
+			$inactive_list = array_slice( $inactive_list, 0, 20 );
+
+			$mu_count = count( get_mu_plugins() );
+
+			$result['plugins'] = array(
+				'active_count'   => $active_count,
+				'inactive_count' => $inactive_count,
+				'total_count'    => $total_count,
+				'must_use_count' => $mu_count,
+				'inactive'       => $inactive_list,
+			);
+
+			if ( $inactive_count > $active_count ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'plugins', 'message' => sprintf( 'More inactive (%d) than active (%d) plugins — potential attack surface.', $inactive_count, $active_count ) );
+			}
+		} catch ( \Throwable $e ) {
+			$result['plugins'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Settings ---
+	if ( ! $include || in_array( 'settings', $include, true ) ) {
+		try {
+			$registration  = (bool) get_option( 'users_can_register', false );
+			$default_role  = get_option( 'default_role', 'subscriber' );
+			$permalink     = get_option( 'permalink_structure', '' );
+			$file_edit_off = defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT;
+			$file_mods_off = defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS;
+
+			$result['settings'] = array(
+				'users_can_register'   => $registration,
+				'default_role'         => $default_role,
+				'blog_public'          => (bool) get_option( 'blog_public', '1' ),
+				'default_comment_status' => get_option( 'default_comment_status', 'open' ),
+				'permalink_structure'  => $permalink,
+				'disallow_file_edit'   => $file_edit_off,
+				'disallow_file_mods'   => $file_mods_off,
+			);
+
+			if ( $registration ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'settings', 'message' => 'Open user registration is enabled.' );
+			}
+			if ( $registration && $default_role !== 'subscriber' ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'settings', 'message' => sprintf( 'Default role for new registrations is "%s" (not subscriber).', $default_role ) );
+			}
+			if ( ! $file_edit_off ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'settings', 'message' => 'DISALLOW_FILE_EDIT is not set — theme/plugin editor is accessible.' );
+			}
+			if ( empty( $permalink ) ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'settings', 'message' => 'Using plain permalinks (no pretty URLs).' );
+			}
+		} catch ( \Throwable $e ) {
+			$result['settings'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Authentication ---
+	if ( ! $include || in_array( 'authentication', $include, true ) ) {
+		try {
+			$debug       = defined( 'WP_DEBUG' ) && WP_DEBUG;
+			$debug_log   = defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG;
+			$debug_display = defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY;
+			$env_type    = wp_get_environment_type();
+			$log_exists  = $debug_log && file_exists( WP_CONTENT_DIR . '/debug.log' );
+
+			// XML-RPC: check if the xmlrpc_enabled filter is being used to disable it.
+			$xmlrpc_enabled = apply_filters( 'xmlrpc_enabled', true );
+
+			$result['authentication'] = array(
+				'debug_mode'       => $debug,
+				'debug_log'        => $debug_log,
+				'debug_log_exists' => $log_exists,
+				'debug_display'    => $debug_display,
+				'environment_type' => $env_type,
+				'xmlrpc_enabled'   => $xmlrpc_enabled,
+			);
+
+			if ( $debug && $env_type === 'production' ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'authentication', 'message' => 'WP_DEBUG is enabled in production.' );
+			}
+			if ( $log_exists ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'authentication', 'message' => 'debug.log file exists in wp-content/ — may be publicly accessible.' );
+			}
+			if ( $debug_display && $env_type === 'production' ) {
+				$flags[] = array( 'severity' => 'critical', 'area' => 'authentication', 'message' => 'WP_DEBUG_DISPLAY is enabled in production — errors visible to visitors.' );
+			}
+			if ( $xmlrpc_enabled ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'authentication', 'message' => 'XML-RPC is enabled.' );
+			}
+		} catch ( \Throwable $e ) {
+			$result['authentication'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Filesystem ---
+	if ( ! $include || in_array( 'filesystem', $include, true ) ) {
+		try {
+			$htaccess_exists  = file_exists( ABSPATH . '.htaccess' );
+			$webconfig_exists = file_exists( ABSPATH . 'web.config' );
+			$debug_log_exists = file_exists( WP_CONTENT_DIR . '/debug.log' );
+			$uploads_exists   = is_dir( WP_CONTENT_DIR . '/uploads' );
+
+			$result['filesystem'] = array(
+				'htaccess_exists'    => $htaccess_exists,
+				'webconfig_exists'   => $webconfig_exists,
+				'debug_log_exists'   => $debug_log_exists,
+				'uploads_dir_exists' => $uploads_exists,
+			);
+		} catch ( \Throwable $e ) {
+			$result['filesystem'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	$result['flags'] = $flags;
+
+	return $result;
 }
 
 // ============================================================
