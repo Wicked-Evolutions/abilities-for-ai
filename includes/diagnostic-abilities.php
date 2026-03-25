@@ -35,7 +35,181 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'callback' => 'abilities_for_ai_diagnostic_site_overview',
 	));
+
+	if ( is_multisite() ) {
+		$reg->read( 'diagnostic/network-overview', array(
+			'label'       => 'Network Overview Diagnostic',
+			'description' => 'Compiled single-call multisite network diagnostic. Runs site-overview across all subsites with cross-site correlation flags. Only available on multisite installations.',
+			'input_schema' => array(
+				'type'       => 'object',
+				'properties' => array(
+					'sections' => array(
+						'type'        => 'array',
+						'items'       => array( 'type' => 'string' ),
+						'description' => 'Optional section filter per subsite. Same values as site-overview: environment, health, plugins, theme, cache, cron, settings, content, abilities.',
+					),
+					'sites' => array(
+						'type'        => 'array',
+						'items'       => array( 'type' => 'integer' ),
+						'description' => 'Optional: only diagnose these blog IDs. Omit for all sites in the network.',
+					),
+					'max_sites' => array(
+						'type'        => 'integer',
+						'description' => 'Maximum sites to diagnose (default: 20, max: 50). Prevents timeout on large networks.',
+					),
+				),
+			),
+			'output_schema' => abilities_for_ai_schema_item_output( array(
+				'generated_at'  => array( 'type' => 'string' ),
+				'network'       => array( 'type' => 'object' ),
+				'sites'         => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+				'network_flags' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+			) ),
+			'callback' => 'abilities_for_ai_diagnostic_network_overview',
+		));
+	}
 });
+
+// ============================================================
+// Orchestrator helpers
+// ============================================================
+
+/**
+ * Gather diagnostic sections and per-site flags for the current blog context.
+ *
+ * Shared by site-overview (single site) and network-overview (per-subsite loop).
+ *
+ * @param array|null $input Optional input with 'sections' filter.
+ * @return array { 'sections' => [...], 'flags' => [...] }
+ */
+function abilities_for_ai_diagnostic_gather_sections( $input = null ) {
+	$sections = array();
+	$flags    = array();
+	$include  = ! empty( $input['sections'] ) ? $input['sections'] : null;
+
+	// --- Environment ---
+	if ( ! $include || in_array( 'environment', $include, true ) ) {
+		try {
+			$sections['environment'] = abilities_for_ai_diagnostic_environment();
+
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && wp_get_environment_type() === 'production' ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'environment', 'message' => 'WP_DEBUG is enabled in production environment.' );
+			}
+		} catch ( \Throwable $e ) {
+			$sections['environment'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Health ---
+	if ( ! $include || in_array( 'health', $include, true ) ) {
+		try {
+			$sections['health'] = abilities_for_ai_diagnostic_health();
+
+			if ( ( $sections['health']['critical'] ?? 0 ) > 0 ) {
+				$flags[] = array( 'severity' => 'critical', 'area' => 'health', 'message' => sprintf( '%d critical site health issue(s) detected.', $sections['health']['critical'] ) );
+			}
+		} catch ( \Throwable $e ) {
+			$sections['health'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Plugins ---
+	if ( ! $include || in_array( 'plugins', $include, true ) ) {
+		try {
+			$sections['plugins'] = abilities_for_ai_diagnostic_plugins();
+
+			if ( ( $sections['plugins']['active_count'] ?? 0 ) > 20 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'plugins', 'message' => sprintf( 'High active plugin count: %d.', $sections['plugins']['active_count'] ) );
+			}
+		} catch ( \Throwable $e ) {
+			$sections['plugins'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Theme ---
+	if ( ! $include || in_array( 'theme', $include, true ) ) {
+		try {
+			$sections['theme'] = abilities_for_ai_diagnostic_theme();
+
+			global $wp_version;
+			if ( ! ( $sections['theme']['block_theme'] ?? false ) && version_compare( $wp_version, '6.5', '>=' ) ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'theme', 'message' => 'Classic theme on WP 6.5+. Consider a block theme for full Site Editor support.' );
+			}
+		} catch ( \Throwable $e ) {
+			$sections['theme'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Cache ---
+	if ( ! $include || in_array( 'cache', $include, true ) ) {
+		try {
+			$sections['cache'] = abilities_for_ai_diagnostic_cache();
+
+			if ( empty( $sections['cache']['persistent_cache'] ) ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'cache', 'message' => 'No persistent object cache detected.' );
+			}
+		} catch ( \Throwable $e ) {
+			$sections['cache'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Cron ---
+	if ( ! $include || in_array( 'cron', $include, true ) ) {
+		try {
+			$sections['cron'] = abilities_for_ai_diagnostic_cron();
+
+			if ( ( $sections['cron']['overdue_count'] ?? 0 ) > 0 ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'cron', 'message' => sprintf( '%d overdue cron event(s).', $sections['cron']['overdue_count'] ) );
+			}
+		} catch ( \Throwable $e ) {
+			$sections['cron'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Settings ---
+	if ( ! $include || in_array( 'settings', $include, true ) ) {
+		try {
+			$sections['settings'] = abilities_for_ai_diagnostic_settings();
+
+			if ( ( $sections['settings']['blog_public'] ?? true ) === false ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'settings', 'message' => 'Search engines are discouraged from indexing this site.' );
+			}
+			if ( ! empty( $sections['settings']['users_can_register'] ) ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'settings', 'message' => 'User registration is open.' );
+			}
+		} catch ( \Throwable $e ) {
+			$sections['settings'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Content ---
+	if ( ! $include || in_array( 'content', $include, true ) ) {
+		try {
+			$sections['content'] = abilities_for_ai_diagnostic_content();
+		} catch ( \Throwable $e ) {
+			$sections['content'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Abilities ---
+	if ( ! $include || in_array( 'abilities', $include, true ) ) {
+		try {
+			$sections['abilities'] = abilities_for_ai_diagnostic_abilities();
+
+			if ( empty( $sections['abilities']['pro_active'] ) ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'abilities', 'message' => 'Abilities for AI Pro license is not active.' );
+			}
+		} catch ( \Throwable $e ) {
+			$sections['abilities'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	return array( 'sections' => $sections, 'flags' => $flags );
+}
+
+// ============================================================
+// Ability callbacks
+// ============================================================
 
 /**
  * Compiled site overview diagnostic callback.
@@ -44,130 +218,207 @@ add_action( 'wp_abilities_api_init', function() {
  * @return array Diagnostic report.
  */
 function abilities_for_ai_diagnostic_site_overview( $input = null ) {
-	$result  = array( 'generated_at' => gmdate( 'Y-m-d H:i:s' ) );
-	$flags   = array();
-	$include = ! empty( $input['sections'] ) ? $input['sections'] : null;
+	$data = abilities_for_ai_diagnostic_gather_sections( $input );
 
-	// --- Environment ---
-	if ( ! $include || in_array( 'environment', $include, true ) ) {
-		try {
-			$result['environment'] = abilities_for_ai_diagnostic_environment();
+	return array_merge(
+		array( 'generated_at' => gmdate( 'Y-m-d H:i:s' ) ),
+		$data['sections'],
+		array( 'flags' => $data['flags'] ),
+	);
+}
 
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && wp_get_environment_type() === 'production' ) {
-				$flags[] = array( 'severity' => 'warning', 'area' => 'environment', 'message' => 'WP_DEBUG is enabled in production environment.' );
-			}
-		} catch ( \Throwable $e ) {
-			$result['environment'] = array( 'error' => $e->getMessage() );
-		}
+/**
+ * Compiled network overview diagnostic callback.
+ *
+ * @param array|null $input Optional input with 'sections', 'sites', 'max_sites' filters.
+ * @return array|WP_Error Network diagnostic report.
+ */
+function abilities_for_ai_diagnostic_network_overview( $input = null ) {
+	if ( ! is_multisite() ) {
+		return new WP_Error( 'not_multisite', 'This ability is only available on multisite installations.' );
 	}
 
-	// --- Health ---
-	if ( ! $include || in_array( 'health', $include, true ) ) {
-		try {
-			$result['health'] = abilities_for_ai_diagnostic_health();
+	$max_sites   = min( intval( $input['max_sites'] ?? 20 ), 50 );
+	$site_filter = ! empty( $input['sites'] ) ? array_map( 'intval', $input['sites'] ) : null;
 
-			if ( ( $result['health']['critical'] ?? 0 ) > 0 ) {
-				$flags[] = array( 'severity' => 'critical', 'area' => 'health', 'message' => sprintf( '%d critical site health issue(s) detected.', $result['health']['critical'] ) );
-			}
-		} catch ( \Throwable $e ) {
-			$result['health'] = array( 'error' => $e->getMessage() );
-		}
+	$site_args = array(
+		'number'  => $max_sites,
+		'orderby' => 'id',
+		'order'   => 'ASC',
+	);
+	if ( $site_filter ) {
+		$site_args['site__in'] = $site_filter;
 	}
 
-	// --- Plugins ---
-	if ( ! $include || in_array( 'plugins', $include, true ) ) {
-		try {
-			$result['plugins'] = abilities_for_ai_diagnostic_plugins();
+	$sites = get_sites( $site_args );
 
-			if ( ( $result['plugins']['active_count'] ?? 0 ) > 20 ) {
-				$flags[] = array( 'severity' => 'info', 'area' => 'plugins', 'message' => sprintf( 'High active plugin count: %d.', $result['plugins']['active_count'] ) );
-			}
+	$result = array(
+		'generated_at' => gmdate( 'Y-m-d H:i:s' ),
+		'network'      => abilities_for_ai_diagnostic_network_info( count( $sites ) ),
+		'sites'        => array(),
+	);
+
+	$all_site_data = array();
+
+	foreach ( $sites as $site ) {
+		$blog_id = (int) $site->blog_id;
+
+		switch_to_blog( $blog_id );
+
+		try {
+			$data       = abilities_for_ai_diagnostic_gather_sections( $input );
+			$site_entry = array(
+				'blog_id' => $blog_id,
+				'url'     => get_site_url(),
+				'name'    => get_bloginfo( 'name' ),
+			);
+			$site_entry = array_merge( $site_entry, $data['sections'] );
+			$site_entry['flags'] = $data['flags'];
+
+			$result['sites'][] = $site_entry;
+			$all_site_data[]   = $site_entry;
 		} catch ( \Throwable $e ) {
-			$result['plugins'] = array( 'error' => $e->getMessage() );
+			$result['sites'][] = array(
+				'blog_id' => $blog_id,
+				'url'     => get_site_url(),
+				'error'   => $e->getMessage(),
+			);
 		}
+
+		restore_current_blog();
 	}
 
-	// --- Theme ---
-	if ( ! $include || in_array( 'theme', $include, true ) ) {
-		try {
-			$result['theme'] = abilities_for_ai_diagnostic_theme();
-
-			global $wp_version;
-			if ( ! ( $result['theme']['block_theme'] ?? false ) && version_compare( $wp_version, '6.5', '>=' ) ) {
-				$flags[] = array( 'severity' => 'info', 'area' => 'theme', 'message' => 'Classic theme on WP 6.5+. Consider a block theme for full Site Editor support.' );
-			}
-		} catch ( \Throwable $e ) {
-			$result['theme'] = array( 'error' => $e->getMessage() );
-		}
-	}
-
-	// --- Cache ---
-	if ( ! $include || in_array( 'cache', $include, true ) ) {
-		try {
-			$result['cache'] = abilities_for_ai_diagnostic_cache();
-
-			if ( empty( $result['cache']['persistent_cache'] ) ) {
-				$flags[] = array( 'severity' => 'warning', 'area' => 'cache', 'message' => 'No persistent object cache detected.' );
-			}
-		} catch ( \Throwable $e ) {
-			$result['cache'] = array( 'error' => $e->getMessage() );
-		}
-	}
-
-	// --- Cron ---
-	if ( ! $include || in_array( 'cron', $include, true ) ) {
-		try {
-			$result['cron'] = abilities_for_ai_diagnostic_cron();
-
-			if ( ( $result['cron']['overdue_count'] ?? 0 ) > 0 ) {
-				$flags[] = array( 'severity' => 'warning', 'area' => 'cron', 'message' => sprintf( '%d overdue cron event(s).', $result['cron']['overdue_count'] ) );
-			}
-		} catch ( \Throwable $e ) {
-			$result['cron'] = array( 'error' => $e->getMessage() );
-		}
-	}
-
-	// --- Settings ---
-	if ( ! $include || in_array( 'settings', $include, true ) ) {
-		try {
-			$result['settings'] = abilities_for_ai_diagnostic_settings();
-
-			if ( ( $result['settings']['blog_public'] ?? true ) === false ) {
-				$flags[] = array( 'severity' => 'warning', 'area' => 'settings', 'message' => 'Search engines are discouraged from indexing this site.' );
-			}
-			if ( ! empty( $result['settings']['users_can_register'] ) ) {
-				$flags[] = array( 'severity' => 'info', 'area' => 'settings', 'message' => 'User registration is open.' );
-			}
-		} catch ( \Throwable $e ) {
-			$result['settings'] = array( 'error' => $e->getMessage() );
-		}
-	}
-
-	// --- Content ---
-	if ( ! $include || in_array( 'content', $include, true ) ) {
-		try {
-			$result['content'] = abilities_for_ai_diagnostic_content();
-		} catch ( \Throwable $e ) {
-			$result['content'] = array( 'error' => $e->getMessage() );
-		}
-	}
-
-	// --- Abilities ---
-	if ( ! $include || in_array( 'abilities', $include, true ) ) {
-		try {
-			$result['abilities'] = abilities_for_ai_diagnostic_abilities();
-
-			if ( empty( $result['abilities']['pro_active'] ) ) {
-				$flags[] = array( 'severity' => 'info', 'area' => 'abilities', 'message' => 'Abilities for AI Pro license is not active.' );
-			}
-		} catch ( \Throwable $e ) {
-			$result['abilities'] = array( 'error' => $e->getMessage() );
-		}
-	}
-
-	$result['flags'] = $flags;
+	$result['network_flags'] = abilities_for_ai_diagnostic_network_flags( $all_site_data );
 
 	return $result;
+}
+
+// ============================================================
+// Network helpers
+// ============================================================
+
+/**
+ * Network-level summary info.
+ *
+ * @param int $diagnosed_count Number of sites diagnosed in this run.
+ * @return array Network info.
+ */
+function abilities_for_ai_diagnostic_network_info( $diagnosed_count ) {
+	return array(
+		'site_count'      => get_blog_count(),
+		'diagnosed_count' => $diagnosed_count,
+		'wp_version'      => get_bloginfo( 'version' ),
+		'php_version'     => PHP_VERSION,
+		'network_name'    => get_site_option( 'site_name' ),
+		'registration'    => get_site_option( 'registration', 'none' ),
+		'network_plugins' => count( get_site_option( 'active_sitewide_plugins', array() ) ),
+	);
+}
+
+/**
+ * Cross-site correlation flags — intelligence that only exists when comparing subsites.
+ *
+ * @param array $sites Array of per-site diagnostic data.
+ * @return array Network-level flags.
+ */
+function abilities_for_ai_diagnostic_network_flags( $sites ) {
+	$flags = array();
+
+	if ( count( $sites ) < 2 ) {
+		return $flags;
+	}
+
+	// Theme version mismatch across subsites.
+	$themes = array();
+	foreach ( $sites as $s ) {
+		if ( isset( $s['theme']['name'], $s['theme']['version'] ) ) {
+			$key = $s['theme']['name'];
+			$themes[ $key ][] = array( 'url' => $s['url'], 'version' => $s['theme']['version'] );
+		}
+	}
+	foreach ( $themes as $name => $instances ) {
+		$versions = array_unique( array_column( $instances, 'version' ) );
+		if ( count( $versions ) > 1 ) {
+			$flags[] = array(
+				'severity' => 'warning',
+				'area'     => 'theme',
+				'message'  => sprintf( 'Theme "%s" has version mismatch across subsites: %s.', $name, implode( ', ', $versions ) ),
+			);
+		}
+	}
+
+	// Cache inconsistency — some sites have persistent cache, others don't.
+	$cache_states = array();
+	foreach ( $sites as $s ) {
+		if ( isset( $s['cache']['persistent_cache'] ) ) {
+			$cache_states[ $s['url'] ] = ! empty( $s['cache']['persistent_cache'] );
+		}
+	}
+	$has_cache = array_filter( $cache_states );
+	$no_cache  = array_diff_key( $cache_states, $has_cache );
+	if ( ! empty( $has_cache ) && ! empty( $no_cache ) ) {
+		$flags[] = array(
+			'severity' => 'warning',
+			'area'     => 'cache',
+			'message'  => sprintf( 'Inconsistent object cache: %d site(s) have it, %d do not.', count( $has_cache ), count( $no_cache ) ),
+		);
+	}
+
+	// Sites with critical health issues.
+	$critical_sites = array();
+	foreach ( $sites as $s ) {
+		if ( ( $s['health']['critical'] ?? 0 ) > 0 ) {
+			$critical_sites[] = $s['url'];
+		}
+	}
+	if ( ! empty( $critical_sites ) ) {
+		$flags[] = array(
+			'severity' => 'critical',
+			'area'     => 'health',
+			'message'  => sprintf( '%d subsite(s) have critical health issues: %s.', count( $critical_sites ), implode( ', ', $critical_sites ) ),
+		);
+	}
+
+	// Content distribution — identify empty subsites.
+	foreach ( $sites as $s ) {
+		$total_content = 0;
+		if ( isset( $s['content'] ) && is_array( $s['content'] ) && ! isset( $s['content']['error'] ) ) {
+			foreach ( $s['content'] as $type => $counts ) {
+				if ( is_array( $counts ) ) {
+					$total_content += $counts['total'] ?? 0;
+				}
+			}
+		}
+		if ( $total_content === 0 && isset( $s['content'] ) && ! isset( $s['content']['error'] ) ) {
+			$flags[] = array(
+				'severity' => 'info',
+				'area'     => 'content',
+				'message'  => sprintf( 'Subsite %s has no content.', $s['url'] ),
+			);
+		}
+	}
+
+	// Plugin count variance — flag if one subsite has significantly more active plugins.
+	$plugin_counts = array();
+	foreach ( $sites as $s ) {
+		if ( isset( $s['plugins']['active_count'] ) ) {
+			$plugin_counts[ $s['url'] ] = $s['plugins']['active_count'];
+		}
+	}
+	if ( count( $plugin_counts ) >= 2 ) {
+		$avg = array_sum( $plugin_counts ) / count( $plugin_counts );
+		foreach ( $plugin_counts as $url => $count ) {
+			if ( $count > $avg * 2 && $count > 5 ) {
+				$flags[] = array(
+					'severity' => 'info',
+					'area'     => 'plugins',
+					'message'  => sprintf( '%s has %d active plugins — significantly above network average (%.0f).', $url, $count, $avg ),
+				);
+			}
+		}
+	}
+
+	return $flags;
 }
 
 // ============================================================
