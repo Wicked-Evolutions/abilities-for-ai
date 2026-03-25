@@ -113,6 +113,26 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'callback' => 'abilities_for_ai_diagnostic_security_posture',
 	));
+
+	$reg->read( 'diagnostic/theme-audit', array(
+		'label'       => 'Theme Audit Diagnostic',
+		'description' => 'Compiled single-call theme and design system audit. Evaluates theme.json configuration, enqueued assets, registered patterns, block type availability, and design consistency. Note: asset detection reflects REST API context — some frontend-only assets may not appear.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'sections' => array(
+					'type'        => 'array',
+					'items'       => array( 'type' => 'string' ),
+					'description' => 'Optional section filter. Values: theme_info, design_tokens, assets, patterns, blocks. Omit for full audit.',
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'generated_at' => array( 'type' => 'string' ),
+			'flags'        => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+		) ),
+		'callback' => 'abilities_for_ai_diagnostic_theme_audit',
+	));
 });
 
 // ============================================================
@@ -464,6 +484,260 @@ function abilities_for_ai_diagnostic_network_flags( $sites ) {
 	}
 
 	return $flags;
+}
+
+// ============================================================
+// Theme audit diagnostic
+// ============================================================
+
+/**
+ * Compiled theme audit diagnostic callback.
+ *
+ * @param array|null $input Optional input with 'sections' filter.
+ * @return array Theme audit report.
+ */
+function abilities_for_ai_diagnostic_theme_audit( $input = null ) {
+	$result  = array( 'generated_at' => gmdate( 'Y-m-d H:i:s' ) );
+	$flags   = array();
+	$include = ! empty( $input['sections'] ) ? $input['sections'] : null;
+
+	$theme = wp_get_theme();
+
+	// --- Theme info ---
+	if ( ! $include || in_array( 'theme_info', $include, true ) ) {
+		try {
+			$is_block    = $theme->is_block_theme();
+			$parent      = $theme->parent();
+			$theme_json  = file_exists( get_stylesheet_directory() . '/theme.json' );
+			$supports    = array();
+			$support_features = array(
+				'align-wide', 'appearance-tools', 'border', 'color', 'custom-line-height',
+				'custom-spacing', 'custom-units', 'editor-color-palette', 'editor-font-sizes',
+				'editor-styles', 'responsive-embeds', 'wp-block-styles',
+			);
+			foreach ( $support_features as $feature ) {
+				if ( current_theme_supports( $feature ) ) {
+					$supports[] = $feature;
+				}
+			}
+
+			$result['theme_info'] = array(
+				'name'         => $theme->get( 'Name' ),
+				'version'      => $theme->get( 'Version' ),
+				'parent'       => $parent ? $parent->get( 'Name' ) : null,
+				'parent_version' => $parent ? $parent->get( 'Version' ) : null,
+				'block_theme'  => $is_block,
+				'theme_json'   => $theme_json,
+				'requires_wp'  => $theme->get( 'RequiresWP' ) ?: null,
+				'requires_php' => $theme->get( 'RequiresPHP' ) ?: null,
+				'theme_supports' => $supports,
+			);
+
+			global $wp_version;
+			if ( ! $is_block && version_compare( $wp_version, '6.5', '>=' ) ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'theme_info', 'message' => 'Classic theme on WP 6.5+. Consider a block theme for full Site Editor support.' );
+			}
+			if ( $is_block && ! $theme_json ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'theme_info', 'message' => 'Block theme without theme.json — design tokens and global styles will not work.' );
+			}
+			if ( $parent && version_compare( $theme->get( 'Version' ), $parent->get( 'Version' ), '<' ) ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'theme_info', 'message' => sprintf( 'Child theme version (%s) is lower than parent (%s).', $theme->get( 'Version' ), $parent->get( 'Version' ) ) );
+			}
+		} catch ( \Throwable $e ) {
+			$result['theme_info'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Design tokens ---
+	if ( ! $include || in_array( 'design_tokens', $include, true ) ) {
+		try {
+			$tokens = array();
+
+			if ( function_exists( 'wp_get_global_settings' ) ) {
+				$settings = wp_get_global_settings();
+
+				// Colors.
+				$palette = $settings['color']['palette']['theme'] ?? $settings['color']['palette'] ?? array();
+				if ( is_array( $palette ) ) {
+					$tokens['color_count'] = count( $palette );
+					$tokens['color_slugs'] = array_slice( array_column( $palette, 'slug' ), 0, 30 );
+				} else {
+					$tokens['color_count'] = 0;
+					$tokens['color_slugs'] = array();
+				}
+
+				// Gradients.
+				$gradients = $settings['color']['gradients']['theme'] ?? $settings['color']['gradients'] ?? array();
+				$tokens['gradient_count'] = is_array( $gradients ) ? count( $gradients ) : 0;
+
+				// Typography — font families.
+				$families = $settings['typography']['fontFamilies']['theme'] ?? $settings['typography']['fontFamilies'] ?? array();
+				if ( is_array( $families ) ) {
+					$tokens['font_family_count'] = count( $families );
+					$tokens['font_families'] = array_slice( array_column( $families, 'name' ), 0, 20 );
+				} else {
+					$tokens['font_family_count'] = 0;
+					$tokens['font_families'] = array();
+				}
+
+				// Font sizes.
+				$sizes = $settings['typography']['fontSizes']['theme'] ?? $settings['typography']['fontSizes'] ?? array();
+				if ( is_array( $sizes ) ) {
+					$tokens['font_size_count'] = count( $sizes );
+					$tokens['font_size_slugs'] = array_slice( array_column( $sizes, 'slug' ), 0, 20 );
+				} else {
+					$tokens['font_size_count'] = 0;
+					$tokens['font_size_slugs'] = array();
+				}
+
+				// Spacing sizes.
+				$spacing = $settings['spacing']['spacingSizes']['theme'] ?? $settings['spacing']['spacingSizes'] ?? array();
+				$tokens['spacing_size_count'] = is_array( $spacing ) ? count( $spacing ) : 0;
+
+				// Layout.
+				$tokens['content_size'] = $settings['layout']['contentSize'] ?? null;
+				$tokens['wide_size']    = $settings['layout']['wideSize'] ?? null;
+			} else {
+				$tokens['note'] = 'wp_get_global_settings() not available (requires WP 6.1+).';
+			}
+
+			$result['design_tokens'] = $tokens;
+
+			if ( ( $tokens['color_count'] ?? 0 ) > 20 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'design_tokens', 'message' => sprintf( 'Large color palette: %d colors defined.', $tokens['color_count'] ) );
+			}
+			if ( ( $tokens['font_family_count'] ?? 0 ) === 0 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'design_tokens', 'message' => 'No font families defined in theme.json.' );
+			}
+			if ( ( $tokens['spacing_size_count'] ?? 0 ) === 0 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'design_tokens', 'message' => 'No spacing scale defined in theme.json.' );
+			}
+		} catch ( \Throwable $e ) {
+			$result['design_tokens'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Assets ---
+	if ( ! $include || in_array( 'assets', $include, true ) ) {
+		try {
+			$styles  = wp_styles();
+			$scripts = wp_scripts();
+
+			$style_handles  = array();
+			foreach ( $styles->registered as $handle => $dep ) {
+				$style_handles[] = $handle;
+			}
+
+			$script_handles  = array();
+			$header_scripts  = 0;
+			foreach ( $scripts->registered as $handle => $dep ) {
+				$script_handles[] = $handle;
+				// Scripts not marked for footer load in header.
+				if ( empty( $dep->extra['group'] ) ) {
+					$header_scripts++;
+				}
+			}
+
+			$result['assets'] = array(
+				'registered_styles'  => count( $style_handles ),
+				'registered_scripts' => count( $script_handles ),
+				'header_scripts'     => $header_scripts,
+				'note'               => 'Counts reflect REST API context. Frontend-only enqueues may not appear.',
+			);
+
+			if ( count( $style_handles ) > 10 ) {
+				$flags[] = array( 'severity' => 'warning', 'area' => 'assets', 'message' => sprintf( 'High registered stylesheet count: %d.', count( $style_handles ) ) );
+			}
+			if ( $header_scripts > 5 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'assets', 'message' => sprintf( '%d scripts registered in header (potential render-blocking).', $header_scripts ) );
+			}
+		} catch ( \Throwable $e ) {
+			$result['assets'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Patterns ---
+	if ( ! $include || in_array( 'patterns', $include, true ) ) {
+		try {
+			$registry = WP_Block_Patterns_Registry::get_instance();
+			$all_patterns = $registry->get_all_registered();
+
+			$by_source  = array( 'theme' => 0, 'plugin' => 0, 'core' => 0, 'other' => 0 );
+			$categories = array();
+			foreach ( $all_patterns as $pattern ) {
+				// Determine source heuristically.
+				$name = $pattern['name'] ?? '';
+				if ( strpos( $name, 'core/' ) === 0 ) {
+					$by_source['core']++;
+				} elseif ( ! empty( $pattern['source'] ) && $pattern['source'] === 'theme' ) {
+					$by_source['theme']++;
+				} elseif ( ! empty( $pattern['source'] ) && $pattern['source'] === 'plugin' ) {
+					$by_source['plugin']++;
+				} else {
+					// Fallback heuristic: check filePath for theme directory.
+					if ( ! empty( $pattern['filePath'] ) && strpos( $pattern['filePath'], get_stylesheet_directory() ) !== false ) {
+						$by_source['theme']++;
+					} else {
+						$by_source['other']++;
+					}
+				}
+				foreach ( $pattern['categories'] ?? array() as $cat ) {
+					if ( ! in_array( $cat, $categories, true ) ) {
+						$categories[] = $cat;
+					}
+				}
+			}
+
+			$result['patterns'] = array(
+				'total'      => count( $all_patterns ),
+				'by_source'  => $by_source,
+				'categories' => $categories,
+			);
+
+			if ( $theme->is_block_theme() && count( $all_patterns ) === 0 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'patterns', 'message' => 'Block theme with no registered patterns.' );
+			}
+		} catch ( \Throwable $e ) {
+			$result['patterns'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	// --- Blocks ---
+	if ( ! $include || in_array( 'blocks', $include, true ) ) {
+		try {
+			$block_registry = WP_Block_Type_Registry::get_instance();
+			$all_blocks     = $block_registry->get_all_registered();
+
+			$by_namespace = array();
+			$ssr_count    = 0;
+			foreach ( $all_blocks as $block ) {
+				$name = $block->name;
+				$ns   = strpos( $name, '/' ) !== false ? explode( '/', $name )[0] : 'ungrouped';
+				$by_namespace[ $ns ] = ( $by_namespace[ $ns ] ?? 0 ) + 1;
+				if ( $block->is_dynamic() ) {
+					$ssr_count++;
+				}
+			}
+			// Sort by count descending.
+			arsort( $by_namespace );
+
+			$result['blocks'] = array(
+				'total'            => count( $all_blocks ),
+				'by_namespace'     => $by_namespace,
+				'server_rendered'  => $ssr_count,
+			);
+
+			if ( count( $all_blocks ) > 200 ) {
+				$flags[] = array( 'severity' => 'info', 'area' => 'blocks', 'message' => sprintf( 'High registered block type count: %d.', count( $all_blocks ) ) );
+			}
+		} catch ( \Throwable $e ) {
+			$result['blocks'] = array( 'error' => $e->getMessage() );
+		}
+	}
+
+	$result['flags'] = $flags;
+
+	return $result;
 }
 
 // ============================================================
