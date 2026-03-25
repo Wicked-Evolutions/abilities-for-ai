@@ -442,7 +442,16 @@ function abilities_for_ai_editorial_content_samples( $input = null ) {
 	$max_total      = min( intval( $input['max_total_posts'] ?? 15 ), 30 );
 	$per_series     = min( intval( $input['posts_per_series'] ?? 2 ), 5 );
 
+	// Output budget enforcement: auto-reduce max_words if total budget exceeds 30K words.
+	$budget_words = 30000;
+	if ( $max_total * $max_words > $budget_words ) {
+		$max_words = (int) floor( $budget_words / $max_total );
+	}
+
 	$selected_posts = array();
+	$seen_ids       = array();
+	$fallback       = null;
+	$fallback_reason = null;
 
 	switch ( $strategy ) {
 		case 'by_ids':
@@ -470,10 +479,20 @@ function abilities_for_ai_editorial_content_samples( $input = null ) {
 
 		case 'longest_per_series':
 			$categories = get_terms( array( 'taxonomy' => 'category', 'hide_empty' => true, 'number' => $max_total ) );
-			if ( ! is_wp_error( $categories ) ) {
+			if ( is_wp_error( $categories ) || empty( $categories ) ) {
+				// Fallback to recent_overall when no categories (e.g. pages).
+				$fallback        = 'recent_overall';
+				$fallback_reason = sprintf( "No category terms found for post type '%s'.", $post_type );
+				$selected_posts  = get_posts( array(
+					'post_type'      => $post_type,
+					'post_status'    => 'publish',
+					'posts_per_page' => $max_total,
+					'orderby'        => 'date',
+					'order'          => 'DESC',
+				) );
+			} else {
 				foreach ( $categories as $cat ) {
 					if ( count( $selected_posts ) >= $max_total ) break;
-					// Get posts in this category, sorted by content length (approximate).
 					$cat_posts = get_posts( array(
 						'post_type'      => $post_type,
 						'post_status'    => 'publish',
@@ -483,18 +502,16 @@ function abilities_for_ai_editorial_content_samples( $input = null ) {
 						'order'          => 'DESC',
 					) );
 					if ( ! empty( $cat_posts ) ) {
-						// Find the longest by word count.
-						$longest     = null;
-						$longest_wc  = 0;
+						// Sort by word count descending, pick first non-duplicate.
+						usort( $cat_posts, function( $a, $b ) {
+							return str_word_count( $b->post_content ) - str_word_count( $a->post_content );
+						} );
 						foreach ( $cat_posts as $cp ) {
-							$wc = str_word_count( abilities_for_ai_editorial_strip( $cp->post_content ) );
-							if ( $wc > $longest_wc ) {
-								$longest    = $cp;
-								$longest_wc = $wc;
+							if ( ! in_array( $cp->ID, $seen_ids, true ) ) {
+								$selected_posts[] = $cp;
+								$seen_ids[]       = $cp->ID;
+								break;
 							}
-						}
-						if ( $longest ) {
-							$selected_posts[] = $longest;
 						}
 					}
 				}
@@ -504,7 +521,18 @@ function abilities_for_ai_editorial_content_samples( $input = null ) {
 		case 'recent_per_series':
 		default:
 			$categories = get_terms( array( 'taxonomy' => 'category', 'hide_empty' => true, 'number' => 50 ) );
-			if ( ! is_wp_error( $categories ) ) {
+			if ( is_wp_error( $categories ) || empty( $categories ) ) {
+				// Fallback to recent_overall when no categories (e.g. pages).
+				$fallback        = 'recent_overall';
+				$fallback_reason = sprintf( "No category terms found for post type '%s'.", $post_type );
+				$selected_posts  = get_posts( array(
+					'post_type'      => $post_type,
+					'post_status'    => 'publish',
+					'posts_per_page' => $max_total,
+					'orderby'        => 'date',
+					'order'          => 'DESC',
+				) );
+			} else {
 				foreach ( $categories as $cat ) {
 					if ( count( $selected_posts ) >= $max_total ) break;
 					$cat_posts = get_posts( array(
@@ -517,21 +545,28 @@ function abilities_for_ai_editorial_content_samples( $input = null ) {
 					) );
 					foreach ( $cat_posts as $cp ) {
 						if ( count( $selected_posts ) >= $max_total ) break;
-						// Avoid duplicates (post in multiple categories).
-						$already = false;
-						foreach ( $selected_posts as $sp ) {
-							if ( $sp->ID === $cp->ID ) {
-								$already = true;
-								break;
-							}
+						if ( in_array( $cp->ID, $seen_ids, true ) ) {
+							continue;
 						}
-						if ( ! $already ) {
-							$selected_posts[] = $cp;
-						}
+						$selected_posts[] = $cp;
+						$seen_ids[]       = $cp->ID;
 					}
 				}
 			}
 			break;
+	}
+
+	// Fallback: if a per-series strategy produced 0 results, fall back to recent_overall.
+	if ( empty( $selected_posts ) && in_array( $strategy, array( 'recent_per_series', 'longest_per_series' ), true ) ) {
+		$fallback        = 'recent_overall';
+		$fallback_reason = $fallback_reason ?: sprintf( "Per-series strategy returned no results for post type '%s'.", $post_type );
+		$selected_posts  = get_posts( array(
+			'post_type'      => $post_type,
+			'post_status'    => 'publish',
+			'posts_per_page' => $max_total,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+		) );
 	}
 
 	// Build samples.
@@ -572,7 +607,7 @@ function abilities_for_ai_editorial_content_samples( $input = null ) {
 		);
 	}
 
-	return array(
+	$result = array(
 		'generated_at'       => gmdate( 'Y-m-d H:i:s' ),
 		'strategy'           => $strategy,
 		'posts_per_series'   => $strategy === 'recent_per_series' ? $per_series : null,
@@ -580,4 +615,11 @@ function abilities_for_ai_editorial_content_samples( $input = null ) {
 		'total_posts'        => count( $samples ),
 		'samples'            => $samples,
 	);
+
+	if ( $fallback ) {
+		$result['fallback']        = $fallback;
+		$result['fallback_reason'] = $fallback_reason;
+	}
+
+	return $result;
 }
