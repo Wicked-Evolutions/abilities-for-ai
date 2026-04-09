@@ -428,9 +428,6 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'knowledge/boot', array(
 		'label'       => 'Knowledge Layer Boot',
 		'description' => 'AI entry point — call this first when connecting to a site. Returns boot sequence, session history, site identity, ESSENCE, active observations, available agents, and courses. Determines if this is a first visit (bootstrap) or returning visit.',
-		'meta'        => array(
-			'mcp' => array( 'public' => true, 'type' => 'prompt' ),
-		),
 		'callback'    => function() {
 			// Mark this session as booted (used for session tracking).
 			set_transient( 'kl_session_booted_' . get_current_user_id(), true, HOUR_IN_SECONDS );
