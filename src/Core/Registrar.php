@@ -155,11 +155,14 @@ class Registrar {
 			'permission_callback' => function() use ( $capability ) {
 				return current_user_can( $capability );
 			},
-			'meta' => array(
-				'show_in_rest' => true,
-				'mcp'          => array( 'public' => true, 'type' => 'tool' ),
-				'annotations'  => $annotations,
-				'tier'         => $tier,
+			'meta' => array_merge(
+				array(
+					'show_in_rest' => true,
+					'mcp'          => array( 'public' => true, 'type' => 'tool' ),
+					'annotations'  => $annotations,
+					'tier'         => $tier,
+				),
+				isset( $config['meta'] ) ? $config['meta'] : array()
 			),
 		);
 

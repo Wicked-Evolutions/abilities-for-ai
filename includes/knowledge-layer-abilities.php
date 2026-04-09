@@ -376,11 +376,61 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	// ─── MCP Resources ───────────────────────────────────────
+
+	$reg->read( 'knowledge/resource-site-identity', array(
+		'label'       => 'Site Identity',
+		'description' => 'Core identity document for this WordPress site — who it is, what it does, infrastructure facts.',
+		'meta'        => array(
+			'mcp'      => array( 'public' => true, 'type' => 'resource' ),
+			'uri'      => 'wordpress://knowledge/site-identity',
+			'mimeType' => 'text/markdown',
+		),
+		'callback'    => function() {
+			$doc = Document::find_by_slug( 'site-identity', 'current' );
+			if ( ! $doc ) {
+				$doc = Document::find_by_slug( 'site-identity', 'site-identity' );
+			}
+			if ( ! $doc ) {
+				return new \WP_Error( 'not_found', 'No site identity document found in Knowledge Layer.' );
+			}
+			return array(
+				'title'   => $doc->title,
+				'content' => $doc->content,
+				'version' => $doc->version,
+			);
+		},
+	) );
+
+	$reg->read( 'knowledge/resource-site-state', array(
+		'label'       => 'Site State',
+		'description' => 'Current operational state of this WordPress site — last session, open items, what shipped.',
+		'meta'        => array(
+			'mcp'      => array( 'public' => true, 'type' => 'resource' ),
+			'uri'      => 'wordpress://knowledge/site-state',
+			'mimeType' => 'text/markdown',
+		),
+		'callback'    => function() {
+			$doc = Document::find_by_slug( 'site-state', 'current' );
+			if ( ! $doc ) {
+				return new \WP_Error( 'not_found', 'No site state document found in Knowledge Layer.' );
+			}
+			return array(
+				'title'   => $doc->title,
+				'content' => $doc->content,
+				'version' => $doc->version,
+			);
+		},
+	) );
+
 	// ─── Boot ─────────────────────────────────────────────────
 
 	$reg->read( 'knowledge/boot', array(
 		'label'       => 'Knowledge Layer Boot',
 		'description' => 'AI entry point — call this first when connecting to a site. Returns boot sequence, session history, site identity, ESSENCE, active observations, available agents, and courses. Determines if this is a first visit (bootstrap) or returning visit.',
+		'meta'        => array(
+			'mcp' => array( 'public' => true, 'type' => 'prompt' ),
+		),
 		'callback'    => function() {
 			// Mark this session as booted (used for session tracking).
 			set_transient( 'kl_session_booted_' . get_current_user_id(), true, HOUR_IN_SECONDS );
