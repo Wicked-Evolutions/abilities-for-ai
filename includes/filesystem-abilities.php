@@ -444,6 +444,122 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	$reg->write( 'filesystem/fetch-remote', array(
+		'label'       => 'Fetch Remote File',
+		'description' => 'Download a file from a remote URL and save it to a path within the WordPress installation. Supports text extensions (css, js, json, md, txt, html, php) and binary extensions (woff2, woff, ttf, otf, eot, ico, png, jpg, jpeg, webp, gif, svg, avif). Rejects private/internal IPs to prevent SSRF.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'url', 'path' ),
+			'properties' => array(
+				'url'       => array( 'type' => 'string', 'description' => 'Remote URL to download (must be http:// or https://)' ),
+				'path'      => array( 'type' => 'string', 'description' => 'Relative destination path from ABSPATH' ),
+				'overwrite' => array( 'type' => 'boolean', 'description' => 'Overwrite if file already exists (default: false)' ),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'path'          => array( 'type' => 'string' ),
+			'bytes_written' => array( 'type' => 'integer' ),
+			'content_type'  => array( 'type' => 'string' ),
+		) ),
+		'callback' => function( $params ) {
+			if ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) {
+				return wp_abilities_error( 'rest_forbidden', 'File modifications are disabled (DISALLOW_FILE_MODS is set in wp-config.php).' );
+			}
+			if ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT ) {
+				return wp_abilities_error( 'rest_forbidden', 'File editing is disabled (DISALLOW_FILE_EDIT is set in wp-config.php).' );
+			}
+
+			$url       = $params['url'] ?? '';
+			$path      = $params['path'] ?? '';
+			$overwrite = ! empty( $params['overwrite'] );
+
+			// --- Extension whitelist (text + binary) ---
+			$allowed = array(
+				'css', 'js', 'json', 'md', 'txt', 'html', 'php',
+				'woff2', 'woff', 'ttf', 'otf', 'eot',
+				'ico', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'avif',
+			);
+			$ext = strtolower( pathinfo( $path, PATHINFO_EXTENSION ) );
+			$blocked = array( 'phtml', 'htaccess', 'sh', 'exe', 'bat' );
+			if ( in_array( $ext, $blocked, true ) ) {
+				return wp_abilities_error( 'ability_invalid_input', "Writing to .{$ext} files is not allowed." );
+			}
+			if ( ! in_array( $ext, $allowed, true ) ) {
+				return wp_abilities_error( 'ability_invalid_input', "Extension .{$ext} is not in the allowed list: " . implode( ', ', $allowed ) );
+			}
+
+			// --- Path validation (ABSPATH containment, denylist, traversal) ---
+			$abs = wp_abilities_filesystem_validate_path( $path, false );
+			if ( is_wp_error( $abs ) ) {
+				return $abs;
+			}
+
+			// --- Overwrite check ---
+			if ( ! $overwrite && file_exists( $abs ) ) {
+				return wp_abilities_error( 'ability_invalid_input', 'File already exists. Set overwrite to true to replace it.' );
+			}
+
+			// --- URL validation ---
+			if ( ! preg_match( '#^https?://#i', $url ) ) {
+				return wp_abilities_error( 'ability_invalid_input', 'URL must start with http:// or https://.' );
+			}
+
+			$parsed = wp_parse_url( $url );
+			$host   = $parsed['host'] ?? '';
+			if ( empty( $host ) ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Could not parse hostname from URL.' );
+			}
+
+			// If host is already an IP literal, use it directly; otherwise resolve DNS.
+			if ( filter_var( $host, FILTER_VALIDATE_IP ) ) {
+				$resolved_ip = $host;
+			} else {
+				$resolved_ip = gethostbyname( $host );
+				if ( $resolved_ip === $host ) {
+					return wp_abilities_error( 'ability_invalid_input', "Could not resolve hostname: {$host}" );
+				}
+			}
+			if ( wp_abilities_is_private_ip( $resolved_ip ) ) {
+				return wp_abilities_error( 'rest_forbidden', "URL resolves to a private/internal IP ({$resolved_ip}). Downloads from private networks are blocked to prevent SSRF." );
+			}
+
+			// --- Download ---
+			$response = wp_remote_get( $url, array(
+				'timeout'   => 30,
+				'sslverify' => true,
+			) );
+
+			if ( is_wp_error( $response ) ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Download failed: ' . $response->get_error_message() );
+			}
+
+			$status_code = (int) wp_remote_retrieve_response_code( $response );
+			if ( $status_code < 200 || $status_code >= 300 ) {
+				return wp_abilities_error( 'ability_invalid_input', "Download failed with HTTP {$status_code}." );
+			}
+
+			$body = wp_remote_retrieve_body( $response );
+			if ( empty( $body ) ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Downloaded file is empty.' );
+			}
+
+			// --- Write ---
+			$result = @file_put_contents( $abs, $body );
+			if ( $result === false ) {
+				return wp_abilities_error( 'ability_invalid_input', 'Could not write to file. Check permissions.' );
+			}
+
+			$content_type = wp_remote_retrieve_header( $response, 'content-type' );
+
+			return array(
+				'success'       => true,
+				'path'          => $path,
+				'bytes_written' => $result,
+				'content_type'  => $content_type ?: 'unknown',
+			);
+		},
+	) );
+
 	// ===== FILESYSTEM — DELETE =====
 
 	$reg->delete( 'filesystem/delete-file', array(
