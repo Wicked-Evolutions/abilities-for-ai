@@ -278,6 +278,49 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	$reg->write( 'knowledge/update-session', array(
+		'label'        => 'Update Knowledge Session',
+		'description'  => 'Update an existing session\'s summary, findings, or what\'s next. Only provided fields are changed.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'session_id' ),
+			'properties' => array(
+				'session_id'         => array( 'type' => 'string', 'description' => 'Session identifier to update.' ),
+				'summary'            => array( 'type' => 'string', 'description' => 'Updated session summary.' ),
+				'findings'           => array( 'type' => 'array', 'items' => array( 'type' => 'string' ), 'description' => 'Updated key findings.' ),
+				'whats_next'         => array( 'type' => 'string', 'description' => 'Updated next steps.' ),
+				'protocols_run'      => array( 'type' => 'array', 'items' => array( 'type' => 'string' ), 'description' => 'Updated protocols run.' ),
+				'documents_modified' => array( 'type' => 'array', 'items' => array( 'type' => 'integer' ), 'description' => 'Updated document IDs modified.' ),
+			),
+		),
+		'callback' => function( $input ) {
+			$result = Session::update( $input['session_id'], $input );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+			return abilities_for_ai_safe_value( (array) $result );
+		},
+	) );
+
+	$reg->delete( 'knowledge/delete-session', array(
+		'label'        => 'Delete Knowledge Session',
+		'description'  => 'Permanently delete a session record. This cannot be undone.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'session_id' ),
+			'properties' => array(
+				'session_id' => array( 'type' => 'string', 'description' => 'Session identifier to delete.' ),
+			),
+		),
+		'callback' => function( $input ) {
+			$result = Session::delete( $input['session_id'] );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+			return array( 'success' => true, 'session_id' => $input['session_id'] );
+		},
+	) );
+
 	// ─── Observations ─────────────────────────────────────────
 
 	$reg->read( 'knowledge/list-observations', array(

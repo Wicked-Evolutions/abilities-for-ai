@@ -34,9 +34,21 @@ class SessionsController extends \WP_REST_Controller {
 
 		// GET /sessions/{id}
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
-			'methods'             => \WP_REST_Server::READABLE,
-			'callback'            => array( $this, 'get_item' ),
-			'permission_callback' => array( $this, 'admin_check' ),
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_item' ),
+				'permission_callback' => array( $this, 'admin_check' ),
+			),
+			array(
+				'methods'             => \WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_item' ),
+				'permission_callback' => array( $this, 'admin_check' ),
+			),
+			array(
+				'methods'             => \WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_item' ),
+				'permission_callback' => array( $this, 'admin_check' ),
+			),
 		) );
 	}
 
@@ -109,6 +121,59 @@ class SessionsController extends \WP_REST_Controller {
 		$data['observations'] = $obs['items'];
 
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * PUT /sessions/{id} — update a session.
+	 */
+	public function update_item( $request ) {
+		global $wpdb;
+
+		$id  = (int) $request->get_param( 'id' );
+		$row = $wpdb->get_row( $wpdb->prepare(
+			"SELECT session_id FROM %i WHERE id = %d",
+			Session::table(),
+			$id
+		) );
+
+		if ( ! $row ) {
+			return new \WP_Error( 'not_found', 'Session not found.', array( 'status' => 404 ) );
+		}
+
+		$data = $request->get_json_params();
+		$result = Session::update( $row->session_id, $data );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response( (array) $result );
+	}
+
+	/**
+	 * DELETE /sessions/{id} — delete a session.
+	 */
+	public function delete_item( $request ) {
+		global $wpdb;
+
+		$id  = (int) $request->get_param( 'id' );
+		$row = $wpdb->get_row( $wpdb->prepare(
+			"SELECT session_id FROM %i WHERE id = %d",
+			Session::table(),
+			$id
+		) );
+
+		if ( ! $row ) {
+			return new \WP_Error( 'not_found', 'Session not found.', array( 'status' => 404 ) );
+		}
+
+		$result = Session::delete( $row->session_id );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		return rest_ensure_response( array( 'deleted' => true, 'session_id' => $row->session_id ) );
 	}
 
 	public function get_collection_params() {

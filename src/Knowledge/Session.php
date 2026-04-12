@@ -138,6 +138,73 @@ class Session {
 	}
 
 	/**
+	 * Update an existing session.
+	 *
+	 * @param string $session_id Session identifier.
+	 * @param array  $data       Updatable fields.
+	 * @return object|WP_Error Updated session or error.
+	 */
+	public static function update( $session_id, $data ) {
+		global $wpdb;
+
+		$session = self::find( $session_id );
+		if ( ! $session ) {
+			return new \WP_Error( 'not_found', 'Session not found.' );
+		}
+
+		$allowed = array( 'summary', 'findings', 'whats_next', 'protocols_run', 'documents_modified' );
+		$update  = array();
+
+		foreach ( $allowed as $field ) {
+			if ( ! array_key_exists( $field, $data ) ) {
+				continue;
+			}
+
+			$value = $data[ $field ];
+
+			// JSON-encode array fields.
+			if ( in_array( $field, array( 'findings', 'protocols_run', 'documents_modified' ), true ) ) {
+				$value = wp_json_encode( is_array( $value ) ? $value : array() );
+			}
+
+			$update[ $field ] = $value;
+		}
+
+		if ( empty( $update ) ) {
+			return new \WP_Error( 'no_fields', 'No updatable fields provided.' );
+		}
+
+		$result = $wpdb->update( self::table(), $update, array( 'session_id' => $session_id ) );
+		if ( false === $result ) {
+			return new \WP_Error( 'db_update_error', 'Failed to update session: ' . $wpdb->last_error );
+		}
+
+		return self::find( $session_id );
+	}
+
+	/**
+	 * Delete a session by session_id.
+	 *
+	 * @param string $session_id Session identifier.
+	 * @return true|WP_Error
+	 */
+	public static function delete( $session_id ) {
+		global $wpdb;
+
+		$session = self::find( $session_id );
+		if ( ! $session ) {
+			return new \WP_Error( 'not_found', 'Session not found.' );
+		}
+
+		$result = $wpdb->delete( self::table(), array( 'session_id' => $session_id ) );
+		if ( false === $result ) {
+			return new \WP_Error( 'db_delete_error', 'Failed to delete session: ' . $wpdb->last_error );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get the most recent session.
 	 *
 	 * @return object|null
