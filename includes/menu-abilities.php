@@ -137,7 +137,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'type'       => 'object',
 			'required'   => array( 'menu_id' ),
 			'properties' => array(
-				'menu_id' => array( 'type' => 'integer', 'description' => 'The menu term ID.' ),
+				'id'      => array( 'type' => 'integer', 'description' => 'Menu term ID (preferred; alias for menu_id).' ),
+				'menu_id' => array( 'type' => 'integer', 'description' => 'Menu term ID (deprecated alias for id).' ),
 			),
 		),
 		'output_schema' => abilities_for_ai_schema_item_output( array(
@@ -147,7 +148,7 @@ add_action( 'wp_abilities_api_init', function() {
 			'items' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
 		) ),
 		'callback' => function( $input ) {
-			$menu_id = (int) $input['menu_id'];
+			$menu_id = (int) ( $input['id'] ?? $input['menu_id'] ?? 0 );
 			$menu    = wp_get_nav_menu_object( $menu_id );
 			if ( ! $menu ) {
 				return new WP_Error( 'not_found', "Menu {$menu_id} not found." );
@@ -338,7 +339,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'type'       => 'object',
 			'required'   => array( 'item_id' ),
 			'properties' => array(
-				'item_id'    => array( 'type' => 'integer', 'description' => 'The menu item post ID.' ),
+				'id'         => array( 'type' => 'integer', 'description' => 'Menu item post ID (preferred; alias for item_id).' ),
+				'item_id'    => array( 'type' => 'integer', 'description' => 'Menu item post ID (deprecated alias for id).' ),
 				'title'      => array( 'type' => 'string', 'description' => 'New display title.' ),
 				'url'        => array( 'type' => 'string', 'description' => 'New URL.' ),
 				'position'   => array( 'type' => 'integer', 'description' => 'New menu order position.' ),
@@ -352,7 +354,7 @@ add_action( 'wp_abilities_api_init', function() {
 			'item' => array( 'type' => 'object' ),
 		) ),
 		'callback' => function( $input ) {
-			$item_id = (int) $input['item_id'];
+			$item_id = (int) ( $input['id'] ?? $input['item_id'] ?? 0 );
 			$post    = get_post( $item_id );
 			if ( ! $post || 'nav_menu_item' !== $post->post_type ) {
 				return new WP_Error( 'not_found', "Menu item {$item_id} not found." );
@@ -507,7 +509,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'type'       => 'object',
 			'required'   => array( 'menu_id' ),
 			'properties' => array(
-				'menu_id' => array( 'type' => 'integer', 'description' => 'The menu term ID to delete.' ),
+				'id'      => array( 'type' => 'integer', 'description' => 'Menu term ID to delete (preferred; alias for menu_id).' ),
+				'menu_id' => array( 'type' => 'integer', 'description' => 'Menu term ID to delete (deprecated alias for id).' ),
 			),
 		),
 		'output_schema' => abilities_for_ai_schema_success_output( array(
@@ -515,7 +518,7 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ),
 		'callback' => function( $input ) {
-			$menu_id    = (int) $input['menu_id'];
+			$menu_id    = (int) ( $input['id'] ?? $input['menu_id'] ?? 0 );
 			$menu       = wp_get_nav_menu_object( $menu_id );
 			if ( ! $menu ) {
 				return new WP_Error( 'not_found', "Menu {$menu_id} not found." );
@@ -539,13 +542,14 @@ add_action( 'wp_abilities_api_init', function() {
 			'type'       => 'object',
 			'required'   => array( 'item_id' ),
 			'properties' => array(
-				'item_id' => array( 'type' => 'integer', 'description' => 'The menu item post ID to delete.' ),
+				'id'      => array( 'type' => 'integer', 'description' => 'Menu item post ID to delete (preferred; alias for item_id).' ),
+				'item_id' => array( 'type' => 'integer', 'description' => 'Menu item post ID to delete (deprecated alias for id).' ),
 			),
 		),
 		'output_schema' => abilities_for_ai_schema_success_output( array() ),
 		'annotations'   => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ),
 		'callback' => function( $input ) {
-			$item_id = (int) $input['item_id'];
+			$item_id = (int) ( $input['id'] ?? $input['item_id'] ?? 0 );
 			$post    = get_post( $item_id );
 			if ( ! $post || 'nav_menu_item' !== $post->post_type ) {
 				return new WP_Error( 'not_found', "Menu item {$item_id} not found." );

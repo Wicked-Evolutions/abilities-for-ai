@@ -1285,9 +1285,13 @@ add_action( 'wp_abilities_api_init', function() {
 			'type'       => 'object',
 			'required'   => array( 'source_id' ),
 			'properties' => array(
+				'id' => array(
+					'type'        => 'integer',
+					'description' => 'Post ID to duplicate (preferred; alias for source_id)',
+				),
 				'source_id' => array(
 					'type'        => 'integer',
-					'description' => 'Post ID to duplicate',
+					'description' => 'Post ID to duplicate (deprecated alias for id)',
 				),
 				'title' => array(
 					'type'        => 'string',
@@ -1311,6 +1315,7 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
 		'callback' => function( $input ) {
+			$input['source_id'] = $input['id'] ?? $input['source_id'] ?? null;
 			$source = get_post( $input['source_id'] );
 			if ( ! $source ) {
 				return new WP_Error( 'ability_invalid_input', 'Source post not found.' );

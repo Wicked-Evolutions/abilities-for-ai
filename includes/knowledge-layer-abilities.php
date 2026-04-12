@@ -229,11 +229,12 @@ add_action( 'wp_abilities_api_init', function() {
 			'type'       => 'object',
 			'required'   => array( 'session_id' ),
 			'properties' => array(
-				'session_id' => array( 'type' => 'string', 'description' => 'Unique session identifier.' ),
+				'id'         => array( 'type' => 'string', 'description' => 'Session identifier (preferred; alias for session_id).' ),
+				'session_id' => array( 'type' => 'string', 'description' => 'Session identifier (deprecated alias for id).' ),
 			),
 		),
 		'callback' => function( $input ) {
-			$session = Session::find( $input['session_id'] );
+			$session = Session::find( $input['id'] ?? $input['session_id'] );
 			if ( ! $session ) {
 				return new \WP_Error( 'not_found', 'Session not found.' );
 			}
@@ -248,7 +249,8 @@ add_action( 'wp_abilities_api_init', function() {
 			'type'       => 'object',
 			'required'   => array( 'session_id', 'agent_type', 'model', 'summary' ),
 			'properties' => array(
-				'session_id'         => array( 'type' => 'string', 'description' => 'Unique session identifier.' ),
+				'id'                 => array( 'type' => 'string', 'description' => 'Session identifier (preferred; alias for session_id).' ),
+				'session_id'         => array( 'type' => 'string', 'description' => 'Session identifier (deprecated alias for id).' ),
 				'agent_type'         => array( 'type' => 'string', 'description' => 'Which agent mode was active.' ),
 				'model'              => array( 'type' => 'string', 'description' => 'AI model used.' ),
 				'started_at'         => array( 'type' => 'string', 'description' => 'ISO datetime — session start.' ),
@@ -261,6 +263,7 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
+			$input['session_id'] = $input['id'] ?? $input['session_id'] ?? null;
 			$result = Session::log( $input );
 			if ( is_wp_error( $result ) ) {
 				return $result;
