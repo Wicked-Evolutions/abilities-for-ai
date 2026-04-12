@@ -1283,7 +1283,6 @@ add_action( 'wp_abilities_api_init', function() {
 		'description' => 'Duplicate a post, page, or custom post type. Copies content, excerpt, meta, and taxonomy terms. Creates the duplicate as a draft.',
 		'input_schema' => array(
 			'type'       => 'object',
-			'required'   => array( 'source_id' ),
 			'properties' => array(
 				'id' => array(
 					'type'        => 'integer',
@@ -1316,6 +1315,9 @@ add_action( 'wp_abilities_api_init', function() {
 		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
 		'callback' => function( $input ) {
 			$input['source_id'] = $input['id'] ?? $input['source_id'] ?? null;
+			if ( ! $input['source_id'] ) {
+				return new WP_Error( 'ability_invalid_input', 'Provide id or source_id.' );
+			}
 			$source = get_post( $input['source_id'] );
 			if ( ! $source ) {
 				return new WP_Error( 'ability_invalid_input', 'Source post not found.' );

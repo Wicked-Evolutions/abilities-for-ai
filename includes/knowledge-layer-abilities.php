@@ -227,14 +227,17 @@ add_action( 'wp_abilities_api_init', function() {
 		'description'  => 'Get a single session detail by session ID.',
 		'input_schema' => array(
 			'type'       => 'object',
-			'required'   => array( 'session_id' ),
 			'properties' => array(
 				'id'         => array( 'type' => 'string', 'description' => 'Session identifier (preferred; alias for session_id).' ),
 				'session_id' => array( 'type' => 'string', 'description' => 'Session identifier (deprecated alias for id).' ),
 			),
 		),
 		'callback' => function( $input ) {
-			$session = Session::find( $input['id'] ?? $input['session_id'] );
+			$session_id = $input['id'] ?? $input['session_id'] ?? null;
+			if ( ! $session_id ) {
+				return new \WP_Error( 'ability_invalid_input', 'Provide id or session_id.' );
+			}
+			$session = Session::find( $session_id );
 			if ( ! $session ) {
 				return new \WP_Error( 'not_found', 'Session not found.' );
 			}
@@ -247,7 +250,7 @@ add_action( 'wp_abilities_api_init', function() {
 		'description'  => 'Write an append-only session log entry. Called at end of each AI session.',
 		'input_schema' => array(
 			'type'       => 'object',
-			'required'   => array( 'session_id', 'agent_type', 'model', 'summary' ),
+			'required'   => array( 'agent_type', 'model', 'summary' ),
 			'properties' => array(
 				'id'                 => array( 'type' => 'string', 'description' => 'Session identifier (preferred; alias for session_id).' ),
 				'session_id'         => array( 'type' => 'string', 'description' => 'Session identifier (deprecated alias for id).' ),
@@ -264,6 +267,9 @@ add_action( 'wp_abilities_api_init', function() {
 		),
 		'callback' => function( $input ) {
 			$input['session_id'] = $input['id'] ?? $input['session_id'] ?? null;
+			if ( ! $input['session_id'] ) {
+				return new \WP_Error( 'ability_invalid_input', 'Provide id or session_id.' );
+			}
 			$result = Session::log( $input );
 			if ( is_wp_error( $result ) ) {
 				return $result;

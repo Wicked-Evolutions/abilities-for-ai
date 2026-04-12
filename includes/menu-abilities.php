@@ -135,7 +135,6 @@ add_action( 'wp_abilities_api_init', function() {
 		'description' => 'Get a single menu with its full hierarchical item tree.',
 		'input_schema' => array(
 			'type'       => 'object',
-			'required'   => array( 'menu_id' ),
 			'properties' => array(
 				'id'      => array( 'type' => 'integer', 'description' => 'Menu term ID (preferred; alias for menu_id).' ),
 				'menu_id' => array( 'type' => 'integer', 'description' => 'Menu term ID (deprecated alias for id).' ),
@@ -149,6 +148,9 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'callback' => function( $input ) {
 			$menu_id = (int) ( $input['id'] ?? $input['menu_id'] ?? 0 );
+			if ( ! $menu_id ) {
+				return new WP_Error( 'ability_invalid_input', 'Provide id or menu_id.' );
+			}
 			$menu    = wp_get_nav_menu_object( $menu_id );
 			if ( ! $menu ) {
 				return new WP_Error( 'not_found', "Menu {$menu_id} not found." );
@@ -337,7 +339,6 @@ add_action( 'wp_abilities_api_init', function() {
 		'description' => 'Update properties of an existing menu item. Only provided fields are changed.',
 		'input_schema' => array(
 			'type'       => 'object',
-			'required'   => array( 'item_id' ),
 			'properties' => array(
 				'id'         => array( 'type' => 'integer', 'description' => 'Menu item post ID (preferred; alias for item_id).' ),
 				'item_id'    => array( 'type' => 'integer', 'description' => 'Menu item post ID (deprecated alias for id).' ),
@@ -355,6 +356,9 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'callback' => function( $input ) {
 			$item_id = (int) ( $input['id'] ?? $input['item_id'] ?? 0 );
+			if ( ! $item_id ) {
+				return new WP_Error( 'ability_invalid_input', 'Provide id or item_id.' );
+			}
 			$post    = get_post( $item_id );
 			if ( ! $post || 'nav_menu_item' !== $post->post_type ) {
 				return new WP_Error( 'not_found', "Menu item {$item_id} not found." );
@@ -507,7 +511,6 @@ add_action( 'wp_abilities_api_init', function() {
 		'description' => 'Delete a navigation menu and all its items. Destructive and cannot be undone.',
 		'input_schema' => array(
 			'type'       => 'object',
-			'required'   => array( 'menu_id' ),
 			'properties' => array(
 				'id'      => array( 'type' => 'integer', 'description' => 'Menu term ID to delete (preferred; alias for menu_id).' ),
 				'menu_id' => array( 'type' => 'integer', 'description' => 'Menu term ID to delete (deprecated alias for id).' ),
@@ -519,6 +522,9 @@ add_action( 'wp_abilities_api_init', function() {
 		'annotations' => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ),
 		'callback' => function( $input ) {
 			$menu_id    = (int) ( $input['id'] ?? $input['menu_id'] ?? 0 );
+			if ( ! $menu_id ) {
+				return new WP_Error( 'ability_invalid_input', 'Provide id or menu_id.' );
+			}
 			$menu       = wp_get_nav_menu_object( $menu_id );
 			if ( ! $menu ) {
 				return new WP_Error( 'not_found', "Menu {$menu_id} not found." );
@@ -540,7 +546,6 @@ add_action( 'wp_abilities_api_init', function() {
 		'description' => 'Remove a single item from a menu.',
 		'input_schema' => array(
 			'type'       => 'object',
-			'required'   => array( 'item_id' ),
 			'properties' => array(
 				'id'      => array( 'type' => 'integer', 'description' => 'Menu item post ID to delete (preferred; alias for item_id).' ),
 				'item_id' => array( 'type' => 'integer', 'description' => 'Menu item post ID to delete (deprecated alias for id).' ),
@@ -550,6 +555,9 @@ add_action( 'wp_abilities_api_init', function() {
 		'annotations'   => array( 'readonly' => false, 'destructive' => true, 'idempotent' => false ),
 		'callback' => function( $input ) {
 			$item_id = (int) ( $input['id'] ?? $input['item_id'] ?? 0 );
+			if ( ! $item_id ) {
+				return new WP_Error( 'ability_invalid_input', 'Provide id or item_id.' );
+			}
 			$post    = get_post( $item_id );
 			if ( ! $post || 'nav_menu_item' !== $post->post_type ) {
 				return new WP_Error( 'not_found', "Menu item {$item_id} not found." );
