@@ -437,6 +437,47 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	$reg->write( 'themes/set-mods-batch', array(
+		'capability'  => 'edit_theme_options',
+		'label'       => 'Set Theme Mods (Batch)',
+		'description' => 'Set multiple theme modification values in a single call. Accepts a key-value map of mod names to values. Returns the full theme_mods option after applying all changes.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'mods' ),
+			'properties' => array(
+				'mods' => array(
+					'type'        => 'object',
+					'description' => 'Key-value map of theme mod names to values. Use JSON strings for complex values (arrays/objects).',
+				),
+			),
+		),
+		'callback' => function( $input ) {
+			$mods    = $input['mods'];
+			$updated = array();
+
+			foreach ( $mods as $name => $value ) {
+				$name = sanitize_text_field( $name );
+
+				// Attempt to decode JSON for complex values (same logic as themes/set-mod).
+				if ( is_string( $value ) ) {
+					$decoded = json_decode( $value, true );
+					if ( json_last_error() === JSON_ERROR_NONE && ( is_array( $decoded ) || is_object( $decoded ) ) ) {
+						$value = $decoded;
+					}
+				}
+
+				set_theme_mod( $name, $value );
+				$updated[] = $name;
+			}
+
+			return array(
+				'success'    => true,
+				'updated'    => $updated,
+				'theme_mods' => get_theme_mods(),
+			);
+		},
+	) );
+
 	// ===== THEMES — DELETE =====
 
 	$reg->delete( 'themes/delete', array(
