@@ -1656,4 +1656,200 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+
+	// ===== CONTENT — MULTISITE CLONE =====
+
+	if ( is_multisite() ) {
+		$reg->write( 'content/clone-to-site', array(
+			'ability_class' => 'WE_Multisite_Ability',
+			'label'       => 'Clone Content to Site',
+			'description' => 'Clone a post from the current site to another site in the multisite network. Copies content, excerpt, meta, and taxonomy terms server-side — content never passes through the LLM context.',
+			'input_schema' => array(
+				'type'       => 'object',
+				'required'   => array( 'source_post_id', 'target_blog_id' ),
+				'properties' => array(
+					'source_post_id' => array(
+						'type'        => 'integer',
+						'description' => 'Post ID on the current site to clone',
+					),
+					'target_blog_id' => array(
+						'type'        => 'integer',
+						'description' => 'Blog ID of the destination site',
+					),
+					'post_type' => array(
+						'type'        => 'string',
+						'description' => 'Post type on the target site. Defaults to the source post type.',
+					),
+					'status' => array(
+						'type'        => 'string',
+						'description' => 'Post status on the target site',
+						'default'     => 'draft',
+						'enum'        => array( 'publish', 'draft', 'pending', 'private' ),
+					),
+					'new_title' => array(
+						'type'        => 'string',
+						'description' => 'Title for the cloned post. Defaults to source title.',
+					),
+					'copy_meta' => array(
+						'type'        => 'boolean',
+						'description' => 'Copy post meta to the target (excludes _edit_lock, _edit_last, _thumbnail_id)',
+						'default'     => true,
+					),
+					'copy_terms' => array(
+						'type'        => 'boolean',
+						'description' => 'Copy taxonomy terms to the target (only taxonomies that exist on both sites)',
+						'default'     => true,
+					),
+				),
+			),
+			'output_schema' => abilities_for_ai_schema_success_output( array(
+				'new_post_id'  => array( 'type' => 'integer' ),
+				'target_url'   => array( 'type' => 'string' ),
+				'meta_copied'  => array( 'type' => 'integer' ),
+				'terms_copied' => array( 'type' => 'integer' ),
+				'media_urls'   => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+				'warnings'     => array( 'type' => 'array', 'items' => array( 'type' => 'string' ) ),
+			) ),
+			'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
+			'callback' => function( $input ) {
+				// Read source post on the current site.
+				$source = get_post( (int) $input['source_post_id'] );
+				if ( ! $source ) {
+					return new WP_Error( 'ability_invalid_input', 'Source post not found.' );
+				}
+
+				// Gather source data before switching blogs.
+				$source_content   = $source->post_content;
+				$source_excerpt   = $source->post_excerpt;
+				$source_post_type = $source->post_type;
+				$source_title     = $source->post_title;
+				$source_meta      = array();
+				$source_terms     = array();
+
+				$copy_meta  = $input['copy_meta'] ?? true;
+				$copy_terms = $input['copy_terms'] ?? true;
+
+				$skip_meta_keys = array( '_edit_lock', '_edit_last', '_thumbnail_id' );
+
+				if ( $copy_meta ) {
+					$meta = get_post_meta( $source->ID );
+					if ( $meta ) {
+						foreach ( $meta as $key => $values ) {
+							if ( in_array( $key, $skip_meta_keys, true ) ) {
+								continue;
+							}
+							$source_meta[ $key ] = array_map( 'maybe_unserialize', $values );
+						}
+					}
+				}
+
+				if ( $copy_terms ) {
+					$taxonomies = get_object_taxonomies( $source_post_type );
+					foreach ( $taxonomies as $taxonomy ) {
+						$terms = wp_get_object_terms( $source->ID, $taxonomy, array( 'fields' => 'all' ) );
+						if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+							$source_terms[ $taxonomy ] = $terms;
+						}
+					}
+				}
+
+				// Extract media URLs from content for informational output.
+				$media_urls = array();
+				if ( preg_match_all( '#https?://[^\s"\'<>]+\.(?:jpg|jpeg|png|gif|webp|svg|mp4|mp3|pdf)#i', $source_content, $matches ) ) {
+					$media_urls = array_unique( $matches[0] );
+					$media_urls = array_values( $media_urls );
+				}
+
+				// Verify target blog exists.
+				$target_blog_id = (int) $input['target_blog_id'];
+				$target_site = get_blog_details( $target_blog_id );
+				if ( ! $target_site ) {
+					return new WP_Error( 'ability_invalid_input', "Target blog ID {$target_blog_id} does not exist." );
+				}
+
+				// Switch to target blog.
+				switch_to_blog( $target_blog_id );
+				try {
+					$post_type = sanitize_key( $input['post_type'] ?? $source_post_type );
+					$post_type_obj = get_post_type_object( $post_type );
+					if ( ! $post_type_obj ) {
+						return new WP_Error( 'ability_invalid_input', "Post type '{$post_type}' does not exist on the target site." );
+					}
+					if ( ! current_user_can( $post_type_obj->cap->create_posts ) ) {
+						return new WP_Error( 'rest_forbidden', 'You do not have permission to create this post type on the target site.' );
+					}
+
+					$new_title = $input['new_title'] ?? $source_title;
+					$status    = $input['status'] ?? 'draft';
+
+					$post_data = array(
+						'post_title'     => $new_title,
+						'post_content'   => $source_content,
+						'post_excerpt'   => $source_excerpt,
+						'post_type'      => $post_type,
+						'post_status'    => $status,
+						'comment_status' => $source->comment_status,
+						'ping_status'    => $source->ping_status,
+						'menu_order'     => $source->menu_order,
+					);
+
+					$new_id = wp_insert_post( $post_data );
+					if ( is_wp_error( $new_id ) ) {
+						return $new_id;
+					}
+
+					// Copy meta to target.
+					$meta_copied = 0;
+					if ( $copy_meta ) {
+						foreach ( $source_meta as $key => $values ) {
+							foreach ( $values as $value ) {
+								add_post_meta( $new_id, $key, $value );
+								$meta_copied++;
+							}
+						}
+					}
+
+					// Copy terms — only for taxonomies that exist on both sites.
+					$terms_copied = 0;
+					if ( $copy_terms ) {
+						foreach ( $source_terms as $taxonomy => $terms ) {
+							if ( ! taxonomy_exists( $taxonomy ) ) {
+								continue;
+							}
+							// Terms may not exist on target site — match by slug.
+							$target_term_ids = array();
+							foreach ( $terms as $term ) {
+								$existing = get_term_by( 'slug', $term->slug, $taxonomy );
+								if ( $existing ) {
+									$target_term_ids[] = (int) $existing->term_id;
+								}
+							}
+							if ( ! empty( $target_term_ids ) ) {
+								wp_set_object_terms( $new_id, $target_term_ids, $taxonomy );
+								$terms_copied += count( $target_term_ids );
+							}
+						}
+					}
+
+					$warnings = array();
+					if ( ! empty( $media_urls ) ) {
+						$warnings[] = 'Media URLs preserved as-is from source site — images may not exist on the target site.';
+					}
+
+					return array(
+						'success'      => true,
+						'new_post_id'  => $new_id,
+						'target_url'   => get_permalink( $new_id ),
+						'meta_copied'  => $meta_copied,
+						'terms_copied' => $terms_copied,
+						'media_urls'   => $media_urls,
+						'warnings'     => $warnings,
+					);
+				} finally {
+					restore_current_blog();
+				}
+			},
+		) );
+	}
+
 } );
