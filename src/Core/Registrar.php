@@ -171,6 +171,11 @@ class Registrar {
 			$args['output_schema'] = $config['output_schema'];
 		}
 
+		// Pass through custom ability class if provided (must extend WP_Ability).
+		if ( isset( $config['ability_class'] ) ) {
+			$args['ability_class'] = $config['ability_class'];
+		}
+
 		wp_register_ability( $name, $args );
 	}
 }

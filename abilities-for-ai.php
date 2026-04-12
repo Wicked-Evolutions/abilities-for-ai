@@ -63,6 +63,9 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/tier-gate.php';
 // must load after autoloader + helpers so the class and its dependencies exist.
 require_once ABILITIES_FOR_AI_PATH . 'includes/compat.php';
 
+// Load custom ability classes (must load after WP core, before ability modules).
+require_once ABILITIES_FOR_AI_PATH . 'includes/class-multisite-ability.php';
+
 // Load ability categories FIRST (required before abilities).
 require_once ABILITIES_FOR_AI_PATH . 'includes/ability-categories.php';
 

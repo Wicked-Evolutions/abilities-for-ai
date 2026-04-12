@@ -24,6 +24,7 @@ add_action( 'wp_abilities_api_init', function() {
 	// ===== MULTISITE — READ =====
 
 	$reg->read( 'multisite/list-sites', array(
+		'ability_class' => 'WE_Multisite_Ability',
 		'label'       => 'List Network Sites',
 		'description' => 'List all sites in the multisite network with status and details',
 		'input_schema' => array(
@@ -107,6 +108,7 @@ add_action( 'wp_abilities_api_init', function() {
 	) );
 
 	$reg->read( 'multisite/get-site', array(
+		'ability_class' => 'WE_Multisite_Ability',
 		'label'       => 'Get Site Details',
 		'description' => 'Get detailed information about a specific site including its settings',
 		'input_schema' => array(
@@ -127,8 +129,7 @@ add_action( 'wp_abilities_api_init', function() {
 				return new WP_Error( 'not_found', 'Site not found' );
 			}
 
-			// Get some key options from the subsite.
-			switch_to_blog( $blog_id );
+			// Context switch handled by WE_Multisite_Ability::do_execute().
 			$details = array(
 				'blog_id'        => (int) $site->blog_id,
 				'domain'         => (string) $site->domain,
@@ -150,13 +151,13 @@ add_action( 'wp_abilities_api_init', function() {
 				'post_count'     => (int) wp_count_posts()->publish,
 				'user_count'     => (int) count_users()['total_users'],
 			);
-			restore_current_blog();
 
 			return $details;
 		},
 	) );
 
 	$reg->read( 'multisite/get-network-settings', array(
+		'ability_class' => 'WE_Multisite_Ability',
 		'label'       => 'Get Network Settings',
 		'description' => 'Get network-level settings like registration policy, upload limits, and default options',
 		'callback' => function() {
@@ -179,6 +180,7 @@ add_action( 'wp_abilities_api_init', function() {
 	// ===== MULTISITE — WRITE =====
 
 	$reg->write( 'multisite/update-site', array(
+		'ability_class' => 'WE_Multisite_Ability',
 		'label'       => 'Update Site Settings',
 		'description' => 'Update settings for a specific site (title, description, admin email, status flags)',
 		'input_schema' => array(
@@ -241,16 +243,14 @@ add_action( 'wp_abilities_api_init', function() {
 				}
 			}
 
-			// Update blog options.
+			// Update blog options (context switch handled by WE_Multisite_Ability::do_execute()).
 			$option_fields = array( 'blogname', 'blogdescription', 'admin_email' );
-			switch_to_blog( $blog_id );
 			foreach ( $option_fields as $field ) {
 				if ( isset( $input[ $field ] ) ) {
 					update_option( $field, sanitize_text_field( $input[ $field ] ) );
 					$updated[ $field ] = $input[ $field ];
 				}
 			}
-			restore_current_blog();
 
 			return array(
 				'success' => true,
