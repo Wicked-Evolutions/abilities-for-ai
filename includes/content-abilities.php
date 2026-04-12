@@ -656,6 +656,113 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	$reg->read( 'content/render-page', array(
+		'ability_class' => 'WE_Multisite_Ability',
+		'capability'    => 'edit_theme_options',
+		'label'         => 'Render Page HTML',
+		'description'   => 'Fetch the full rendered frontend HTML of a page via HTTP loopback — equivalent to what a browser or curl would receive. Returns the complete document including <html>, <head>, enqueued assets, <body class>, and template chrome. Accepts a URL (full or path) or a post_id. Useful for theme refactor baselines, visual regression checks, and verifying rendered output.',
+		'input_schema'  => array(
+			'type'       => 'object',
+			'properties' => array(
+				'url' => array(
+					'type'        => 'string',
+					'description' => 'Full URL or relative path (e.g. "/about/" or "https://site.com/about/") to render. At least one of url or post_id is required.',
+				),
+				'post_id' => array(
+					'type'        => 'integer',
+					'description' => 'Post ID to render. Resolves the URL via get_permalink(). At least one of url or post_id is required.',
+				),
+				'blog_id' => array(
+					'type'        => 'integer',
+					'description' => 'Multisite: subsite blog ID to render from. Switches context so home_url() and get_permalink() resolve to that subsite.',
+				),
+				'timeout' => array(
+					'type'        => 'integer',
+					'description' => 'HTTP request timeout in seconds.',
+					'default'     => 20,
+					'minimum'     => 1,
+					'maximum'     => 60,
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'html'           => array( 'type' => 'string' ),
+			'status_code'    => array( 'type' => 'integer' ),
+			'content_length' => array( 'type' => 'integer' ),
+			'url'            => array( 'type' => 'string' ),
+			'headers'        => array( 'type' => 'object' ),
+		) ),
+		'callback' => function( $input ) {
+			$url     = $input['url'] ?? null;
+			$post_id = isset( $input['post_id'] ) ? (int) $input['post_id'] : 0;
+			$timeout = isset( $input['timeout'] ) ? (int) $input['timeout'] : 20;
+
+			if ( ! $url && ! $post_id ) {
+				return new WP_Error(
+					'ability_invalid_input',
+					'At least one of url or post_id is required.'
+				);
+			}
+
+			// Resolve URL from post_id.
+			if ( $post_id ) {
+				$permalink = get_permalink( $post_id );
+				if ( ! $permalink ) {
+					return new WP_Error(
+						'ability_invalid_input',
+						sprintf( 'Could not resolve permalink for post ID %d. Post may not exist or is not public.', $post_id )
+					);
+				}
+				$url = $permalink;
+			}
+
+			// Relative path → absolute URL.
+			if ( strpos( $url, '/' ) === 0 ) {
+				$url = home_url( $url );
+			}
+
+			$response = wp_remote_get( $url, array(
+				'timeout'     => $timeout,
+				'redirection' => 3,
+				'sslverify'   => false,
+			) );
+
+			if ( is_wp_error( $response ) ) {
+				return new WP_Error(
+					'loopback_failed',
+					sprintf(
+						'HTTP loopback request failed: %s. This can happen on shared hosting (CageFS/CloudLinux) that blocks self-requests. URL attempted: %s',
+						$response->get_error_message(),
+						$url
+					),
+					array( 'status' => 502 )
+				);
+			}
+
+			$body        = wp_remote_retrieve_body( $response );
+			$status_code = (int) wp_remote_retrieve_response_code( $response );
+			$headers     = wp_remote_retrieve_headers( $response );
+
+			// Convert headers object to plain array.
+			$headers_array = array();
+			if ( $headers instanceof \WpOrg\Requests\Utility\CaseInsensitiveDictionary || $headers instanceof \Requests_Utility_CaseInsensitiveDictionary ) {
+				foreach ( $headers as $key => $value ) {
+					$headers_array[ $key ] = $value;
+				}
+			} elseif ( is_array( $headers ) ) {
+				$headers_array = $headers;
+			}
+
+			return array(
+				'html'           => $body,
+				'status_code'    => $status_code,
+				'content_length' => strlen( $body ),
+				'url'            => $url,
+				'headers'        => $headers_array,
+			);
+		},
+	) );
+
 	// ===== CONTENT — WRITE =====
 
 	$reg->write( 'content/create', array(
@@ -781,6 +888,168 @@ add_action( 'wp_abilities_api_init', function() {
 				'success' => true,
 				'id'      => $post_id,
 				'link'    => get_permalink( $post_id ),
+			);
+		},
+	) );
+
+	$reg->write( 'content/create-from-file', array(
+		'tier'        => 'free',
+		'label'       => 'Create Content from File',
+		'description' => 'Create content by reading post_content from a server-side file. Use with filesystem/write-file to move large payloads (block markup, long-form content) without passing content through the LLM context.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'content_path', 'title' ),
+			'properties' => array(
+				'content_path' => array(
+					'type'        => 'string',
+					'description' => 'Relative path from ABSPATH to the file containing post content (e.g. "wp-content/uploads/staging/my-page.html")',
+				),
+				'title' => array(
+					'type'        => 'string',
+					'description' => 'Post title',
+				),
+				'post_type' => array(
+					'type'        => 'string',
+					'description' => 'Post type',
+					'default'     => 'post',
+				),
+				'status' => array(
+					'type'        => 'string',
+					'description' => 'Post status',
+					'default'     => 'draft',
+					'enum'        => array( 'publish', 'draft', 'pending', 'private' ),
+				),
+				'excerpt' => array(
+					'type'        => 'string',
+					'description' => 'Post excerpt',
+				),
+				'post_date' => array(
+					'type'        => 'string',
+					'description' => 'Publish date in MySQL datetime (e.g. "2026-03-05 14:30:00") or ISO 8601 format. Defaults to current time.',
+				),
+				'author' => array(
+					'type'        => 'integer',
+					'description' => 'User ID to set as post author. Defaults to current user.',
+				),
+				'post_name' => array(
+					'type'        => 'string',
+					'description' => 'Post slug. Auto-generated from title if not provided.',
+				),
+				'terms' => array(
+					'type'        => 'string',
+					'description' => 'JSON object of taxonomy terms to assign. Keys are taxonomy slugs, values are arrays of term IDs. Example: {"category": [3, 5], "post_tag": [12]}',
+				),
+				'delete_file' => array(
+					'type'        => 'boolean',
+					'description' => 'Delete the staging file after post creation',
+					'default'     => true,
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'id'           => array( 'type' => 'integer' ),
+			'link'         => array( 'type' => 'string' ),
+			'bytes_read'   => array( 'type' => 'integer' ),
+			'file_deleted' => array( 'type' => 'boolean' ),
+		) ),
+		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
+		'callback' => function( $input ) {
+			// Validate and resolve file path.
+			$abs_path = wp_abilities_filesystem_validate_path( $input['content_path'], true );
+			if ( is_wp_error( $abs_path ) ) {
+				return $abs_path;
+			}
+
+			if ( ! is_file( $abs_path ) || ! is_readable( $abs_path ) ) {
+				return new WP_Error( 'ability_invalid_input', 'Content file does not exist or is not readable.' );
+			}
+
+			// Read file content.
+			$content = file_get_contents( $abs_path );
+			if ( $content === false ) {
+				return new WP_Error( 'ability_server_error', 'Failed to read content file.' );
+			}
+			$bytes_read = strlen( $content );
+
+			// Validate post type and permissions.
+			$post_type     = sanitize_key( $input['post_type'] ?? 'post' );
+			$post_type_obj = get_post_type_object( $post_type );
+			if ( ! $post_type_obj ) {
+				return new WP_Error( 'ability_invalid_input', 'Invalid post type.' );
+			}
+			if ( ! current_user_can( $post_type_obj->cap->create_posts ) ) {
+				return new WP_Error( 'rest_forbidden', 'You do not have permission to create this post type.' );
+			}
+
+			$status = $input['status'] ?? 'draft';
+			if ( in_array( $status, array( 'publish', 'future' ), true ) ) {
+				if ( ! current_user_can( $post_type_obj->cap->publish_posts ) ) {
+					return new WP_Error( 'rest_forbidden', 'You do not have permission to publish this post type.' );
+				}
+			}
+
+			$post_data = array(
+				'post_title'   => $input['title'],
+				'post_content' => $content,
+				'post_type'    => $post_type,
+				'post_status'  => $status,
+				'post_excerpt' => $input['excerpt'] ?? '',
+			);
+
+			if ( isset( $input['post_name'] ) ) {
+				$post_data['post_name'] = sanitize_title( $input['post_name'] );
+			}
+
+			if ( isset( $input['post_date'] ) ) {
+				$post_data['post_date']     = sanitize_text_field( $input['post_date'] );
+				$post_data['post_date_gmt'] = get_gmt_from_date( $post_data['post_date'] );
+			}
+
+			if ( isset( $input['author'] ) ) {
+				$author_id = (int) $input['author'];
+				if ( ! get_userdata( $author_id ) ) {
+					return new WP_Error( 'ability_invalid_input', "User ID {$author_id} does not exist." );
+				}
+				$post_data['post_author'] = $author_id;
+			}
+
+			$post_id = wp_insert_post( $post_data );
+			if ( is_wp_error( $post_id ) ) {
+				return $post_id;
+			}
+
+			// Handle terms assignment.
+			if ( ! empty( $input['terms'] ) ) {
+				$terms = $input['terms'];
+				if ( is_string( $terms ) ) {
+					$terms = json_decode( $terms, true );
+				}
+				if ( ! is_array( $terms ) ) {
+					$terms = array();
+				}
+				foreach ( $terms as $taxonomy => $term_ids ) {
+					$taxonomy = sanitize_key( $taxonomy );
+					if ( ! taxonomy_exists( $taxonomy ) ) {
+						continue;
+					}
+					$term_ids = array_map( 'intval', (array) $term_ids );
+					wp_set_object_terms( $post_id, $term_ids, $taxonomy );
+				}
+			}
+
+			// Clean up staging file.
+			$delete_file = $input['delete_file'] ?? true;
+			$file_deleted = false;
+			if ( $delete_file ) {
+				$file_deleted = @unlink( $abs_path );
+			}
+
+			return array(
+				'success'      => true,
+				'id'           => $post_id,
+				'link'         => get_permalink( $post_id ),
+				'bytes_read'   => $bytes_read,
+				'file_deleted' => $file_deleted,
 			);
 		},
 	) );
