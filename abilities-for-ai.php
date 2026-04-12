@@ -110,6 +110,9 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-tag-abilities.php';
 // Knowledge Layer REST API — admin SPA controllers under abilities-kl/v1.
 require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-rest.php';
 
+// Knowledge Layer — automatic ability execution logging via core hooks.
+require_once ABILITIES_FOR_AI_PATH . 'includes/activity-logger.php';
+
 // Auto-load third-party plugin suites.
 // Each suite lives in includes/suites/{slug}/loader.php and handles
 // its own detection (class_exists / defined checks). If the parent

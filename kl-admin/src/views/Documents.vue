@@ -138,11 +138,76 @@
         <el-button type="primary" @click="confirmBulkStatus">Apply</el-button>
       </template>
     </el-dialog>
+
+    <!-- Create Document Dialog -->
+    <el-dialog v-model="showCreate" title="Create Document" width="560px">
+      <div class="kl-create-form">
+        <div class="kl-form-row">
+          <label class="kl-form-label">Title</label>
+          <el-input v-model="newDoc.title" placeholder="Document title" />
+        </div>
+        <div class="kl-form-row">
+          <label class="kl-form-label">Type</label>
+          <el-select v-model="newDoc.doc_type" placeholder="Select type" style="width:100%">
+            <el-option v-for="t in docTypes" :key="t" :value="t" :label="t" />
+          </el-select>
+        </div>
+        <div class="kl-form-row">
+          <label class="kl-form-label">Slug</label>
+          <el-input v-model="newDoc.slug" placeholder="Auto-generated from title if empty" />
+        </div>
+        <div class="kl-form-row">
+          <label class="kl-form-label">Status</label>
+          <el-select v-model="newDoc.status" style="width:100%">
+            <el-option value="active" label="Active" />
+            <el-option value="draft" label="Draft" />
+            <el-option value="seed" label="Seed" />
+          </el-select>
+        </div>
+        <div class="kl-form-row">
+          <label class="kl-form-label">Source</label>
+          <el-select v-model="newDoc.source" style="width:100%">
+            <el-option value="human" label="Human" />
+            <el-option value="ai" label="AI" />
+            <el-option value="plugin" label="Plugin" />
+          </el-select>
+        </div>
+        <div class="kl-form-row">
+          <label class="kl-form-label">Tags</label>
+          <el-select
+            v-model="newDoc.tag_ids"
+            multiple
+            filterable
+            placeholder="Select tags"
+            style="width:100%"
+          >
+            <el-option
+              v-for="tag in tagsStore.items"
+              :key="tag.id"
+              :label="tag.name"
+              :value="tag.id"
+            />
+          </el-select>
+        </div>
+        <div class="kl-form-row">
+          <label class="kl-form-label">Excerpt</label>
+          <el-input v-model="newDoc.excerpt" type="textarea" :rows="2" placeholder="Short description" />
+        </div>
+        <div class="kl-form-row">
+          <label class="kl-form-label">Content</label>
+          <el-input v-model="newDoc.content" type="textarea" :rows="6" placeholder="Document content (markdown)" />
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="showCreate = false">Cancel</el-button>
+        <el-button type="primary" :disabled="!newDoc.title || !newDoc.doc_type" @click="confirmCreate">Create</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDocumentsStore, useTagsStore } from '../stores/index.js'
 import TypeBadge from '../components/TypeBadge.vue'
@@ -157,6 +222,18 @@ const tagsStore = useTagsStore()
 const searchInput = ref(store.filters.search)
 const selectedIds = ref([])
 const showCreate = ref(false)
+
+const defaultDoc = () => ({
+  title: '',
+  doc_type: '',
+  slug: '',
+  status: 'draft',
+  source: 'human',
+  content: '',
+  excerpt: '',
+  tag_ids: [],
+})
+const newDoc = reactive(defaultDoc())
 
 // Bulk action dialogs
 const showBulkTags = ref(false)
@@ -247,6 +324,19 @@ async function bulkArchive() {
   await store.bulkAction('archive', selectedIds.value)
   selectedIds.value = []
   store.fetchDocuments()
+}
+
+async function confirmCreate() {
+  const payload = { ...newDoc }
+  if (!payload.slug) delete payload.slug
+  const created = await store.createDocument(payload)
+  showCreate.value = false
+  Object.assign(newDoc, defaultDoc())
+  if (created?.id) {
+    router.push(`/documents/${created.id}`)
+  } else {
+    store.fetchDocuments()
+  }
 }
 
 function formatDate(dateStr) {

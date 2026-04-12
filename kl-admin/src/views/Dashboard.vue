@@ -40,6 +40,13 @@
         <div class="kl-stat-value">{{ stats.tags?.total || 0 }}</div>
         <div class="kl-stat-sub">{{ stats.tags?.assignments || 0 }} total assignments</div>
       </div>
+      <div class="kl-stat-card">
+        <div class="kl-stat-label">Activity</div>
+        <div class="kl-stat-value">{{ stats.activity?.total || 0 }}</div>
+        <div class="kl-stat-sub">
+          {{ stats.activity?.total_error || 0 }} errors
+        </div>
+      </div>
     </div>
 
     <!-- Two columns -->
@@ -94,6 +101,24 @@
         <p v-else style="color:var(--text-muted); font-size:.875rem;">No documents yet.</p>
       </div>
     </div>
+
+    <!-- Recent Activity -->
+    <div style="margin-top:24px;">
+      <div class="kl-section-title">Recent Activity</div>
+      <div v-if="recentActivity.length" class="kl-feed">
+        <div v-for="a in recentActivity" :key="a.id" class="kl-feed-item" @click="$router.push('/activity')" style="cursor:pointer;">
+          <div class="kl-feed-body">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="kl-badge" :class="a.status === 'error' ? 'badge-action' : 'badge-agent-type'">{{ a.status }}</span>
+              <span class="kl-feed-title" style="margin:0; font-family:var(--font-mono); font-size:.8125rem;">{{ a.ability_name }}</span>
+              <span style="font-family:var(--font-mono); font-size:.75rem; color:var(--text-muted);">{{ a.duration_ms }}ms</span>
+            </div>
+            <div class="kl-feed-sub">{{ formatDate(a.created_at) }}{{ a.error_code ? ' · ' + a.error_code : '' }}</div>
+          </div>
+        </div>
+      </div>
+      <p v-else style="color:var(--text-muted); font-size:.875rem;">No activity recorded yet.</p>
+    </div>
   </div>
 </template>
 
@@ -106,6 +131,7 @@ const stats = ref({})
 const recentSessions = ref([])
 const openObservations = ref([])
 const recentDocuments = ref([])
+const recentActivity = ref([])
 const siteName = window.abilitiesKL?.site_name || ''
 
 async function loadDashboard() {
@@ -116,6 +142,7 @@ async function loadDashboard() {
     recentSessions.value = data.recent_sessions || []
     openObservations.value = data.open_observations || []
     recentDocuments.value = data.recent_documents || []
+    recentActivity.value = data.activity?.recent || []
   } catch (e) {
     // Dashboard stats endpoint may not exist yet
   } finally {

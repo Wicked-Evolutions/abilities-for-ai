@@ -46,6 +46,7 @@ const version = window.abilitiesKL?.version || '0.1.0'
 const navItems = [
   { to: '/documents', label: 'Documents', icon: '◧', match: '/documents' },
   { to: '/sessions', label: 'Sessions', icon: '▤', match: '/sessions' },
+  { to: '/activity', label: 'Activity', icon: '◷', match: '/activity' },
   { to: '/observations', label: 'Observations', icon: '◉', match: '/observations' },
   { to: '/tags', label: 'Tags', icon: '⬡', match: '/tags' },
   { to: '/dashboard', label: 'Dashboard', icon: '◫', match: '/dashboard' },

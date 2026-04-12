@@ -23,7 +23,7 @@ class Schema {
 	/**
 	 * Current schema version. Bump this when tables change.
 	 */
-	const VERSION = '0.4.0';
+	const VERSION = '0.5.0';
 
 	/**
 	 * Option key for stored schema version.
@@ -245,7 +245,28 @@ class Schema {
 			KEY idx_title (title)
 		) {$charset_collate};";
 
-		// 7. kl_taggables — polymorphic pivot for tag assignments.
+		// 7. kl_activity — automatic ability execution log.
+		$tables[] = "CREATE TABLE {$prefix}kl_activity (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			ability_name varchar(191) NOT NULL,
+			category varchar(100) NOT NULL DEFAULT '',
+			input_hash varchar(64) NOT NULL DEFAULT '',
+			status varchar(20) NOT NULL DEFAULT 'success',
+			error_code varchar(100) DEFAULT NULL,
+			duration_ms int unsigned NOT NULL DEFAULT 0,
+			user_id bigint(20) unsigned NOT NULL DEFAULT 0,
+			session_id varchar(64) NOT NULL DEFAULT '',
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id),
+			KEY idx_ability (ability_name),
+			KEY idx_category (category),
+			KEY idx_status (status),
+			KEY idx_user (user_id),
+			KEY idx_session (session_id),
+			KEY idx_created (created_at)
+		) {$charset_collate};";
+
+		// 8. kl_taggables — polymorphic pivot for tag assignments.
 		$tables[] = "CREATE TABLE {$prefix}kl_taggables (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			tag_id bigint(20) unsigned NOT NULL,

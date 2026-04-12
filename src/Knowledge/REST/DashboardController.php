@@ -71,6 +71,25 @@ class DashboardController extends \WP_REST_Controller {
 		$open_obs       = Observation::count_open();
 		$total_tags     = Tag::count();
 
+		// Activity stats (kl_activity table).
+		$activity_table = $wpdb->prefix . 'kl_activity';
+		$activity_data  = array( 'total' => 0, 'total_error' => 0, 'recent' => array() );
+
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $activity_table ) ) === $activity_table ) {
+			$activity_data['total']       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$activity_table}" );
+			$activity_data['total_error'] = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$activity_table} WHERE status = 'error'" );
+
+			$recent_activity = $wpdb->get_results(
+				"SELECT * FROM {$activity_table} ORDER BY created_at DESC LIMIT 5"
+			);
+			foreach ( $recent_activity as $item ) {
+				$item->id          = (int) $item->id;
+				$item->duration_ms = (int) $item->duration_ms;
+				$item->user_id     = (int) $item->user_id;
+			}
+			$activity_data['recent'] = $recent_activity;
+		}
+
 		return rest_ensure_response( array(
 			'documents' => array(
 				'total'     => $total_docs,
@@ -88,6 +107,7 @@ class DashboardController extends \WP_REST_Controller {
 			'tags' => array(
 				'total' => $total_tags,
 			),
+			'activity' => $activity_data,
 		) );
 	}
 

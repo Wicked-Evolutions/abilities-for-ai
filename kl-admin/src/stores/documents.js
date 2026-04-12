@@ -75,6 +75,11 @@ export const useDocumentsStore = defineStore('documents', {
       }
     },
 
+    async createDocument(data) {
+      const doc = await api.post('documents', data)
+      return doc
+    },
+
     async bulkAction(action, ids, extra = {}) {
       return api.post('documents/bulk-action', { action, ids, ...extra })
     },
