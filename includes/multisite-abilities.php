@@ -179,6 +179,89 @@ add_action( 'wp_abilities_api_init', function() {
 
 	// ===== MULTISITE — WRITE =====
 
+	$reg->write( 'multisite/create-site', array(
+		'ability_class' => 'WE_Multisite_Ability',
+		'label'       => 'Create Network Site',
+		'description' => 'Create a new site in the multisite network. Returns the new blog_id, URL, and admin URL.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'domain', 'title' ),
+			'properties' => array(
+				'domain' => array(
+					'type'        => 'string',
+					'description' => 'Subdomain or full domain for the new site (e.g., "sub.network.com")',
+				),
+				'path' => array(
+					'type'        => 'string',
+					'description' => 'Site path (default "/"). Use "/" for subdomain installs.',
+					'default'     => '/',
+				),
+				'title' => array(
+					'type'        => 'string',
+					'description' => 'Site title',
+				),
+				'admin_email' => array(
+					'type'        => 'string',
+					'description' => 'Admin email for the new site. Defaults to network admin email.',
+				),
+				'public' => array(
+					'type'        => 'boolean',
+					'description' => 'Whether the site is public',
+					'default'     => true,
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'blog_id'   => array( 'type' => 'integer' ),
+			'url'       => array( 'type' => 'string' ),
+			'admin_url' => array( 'type' => 'string' ),
+		) ),
+		'annotations' => array( 'idempotent' => false ),
+		'callback' => function( $input ) {
+			if ( ! is_multisite() ) {
+				return new WP_Error( 'not_multisite', 'This operation requires a WordPress multisite installation.' );
+			}
+
+			$domain      = sanitize_text_field( $input['domain'] );
+			$path        = isset( $input['path'] ) ? sanitize_text_field( $input['path'] ) : '/';
+			$title       = sanitize_text_field( $input['title'] );
+			$admin_email = ! empty( $input['admin_email'] ) ? sanitize_email( $input['admin_email'] ) : get_network_option( null, 'admin_email' );
+			$public      = $input['public'] ?? true;
+
+			// Resolve or create the admin user.
+			$admin_user = get_user_by( 'email', $admin_email );
+			$user_id    = $admin_user ? $admin_user->ID : get_current_user_id();
+
+			$blog_id = wp_insert_site( array(
+				'domain'  => $domain,
+				'path'    => $path,
+				'title'   => $title,
+				'user_id' => $user_id,
+				'options' => array(
+					'public' => $public ? 1 : 0,
+				),
+			) );
+
+			if ( is_wp_error( $blog_id ) ) {
+				return $blog_id;
+			}
+
+			// Set admin email on the new site.
+			switch_to_blog( $blog_id );
+			update_option( 'admin_email', $admin_email );
+			$url       = home_url();
+			$admin_url = admin_url();
+			restore_current_blog();
+
+			return array(
+				'success'   => true,
+				'blog_id'   => (int) $blog_id,
+				'url'       => (string) $url,
+				'admin_url' => (string) $admin_url,
+			);
+		},
+	) );
+
 	$reg->write( 'multisite/update-site', array(
 		'ability_class' => 'WE_Multisite_Ability',
 		'label'       => 'Update Site Settings',
