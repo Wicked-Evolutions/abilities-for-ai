@@ -213,6 +213,41 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'callback' => 'abilities_for_ai_diagnostic_content_health',
 	));
+
+	$reg->read( 'diagnostic/environment-info', array(
+		'label'       => 'Environment Info',
+		'description' => 'Server environment snapshot — PHP version and extensions, MySQL version, memory limits, debug constants, upload limits, server software, SAPI, object cache, timezone, active theme, and ABSPATH. Complements site-health/info with a flat, focused output.',
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'php'       => array( 'type' => 'object' ),
+			'database'  => array( 'type' => 'object' ),
+			'wordpress' => array( 'type' => 'object' ),
+			'server'    => array( 'type' => 'object' ),
+			'theme'     => array( 'type' => 'object' ),
+		) ),
+		'callback' => 'abilities_for_ai_diagnostic_environment_info',
+	));
+
+	$reg->read( 'diagnostic/registered-assets', array(
+		'label'       => 'Registered Scripts & Styles',
+		'description' => 'Inventory of all scripts and styles registered in the WordPress dependency system (wp_scripts/wp_styles). Shows handle, src, version, dependencies, enqueued status, and type-specific attributes. Reflects REST API context — frontend-only enqueues may not appear; use content/get-snapshot for actual rendered page assets.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'properties' => array(
+				'type' => array(
+					'type'        => 'string',
+					'enum'        => array( 'scripts', 'styles', 'all' ),
+					'default'     => 'all',
+					'description' => 'Asset type to list.',
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_item_output( array(
+			'scripts' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+			'styles'  => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
+			'totals'  => array( 'type' => 'object' ),
+		) ),
+		'callback' => 'abilities_for_ai_diagnostic_registered_assets',
+	));
 });
 
 // ============================================================
@@ -2251,4 +2286,131 @@ function abilities_for_ai_diagnostic_abilities() {
 		'total_abilities' => $total,
 		'enabled_modules' => $enabled,
 	);
+}
+
+/**
+ * Environment info diagnostic callback.
+ *
+ * @return array Structured environment snapshot.
+ */
+function abilities_for_ai_diagnostic_environment_info() {
+	global $wpdb;
+
+	$theme = wp_get_theme();
+
+	return array(
+		'php' => array(
+			'version'          => PHP_VERSION,
+			'sapi'             => PHP_SAPI,
+			'extensions'       => get_loaded_extensions(),
+			'memory_limit'     => ini_get( 'memory_limit' ),
+			'max_execution_time' => (int) ini_get( 'max_execution_time' ),
+			'upload_max_filesize' => ini_get( 'upload_max_filesize' ),
+			'post_max_size'    => ini_get( 'post_max_size' ),
+			'max_input_vars'   => (int) ini_get( 'max_input_vars' ),
+		),
+		'database' => array(
+			'version'        => $wpdb->db_version(),
+			'server_info'    => $wpdb->db_server_info(),
+			'charset'        => $wpdb->charset,
+			'collate'        => $wpdb->collate,
+			'table_prefix'   => $wpdb->prefix,
+		),
+		'wordpress' => array(
+			'version'            => get_bloginfo( 'version' ),
+			'multisite'          => is_multisite(),
+			'environment_type'   => wp_get_environment_type(),
+			'memory_limit'       => defined( 'WP_MEMORY_LIMIT' ) ? WP_MEMORY_LIMIT : null,
+			'max_memory_limit'   => defined( 'WP_MAX_MEMORY_LIMIT' ) ? WP_MAX_MEMORY_LIMIT : null,
+			'debug'              => defined( 'WP_DEBUG' ) && WP_DEBUG,
+			'debug_log'          => defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG,
+			'debug_display'      => defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY,
+			'script_debug'       => defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG,
+			'savequeries'        => defined( 'SAVEQUERIES' ) && SAVEQUERIES,
+			'max_upload_size'    => size_format( wp_max_upload_size() ),
+			'max_upload_size_bytes' => wp_max_upload_size(),
+			'timezone'           => wp_timezone_string(),
+			'language'           => get_locale(),
+			'abspath'            => ABSPATH,
+			'object_cache'       => wp_using_ext_object_cache(),
+		),
+		'server' => array(
+			'software'  => $_SERVER['SERVER_SOFTWARE'] ?? 'unknown',
+			'hostname'  => gethostname() ?: 'unknown',
+			'os'        => PHP_OS,
+		),
+		'theme' => array(
+			'name'        => $theme->get( 'Name' ),
+			'version'     => $theme->get( 'Version' ),
+			'parent'      => $theme->parent() ? $theme->parent()->get( 'Name' ) : null,
+			'block_theme' => $theme->is_block_theme(),
+		),
+	);
+}
+
+/**
+ * Registered scripts and styles diagnostic callback.
+ *
+ * @param array|null $input Optional input with 'type' filter.
+ * @return array Asset inventory.
+ */
+function abilities_for_ai_diagnostic_registered_assets( $input = null ) {
+	$type = sanitize_key( $input['type'] ?? 'all' );
+
+	$result = array();
+	$totals = array();
+
+	// --- Scripts ---
+	if ( $type === 'all' || $type === 'scripts' ) {
+		$wp_scripts = wp_scripts();
+		$scripts    = array();
+
+		foreach ( $wp_scripts->registered as $handle => $dep ) {
+			$entry = array(
+				'handle'    => $handle,
+				'src'       => $dep->src ?: null,
+				'ver'       => $dep->ver ?: null,
+				'deps'      => $dep->deps,
+				'enqueued'  => in_array( $handle, $wp_scripts->queue, true ),
+				'in_footer' => isset( $dep->extra['group'] ) && $dep->extra['group'] === 1,
+			);
+
+			// Script loading strategy (defer/async — WP 6.3+).
+			if ( ! empty( $dep->extra['strategy'] ) ) {
+				$entry['strategy'] = $dep->extra['strategy'];
+			}
+
+			$scripts[] = $entry;
+		}
+
+		$result['scripts'] = $scripts;
+		$totals['scripts_registered'] = count( $scripts );
+		$totals['scripts_enqueued']   = count( $wp_scripts->queue );
+	}
+
+	// --- Styles ---
+	if ( $type === 'all' || $type === 'styles' ) {
+		$wp_styles = wp_styles();
+		$styles    = array();
+
+		foreach ( $wp_styles->registered as $handle => $dep ) {
+			$styles[] = array(
+				'handle'   => $handle,
+				'src'      => $dep->src ?: null,
+				'ver'      => $dep->ver ?: null,
+				'deps'     => $dep->deps,
+				'enqueued' => in_array( $handle, $wp_styles->queue, true ),
+				'media'    => $dep->args ?: 'all',
+			);
+		}
+
+		$result['styles'] = $styles;
+		$totals['styles_registered'] = count( $styles );
+		$totals['styles_enqueued']   = count( $wp_styles->queue );
+	}
+
+	$result['totals'] = $totals;
+	$result['note']   = 'Reflects REST API context. Frontend-only enqueues (wp_enqueue_scripts hook) may not appear.';
+
+	return $result;
 }
