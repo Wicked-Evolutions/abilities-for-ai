@@ -88,7 +88,8 @@ $reg->write( 'presto-player/update-setting', array(
 				'description' => 'Setting name within the group.',
 			),
 			'value' => array(
-				'description' => 'New value for the setting (string, number, boolean, or object).',
+				'type'        => array( 'string', 'number', 'boolean', 'object', 'array' ),
+				'description' => 'New value for the setting (string, number, boolean, object, or array).',
 			),
 		),
 		'required' => array( 'group', 'name', 'value' ),
