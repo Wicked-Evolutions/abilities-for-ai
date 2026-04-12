@@ -229,6 +229,47 @@ add_action( 'wp_abilities_api_init', function() {
 		},
 	) );
 
+	$reg->write( 'cron/run-event', array(
+		'label'       => 'Run Cron Event',
+		'description' => 'Immediately fire a cron hook by name. Executes all callbacks attached to the hook via do_action(). Use cron/get-event to verify the hook exists first.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'hook' ),
+			'properties' => array(
+				'hook' => array(
+					'type'        => 'string',
+					'description' => 'Cron hook name to fire',
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'hook'               => array( 'type' => 'string' ),
+			'callbacks_attached' => array( 'type' => 'boolean' ),
+			'output'             => array( 'type' => 'string' ),
+		) ),
+		'annotations' => array( 'idempotent' => false ),
+		'callback' => function( $input ) {
+			$hook = sanitize_text_field( $input['hook'] );
+
+			$has_callbacks = has_action( $hook );
+
+			if ( ! $has_callbacks ) {
+				return new WP_Error( 'no_callbacks', "No callbacks are attached to hook '{$hook}'. The hook must have registered actions to execute." );
+			}
+
+			ob_start();
+			do_action( $hook );
+			$output = ob_get_clean();
+
+			return array(
+				'success'            => true,
+				'hook'               => $hook,
+				'callbacks_attached' => true,
+				'output'             => (string) $output,
+			);
+		},
+	) );
+
 	// ===== CRON — DELETE =====
 
 	$reg->delete( 'cron/delete-event', array(
