@@ -234,7 +234,7 @@ function abilities_for_ai_permission_defaults() {
 		'rewrite'    => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'filesystem' => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'revisions'  => array( 'read' => true, 'write' => true, 'delete' => false ),
-		'multisite'  => array( 'read' => true, 'write' => true ),
+		'multisite'  => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'knowledge'  => array( 'read' => true, 'write' => true, 'delete' => false ),
 		'diagnostic' => array( 'read' => true ),
 		'editorial'  => array( 'read' => true ),

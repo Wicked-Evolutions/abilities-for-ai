@@ -342,4 +342,72 @@ add_action( 'wp_abilities_api_init', function() {
 			);
 		},
 	) );
+
+	// ===== MULTISITE — DELETE =====
+
+	$reg->delete( 'multisite/delete-site', array(
+		'ability_class' => 'WE_Multisite_Ability',
+		'label'       => 'Delete Network Site',
+		'description' => 'Permanently delete a site from the multisite network. This is destructive and irreversible — requires confirmation matching the site domain or site_id.',
+		'input_schema' => array(
+			'type'       => 'object',
+			'required'   => array( 'site_id', 'confirm' ),
+			'properties' => array(
+				'site_id' => array(
+					'type'        => 'integer',
+					'description' => 'ID of the site to delete',
+				),
+				'confirm' => array(
+					'type'        => 'string',
+					'description' => 'Safety confirmation — must match the site domain or the site_id as a string',
+				),
+				'drop_tables' => array(
+					'type'        => 'boolean',
+					'description' => 'Whether to drop the site database tables (default true)',
+					'default'     => true,
+				),
+			),
+		),
+		'output_schema' => abilities_for_ai_schema_success_output( array(
+			'site_id' => array( 'type' => 'integer' ),
+			'domain'  => array( 'type' => 'string' ),
+		) ),
+		'annotations' => array( 'destructive' => true, 'idempotent' => false ),
+		'callback' => function( $input ) {
+			if ( ! is_multisite() ) {
+				return new WP_Error( 'not_multisite', 'This operation requires a WordPress multisite installation.' );
+			}
+
+			$site_id = (int) $input['site_id'];
+			$confirm = sanitize_text_field( $input['confirm'] );
+
+			if ( 1 === $site_id ) {
+				return new WP_Error( 'ability_invalid_input', 'Cannot delete the main site (ID 1).' );
+			}
+
+			$site = get_blog_details( $site_id );
+			if ( ! $site ) {
+				return new WP_Error( 'not_found', 'Site not found.' );
+			}
+
+			$domain = (string) $site->domain;
+			if ( $confirm !== $domain && $confirm !== (string) $site_id ) {
+				return new WP_Error( 'ability_invalid_input', "Confirmation failed. Provide the site domain \"{$domain}\" or site_id \"{$site_id}\" as the confirm value." );
+			}
+
+			$drop_tables = $input['drop_tables'] ?? true;
+
+			$result = wp_delete_site( $site_id );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+
+			return array(
+				'success' => true,
+				'site_id' => $site_id,
+				'domain'  => $domain,
+			);
+		},
+	) );
 } );
