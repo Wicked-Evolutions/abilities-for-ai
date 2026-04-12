@@ -283,9 +283,9 @@ add_action( 'wp_abilities_api_init', function() {
 		'description'  => 'Update an existing session\'s summary, findings, or what\'s next. Only provided fields are changed.',
 		'input_schema' => array(
 			'type'       => 'object',
-			'required'   => array( 'session_id' ),
 			'properties' => array(
-				'session_id'         => array( 'type' => 'string', 'description' => 'Session identifier to update.' ),
+				'id'                 => array( 'type' => 'string', 'description' => 'Session identifier (preferred; alias for session_id).' ),
+				'session_id'         => array( 'type' => 'string', 'description' => 'Session identifier (deprecated alias for id).' ),
 				'summary'            => array( 'type' => 'string', 'description' => 'Updated session summary.' ),
 				'findings'           => array( 'type' => 'array', 'items' => array( 'type' => 'string' ), 'description' => 'Updated key findings.' ),
 				'whats_next'         => array( 'type' => 'string', 'description' => 'Updated next steps.' ),
@@ -294,7 +294,11 @@ add_action( 'wp_abilities_api_init', function() {
 			),
 		),
 		'callback' => function( $input ) {
-			$result = Session::update( $input['session_id'], $input );
+			$session_id = $input['id'] ?? $input['session_id'] ?? null;
+			if ( ! $session_id ) {
+				return new \WP_Error( 'ability_invalid_input', 'Provide id or session_id.' );
+			}
+			$result = Session::update( $session_id, $input );
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
@@ -307,17 +311,21 @@ add_action( 'wp_abilities_api_init', function() {
 		'description'  => 'Permanently delete a session record. This cannot be undone.',
 		'input_schema' => array(
 			'type'       => 'object',
-			'required'   => array( 'session_id' ),
 			'properties' => array(
-				'session_id' => array( 'type' => 'string', 'description' => 'Session identifier to delete.' ),
+				'id'         => array( 'type' => 'string', 'description' => 'Session identifier (preferred; alias for session_id).' ),
+				'session_id' => array( 'type' => 'string', 'description' => 'Session identifier (deprecated alias for id).' ),
 			),
 		),
 		'callback' => function( $input ) {
-			$result = Session::delete( $input['session_id'] );
+			$session_id = $input['id'] ?? $input['session_id'] ?? null;
+			if ( ! $session_id ) {
+				return new \WP_Error( 'ability_invalid_input', 'Provide id or session_id.' );
+			}
+			$result = Session::delete( $session_id );
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
-			return array( 'success' => true, 'session_id' => $input['session_id'] );
+			return array( 'success' => true, 'session_id' => $session_id );
 		},
 	) );
 
