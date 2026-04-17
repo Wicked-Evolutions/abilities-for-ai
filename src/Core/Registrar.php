@@ -146,6 +146,21 @@ class Registrar {
 			};
 		}
 
+		$meta = array(
+			'show_in_rest' => true,
+			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
+			'annotations'  => $annotations,
+			'tier'         => $tier,
+		);
+
+		if ( array_key_exists( 'compiled', $config ) ) {
+			$meta['compiled'] = (bool) $config['compiled'];
+		}
+
+		if ( array_key_exists( 'replaces', $config ) ) {
+			$meta['replaces'] = $config['replaces'];
+		}
+
 		$args = array(
 			'label'               => $config['label'],
 			'description'         => $config['description'],
@@ -155,15 +170,7 @@ class Registrar {
 			'permission_callback' => function() use ( $capability ) {
 				return current_user_can( $capability );
 			},
-			'meta' => array_merge(
-				array(
-					'show_in_rest' => true,
-					'mcp'          => array( 'public' => true, 'type' => 'tool' ),
-					'annotations'  => $annotations,
-					'tier'         => $tier,
-				),
-				isset( $config['meta'] ) ? $config['meta'] : array()
-			),
+			'meta' => array_merge( $meta, isset( $config['meta'] ) ? $config['meta'] : array() ),
 		);
 
 		// Only include output_schema if provided.
