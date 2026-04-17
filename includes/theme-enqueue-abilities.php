@@ -112,6 +112,8 @@ add_action( 'wp_abilities_api_init', function() {
 	// ── theme/enqueue-asset (write) ──
 	$reg->write( 'themes/enqueue-asset', array(
 		'label'       => 'Enqueue Theme Asset',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Register a CSS or JS file from the active theme to be loaded on the frontend. Rules are stored in a WordPress option and persist across sessions. Idempotent — calling with the same handle updates the existing rule.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -244,6 +246,8 @@ add_action( 'wp_abilities_api_init', function() {
 	// ── theme/dequeue-asset (delete) ──
 	$reg->delete( 'themes/dequeue-asset', array(
 		'label'       => 'Dequeue Theme Asset',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Remove an enqueue rule by handle. The file remains on disk — only the enqueue registration is removed.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -295,6 +299,8 @@ add_action( 'wp_abilities_api_init', function() {
 	// ── theme/list-enqueued-assets (read) ──
 	$reg->read( 'themes/list-enqueued-assets', array(
 		'label'       => 'List Enqueued Theme Assets',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'List all asset enqueue rules managed by the abilities system. Shows each rule with a file_exists check.',
 		'output_schema' => abilities_for_ai_schema_collection_output( 'rules', array(
 			'handle'      => array( 'type' => 'string' ),

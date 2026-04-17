@@ -18,6 +18,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'cron/list-events', array(
 		'label'       => 'List Cron Events',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'List scheduled cron events with next run times, recurrence, and arguments. Paginated — returns up to 100 events per page.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -93,6 +95,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'cron/list-schedules', array(
 		'label'       => 'List Cron Schedules',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'List available cron recurrence schedules (hourly, twicedaily, daily, etc.).',
 		'output_schema' => abilities_for_ai_schema_collection_output( 'schedules', array(
 			'name'     => array( 'type' => 'string' ),
@@ -118,6 +122,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'cron/get-event', array(
 		'label'       => 'Get Cron Event',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Get details for a specific cron hook including all scheduled instances.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -169,6 +175,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'cron/create-event', array(
 		'label'       => 'Schedule Cron Event',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Schedule a new cron event. Use recurrence for recurring events or omit for single-fire events. The hook must already be registered in WordPress (this schedules when it runs, not what it does).',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -231,6 +239,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'cron/run-event', array(
 		'label'       => 'Run Cron Event',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Immediately fire a cron hook by name. Executes all callbacks attached to the hook via do_action(). Use cron/get-event to verify the hook exists first.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -274,6 +284,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'cron/delete-event', array(
 		'label'       => 'Unschedule Cron Event',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Remove a scheduled cron event by hook name and timestamp. Use cron/list-events to find the exact timestamp.',
 		'input_schema' => array(
 			'type'       => 'object',

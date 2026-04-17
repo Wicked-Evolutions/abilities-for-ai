@@ -20,6 +20,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'comments/list', array(
 		'label'       => 'List Comments',
+		'compiled'    => false,
+		'replaces'    => 'edit-comments.php',
 		'description' => 'List comments with filtering, pagination, and search options',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -131,6 +133,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'comments/get', array(
 		'label'       => 'Get Comment',
+		'compiled'    => false,
+		'replaces'    => 'edit-comments.php',
 		'description' => 'Get detailed information about a specific comment by ID',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -178,6 +182,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'comments/create', array(
 		'label'       => 'Create Comment',
+		'compiled'    => false,
+		'replaces'    => 'edit-comments.php',
 		'description' => 'Create a new comment on a post',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -249,6 +255,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'comments/update', array(
 		'label'       => 'Update Comment',
+		'compiled'    => false,
+		'replaces'    => 'edit-comments.php',
 		'description' => "Update an existing comment's content, author info, or status",
 		'input_schema' => array(
 			'type'       => 'object',
@@ -329,6 +337,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'comments/delete', array(
 		'label'       => 'Delete Comment',
+		'compiled'    => false,
+		'replaces'    => 'edit-comments.php',
 		'description' => 'Delete a comment permanently or move to trash',
 		'input_schema' => array(
 			'type'       => 'object',

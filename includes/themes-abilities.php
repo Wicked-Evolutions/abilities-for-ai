@@ -18,6 +18,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'themes/list', array(
 		'label'       => 'List Themes',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'List all installed themes with version, status, and capabilities.',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'themes' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
@@ -48,6 +50,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'themes/get-active', array(
 		'label'       => 'Get Active Theme',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'Get detailed information about the currently active theme.',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'name'        => array( 'type' => 'string' ),
@@ -80,6 +84,8 @@ add_action( 'wp_abilities_api_init', function() {
 	// list-mods and get-mod require edit_theme_options — override the module-level capability.
 	$reg->read( 'themes/list-mods', array(
 		'label'       => 'List Theme Mods',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'List all theme modifications for the active theme.',
 		'capability'  => 'edit_theme_options',
 		'output_schema' => abilities_for_ai_schema_collection_output( 'mods', array(
@@ -106,6 +112,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'themes/get-mod', array(
 		'label'       => 'Get Theme Mod',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'Get a specific theme modification value.',
 		'capability'  => 'edit_theme_options',
 		'input_schema' => array(
@@ -131,6 +139,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'themes/get-theme-json', array(
 		'label'       => 'Get Theme JSON',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'Get the merged theme.json data for the active block theme. Returns settings and styles.',
 		'capability'  => 'edit_theme_options',
 		'input_schema' => array(
@@ -176,6 +186,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'themes/design-snapshot', array(
 		'label'       => 'Design Snapshot',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'Single-call design overview: active theme info, theme.json settings (colors, typography, spacing, layout), custom CSS, template list, and global styles. Everything an AI needs to understand the site\'s visual identity without multiple tool calls.',
 		'capability'  => 'edit_theme_options',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
@@ -278,6 +290,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'themes/activate', array(
 		'label'       => 'Activate Theme',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'Switch to a different installed theme. The theme must already be installed.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -314,6 +328,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'themes/install', array(
 		'capability'  => 'install_themes',
 		'label'       => 'Install Theme',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'Install a theme from the WordPress.org repository by slug.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -398,6 +414,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'themes/set-mod', array(
 		'capability'  => 'edit_theme_options',
 		'label'       => 'Set Theme Mod',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'Set a theme modification value for the active theme.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -440,6 +458,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'themes/set-mods-batch', array(
 		'capability'  => 'edit_theme_options',
 		'label'       => 'Set Theme Mods (Batch)',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'Set multiple theme modification values in a single call. Accepts a key-value map of mod names to values. Returns the full theme_mods option after applying all changes.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -483,6 +503,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'themes/delete', array(
 		'capability'  => 'delete_themes',
 		'label'       => 'Delete Theme',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'Delete an installed theme. The theme must not be the active theme or its parent.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -526,6 +548,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'themes/delete-mod', array(
 		'capability'  => 'edit_theme_options',
 		'label'       => 'Delete Theme Mod',
+		'compiled'    => false,
+		'replaces'    => 'themes.php',
 		'description' => 'Remove a theme modification from the active theme.',
 		'input_schema' => array(
 			'type'       => 'object',

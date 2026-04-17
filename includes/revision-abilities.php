@@ -20,6 +20,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'revisions/list', array(
 		'label'       => 'List Revisions',
+		'compiled'    => false,
+		'replaces'    => 'revision.php',
 		'description' => 'List all revisions for a post, ordered by date (newest first)',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -66,6 +68,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'revisions/get', array(
 		'label'       => 'Get Revision',
+		'compiled'    => false,
+		'replaces'    => 'revision.php',
 		'description' => 'Get a specific revision with full content, useful for comparing or restoring',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -108,6 +112,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'revisions/restore', array(
 		'capability'  => 'edit_posts',
 		'label'       => 'Restore Revision',
+		'compiled'    => false,
+		'replaces'    => 'revision.php',
 		'description' => 'Restore a post to a specific revision. The current state is saved as a new revision before restoring.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -151,6 +157,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'revisions/delete', array(
 		'capability'  => 'delete_posts',
 		'label'       => 'Delete Revision',
+		'compiled'    => false,
+		'replaces'    => 'revision.php',
 		'description' => 'Permanently delete a specific revision',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -191,6 +199,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'revisions/purge', array(
 		'capability'  => 'delete_posts',
 		'label'       => 'Purge All Revisions',
+		'compiled'    => false,
+		'replaces'    => 'revision.php',
 		'description' => 'Delete all revisions for a specific post. Keeps the current version intact.',
 		'input_schema' => array(
 			'type'       => 'object',

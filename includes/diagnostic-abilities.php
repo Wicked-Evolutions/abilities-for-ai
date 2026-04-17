@@ -18,6 +18,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'diagnostic/site-overview', array(
 		'label'       => 'Site Overview Diagnostic',
+		'compiled'    => true,
+		'replaces'    => 'site-health.php',
 		'description' => 'Compiled single-call site diagnostic. Combines environment, health, plugins, theme, cache, cron, settings, content, and abilities status into one structured report with cross-correlated diagnostic flags.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -39,6 +41,8 @@ add_action( 'wp_abilities_api_init', function() {
 	if ( is_multisite() ) {
 		$reg->read( 'diagnostic/network-overview', array(
 			'label'       => 'Network Overview Diagnostic',
+			'compiled'    => true,
+			'replaces'    => 'network/sites.php',
 			'description' => 'Compiled single-call multisite network diagnostic. Runs site-overview across all subsites with cross-site correlation flags. Only available on multisite installations.',
 			'input_schema' => array(
 				'type'       => 'object',
@@ -71,6 +75,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'diagnostic/taxonomy-health', array(
 		'label'       => 'Taxonomy Health Diagnostic',
+		'compiled'    => true,
+		'replaces'    => null,
 		'description' => 'Compiled single-call taxonomy health assessment. Discovers all taxonomies, counts terms and content assignments, identifies empty terms, orphan terms, deep hierarchies, and overlapping terms.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -96,6 +102,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'diagnostic/security-posture', array(
 		'label'       => 'Security Posture Diagnostic',
+		'compiled'    => true,
+		'replaces'    => null,
 		'description' => 'Compiled single-call security assessment. Evaluates user configuration, plugin hygiene, exposed settings, authentication state, and filesystem indicators. Read-only and non-invasive.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -116,6 +124,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'diagnostic/theme-audit', array(
 		'label'       => 'Theme Audit Diagnostic',
+		'compiled'    => true,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Compiled single-call theme and design system audit. Evaluates theme.json configuration, enqueued assets, registered patterns, block type availability, and design consistency. Note: asset detection reflects REST API context — some frontend-only assets may not appear.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -136,6 +146,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'diagnostic/content-narrative', array(
 		'label'       => 'Content Narrative',
+		'compiled'    => true,
+		'replaces'    => null,
 		'description' => 'Compiled site story — what this site is about, who it is for, how content is organised, and the publication timeline. The AI onboarding script.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -160,6 +172,8 @@ add_action( 'wp_abilities_api_init', function() {
 	if ( is_multisite() ) {
 		$reg->read( 'diagnostic/multisite-map', array(
 			'label'       => 'Multisite Content Map',
+			'compiled'    => true,
+			'replaces'    => 'network/sites.php',
 			'description' => 'Compiled network content architecture. Maps what each subsite is, what content it holds, what plugins it runs, and what role it plays in the network.',
 			'input_schema' => array(
 				'type'       => 'object',
@@ -186,6 +200,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'diagnostic/content-health', array(
 		'label'       => 'Content Health Audit',
+		'compiled'    => true,
+		'replaces'    => null,
 		'description' => 'Compiled single-call content health assessment. Identifies missing metadata, stale drafts, orphan pages, thin content, uncategorised posts, and missing featured images. Returns summary counts plus worst offenders via server-side SQL aggregation.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -216,6 +232,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'diagnostic/environment-info', array(
 		'label'       => 'Environment Info',
+		'compiled'    => true,
+		'replaces'    => 'site-health.php?tab=debug',
 		'description' => 'Server environment snapshot — PHP version and extensions, MySQL version, memory limits, debug constants, upload limits, server software, SAPI, object cache, timezone, active theme, and ABSPATH. Complements site-health/info with a flat, focused output.',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'php'       => array( 'type' => 'object' ),
@@ -229,6 +247,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'diagnostic/registered-assets', array(
 		'label'       => 'Registered Scripts & Styles',
+		'compiled'    => true,
+		'replaces'    => null,
 		'description' => 'Inventory of all scripts and styles registered in the WordPress dependency system (wp_scripts/wp_styles). Shows handle, src, version, dependencies, enqueued status, and type-specific attributes. Reflects REST API context — frontend-only enqueues may not appear; use content/get-snapshot for actual rendered page assets.',
 		'input_schema' => array(
 			'type'       => 'object',

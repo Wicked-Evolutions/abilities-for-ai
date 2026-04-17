@@ -20,6 +20,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'cache/list-transients', array(
 		'label'       => 'List Transients',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'List all transients stored in the options table with expiry times.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -84,6 +86,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'cache/get-transient', array(
 		'label'       => 'Get Transient',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Get a specific transient value.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -122,6 +126,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'cache/object-cache-status', array(
 		'label'       => 'Object Cache Status',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Check if a persistent object cache is active and get cache statistics.',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'persistent_cache' => array( 'type' => 'boolean' ),
@@ -154,6 +160,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'cache/set-transient', array(
 		'label'       => 'Set Transient',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Set a transient with an optional TTL in seconds.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -180,6 +188,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'cache/flush-page-cache', array(
 		'label'       => 'Flush Page Cache',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Purge the full-page cache (LiteSpeed, WP Super Cache, W3 Total Cache, WP Fastest Cache, or wp_cache_flush fallback). Use after content changes, theme updates, or permalink changes when cached pages show stale content. Returns which cache system was detected and purged.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -246,6 +256,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'cache/delete-transient', array(
 		'tier'        => 'free',
 		'label'       => 'Delete Transient',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Delete a specific transient.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -267,6 +279,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'cache/flush', array(
 		'label'       => 'Flush Transients',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Delete all expired transients from the database. Use with care.',
 		'input_schema' => array(
 			'type'       => 'object',

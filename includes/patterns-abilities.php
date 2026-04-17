@@ -18,6 +18,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'patterns/list', array(
 		'label'       => 'List Block Patterns',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php?p=%2Fpattern',
 		'description' => 'List all registered block patterns with optional category filter.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -80,6 +82,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'patterns/get', array(
 		'label'       => 'Get Block Pattern',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php?p=%2Fpattern',
 		'description' => 'Get a single block pattern by name, including its content markup.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -134,10 +138,14 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'patterns/list-categories', array(
 		'label'       => 'List Pattern Categories',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php?p=%2Fpattern',
 		'description' => 'List all registered block pattern categories.',
 		'output_schema' => abilities_for_ai_schema_collection_output( 'categories', array(
 			'name'        => array( 'type' => 'string' ),
 			'label'       => array( 'type' => 'string' ),
+			'compiled'    => false,
+			'replaces'    => 'site-editor.php?p=%2Fpattern',
 			'description' => array( 'type' => 'string' ),
 		) ),
 		'callback' => function() {
@@ -148,6 +156,8 @@ add_action( 'wp_abilities_api_init', function() {
 				$result[] = array(
 					'name'        => $cat['name'] ?? '',
 					'label'       => $cat['label'] ?? '',
+					'compiled'    => false,
+					'replaces'    => 'site-editor.php?p=%2Fpattern',
 					'description' => $cat['description'] ?? '',
 				);
 			}
@@ -157,6 +167,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'patterns/register', array(
 		'label'       => 'Register Block Pattern',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php?p=%2Fpattern',
 		'description' => 'Register a new block pattern. The pattern will be available in the block inserter.',
 		'capability'  => 'manage_options',
 		'input_schema' => array(
@@ -202,6 +214,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'patterns/unregister', array(
 		'label'       => 'Unregister Block Pattern',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php?p=%2Fpattern',
 		'description' => 'Unregister an existing block pattern by name.',
 		'capability'  => 'manage_options',
 		'input_schema' => array(

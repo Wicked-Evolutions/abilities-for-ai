@@ -29,6 +29,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/list-tags', array(
 		'label'        => 'List Knowledge Tags',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'List tags with optional search and pagination.',
 		'tier'         => 'free',
 		'input_schema' => array(
@@ -48,6 +50,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/get-tag', array(
 		'label'        => 'Get Knowledge Tag',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Get a single tag by ID or slug.',
 		'tier'         => 'free',
 		'input_schema' => array(
@@ -80,6 +84,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/create-tag', array(
 		'label'        => 'Create Knowledge Tag',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Create a new tag. Slug is auto-generated from title if omitted.',
 		'tier'         => 'free',
 		'input_schema' => array(
@@ -105,6 +111,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/update-tag', array(
 		'label'        => 'Update Knowledge Tag',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Update tag properties.',
 		'tier'         => 'free',
 		'annotations'  => array( 'idempotent' => true ),
@@ -132,6 +140,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'knowledge/delete-tag', array(
 		'label'        => 'Delete Knowledge Tag',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Delete a tag and cascade-remove all assignments.',
 		'tier'         => 'free',
 		'input_schema' => array(
@@ -154,6 +164,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/assign-tags', array(
 		'label'        => 'Assign Tags to Entity',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Assign one or more tags to a knowledge layer entity (document, session, or observation).',
 		'tier'         => 'free',
 		'input_schema' => array(
@@ -186,6 +198,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/unassign-tags', array(
 		'label'        => 'Unassign Tags from Entity',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Remove one or more tags from a knowledge layer entity.',
 		'tier'         => 'free',
 		'input_schema' => array(

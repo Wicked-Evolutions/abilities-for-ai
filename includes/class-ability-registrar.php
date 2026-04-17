@@ -117,6 +117,27 @@ class Abilities_For_AI_Registrar {
 			};
 		}
 
+		// v0.6.0 (issue #123) — activity-capture annotations.
+		// 'compiled' declares whether the ability crosses plugin boundaries
+		// in a single call (compiled abilities, like diagnostic/site-overview
+		// or fluent/get-user-360, vs single-domain CRUD).
+		// 'replaces' declares which wp-admin screen the ability replaces —
+		// powers the "admin panel is now optional" dashboard intelligence.
+		// Both default to null in config; the activity logger uses a
+		// heuristic fallback for is_compiled when annotation is absent.
+		$meta = array(
+			'show_in_rest' => true,
+			'mcp'          => array( 'public' => true, 'type' => 'tool' ),
+			'annotations'  => $annotations,
+			'tier'         => $tier,
+		);
+		if ( array_key_exists( 'compiled', $config ) ) {
+			$meta['compiled'] = (bool) $config['compiled'];
+		}
+		if ( array_key_exists( 'replaces', $config ) ) {
+			$meta['replaces'] = $config['replaces'];
+		}
+
 		$args = array(
 			'label'               => $config['label'],
 			'description'         => $config['description'],
@@ -126,12 +147,7 @@ class Abilities_For_AI_Registrar {
 			'permission_callback' => function() use ( $capability ) {
 				return current_user_can( $capability );
 			},
-			'meta' => array(
-				'show_in_rest' => true,
-				'mcp'          => array( 'public' => true, 'type' => 'tool' ),
-				'annotations'  => $annotations,
-				'tier'         => $tier,
-			),
+			'meta'                => $meta,
 		);
 
 		// Only include output_schema if provided.

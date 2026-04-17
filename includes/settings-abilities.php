@@ -42,6 +42,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'settings/list', array(
 		'label'       => 'List Settings',
+		'compiled'    => false,
+		'replaces'    => 'options-general.php',
 		'description' => 'List core WordPress settings grouped by settings page with current values.',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'groups' => array( 'type' => 'object', 'description' => 'Settings keyed by group name' ),
@@ -61,6 +63,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'settings/get', array(
 		'label'       => 'Get Setting',
+		'compiled'    => false,
+		'replaces'    => 'options-general.php',
 		'description' => 'Get a specific WordPress setting/option value.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -85,6 +89,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'settings/get-group', array(
 		'label'       => 'Get Settings Group',
+		'compiled'    => false,
+		'replaces'    => 'options-general.php',
 		'description' => 'Get all settings in a group: general, writing, reading, discussion, media, permalink, or privacy.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -112,6 +118,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'settings/get-permalink-structure', array(
 		'label'       => 'Get Permalink Structure',
+		'compiled'    => false,
+		'replaces'    => 'options-general.php',
 		'description' => 'Get the current permalink configuration.',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'structure'              => array( 'type' => 'string' ),
@@ -134,6 +142,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'settings/update', array(
 		'label'       => 'Update Setting',
+		'compiled'    => false,
+		'replaces'    => 'options-general.php',
 		'description' => 'Update a WordPress setting. V1.0: limited to safe allowlisted settings (no siteurl, home, admin_email).',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -163,6 +173,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'settings/delete', array(
 		'label'       => 'Delete Option',
+		'compiled'    => false,
+		'replaces'    => 'options-general.php',
 		'description' => 'Delete a WordPress option from the database. Core WordPress options and protected options are blocked. Use this for cleaning up custom/plugin options only.',
 		'input_schema' => array(
 			'type'       => 'object',

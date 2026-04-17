@@ -18,6 +18,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'site-health/status', array(
 		'label'       => 'Site Health Status',
+		'compiled'    => false,
+		'replaces'    => 'site-health.php',
 		'description' => 'Get the overall site health status (good, recommended, critical counts).',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'status'             => array( 'type' => 'object' ),
@@ -55,6 +57,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'site-health/list-tests', array(
 		'label'       => 'List Health Tests',
+		'compiled'    => false,
+		'replaces'    => 'site-health.php',
 		'description' => 'List all available site health tests (direct and async).',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'direct' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
@@ -81,6 +85,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'site-health/run-test', array(
 		'label'       => 'Run Health Test',
+		'compiled'    => false,
+		'replaces'    => 'site-health.php',
 		'description' => 'Run a specific direct site health test and return the result.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -149,6 +155,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'site-health/pulse', array(
 		'label'       => 'Site Pulse',
+		'compiled'    => false,
+		'replaces'    => 'site-health.php',
 		'description' => 'Single-call site health overview: WordPress version, PHP version, active theme, plugin count, content counts by type, site health status, disk usage estimate, and recent activity. Ideal for quick orientation without multiple tool calls.',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'wordpress'     => array( 'type' => 'object' ),
@@ -249,6 +257,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'site-health/info', array(
 		'label'       => 'Site Health Info',
+		'compiled'    => false,
+		'replaces'    => 'site-health.php',
 		'description' => 'Get comprehensive debug information (PHP, DB, server, WordPress versions, active plugins, theme).',
 		'input_schema' => array(
 			'type'       => 'object',

@@ -20,6 +20,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'media/list', array(
 		'label'       => 'List Media',
+		'compiled'    => false,
+		'replaces'    => 'upload.php',
 		'description' => 'List media items from the WordPress media library with filtering and pagination',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -117,6 +119,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'media/get', array(
 		'label'       => 'Get Media Item',
+		'compiled'    => false,
+		'replaces'    => 'upload.php',
 		'description' => 'Get detailed information about a specific media attachment by ID, including metadata, sizes, and file info.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -182,6 +186,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'media/create', array(
 		'tier'        => 'free',
 		'label'       => 'Upload Media',
+		'compiled'    => false,
+		'replaces'    => 'upload.php',
 		'description' => 'Upload media from a URL to the WordPress media library',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -311,6 +317,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'media/upload', array(
 		'label'       => 'Upload Media from Base64',
+		'compiled'    => false,
+		'replaces'    => 'upload.php',
 		'description' => 'Upload media directly from base64-encoded file data',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -427,6 +435,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'media/update', array(
 		'label'       => 'Update Media',
+		'compiled'    => false,
+		'replaces'    => 'upload.php',
 		'description' => 'Update media item metadata (title, caption, description, alt text)',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -496,6 +506,8 @@ add_action( 'wp_abilities_api_init', function() {
 		'tier'        => 'free',
 		'capability'  => 'delete_posts',
 		'label'       => 'Delete Media',
+		'compiled'    => false,
+		'replaces'    => 'upload.php',
 		'description' => 'Delete a media item from the library',
 		'input_schema' => array(
 			'type'       => 'object',

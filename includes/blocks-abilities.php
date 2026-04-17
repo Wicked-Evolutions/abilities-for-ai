@@ -20,6 +20,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'blocks/parse', array(
 		'label'       => 'Parse Blocks',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Parse post content into a structured block array. Provide either post_id (reads the post) or raw content string.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -58,6 +60,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'blocks/serialize', array(
 		'label'       => 'Serialize Blocks',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Convert a structured block array back to HTML comment markup.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -85,6 +89,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'blocks/list-types', array(
 		'label'       => 'List Block Types',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'List all registered block types with their attributes, supports, and styles.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -144,6 +150,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'blocks/get-type', array(
 		'label'       => 'Get Block Type',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Get detailed information about a single registered block type.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -193,6 +201,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'blocks/find-in-post', array(
 		'label'       => 'Find Block in Post',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Find blocks by name or attribute value within a post. Returns matching blocks with their index positions. Set recursive=true to search nested blocks and return path arrays.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -285,6 +295,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'blocks/get-at-path', array(
 		'label'       => 'Get Block at Path',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Get a single block by integer path array. Use blocks/find-nested or blocks/find-in-post (recursive) to discover paths first.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -321,6 +333,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'blocks/find-nested', array(
 		'tier'        => 'free',
 		'label'       => 'Find Nested Blocks',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Find blocks at any depth by name, attribute, or CSS class. Returns path arrays for use with get-at-path, update-attributes, etc.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -371,6 +385,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'blocks/update-attributes', array(
 		'label'       => 'Update Block Attributes',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Merge new attributes into a block at a path. The surgical edit — change one attribute on a deeply nested block without touching the rest of the post.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -426,6 +442,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'blocks/update-at-path', array(
 		'label'       => 'Update Block at Path',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Replace a full block at a path with a new block. For attribute-only changes, prefer blocks/update-attributes.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -478,6 +496,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'blocks/append-inner', array(
 		'label'       => 'Append Inner Blocks',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Add innerBlocks to an existing block at a path. Inserts children without rebuilding the whole container.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -544,6 +564,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'blocks/insert', array(
 		'label'       => 'Insert Block',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Insert one or more blocks at a position in a post. Position 0 = beginning, -1 = end.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -593,6 +615,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'blocks/replace', array(
 		'label'       => 'Replace Block',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Replace a block at a specific index position in a post with a new block.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -645,6 +669,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'blocks/remove', array(
 		'tier'        => 'free',
 		'label'       => 'Remove Block',
+		'compiled'    => false,
+		'replaces'    => 'site-editor.php',
 		'description' => 'Remove a block at a specific index position from a post.',
 		'input_schema' => array(
 			'type'       => 'object',

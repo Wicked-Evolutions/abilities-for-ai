@@ -18,6 +18,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	wp_register_ability( 'suite/get-status', array(
 		'label'               => 'Get Status',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description'         => 'Get unified status of all active ability modules, permissions, and license state.',
 		'category'            => 'settings',
 		'execute_callback'    => 'abilities_for_ai_get_status',
