@@ -44,7 +44,95 @@
         <div class="kl-stat-label">Activity</div>
         <div class="kl-stat-value">{{ stats.activity?.total || 0 }}</div>
         <div class="kl-stat-sub">
-          {{ stats.activity?.total_error || 0 }} errors
+          {{ stats.activity?.total_error || 0 }} errors ·
+          {{ stats.activity?.total_compiled || 0 }} compiled
+          <span v-if="stats.activity?.compiled_pct">({{ stats.activity.compiled_pct }}%)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- v0.6.0 (issue #123) — Operational signal panels -->
+    <div class="kl-dashboard-grid" style="margin-top:24px;" v-if="stats.activity?.total > 0">
+      <!-- Caller origins -->
+      <div>
+        <div class="kl-section-title">Caller Origins</div>
+        <p class="kl-section-sub">Where ability calls come from.</p>
+        <div v-if="callerOriginsList.length" class="kl-feed">
+          <div v-for="co in callerOriginsList" :key="co.name" class="kl-feed-item">
+            <div class="kl-feed-body">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="kl-badge badge-agent-type">{{ co.name }}</span>
+                <span class="kl-feed-title" style="margin:0; font-family:var(--font-mono); font-size:.8125rem;">{{ co.count }}</span>
+                <span style="flex:1"></span>
+                <span class="kl-cell-muted" style="font-size:.75rem;">{{ co.pct }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p v-else class="kl-cell-muted" style="font-size:.875rem;">No caller data yet.</p>
+      </div>
+
+      <!-- Compiled vs CRUD -->
+      <div>
+        <div class="kl-section-title">Compiled vs CRUD</div>
+        <p class="kl-section-sub">
+          Compiled abilities cross plugin boundaries in a single call —
+          the architectural advantage over REST-wrapping MCPs.
+        </p>
+        <div class="kl-stat-card" style="margin-bottom:8px;">
+          <div class="kl-stat-label">Compiled Calls</div>
+          <div class="kl-stat-value" style="color:var(--accent-success, #22c55e);">{{ stats.activity?.total_compiled || 0 }}</div>
+          <div class="kl-stat-sub">{{ stats.activity?.compiled_pct || 0 }}% of total</div>
+        </div>
+        <div class="kl-stat-card">
+          <div class="kl-stat-label">CRUD Calls</div>
+          <div class="kl-stat-value">{{ (stats.activity?.total || 0) - (stats.activity?.total_compiled || 0) }}</div>
+          <div class="kl-stat-sub">Single-domain operations</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cache candidates + Replaced surfaces -->
+    <div class="kl-dashboard-grid" style="margin-top:24px;" v-if="stats.activity?.total > 0">
+      <!-- Cache candidates -->
+      <div>
+        <div class="kl-section-title">Cache Candidates</div>
+        <p class="kl-section-sub">
+          Abilities whose responses repeat often — prime targets for caching.
+          Repeat rate = share of calls returning the same result.
+        </p>
+        <div v-if="stats.activity?.cache_candidates?.length" class="kl-feed">
+          <div v-for="c in stats.activity.cache_candidates" :key="c.name" class="kl-feed-item">
+            <div class="kl-feed-body">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="kl-feed-title" style="margin:0; font-family:var(--font-mono); font-size:.8125rem;">{{ c.name }}</span>
+                <span style="flex:1"></span>
+                <span class="kl-cell-muted" style="font-size:.75rem;">{{ c.total_calls }} calls</span>
+                <span class="kl-cell-mono" style="color:var(--accent-success, #22c55e); font-size:.75rem;">{{ Math.round(c.repeat_rate * 100) }}% repeat</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p v-else class="kl-cell-muted" style="font-size:.875rem;">
+          Need at least 5 calls per ability to surface candidates.
+        </p>
+      </div>
+
+      <!-- Replaced surfaces -->
+      <div>
+        <div class="kl-section-title">Admin Screens Replaced</div>
+        <p class="kl-section-sub">
+          wp-admin URLs that AI operated through abilities instead.
+          <strong>{{ stats.activity?.replaced_unique || 0 }}</strong> unique screens replaced.
+        </p>
+        <p class="kl-cell-muted" style="font-size:.875rem;" v-if="!stats.activity?.replaced_unique">
+          Ability annotations (<code>meta.replaces</code>) power this view.
+          Coverage grows as abilities are annotated.
+        </p>
+        <div class="kl-stat-card" v-else>
+          <div class="kl-stat-label">Avg Response Size</div>
+          <div class="kl-stat-value">{{ formatBytes(stats.activity?.avg_response_bytes || 0) }}</div>
+          <div class="kl-stat-sub">Per successful ability call</div>
         </div>
       </div>
     </div>
@@ -123,7 +211,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { api } from '../api.js'
 
 const loading = ref(true)
@@ -133,6 +221,28 @@ const openObservations = ref([])
 const recentDocuments = ref([])
 const recentActivity = ref([])
 const siteName = window.abilitiesKL?.site_name || ''
+
+// v0.6.0 — normalize caller_origins dict → sorted array with pct.
+const callerOriginsList = computed(() => {
+  const origins = stats.value.activity?.caller_origins || {}
+  const total = Object.values(origins).reduce((a, b) => a + b, 0)
+  return Object.entries(origins)
+    .map(([name, count]) => ({
+      name,
+      count,
+      pct: total > 0 ? Math.round((count / total) * 100) : 0,
+    }))
+    .sort((a, b) => b.count - a.count)
+})
+
+function formatBytes(n) {
+  if (!n) return '0 B'
+  const abs = Math.abs(n)
+  if (abs < 1024) return `${n} B`
+  if (abs < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`
+  if (abs < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1)} MB`
+  return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`
+}
 
 async function loadDashboard() {
   loading.value = true
