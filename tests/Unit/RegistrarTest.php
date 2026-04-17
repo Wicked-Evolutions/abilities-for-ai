@@ -191,4 +191,75 @@ class RegistrarTest extends TestCase {
 		$this->assertArrayNotHasKey( 'output_schema', $abilities['cron/list-events'] );
 	}
 
+	// ── v0.6.0 (issue #123) — compiled + replaces meta ────────────────────────
+
+	public function test_meta_compiled_flag_persisted_as_bool() {
+		$reg = new Registrar( 'diagnostic', 'manage_options' );
+		$reg->read( 'diagnostic/site-overview', array(
+			'label' => 'T', 'description' => 'T', 'callback' => function() {},
+			'compiled' => true,
+			'replaces' => null,
+		) );
+
+		$abilities = wp_get_abilities();
+		$meta = $abilities['diagnostic/site-overview']['meta'];
+		$this->assertArrayHasKey( 'compiled', $meta );
+		$this->assertTrue( $meta['compiled'] );
+		$this->assertIsBool( $meta['compiled'] );
+	}
+
+	public function test_meta_compiled_false_is_persisted() {
+		$reg = new Registrar( 'users', 'list_users' );
+		$reg->read( 'users/list', array(
+			'label' => 'T', 'description' => 'T', 'callback' => function() {},
+			'compiled' => false,
+			'replaces' => 'users.php',
+		) );
+
+		$abilities = wp_get_abilities();
+		$meta = $abilities['users/list']['meta'];
+		$this->assertArrayHasKey( 'compiled', $meta );
+		$this->assertFalse( $meta['compiled'] );
+	}
+
+	public function test_meta_replaces_string_persisted() {
+		$reg = new Registrar( 'users', 'list_users' );
+		$reg->read( 'users/list', array(
+			'label' => 'T', 'description' => 'T', 'callback' => function() {},
+			'compiled' => false,
+			'replaces' => 'users.php',
+		) );
+
+		$abilities = wp_get_abilities();
+		$meta = $abilities['users/list']['meta'];
+		$this->assertArrayHasKey( 'replaces', $meta );
+		$this->assertSame( 'users.php', $meta['replaces'] );
+	}
+
+	public function test_meta_replaces_null_persisted() {
+		$reg = new Registrar( 'editorial', 'manage_options' );
+		$reg->read( 'editorial/site-voice', array(
+			'label' => 'T', 'description' => 'T', 'callback' => function() {},
+			'compiled' => true,
+			'replaces' => null,
+		) );
+
+		$abilities = wp_get_abilities();
+		$meta = $abilities['editorial/site-voice']['meta'];
+		$this->assertArrayHasKey( 'replaces', $meta );
+		$this->assertNull( $meta['replaces'] );
+	}
+
+	public function test_meta_compiled_omitted_when_not_provided() {
+		$reg = new Registrar( 'cron', 'manage_options' );
+		$reg->read( 'cron/list-events', array(
+			'label' => 'T', 'description' => 'T', 'callback' => function() {},
+		) );
+
+		$abilities = wp_get_abilities();
+		$meta = $abilities['cron/list-events']['meta'];
+		$this->assertArrayNotHasKey( 'compiled', $meta );
+		$this->assertArrayNotHasKey( 'replaces', $meta );
+	}
+
 }
