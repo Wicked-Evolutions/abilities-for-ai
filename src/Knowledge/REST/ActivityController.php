@@ -263,8 +263,8 @@ class ActivityController extends \WP_REST_Controller {
 			FROM {$table}
 			WHERE response_hash != '' AND status = 'success'
 			GROUP BY ability_name
-			HAVING total_calls >= 5
-			ORDER BY (total_calls - unique_hashes) DESC, total_calls DESC
+			HAVING COUNT(*) >= 5
+			ORDER BY (COUNT(*) - COUNT(DISTINCT response_hash)) DESC, COUNT(*) DESC
 			LIMIT 10"
 		);
 		$cache_candidates = array();
@@ -287,15 +287,15 @@ class ActivityController extends \WP_REST_Controller {
 			"SELECT ability_name, AVG(memory_delta_bytes) as avg_bytes, COUNT(*) as count
 			FROM {$table}
 			GROUP BY ability_name
-			HAVING avg_bytes > 0
-			ORDER BY avg_bytes DESC LIMIT 10"
+			HAVING AVG(memory_delta_bytes) > 0
+			ORDER BY AVG(memory_delta_bytes) DESC LIMIT 10"
 		);
 		$top_queries = $wpdb->get_results(
 			"SELECT ability_name, AVG(sql_query_count) as avg_queries, COUNT(*) as count
 			FROM {$table}
 			GROUP BY ability_name
-			HAVING avg_queries > 0
-			ORDER BY avg_queries DESC LIMIT 10"
+			HAVING AVG(sql_query_count) > 0
+			ORDER BY AVG(sql_query_count) DESC LIMIT 10"
 		);
 
 		$memory_hotspots = array();

@@ -123,8 +123,8 @@ class DashboardController extends \WP_REST_Controller {
 				FROM {$activity_table}
 				WHERE response_hash != '' AND status = 'success'
 				GROUP BY ability_name
-				HAVING total_calls >= 5
-				ORDER BY (total_calls - unique_hashes) DESC, total_calls DESC
+				HAVING COUNT(*) >= 5
+				ORDER BY (COUNT(*) - COUNT(DISTINCT response_hash)) DESC, COUNT(*) DESC
 				LIMIT 5"
 			);
 			$cache_candidates = array();
