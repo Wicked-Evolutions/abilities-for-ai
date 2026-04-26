@@ -103,15 +103,22 @@ class HelpersTest extends TestCase {
 		$this->assertTrue( $defaults['content']['read'] );
 	}
 
-	public function test_permission_defaults_filesystem_write_off() {
+	public function test_permission_defaults_filesystem_write_on() {
+		// Public-alpha posture (J's Answer A, 2026-04-25): filesystem-write
+		// stays enabled by default. Operators handle compliance via the
+		// per-ability permission settings UI; the alpha trusts early users
+		// to know what they're doing. Visibility is the safety surface, not
+		// closed defaults.
 		$defaults = abilities_for_ai_permission_defaults();
-		$this->assertFalse( $defaults['filesystem']['write'] );
+		$this->assertTrue( $defaults['filesystem']['write'] );
 	}
 
-	public function test_permission_defaults_cron_read_only() {
+	public function test_permission_defaults_cron_write_on() {
+		// Public-alpha posture (J's Answer A, 2026-04-25): cron-write stays
+		// enabled by default. Same reasoning as filesystem-write above.
 		$defaults = abilities_for_ai_permission_defaults();
 		$this->assertTrue( $defaults['cron']['read'] );
-		$this->assertArrayNotHasKey( 'write', $defaults['cron'] );
+		$this->assertTrue( $defaults['cron']['write'] );
 	}
 
 	// ── abilities_for_ai_get_permissions() ─────────────────────────────────

@@ -23,7 +23,7 @@ class Schema {
 	/**
 	 * Current schema version. Bump this when tables change.
 	 */
-	const VERSION = '0.6.0';
+	const VERSION = '0.7.0';
 
 	/**
 	 * Option key for stored schema version.
@@ -95,6 +95,9 @@ class Schema {
 		// Handled by dbDelta via get_sql — no additional migration logic needed.
 		// New columns: response_size_bytes, response_hash, input_size_bytes,
 		// memory_delta_bytes, sql_query_count, caller_origin, is_compiled, replaced_surface.
+
+		// v0.7.0: Add kl_boundary sister table for MCP boundary event logging (issue #132).
+		// Handled by dbDelta via get_sql — no additional migration logic needed.
 	}
 
 	/**
@@ -282,6 +285,38 @@ class Schema {
 			KEY idx_caller_origin (caller_origin),
 			KEY idx_is_compiled (is_compiled),
 			KEY idx_response_hash (response_hash)
+		) {$charset_collate};";
+
+		// 9. kl_boundary — MCP adapter boundary event log (issue #132).
+		// Sister table to kl_activity. Stores metadata-only events from the
+		// MCP /mcp endpoint: session lifecycle, auth denials, transport errors,
+		// rate-limit hits. Never stores request/response bodies — defense-in-depth
+		// sanitization applied at write time on top of adapter-side sanitization.
+		$tables[] = "CREATE TABLE {$prefix}kl_boundary (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			event varchar(64) NOT NULL,
+			severity varchar(16) NOT NULL DEFAULT 'info',
+			ip_truncated varchar(45) NOT NULL DEFAULT '',
+			user_id bigint(20) unsigned NOT NULL DEFAULT 0,
+			session_id varchar(64) NOT NULL DEFAULT '',
+			api_key_hash varchar(64) NOT NULL DEFAULT '',
+			client_name varchar(128) NOT NULL DEFAULT '',
+			user_agent varchar(255) NOT NULL DEFAULT '',
+			method varchar(64) NOT NULL DEFAULT '',
+			request_id varchar(64) NOT NULL DEFAULT '',
+			transport varchar(16) NOT NULL DEFAULT 'HTTP',
+			status_code smallint(5) unsigned NOT NULL DEFAULT 0,
+			error_code varchar(64) NOT NULL DEFAULT '',
+			detail_json text DEFAULT NULL,
+			duration_ms int unsigned NOT NULL DEFAULT 0,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id),
+			KEY idx_event (event, created_at),
+			KEY idx_user (user_id, created_at),
+			KEY idx_session (session_id),
+			KEY idx_severity (severity, created_at),
+			KEY idx_created (created_at),
+			KEY idx_api_key (api_key_hash)
 		) {$charset_collate};";
 
 		// 8. kl_taggables — polymorphic pivot for tag assignments.

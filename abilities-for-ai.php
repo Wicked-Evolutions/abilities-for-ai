@@ -3,7 +3,7 @@
  * Plugin Name: Abilities for AI
  * Plugin URI:  https://github.com/Wicked-Evolutions/abilities-for-ai
  * Description: 137 abilities across 21 modules — content, blocks, meta, settings, cron, themes, patterns, site health, REST discovery, menus, filesystem, knowledge, users, revisions, multisite, and more. Powers AI control through the WordPress Abilities API.
- * Version: 1.8.0
+ * Version: 1.9.0
  * Author: Wicked Evolutions
  * Author URI: https://wickedevolutions.com
  * Copyright: Copyright (C) 2026 Wicked Evolutions
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 
 // Define plugin constants (guarded — WordPress updater can re-include this file).
 if ( ! defined( 'ABILITIES_FOR_AI_VERSION' ) ) {
-	define( 'ABILITIES_FOR_AI_VERSION', '1.8.0' );
+	define( 'ABILITIES_FOR_AI_VERSION', '1.9.0' );
 }
 if ( ! defined( 'ABILITIES_FOR_AI_PATH' ) ) {
 	define( 'ABILITIES_FOR_AI_PATH', plugin_dir_path( __FILE__ ) );
@@ -115,6 +115,9 @@ require_once ABILITIES_FOR_AI_PATH . 'includes/knowledge-rest.php';
 
 // Knowledge Layer — automatic ability execution logging via core hooks.
 require_once ABILITIES_FOR_AI_PATH . 'includes/activity-logger.php';
+
+// Knowledge Layer — MCP boundary event logging via adapter observability hooks.
+require_once ABILITIES_FOR_AI_PATH . 'includes/boundary-logger.php';
 
 // Auto-load third-party plugin suites.
 // Each suite lives in includes/suites/{slug}/loader.php and handles
