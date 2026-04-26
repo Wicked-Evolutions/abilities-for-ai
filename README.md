@@ -189,7 +189,7 @@ This posture pairs with [Abilities MCP Adapter](https://github.com/Wicked-Evolut
 - [Product page](https://community.wickedevolutions.com/item/abilities-for-ai/)
 - [Abilities MCP Adapter](https://community.wickedevolutions.com/item/abilities-mcp-adapter/) — WordPress-side MCP protocol handler
 - [Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp) — MCP bridge for AI clients (`npx @wickedevolutions/abilities-mcp`)
-- [Abilities for Fluent Plugins](https://github.com/Wicked-Evolutions/abilities-for-fluent-plugins) — FluentCRM, Community, Cart, Support, Boards, Booking, and more
+- [Abilities for Fluent Plugins](https://github.com/Wicked-Evolutions/abilities-for-fluent-plugins) — our continuously-enhanced translator for the Fluent suite (FluentCRM, FluentCommunity, FluentForms, FluentBooking, FluentSupport, FluentBoards, FluentSMTP, FluentAuth, FluentSnippets, FluentMessaging, FluentCart, FluentAffiliate)
 
 ## Evolving Knowledge
 
