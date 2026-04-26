@@ -135,16 +135,46 @@ Products, prices, orders, subscriptions, customers, coupons, bumps, shipping, ta
 - **Abilities Explorer** — browse all registered abilities with inline Read/Write/Delete toggles per module
 - **License** — enter and validate your Pro license key (network-wide for multisite)
 
+## Boundary activity log
+
+Operators get a structured audit trail of MCP protocol events alongside ability execution. The plugin maintains two activity tables:
+
+- `kl_activity` — every ability execution (request, status, duration, response size)
+- `kl_boundary` — protocol-layer events (session lifecycle, auth denials, transport errors, rate-limit hits, settings audit changes)
+
+The Activity tab in WP Admin offers a toggle: **Ability executions / Boundary events / Both** — the "Both" view is a UNION-paginated timeline across both tables, sorted by `created_at`.
+
+REST routes (gated by `manage_options`):
+
+- `abilities-kl/v1/activity` — paginated `kl_activity` rows
+- `abilities-kl/v1/boundary` — paginated `kl_boundary` rows
+- `abilities-kl/v1/boundary/stats` — event-type and severity counts
+- `abilities-kl/v1/timeline` — UNION across both tables
+
+The boundary log writer (`BoundaryEventLogger`) implements the `McpObservabilityHandlerInterface` from [Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter) and listens on the `mcp_adapter_boundary_event` action hook. Both paths route to the same writer with metadata-only sanitization as defense-in-depth.
+
+A daily cron (`abilities_kl_boundary_retention`) prunes rows older than the `kl_boundary_retention_days` filter (default 90 days).
+
+Compatible with Abilities MCP Adapter v1.4.0+ (the version that emits the events this writer consumes).
+
 ## Security Model
 
-Every ability enforces WordPress capabilities at execution time. The WordPress user role assigned to your AI agent determines access:
+Every ability enforces WordPress capabilities at execution time. The WordPress user role assigned to your AI agent determines the baseline:
 
 | Role | Access |
 |------|--------|
 | **Administrator** | All modules |
 | **Editor** | Content, Blocks, Taxonomies, Patterns, Meta, Media |
 
-Per-module Read/Write/Delete toggles provide additional control. Pro abilities require both the permission toggle AND a valid license.
+Per-module Read/Write/Delete toggles provide additional control on top of WordPress capabilities. Pro abilities require both the permission toggle AND a valid license.
+
+### Permission posture for the public alpha
+
+Read access is enabled by default for every module. Write and delete are enabled by default for most modules — including filesystem and cron. The alpha trusts early operators to know what they're doing; visibility through the [boundary activity log](#boundary-activity-log) is the safety surface, not closed defaults.
+
+Operators who want a stricter baseline disable per-module write or delete via the **Settings → Abilities for AI** UI. The choices are explicit: every module's permission state is shown, and changes are recorded in `kl_boundary` for audit.
+
+This posture pairs with [Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter)'s response redaction filter, which sits between ability output and the MCP wire — so even with permissive write defaults, sensitive fields (passwords, API keys, contact PII) are redacted by default before responses leave the site.
 
 ## Documentation
 
