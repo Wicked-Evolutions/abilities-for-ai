@@ -18,6 +18,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'rest/list-namespaces', array(
 		'label'       => 'List REST Namespaces',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'List all registered REST API namespaces.',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'total'      => array( 'type' => 'integer', 'description' => 'Total number of namespaces' ),
@@ -35,6 +37,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'rest/list-routes', array(
 		'label'       => 'List REST Routes',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'List all routes for a namespace with their HTTP methods.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -79,6 +83,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'rest/get-route-schema', array(
 		'label'       => 'Get Route Schema',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Get the JSON Schema for a specific REST route\'s arguments and response.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -123,6 +129,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'rest/get-index', array(
 		'label'       => 'Get REST Index',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Get the full REST API index (equivalent to /wp-json/).',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'name'           => array( 'type' => 'string' ),

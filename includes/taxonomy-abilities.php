@@ -20,6 +20,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'taxonomies/discover', array(
 		'label'       => 'Discover Taxonomies',
+		'compiled'    => false,
+		'replaces'    => 'edit-tags.php',
 		'description' => 'List all available taxonomies with their configuration',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -47,6 +49,8 @@ add_action( 'wp_abilities_api_init', function() {
 				return array(
 					'name'         => $taxonomy->name,
 					'label'        => $taxonomy->label,
+					'compiled'    => false,
+					'replaces'    => 'edit-tags.php',
 					'description'  => $taxonomy->description,
 					'hierarchical' => $taxonomy->hierarchical,
 					'public'       => $taxonomy->public,
@@ -60,6 +64,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'taxonomies/list-terms', array(
 		'label'       => 'List Terms',
+		'compiled'    => false,
+		'replaces'    => 'edit-tags.php',
 		'description' => 'List terms in a specific taxonomy with filtering and pagination',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -146,6 +152,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'taxonomies/get-term', array(
 		'label'       => 'Get Term',
+		'compiled'    => false,
+		'replaces'    => 'edit-tags.php',
 		'description' => 'Get a specific term by ID',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -183,6 +191,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'taxonomies/get-content-terms', array(
 		'label'       => 'Get Content Terms',
+		'compiled'    => false,
+		'replaces'    => 'edit-tags.php',
 		'description' => 'Get all terms assigned to a specific post',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -259,6 +269,8 @@ add_action( 'wp_abilities_api_init', function() {
 		'tier'        => 'free',
 		'capability'  => 'manage_categories',
 		'label'       => 'Create Term',
+		'compiled'    => false,
+		'replaces'    => 'edit-tags.php',
 		'description' => 'Create a new term in a taxonomy',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -324,6 +336,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'taxonomies/update-term', array(
 		'capability'  => 'manage_categories',
 		'label'       => 'Update Term',
+		'compiled'    => false,
+		'replaces'    => 'edit-tags.php',
 		'description' => 'Update an existing term',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -391,6 +405,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'taxonomies/assign-to-content', array(
 		'capability'  => 'edit_posts',
 		'label'       => 'Assign Terms to Content',
+		'compiled'    => false,
+		'replaces'    => 'edit-tags.php',
 		'description' => 'Assign one or more terms to a post or custom post type',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -451,6 +467,8 @@ add_action( 'wp_abilities_api_init', function() {
 		'tier'        => 'free',
 		'capability'  => 'edit_posts',
 		'label'       => 'Batch Assign Terms',
+		'compiled'    => false,
+		'replaces'    => 'edit-tags.php',
 		'description' => 'Assign one or more terms to multiple posts in a single call. Supports append or replace mode per post.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -557,6 +575,8 @@ add_action( 'wp_abilities_api_init', function() {
 		'tier'        => 'free',
 		'capability'  => 'manage_categories',
 		'label'       => 'Delete Term',
+		'compiled'    => false,
+		'replaces'    => 'edit-tags.php',
 		'description' => 'Delete a term from a taxonomy',
 		'input_schema' => array(
 			'type'       => 'object',

@@ -23,7 +23,7 @@ class Schema {
 	/**
 	 * Current schema version. Bump this when tables change.
 	 */
-	const VERSION = '0.5.0';
+	const VERSION = '0.6.0';
 
 	/**
 	 * Option key for stored schema version.
@@ -90,6 +90,11 @@ class Schema {
 
 		// v0.4.0: Add wp_post_id column (handled by dbDelta via get_sql).
 		// No additional migration logic needed — dbDelta adds the column.
+
+		// v0.6.0: Add 8 columns to kl_activity for richer operational signal (issue #123).
+		// Handled by dbDelta via get_sql — no additional migration logic needed.
+		// New columns: response_size_bytes, response_hash, input_size_bytes,
+		// memory_delta_bytes, sql_query_count, caller_origin, is_compiled, replaced_surface.
 	}
 
 	/**
@@ -246,6 +251,8 @@ class Schema {
 		) {$charset_collate};";
 
 		// 7. kl_activity — automatic ability execution log.
+		// v0.6.0 added 8 columns for richer operational signal (issue #123):
+		// response/input size + hash, memory/SQL deltas, caller origin, compiled flag, replaced surface.
 		$tables[] = "CREATE TABLE {$prefix}kl_activity (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			ability_name varchar(191) NOT NULL,
@@ -256,6 +263,14 @@ class Schema {
 			duration_ms int unsigned NOT NULL DEFAULT 0,
 			user_id bigint(20) unsigned NOT NULL DEFAULT 0,
 			session_id varchar(64) NOT NULL DEFAULT '',
+			response_size_bytes int unsigned NOT NULL DEFAULT 0,
+			response_hash varchar(64) NOT NULL DEFAULT '',
+			input_size_bytes int unsigned NOT NULL DEFAULT 0,
+			memory_delta_bytes bigint NOT NULL DEFAULT 0,
+			sql_query_count int unsigned NOT NULL DEFAULT 0,
+			caller_origin varchar(32) NOT NULL DEFAULT '',
+			is_compiled tinyint(1) NOT NULL DEFAULT 0,
+			replaced_surface varchar(191) DEFAULT NULL,
 			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id),
 			KEY idx_ability (ability_name),
@@ -263,7 +278,10 @@ class Schema {
 			KEY idx_status (status),
 			KEY idx_user (user_id),
 			KEY idx_session (session_id),
-			KEY idx_created (created_at)
+			KEY idx_created (created_at),
+			KEY idx_caller_origin (caller_origin),
+			KEY idx_is_compiled (is_compiled),
+			KEY idx_response_hash (response_hash)
 		) {$charset_collate};";
 
 		// 8. kl_taggables — polymorphic pivot for tag assignments.

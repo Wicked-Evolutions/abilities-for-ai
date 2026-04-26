@@ -96,6 +96,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'menus/list-menus', array(
 		'label'       => 'List Menus',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'List all navigation menus with item counts and assigned theme locations.',
 		'output_schema' => abilities_for_ai_schema_collection_output( 'menus', array(
 			'id'        => array( 'type' => 'integer' ),
@@ -132,6 +134,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'menus/get-menu', array(
 		'label'       => 'Get Menu',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'Get a single menu with its full hierarchical item tree.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -163,6 +167,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'menus/list-menu-items', array(
 		'label'       => 'List Menu Items',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'List all items in a menu as a flat list with parent IDs and positions.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -193,6 +199,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'menus/list-locations', array(
 		'label'       => 'List Menu Locations',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'List all registered theme menu locations with their current menu assignments.',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'locations' => array( 'type' => 'array', 'items' => array( 'type' => 'object' ) ),
@@ -218,6 +226,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'menus/create-menu', array(
 		'label'       => 'Create Menu',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'Create a new empty navigation menu. Optionally assign it to a theme location.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -249,6 +259,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'menus/add-menu-item', array(
 		'label'       => 'Add Menu Item',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'Add an item to a navigation menu. For "custom", provide title and url. For "page"/"post"/"category"/"tag", provide object_id.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -336,6 +348,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'menus/update-menu-item', array(
 		'label'       => 'Update Menu Item',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'Update properties of an existing menu item. Only provided fields are changed.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -397,6 +411,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'menus/reorder-menu-items', array(
 		'label'       => 'Reorder Menu Items',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'Reorder items within a menu by providing an array of item IDs in the desired order.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -444,6 +460,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'menus/assign-location', array(
 		'label'       => 'Assign Menu to Location',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'Assign a menu to a theme location. Replaces any previous assignment.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -478,6 +496,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'menus/unassign-location', array(
 		'label'       => 'Unassign Menu from Location',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'Remove the menu assignment from a theme location, leaving it empty.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -508,6 +528,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'menus/delete-menu', array(
 		'tier'        => 'free',
 		'label'       => 'Delete Menu',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'Delete a navigation menu and all its items. Destructive and cannot be undone.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -543,6 +565,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'menus/delete-menu-item', array(
 		'tier'        => 'free',
 		'label'       => 'Delete Menu Item',
+		'compiled'    => false,
+		'replaces'    => 'nav-menus.php',
 		'description' => 'Remove a single item from a menu.',
 		'input_schema' => array(
 			'type'       => 'object',

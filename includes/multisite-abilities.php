@@ -26,6 +26,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'multisite/list-sites', array(
 		'ability_class' => 'WE_Multisite_Ability',
 		'label'       => 'List Network Sites',
+		'compiled'    => false,
+		'replaces'    => 'network/sites.php',
 		'description' => 'List all sites in the multisite network with status and details',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -110,6 +112,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'multisite/get-site', array(
 		'ability_class' => 'WE_Multisite_Ability',
 		'label'       => 'Get Site Details',
+		'compiled'    => false,
+		'replaces'    => 'network/sites.php',
 		'description' => 'Get detailed information about a specific site including its settings',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -159,6 +163,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'multisite/get-network-settings', array(
 		'ability_class' => 'WE_Multisite_Ability',
 		'label'       => 'Get Network Settings',
+		'compiled'    => false,
+		'replaces'    => 'network/sites.php',
 		'description' => 'Get network-level settings like registration policy, upload limits, and default options',
 		'callback' => function() {
 			return array(
@@ -182,6 +188,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'multisite/create-site', array(
 		'ability_class' => 'WE_Multisite_Ability',
 		'label'       => 'Create Network Site',
+		'compiled'    => false,
+		'replaces'    => 'network/sites.php',
 		'description' => 'Create a new site in the multisite network. Returns the new blog_id, URL, and admin URL.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -265,6 +273,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'multisite/update-site', array(
 		'ability_class' => 'WE_Multisite_Ability',
 		'label'       => 'Update Site Settings',
+		'compiled'    => false,
+		'replaces'    => 'network/sites.php',
 		'description' => 'Update settings for a specific site (title, description, admin email, status flags)',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -348,6 +358,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'multisite/delete-site', array(
 		'ability_class' => 'WE_Multisite_Ability',
 		'label'       => 'Delete Network Site',
+		'compiled'    => false,
+		'replaces'    => 'network/sites.php',
 		'description' => 'Permanently delete a site from the multisite network. This is destructive and irreversible — requires confirmation matching the site domain or site_id.',
 		'input_schema' => array(
 			'type'       => 'object',

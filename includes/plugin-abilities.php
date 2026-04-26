@@ -20,6 +20,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'plugins/list', array(
 		'label'       => 'List Plugins',
+		'compiled'    => false,
+		'replaces'    => 'plugins.php',
 		'description' => 'List all installed plugins with their details and status',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -112,6 +114,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'plugins/get', array(
 		'label'       => 'Get Plugin',
+		'compiled'    => false,
+		'replaces'    => 'plugins.php',
 		'description' => 'Get detailed information about a specific plugin',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -173,6 +177,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'plugins/search-repository', array(
 		'capability'  => 'install_plugins',
 		'label'       => 'Search Plugin Repository',
+		'compiled'    => false,
+		'replaces'    => 'plugins.php',
 		'description' => 'Search the WordPress.org plugin repository',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -308,6 +314,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'plugins/activate', array(
 		'label'       => 'Activate Plugin',
+		'compiled'    => false,
+		'replaces'    => 'plugins.php',
 		'description' => 'Activate a plugin',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -369,6 +377,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'plugins/deactivate', array(
 		'label'       => 'Deactivate Plugin',
+		'compiled'    => false,
+		'replaces'    => 'plugins.php',
 		'description' => 'Deactivate a plugin',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -420,6 +430,8 @@ add_action( 'wp_abilities_api_init', function() {
 		'tier'        => 'free',
 		'capability'  => 'install_plugins',
 		'label'       => 'Install Plugin',
+		'compiled'    => false,
+		'replaces'    => 'plugins.php',
 		'description' => 'Install a plugin from the WordPress.org repository',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -521,6 +533,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'plugins/delete', array(
 		'capability'  => 'delete_plugins',
 		'label'       => 'Delete Plugin',
+		'compiled'    => false,
+		'replaces'    => 'plugins.php',
 		'description' => 'Delete an inactive plugin from the filesystem. The plugin must be deactivated first.',
 		'input_schema' => array(
 			'type'       => 'object',

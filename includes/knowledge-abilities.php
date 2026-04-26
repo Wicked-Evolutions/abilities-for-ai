@@ -23,6 +23,8 @@ defined( 'ABSPATH' ) || exit;
 add_action( 'wp_abilities_api_categories_init', function() {
 	wp_register_ability_category( 'knowledge', array(
 		'label'       => __( 'Knowledge', 'abilities-for-ai' ),
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description' => __( 'Domain knowledge docs that help AI understand WordPress concepts, modules, and best practices. Read-only, free tier.', 'abilities-for-ai' ),
 	) );
 } );
@@ -78,6 +80,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 		wp_register_ability( $name, array(
 			'label'            => $label,
+			'compiled'    => false,
+			'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 			'description'      => $description,
 			'category'         => 'knowledge',
 			'execute_callback' => static function() use ( $file_path, $slug ) {

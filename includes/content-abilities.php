@@ -20,6 +20,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'content/list', array(
 		'label'       => 'List Content',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'List posts, pages, or custom post types with filtering and pagination',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -129,6 +131,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'content/get', array(
 		'label'       => 'Get Content',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Get a specific post, page, or custom post type by ID',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -169,6 +173,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'content/get-snapshot', array(
 		'label'       => 'Get Content Snapshot',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Get complete post data in a single call: post fields, all meta, taxonomy terms, featured image URL, and author details. Use include/exclude arrays to control which sections are returned. Much more efficient than calling content/get + separate meta/taxonomy lookups.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -317,6 +323,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'content/get-text', array(
 		'label'       => 'Get Content as Plain Text',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Get a post\'s readable text content with block markup and HTML stripped. Returns ~2-20KB instead of 50-200KB from content/get. Ideal for Story Read, ESSENCE synthesis, and content analysis where you need what the page says, not how it\'s built.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -364,6 +372,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'content/list-structure', array(
 		'label'       => 'List Content Structure',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'List content metadata without the content field. Returns titles, IDs, slugs, parent, status, and dates — everything needed for site mapping without the 50-200KB Gutenberg payload per post. Supports pagination, filtering by type and status.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -461,6 +471,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'content/get-site-map', array(
 		'label'       => 'Get Site Map',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Get the full hierarchical page tree in a single call. Returns all pages as a nested tree structure with parent/child relationships resolved. Ideal for understanding site architecture without multiple content/list calls.',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'total' => array( 'type' => 'integer' ),
@@ -517,6 +529,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'content/discover-types', array(
 		'label'       => 'Discover Content Types',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Discover all available post types',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -544,6 +558,8 @@ add_action( 'wp_abilities_api_init', function() {
 				return array(
 					'name'         => $post_type->name,
 					'label'        => $post_type->label,
+					'compiled'    => false,
+					'replaces'    => 'edit.php',
 					'description'  => $post_type->description,
 					'public'       => $post_type->public,
 					'hierarchical' => $post_type->hierarchical,
@@ -558,6 +574,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'content/find-by-url', array(
 		'label'       => 'Find Content by URL',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Find a post, page, or custom post type by its URL',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -601,6 +619,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'content/get-by-slug', array(
 		'label'       => 'Get Content by Slug',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Get a post, page, or custom post type by its slug',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -660,6 +680,8 @@ add_action( 'wp_abilities_api_init', function() {
 		'ability_class' => 'WE_Multisite_Ability',
 		'capability'    => 'edit_theme_options',
 		'label'         => 'Render Page HTML',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description'   => 'Fetch the full rendered frontend HTML of a page via HTTP loopback — equivalent to what a browser or curl would receive. Returns the complete document including <html>, <head>, enqueued assets, <body class>, and template chrome. Accepts a URL (full or path) or a post_id. Useful for theme refactor baselines, visual regression checks, and verifying rendered output.',
 		'input_schema'  => array(
 			'type'       => 'object',
@@ -768,6 +790,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'content/create', array(
 		'tier'        => 'free',
 		'label'       => 'Create Content',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Create new content (posts, pages, custom post types)',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -895,6 +919,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'content/create-from-file', array(
 		'tier'        => 'free',
 		'label'       => 'Create Content from File',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Create content by reading post_content from a server-side file. Use with filesystem/write-file to move large payloads (block markup, long-form content) without passing content through the LLM context.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -1056,6 +1082,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'content/update', array(
 		'label'       => 'Update Content',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Update existing content',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -1136,6 +1164,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'content/append', array(
 		'label'       => 'Append Content',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Append block markup to the end of an existing post\'s content without reading or returning the full content. Useful for incrementally building pages.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -1182,6 +1212,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'content/change-type', array(
 		'label'       => 'Change Content Type',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Convert a post between post types (e.g. page to post, post to page). Returns the new permalink and warns about taxonomy/template side effects. Use this instead of content/update when you need to change post_type — content/update does not support type changes.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -1274,6 +1306,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'content/search-replace', array(
 		'label'       => 'Search and Replace in Content',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Find and replace text across multiple posts. Operates on post_content only. Returns a list of affected post IDs with match counts. Supports plain text matching (not regex). Use dry_run=true to preview changes without saving.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -1393,6 +1427,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'content/batch-update', array(
 		'label'       => 'Batch Update Content',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Update multiple posts in a single call. Each operation specifies a post ID and the fields to update. Supports title, content, status, excerpt, and author. Returns per-item results with success/error.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -1507,6 +1543,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'content/delete', array(
 		'tier'        => 'free',
 		'label'       => 'Delete Content',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Delete content (move to trash or permanently delete)',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -1549,6 +1587,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'content/duplicate', array(
 		'label'       => 'Duplicate Content',
+		'compiled'    => false,
+		'replaces'    => 'edit.php',
 		'description' => 'Duplicate a post, page, or custom post type. Copies content, excerpt, meta, and taxonomy terms. Creates the duplicate as a draft.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -1663,6 +1703,8 @@ add_action( 'wp_abilities_api_init', function() {
 		$reg->write( 'content/clone-to-site', array(
 			'ability_class' => 'WE_Multisite_Ability',
 			'label'       => 'Clone Content to Site',
+			'compiled'    => false,
+			'replaces'    => 'edit.php',
 			'description' => 'Clone a post from the current site to another site in the multisite network. Copies content, excerpt, meta, and taxonomy terms server-side — content never passes through the LLM context.',
 			'input_schema' => array(
 				'type'       => 'object',

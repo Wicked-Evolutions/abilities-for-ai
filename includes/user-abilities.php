@@ -20,6 +20,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'users/list', array(
 		'label'       => 'List Users',
+		'compiled'    => false,
+		'replaces'    => 'users.php',
 		'description' => 'List WordPress users with filtering and pagination options',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -113,6 +115,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'users/get', array(
 		'label'       => 'Get User',
+		'compiled'    => false,
+		'replaces'    => 'users.php',
 		'description' => 'Get detailed information about a specific user by ID, email, or username',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -178,6 +182,8 @@ add_action( 'wp_abilities_api_init', function() {
 		'tier'        => 'free',
 		'capability'  => 'create_users',
 		'label'       => 'Create User',
+		'compiled'    => false,
+		'replaces'    => 'users.php',
 		'description' => 'Create a new WordPress user with specified details and role',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -270,6 +276,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'users/update', array(
 		'capability'  => 'edit_users',
 		'label'       => 'Update User',
+		'compiled'    => false,
+		'replaces'    => 'users.php',
 		'description' => "Update an existing user's information and metadata",
 		'input_schema' => array(
 			'type'       => 'object',
@@ -376,6 +384,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'users/delete', array(
 		'capability'  => 'delete_users',
 		'label'       => 'Delete User',
+		'compiled'    => false,
+		'replaces'    => 'users.php',
 		'description' => 'Delete a WordPress user and optionally reassign their content',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -419,6 +429,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->read( 'users/list-app-passwords', array(
 		'capability'  => 'edit_users',
 		'label'       => 'List Application Passwords',
+		'compiled'    => false,
+		'replaces'    => 'profile.php',
 		'description' => 'List all application passwords for a user. Passwords are hashed and cannot be retrieved — only metadata (name, created, last used) is returned.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -477,6 +489,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->write( 'users/create-app-password', array(
 		'capability'  => 'edit_users',
 		'label'       => 'Create Application Password',
+		'compiled'    => false,
+		'replaces'    => 'profile.php',
 		'description' => 'Create a new application password for a user. The plaintext password is returned ONCE — it cannot be retrieved later. Use it for REST API / XML-RPC authentication.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -532,6 +546,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'users/delete-app-password', array(
 		'capability'  => 'edit_users',
 		'label'       => 'Delete Application Password',
+		'compiled'    => false,
+		'replaces'    => 'profile.php',
 		'description' => 'Delete a specific application password by UUID. Use users/list-app-passwords to find the UUID.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -573,6 +589,8 @@ add_action( 'wp_abilities_api_init', function() {
 	$reg->delete( 'users/delete-all-app-passwords', array(
 		'capability'  => 'edit_users',
 		'label'       => 'Delete All Application Passwords',
+		'compiled'    => false,
+		'replaces'    => 'profile.php',
 		'description' => 'Delete ALL application passwords for a user. This revokes all API access for that user. Destructive and cannot be undone.',
 		'input_schema' => array(
 			'type'       => 'object',

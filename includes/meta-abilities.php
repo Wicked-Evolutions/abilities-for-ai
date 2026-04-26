@@ -20,6 +20,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'meta/list-post-meta', array(
 		'label'       => 'List Post Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'List all meta fields for a post.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -48,6 +50,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'meta/get-post-meta', array(
 		'label'       => 'Get Post Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Get a specific meta value for a post.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -75,6 +79,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'meta/list-term-meta', array(
 		'label'       => 'List Term Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'List all meta fields for a taxonomy term.',
 		'capability'  => 'manage_options',
 		'input_schema' => array(
@@ -106,6 +112,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'meta/get-term-meta', array(
 		'label'       => 'Get Term Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Get a specific meta value for a taxonomy term.',
 		'capability'  => 'manage_options',
 		'input_schema' => array(
@@ -136,6 +144,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'meta/list-user-meta', array(
 		'label'       => 'List User Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'List all meta fields for a user (sensitive security keys are redacted).',
 		'capability'  => 'list_users',
 		'input_schema' => array(
@@ -178,6 +188,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'meta/get-user-meta', array(
 		'label'       => 'Get User Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Get a specific meta value for a user (sensitive security keys are blocked).',
 		'capability'  => 'list_users',
 		'input_schema' => array(
@@ -215,6 +227,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'meta/list-registered', array(
 		'label'       => 'List Registered Meta Keys',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'List all meta keys registered via register_meta() for a given object type.',
 		'capability'  => 'manage_options',
 		'input_schema' => array(
@@ -265,6 +279,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'meta/update-post-meta', array(
 		'label'       => 'Update Post Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Set or update a meta value for a post.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -293,6 +309,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'meta/update-term-meta', array(
 		'label'       => 'Update Term Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Set or update a meta value for a taxonomy term.',
 		'capability'  => 'manage_options',
 		'input_schema' => array(
@@ -324,6 +342,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'meta/update-user-meta', array(
 		'label'       => 'Update User Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Set or update a meta value for a user. Security-sensitive keys are blocked.',
 		'capability'  => 'edit_users',
 		'input_schema' => array(
@@ -363,6 +383,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'meta/delete-post-meta', array(
 		'label'       => 'Delete Post Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Delete a meta key from a post.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -389,6 +411,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'meta/delete-term-meta', array(
 		'label'       => 'Delete Term Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Delete a meta key from a taxonomy term.',
 		'capability'  => 'manage_options',
 		'input_schema' => array(
@@ -418,6 +442,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'meta/delete-user-meta', array(
 		'label'       => 'Delete User Meta',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Delete a meta key from a user. Security-sensitive keys are blocked.',
 		'capability'  => 'edit_users',
 		'input_schema' => array(

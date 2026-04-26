@@ -38,6 +38,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/list', array(
 		'label'        => 'List Knowledge Documents',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'List knowledge layer documents filtered by type, status, or search term.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -57,6 +59,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/get', array(
 		'label'        => 'Get Knowledge Document',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Get a single knowledge layer document by ID or by doc_type + slug.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -87,6 +91,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/create', array(
 		'label'        => 'Create Knowledge Document',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Create a new knowledge layer document.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -113,6 +119,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/update', array(
 		'label'        => 'Update Knowledge Document',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Update an existing knowledge layer document. Creates a revision before updating. Rejects locked documents — use knowledge/fork instead.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -138,6 +146,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'knowledge/delete', array(
 		'label'        => 'Archive Knowledge Document',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Soft-delete a document (status → archived). Locked documents cannot be archived.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -157,6 +167,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/fork', array(
 		'label'        => 'Fork Knowledge Document',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Create an editable copy of a locked (plugin-seeded) document.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -180,6 +192,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/search', array(
 		'label'        => 'Search Knowledge Documents',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'FULLTEXT search across knowledge layer documents with optional filters. Returns relevance-ranked results. Falls back to filtered listing when no query is provided.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -207,6 +221,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/list-sessions', array(
 		'label'        => 'List Knowledge Sessions',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'List AI session history with optional filters.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -224,6 +240,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/get-session', array(
 		'label'        => 'Get Knowledge Session',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Get a single session detail by session ID.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -247,6 +265,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/log-session', array(
 		'label'        => 'Log Knowledge Session',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Write an append-only session log entry. Called at end of each AI session.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -280,6 +300,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/update-session', array(
 		'label'        => 'Update Knowledge Session',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Update an existing session\'s summary, findings, or what\'s next. Only provided fields are changed.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -308,6 +330,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'knowledge/delete-session', array(
 		'label'        => 'Delete Knowledge Session',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Permanently delete a session record. This cannot be undone.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -333,6 +357,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/list-observations', array(
 		'label'        => 'List Knowledge Observations',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'List observations (findings from diagnostics) filtered by status, category, or severity.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -351,6 +377,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/add-observation', array(
 		'label'        => 'Add Knowledge Observation',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Record a finding from a diagnostic session.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -374,6 +402,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/resolve-observation', array(
 		'label'        => 'Resolve Knowledge Observation',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Mark an observation as resolved, deferred, or won\'t fix.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -397,6 +427,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/get-revisions', array(
 		'label'        => 'Get Document Revisions',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Get revision history for a knowledge layer document.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -418,6 +450,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'knowledge/restore-revision', array(
 		'label'        => 'Restore Document Revision',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description'  => 'Restore a document to a previous version. Creates a new revision of the current state before restoring.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -440,6 +474,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/resource-site-identity', array(
 		'label'       => 'Site Identity',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description' => 'Core identity document for this WordPress site — who it is, what it does, infrastructure facts.',
 		'meta'        => array(
 			'mcp'      => array( 'public' => true, 'type' => 'resource' ),
@@ -464,6 +500,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/resource-site-state', array(
 		'label'       => 'Site State',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description' => 'Current operational state of this WordPress site — last session, open items, what shipped.',
 		'meta'        => array(
 			'mcp'      => array( 'public' => true, 'type' => 'resource' ),
@@ -487,6 +525,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'knowledge/boot', array(
 		'label'       => 'Knowledge Layer Boot',
+		'compiled'    => false,
+		'replaces'    => 'admin.php?page=abilities-for-ai-knowledge',
 		'description' => 'AI entry point — call this first when connecting to a site. Returns boot sequence, session history, site identity, ESSENCE, active observations, available agents, and courses. Determines if this is a first visit (bootstrap) or returning visit.',
 		'callback'    => function() {
 			// Mark this session as booted (used for session tracking).

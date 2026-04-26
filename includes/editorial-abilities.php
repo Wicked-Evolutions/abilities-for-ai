@@ -18,6 +18,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'editorial/site-voice', array(
 		'label'       => 'Editorial Voice Fingerprint',
+		'compiled'    => true,
+		'replaces'    => null,
 		'description' => 'Compiled editorial analysis. Extracts voice signatures, opening patterns, headline analysis, series arcs, content depth, and structural patterns from all published content. Reads content server-side — returns intelligence, not raw text.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -44,6 +46,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'editorial/content-samples', array(
 		'label'       => 'Content Samples',
+		'compiled'    => true,
+		'replaces'    => null,
 		'description' => 'Selective deep reading. Returns full plaintext content (block markup stripped) for a curated sample of posts. Use after editorial/site-voice to read representative content.',
 		'input_schema' => array(
 			'type'       => 'object',

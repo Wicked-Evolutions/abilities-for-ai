@@ -18,6 +18,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'rewrite/get-structure', array(
 		'label'       => 'Get Permalink Structure',
+		'compiled'    => false,
+		'replaces'    => 'options-permalink.php',
 		'description' => 'Get the current permalink structure and rewrite configuration.',
 		'output_schema' => abilities_for_ai_schema_item_output( array(
 			'permalink_structure' => array( 'type' => 'string' ),
@@ -43,6 +45,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'rewrite/list-rules', array(
 		'label'       => 'List Rewrite Rules',
+		'compiled'    => false,
+		'replaces'    => 'options-permalink.php',
 		'description' => 'List all active rewrite rules (regex → query pairs).',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -92,6 +96,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'rewrite/flush', array(
 		'label'       => 'Flush Rewrite Rules',
+		'compiled'    => false,
+		'replaces'    => 'options-permalink.php',
 		'description' => 'Flush and regenerate rewrite rules. Safe operation — just rebuilds the rule set.',
 		'input_schema' => array(
 			'type'       => 'object',

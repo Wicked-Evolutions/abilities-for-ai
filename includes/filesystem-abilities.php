@@ -122,6 +122,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'filesystem/list-directory', array(
 		'label'       => 'List Directory',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'List files and folders in a directory within the WordPress installation.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -175,6 +177,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->read( 'filesystem/read-file', array(
 		'label'       => 'Read File',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Read the content of a file within the WordPress installation. Limited to 1MB.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -219,6 +223,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'filesystem/write-file', array(
 		'label'       => 'Write File',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Write or append content to a file within the WordPress installation. Allowed extensions: css, js, json, md, txt, html, php.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -273,6 +279,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'theme/update-asset', array(
 		'label'       => 'Update Theme Asset',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => "Write a file to the active theme's assets/ directory. Restricted to css, js, json, md extensions. Asset type is auto-detected from the filename extension if not provided.",
 		'input_schema' => array(
 			'type'       => 'object',
@@ -342,6 +350,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'filesystem/create-directory', array(
 		'label'       => 'Create Directory',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Create a directory within the WordPress installation. Creates parent directories recursively (like mkdir -p). Permissions set to 0755.',
 		'tier'        => 'free',
 		'input_schema' => array(
@@ -391,6 +401,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'filesystem/write-binary', array(
 		'label'       => 'Write Binary File',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Write base64-encoded binary content to a file within the WordPress installation. Allowed extensions: woff2, woff, ttf, otf, eot, ico, png, jpg, jpeg, webp, gif, svg, avif.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -446,6 +458,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->write( 'filesystem/fetch-remote', array(
 		'label'       => 'Fetch Remote File',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Download a file from a remote URL and save it to a path within the WordPress installation. Supports text extensions (css, js, json, md, txt, html, php) and binary extensions (woff2, woff, ttf, otf, eot, ico, png, jpg, jpeg, webp, gif, svg, avif). Rejects private/internal IPs to prevent SSRF.',
 		'input_schema' => array(
 			'type'       => 'object',
@@ -564,6 +578,8 @@ add_action( 'wp_abilities_api_init', function() {
 
 	$reg->delete( 'filesystem/delete-file', array(
 		'label'       => 'Delete File',
+		'compiled'    => false,
+		'replaces'    => null,
 		'description' => 'Delete a file within the WordPress installation. Allowed extensions: css, js, json, md, txt, html, php.',
 		'input_schema' => array(
 			'type'       => 'object',
