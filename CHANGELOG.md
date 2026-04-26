@@ -2,6 +2,18 @@
 
 All notable changes to Abilities for AI will be documented in this file.
 
+## [1.9.0] - 2026-04-26
+
+### Added
+- **#132 — `kl_boundary` sister table + writer + Activity tab.** New schema table for MCP boundary events (session lifecycle, auth denials, transport errors, rate-limit hits) at `Schema::VERSION = 0.7.0`. New `BoundaryEventLogger` class implements `McpObservabilityHandlerInterface` from `abilities-mcp-adapter` and listens on the new `mcp_adapter_boundary_event` action hook for third-party event sources. Both paths route to the same writer; writer applies a metadata-only allowlist as defense-in-depth on top of adapter-side sanitization.
+- **REST routes:** `abilities-kl/v1/boundary`, `abilities-kl/v1/boundary/stats`, and `abilities-kl/v1/timeline` (UNION-paginated across `kl_activity` + `kl_boundary` by `created_at`). All gated by `manage_options`.
+- **Activity admin tab/toggle** (Vue SPA): `Ability executions / Boundary events / Both` switches the existing Activity view between `kl_activity`, `kl_boundary`, and the merged timeline.
+- **Daily retention cron** `abilities_kl_boundary_retention` — prunes rows older than `kl_boundary_retention_days` filter (default 90 days). Bounded by `idx_created`.
+
+### Notes
+- Graceful degradation in both directions: adapter alone (no abilities-for-ai) → adapter's `NullMcpObservabilityHandler` no-op + action hook with no listener. abilities-for-ai alone (no adapter) → `BoundaryEventLogger` never fires; action listener registered but never invoked.
+- Five v0.1 events written: `boundary.session.init`, `boundary.session.terminated`, `boundary.auth.denied`, `boundary.transport.error`, `boundary.rate_limit_hit` (column reserved; rate-limiter writer ships in DB-4).
+
 ## [1.7.1] - 2026-03-20
 
 ### Fixed

@@ -19,6 +19,7 @@ use WickedEvolutions\AbilitiesForAI\Knowledge\REST\ObservationsController;
 use WickedEvolutions\AbilitiesForAI\Knowledge\REST\TagsController;
 use WickedEvolutions\AbilitiesForAI\Knowledge\REST\DashboardController;
 use WickedEvolutions\AbilitiesForAI\Knowledge\REST\ActivityController;
+use WickedEvolutions\AbilitiesForAI\Knowledge\REST\BoundaryController;
 use WickedEvolutions\AbilitiesForAI\Knowledge\Schema;
 
 add_action( 'rest_api_init', function() {
@@ -35,6 +36,7 @@ add_action( 'rest_api_init', function() {
 		new TagsController(),
 		new DashboardController(),
 		new ActivityController(),
+		new BoundaryController(),
 	);
 
 	foreach ( $controllers as $controller ) {
