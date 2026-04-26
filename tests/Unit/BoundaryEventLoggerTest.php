@@ -39,17 +39,70 @@ class BoundaryEventLoggerTest extends TestCase {
 
 	public function test_event_severity_table_lists_v01_taxonomy() {
 		$expected = array(
+			// Protocol-layer events (Phase 1 brief, DB-1 base).
 			'boundary.session.init',
 			'boundary.session.terminated',
 			'boundary.auth.denied',
 			'boundary.transport.error',
 			'boundary.rate_limit_hit',
+			// Settings audit events (DB-3, synthesis Decision 11).
+			'boundary.master_toggle.changed',
+			'boundary.redaction_keywords.changed',
+			'boundary.ability_exemption.changed',
+			'boundary.confirmation.failed',
 		);
 		$this->assertSame(
 			$expected,
 			array_keys( BoundaryEventLogger::EVENT_SEVERITY ),
-			'v0.1 event taxonomy must be exactly these five — no additions, no drops.'
+			'v0.1 taxonomy: 5 protocol-layer + 4 settings-audit events.'
 		);
+	}
+
+	public function test_settings_audit_events_default_to_info_severity() {
+		$audit_events = array(
+			'boundary.master_toggle.changed',
+			'boundary.redaction_keywords.changed',
+			'boundary.ability_exemption.changed',
+			'boundary.confirmation.failed',
+		);
+		foreach ( $audit_events as $event ) {
+			$this->assertSame(
+				'info',
+				BoundaryEventLogger::EVENT_SEVERITY[ $event ],
+				"Settings audit event {$event} must default to info; the adapter raises individual emissions to warn when the change weakens safety."
+			);
+		}
+	}
+
+	public function test_settings_audit_events_pass_the_allowlist_gate() {
+		// All four DB-3 events must pass the allowlist gate in persist() and
+		// progress to the table-existence check. We assert by intercepting
+		// at $wpdb: a fake that records the SHOW TABLES query confirms the
+		// gate held. Unknown boundary.* events return earlier (covered by
+		// test_record_event_ignores_unknown_boundary_events) and would not
+		// touch $wpdb at all.
+		global $wpdb;
+		$wpdb = new BoundaryEventLoggerTest_FakeWpdb();
+
+		$logger = new BoundaryEventLogger();
+
+		$audit_events = array(
+			'boundary.master_toggle.changed',
+			'boundary.redaction_keywords.changed',
+			'boundary.ability_exemption.changed',
+			'boundary.confirmation.failed',
+		);
+		foreach ( $audit_events as $event ) {
+			$logger->record_event( $event, array( 'user_id' => 1 ) );
+		}
+
+		$this->assertSame(
+			count( $audit_events ),
+			$wpdb->table_check_calls,
+			'Each settings-audit event must reach the table-existence check, proving the allowlist gate passed.'
+		);
+
+		$wpdb = null;
 	}
 
 	public function test_record_event_ignores_non_boundary_events() {
@@ -176,5 +229,29 @@ class BoundaryEventLoggerTest extends TestCase {
 
 		$this->assertNotNull( $json );
 		$this->assertLessThanOrEqual( 4096, strlen( $json ) );
+	}
+}
+
+/**
+ * Minimal $wpdb fake — only the methods/properties the writer touches
+ * before the table-existence check.
+ */
+class BoundaryEventLoggerTest_FakeWpdb {
+	public string $prefix = 'wp_';
+	public int $table_check_calls = 0;
+
+	public function prepare( $query, ...$args ) {
+		return $query;
+	}
+
+	public function get_var( $query ) {
+		// Always report the table as missing so persist() returns cleanly
+		// without hitting insert(). The counter is what the test checks.
+		$this->table_check_calls++;
+		return '';
+	}
+
+	public function insert( ...$args ) {
+		return false; // never reached in this test path.
 	}
 }

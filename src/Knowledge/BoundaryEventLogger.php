@@ -29,14 +29,28 @@ class BoundaryEventLogger {
 	/**
 	 * v0.1 event taxonomy. Events not on this list are ignored.
 	 *
+	 * Default severities apply when the upstream emitter does not pass a
+	 * `severity` tag. The four `boundary.*.changed` and
+	 * `boundary.confirmation.failed` events come from DB-3 (adapter-side
+	 * Safety Settings UI + AI-callable settings abilities); per synthesis
+	 * Decision 11 they belong in the audit trail. They default to `info`
+	 * here; the adapter raises individual emissions to `warn` when the
+	 * change weakens the safety posture (master toggle off, Bucket 2 mod,
+	 * confirmation token rejected).
+	 *
 	 * @var array<string,string> event_name => default_severity
 	 */
 	const EVENT_SEVERITY = array(
-		'boundary.session.init'       => 'info',
-		'boundary.session.terminated' => 'info',
-		'boundary.auth.denied'        => 'warn',
-		'boundary.transport.error'    => 'warn',
-		'boundary.rate_limit_hit'     => 'warn',
+		'boundary.session.init'              => 'info',
+		'boundary.session.terminated'        => 'info',
+		'boundary.auth.denied'               => 'warn',
+		'boundary.transport.error'           => 'warn',
+		'boundary.rate_limit_hit'            => 'warn',
+		// Settings audit (DB-3, synthesis Decision 11).
+		'boundary.master_toggle.changed'     => 'info',
+		'boundary.redaction_keywords.changed' => 'info',
+		'boundary.ability_exemption.changed' => 'info',
+		'boundary.confirmation.failed'       => 'info',
 	);
 
 	/**
