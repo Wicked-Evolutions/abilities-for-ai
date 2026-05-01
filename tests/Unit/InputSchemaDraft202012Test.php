@@ -1,44 +1,47 @@
 <?php
 /**
- * Integration-style validator — every registered ability's `input_schema`
- * is checked against the JSON Schema draft 2020-12 profile enforced by the
- * Anthropic API.
+ * Validates that every registered ability's `input_schema` is acceptable to
+ * the Anthropic API's tool-registration endpoint.
  *
- * Why this test exists
- * --------------------
- * The Anthropic API enforces draft 2020-12 on tool catalogs but applies a
- * stricter profile than the spec itself. A single malformed `input_schema`
- * rejects the entire catalog (HTTP 400), which blocks every WordPress
- * ability for any client backed by the Anthropic API. The fix shapes for
- * individual schemas are well-understood (see issues #134 and #135), but
- * without an automated check, new abilities can re-introduce the same
- * class of bug silently.
+ * The Anthropic-strict profile
+ * ----------------------------
+ * The Anthropic API enforces JSON Schema draft 2020-12 PLUS a stricter
+ * profile we call "Anthropic-strict". Two rules in that profile go beyond
+ * raw draft 2020-12 — both are accepted by the meta-schema but rejected
+ * by Anthropic's tool-catalog endpoint with a 400 invalid_request_error,
+ * which drops the entire catalog and breaks every WordPress ability for
+ * any client backed by the Anthropic API:
  *
- * What this test enforces
+ *   1. No array-form `type` — e.g. `type: ["string", "null"]`. Raw
+ *      2020-12 permits this; Anthropic rejects. Use `oneOf` for unions.
+ *      (See #134.)
+ *   2. No empty `properties: {}` on `type: object`. Raw 2020-12 permits
+ *      this; Anthropic rejects. For no-arg abilities, omit the
+ *      `properties` key entirely (per CLAUDE.md PHP standards).
+ *      (See #135.)
+ *
+ * What this test combines
  * -----------------------
- *   1. Each `input_schema` literal parses successfully under draft
- *      2020-12 via opis/json-schema.
- *   2. No `type` keyword anywhere in the schema is declared as an array
- *      ("type": ["string", "null"]). The base spec allows this; the
- *      Anthropic API does not. (Issue #134.)
- *   3. No object schema declares an empty `properties: {}` when the
- *      cleaner shape "type: object" alone is what's intended for no-arg
- *      tools. (Issue #135.)
+ *   - opis/json-schema parse against the draft 2020-12 meta-schema —
+ *     catches structural malformations the spec itself disallows.
+ *   - Explicit Anthropic-strict lint, layered on top of the opis parse —
+ *     catches the two rules above that the meta-schema alone would miss.
  *
  * Discovery
  * ---------
- * Ability registrations are discovered directly from source — this test
- * doesn't require a WordPress runtime — by extracting the
- * `'input_schema' => array(...)` literal from each
- * `$reg->read|write|delete()` call. Each literal is then evaluated in a
- * controlled sandbox and validated.
+ * Ability registrations are discovered via PHP source-text extraction,
+ * not WP runtime. We pull the `'input_schema' => array(...)` literal
+ * out of each `$reg->read|write|delete()` call and evaluate it in a
+ * controlled sandbox. This lets the gate run in the existing Unit suite
+ * without WP_TESTS_DIR.
  *
  * XFAIL list
  * ----------
- * Some schemas are known to be malformed and tracked by their own
- * issues. The XFAIL list is constant `XFAIL` below, and entries must
- * point to a tracking issue. Entries are removed as their tracking
- * issue lands (e.g. surecart/get-store-info → removed in C.2 / #135).
+ * Some schemas may be known-malformed and tracked by their own issues.
+ * The `XFAIL` constant below carries those exclusions; each entry must
+ * point to a tracking issue and is removed as that issue lands. The
+ * constant exists even when empty so future regressions can be parked
+ * against an issue without re-adding scaffolding.
  *
  * @package Abilities_For_AI\Tests\Unit
  */
@@ -55,14 +58,12 @@ class InputSchemaDraft202012Test extends TestCase {
 	 * to the GitHub issue tracking the fix. Entries are removed once their
 	 * tracking issue lands.
 	 *
+	 * Currently empty — kept as scaffolding so future regressions can be
+	 * parked against a tracking issue without re-introducing the constant.
+	 *
 	 * @var array<string,string>  ability_name => "see issue #X"
 	 */
-	private const XFAIL = array(
-		// Issue #135 — surecart/get-store-info empty `properties: {}` under
-		// JSON Schema draft 2020-12. Fix lands in C.2 of the Stretch-to-Stable
-		// sprint; remove this entry as part of that PR.
-		'surecart/get-store-info' => 'see issue #135',
-	);
+	private const XFAIL = array();
 
 	/**
 	 * Locate every `*-abilities.php` file shipped in the plugin.
