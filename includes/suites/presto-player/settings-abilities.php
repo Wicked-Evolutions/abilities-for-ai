@@ -88,7 +88,17 @@ $reg->write( 'presto-player/update-setting', array(
 				'description' => 'Setting name within the group.',
 			),
 			'value' => array(
-				'type'        => array( 'string', 'number', 'boolean', 'object', 'array' ),
+				// Presto Player settings are heterogeneous; values may legitimately be any
+				// of several JSON shapes. Use oneOf so the schema is valid under JSON
+				// Schema draft 2020-12 — array-form `type` is rejected by the Anthropic
+				// API (see issue #134).
+				'oneOf' => array(
+					array( 'type' => 'string' ),
+					array( 'type' => 'number' ),
+					array( 'type' => 'boolean' ),
+					array( 'type' => 'object' ),
+					array( 'type' => 'array' ),
+				),
 				'description' => 'New value for the setting (string, number, boolean, object, or array).',
 			),
 		),
