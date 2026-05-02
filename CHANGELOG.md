@@ -2,6 +2,23 @@
 
 All notable changes to Abilities for AI will be documented in this file.
 
+## [1.9.1] - 2026-05-02
+
+Stretch-to-Stable post-alpha stabilization release. Two schema-correctness fixes that close a class of Anthropic API tool-registration rejection, plus a cross-cutting CI validator that protects every future ability from the same class of bug. Companion releases: [abilities-mcp-adapter v1.4.4](https://github.com/Wicked-Evolutions/abilities-mcp-adapter/releases/tag/v1.4.4), [abilities-mcp v1.5.1](https://github.com/Wicked-Evolutions/abilities-mcp/releases/tag/v1.5.1).
+
+### Bug — High
+- **#134: `presto-player/update-setting` `value` property used array-form `type`.** The `input_schema` for the SureCart-adjacent `update-setting` ability declared `'type' => array( 'string', 'integer', 'boolean' )` on the `value` property — accepted by raw JSON Schema draft 2020-12 but rejected by the Anthropic API's stricter tool-catalog profile. Submitting a tool catalog containing this schema returned a 400 `invalid_request_error` from `tools/list`, and the entire catalog was dropped — every WordPress ability went dark for any client backed by the Anthropic API. Fixed by switching the `value` property to `oneOf` with single-typed branches per the issue body's preferred shape; the union semantics are preserved without violating Anthropic-strict. (#134, PR #137)
+- **#135: `Registrar::register()` default `input_schema` fallback emitted empty PHP array.** When an ability was registered without an explicit `input_schema` (every no-arg `read` ability uses the default), the fallback `$config['input_schema'] ?? array()` produced `{}`, which the MCP adapter wrapped into `{ "type": "object", "properties": {} }` downstream — the empty-`properties` shape Anthropic-strict rejects. Fixed structurally at `src/Core/Registrar.php` line 168: the fallback now emits `array( 'type' => 'object' )`, matching the canonical CLAUDE.md PHP rule about omitting `properties` for no-arg abilities. Single-line production change retroactively unblocks every no-arg ability across every suite without per-ability overrides; future no-arg abilities inherit the safe default by construction. New `RegistrarTest::test_no_arg_ability_default_schema_omits_properties` asserts the registered shape. (#135, PR #139)
+
+### Test infra
+- **Anthropic-strict draft 2020-12 validator shipped (cross-cutting deliverable from #134).** New `tests/Unit/InputSchemaDraft202012Test.php` walks every registered ability's `input_schema`, parses it with `opis/json-schema` against the draft 2020-12 meta-schema, then layers an explicit Anthropic-strict lint on top — the lint catches the two rules the meta-schema permits but the Anthropic API rejects: array-form `type` (#134) and empty `properties: {}` on `type: object` (#135). Discovery is via PHP source-text extraction so the gate runs in the existing Unit suite without `WP_TESTS_DIR`. The validator is permanent CI infrastructure: every future ability gets the same gate without per-ability work. Class-level docstring documents the profile by name and the raw-2020-12-vs-Anthropic distinction so a future contributor reading the test understands why the lint goes beyond the meta-schema. New `composer.json` require-dev: `opis/json-schema:^2.3`. (PR #137)
+
+### CI
+- **PHP 8.0 dropped from CI matrix; PHP 8.5 added.** PHPUnit 10's transitive dev-dependencies pinned in `composer.lock` require PHP `>=8.1`, so the 8.0 matrix entry had been failing on `main` since PHPUnit was bumped. Matrix is now `['8.1', '8.2', '8.3', '8.5']`. Plugin header `Requires PHP` and `composer.json` `require.php` aligned to `8.1`. Pre-C.1 housekeeping that unblocked Phase C's CI. (PR #138)
+
+### Notes
+- Discovered during this sprint and filed for v1.9.2: **#136** — `cache/flush-page-cache` `output_schema` declares array-form type (same bug class as #134, but in `output_schema` rather than `input_schema`; the validator currently walks `input_schema` only). **#140** — strict validator's source-walk discovery skips abilities whose registration omits `input_schema` entirely, so the Registrar runtime default (now `array( 'type' => 'object' )`) is structurally invisible to the validator; the unit test on the Registrar carries the load-bearing proof for that path. Both are out of scope for v1.9.1 per the sprint plan's scope-boundary rule.
+
 ## [1.9.0] - 2026-04-26
 
 > v1.8.0 was an internal version captured in the BUILD CAPTURE document during the public alpha hardening sprint. Its `kl_activity` operational signal columns and annotation linter shipped via PR #127, merged together with v1.9.0's DB-1 work — there was no discrete v1.8.0 release event. The version jump from 1.7.1 to 1.9.0 reflects that consolidation.
