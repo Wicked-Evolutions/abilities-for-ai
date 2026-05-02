@@ -165,7 +165,7 @@ class Registrar {
 			'label'               => $config['label'],
 			'description'         => $config['description'],
 			'category'            => $config['category'] ?? $this->module,
-			'input_schema'        => $config['input_schema'] ?? array(),
+			'input_schema'        => $config['input_schema'] ?? array( 'type' => 'object' ),
 			'execute_callback'    => $callback,
 			'permission_callback' => function() use ( $capability ) {
 				return current_user_can( $capability );
