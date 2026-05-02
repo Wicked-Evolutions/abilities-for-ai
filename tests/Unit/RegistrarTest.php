@@ -191,6 +191,20 @@ class RegistrarTest extends TestCase {
 		$this->assertArrayNotHasKey( 'output_schema', $abilities['cron/list-events'] );
 	}
 
+	// ── input_schema default fallback (issue #135) ────────────────────────────
+
+	public function test_no_arg_ability_default_schema_omits_properties() {
+		$reg = new Registrar( 'cron', 'manage_options' );
+		$reg->read( 'cron/list-events', array(
+			'label' => 'T', 'description' => 'T', 'callback' => function() {},
+		) );
+
+		$abilities    = wp_get_abilities();
+		$input_schema = $abilities['cron/list-events']['input_schema'];
+		$this->assertSame( 'object', $input_schema['type'] );
+		$this->assertArrayNotHasKey( 'properties', $input_schema );
+	}
+
 	// ── v0.6.0 (issue #123) — compiled + replaces meta ────────────────────────
 
 	public function test_meta_compiled_flag_persisted_as_bool() {
