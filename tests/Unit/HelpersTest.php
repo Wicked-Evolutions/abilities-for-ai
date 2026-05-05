@@ -62,6 +62,33 @@ class HelpersTest extends TestCase {
 		$this->assertSame( 'Test message', $error->get_error_message() );
 	}
 
+	// ── abilities_for_ai_module_prefix_map() ──────────────────────────────────
+
+	public function test_module_prefix_map_matches_defaults_keys() {
+		$map      = abilities_for_ai_module_prefix_map();
+		$defaults = abilities_for_ai_permission_defaults();
+		$this->assertSame(
+			array_keys( $defaults ),
+			array_keys( $map ),
+			'Prefix map keys must match permission_defaults() keys exactly — that is the introspection contract that keeps the sanitizer / counts / enabled-count in sync.'
+		);
+		foreach ( $map as $key => $value ) {
+			$this->assertSame( $key, $value, "Identity convention violated for module {$key}: prefix !== module slug." );
+		}
+	}
+
+	public function test_module_prefix_map_includes_v1_9_2_added_modules() {
+		$map = abilities_for_ai_module_prefix_map();
+		$must_be_present = array( 'knowledge', 'diagnostic', 'editorial', 'astra', 'presto-player', 'spectra', 'surecart' );
+		foreach ( $must_be_present as $module ) {
+			$this->assertArrayHasKey(
+				$module,
+				$map,
+				"Module '{$module}' must be in the prefix map; it was missing in v1.9.1's hardcoded sanitizer (#145)."
+			);
+		}
+	}
+
 	// ── wp_abilities_is_private_ip() ──────────────────────────────────────────
 
 	public function test_private_ip_loopback() {

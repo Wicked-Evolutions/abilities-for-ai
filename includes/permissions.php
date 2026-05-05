@@ -54,15 +54,7 @@ function abilities_for_ai_sanitize_permissions( $input ) {
 	// Per-ability overrides.
 	// Only store overrides that DIFFER from the module-level permission.
 	// This prevents stale overrides when module toggles change.
-	$category_to_module = array(
-		'content' => 'content', 'taxonomies' => 'taxonomies', 'plugins' => 'plugins',
-		'media' => 'media', 'users' => 'users', 'comments' => 'comments',
-		'menus' => 'menus', 'blocks' => 'blocks', 'patterns' => 'patterns',
-		'meta' => 'meta', 'settings' => 'settings', 'site-health' => 'site-health',
-		'cache' => 'cache', 'cron' => 'cron', 'themes' => 'themes',
-		'rest' => 'rest', 'rewrite' => 'rewrite', 'filesystem' => 'filesystem',
-		'revisions' => 'revisions', 'multisite' => 'multisite',
-	);
+	$category_to_module = abilities_for_ai_module_prefix_map();
 	$overrides = array();
 	if ( ! empty( $input['_overrides'] ) && is_array( $input['_overrides'] ) ) {
 		foreach ( $input['_overrides'] as $ability_name => $enabled ) {
@@ -113,29 +105,7 @@ function abilities_for_ai_sanitize_permissions( $input ) {
  * @return array Module counts: [ 'content' => ['read' => 5, 'write' => 2, 'delete' => 1, 'total' => 8], ... ]
  */
 function abilities_for_ai_get_ability_counts() {
-	// Map category slugs to modules for counting.
-	$category_to_module = array(
-		'content'    => 'content',
-		'taxonomies' => 'taxonomies',
-		'plugins'    => 'plugins',
-		'media'      => 'media',
-		'users'      => 'users',
-		'comments'   => 'comments',
-		'menus'      => 'menus',
-		'blocks'     => 'blocks',
-		'patterns'   => 'patterns',
-		'meta'       => 'meta',
-		'settings'   => 'settings',
-		'site-health' => 'site-health',
-		'cache'      => 'cache',
-		'cron'       => 'cron',
-		'themes'     => 'themes',
-		'rest'       => 'rest',
-		'rewrite'    => 'rewrite',
-		'filesystem' => 'filesystem',
-		'revisions'  => 'revisions',
-		'multisite'  => 'multisite',
-	);
+	$category_to_module = abilities_for_ai_module_prefix_map();
 
 	$counts = array();
 	foreach ( array_keys( abilities_for_ai_permission_defaults() ) as $module ) {
@@ -185,26 +155,7 @@ function abilities_for_ai_enabled_count() {
 		return array( 'enabled' => 0, 'total' => 0 );
 	}
 
-	$category_to_module = array(
-		'content'    => 'content',
-		'taxonomies' => 'taxonomies',
-		'plugins'    => 'plugins',
-		'media'      => 'media',
-		'users'      => 'users',
-		'comments'   => 'comments',
-		'menus'      => 'menus',
-		'blocks'     => 'blocks',
-		'patterns'   => 'patterns',
-		'meta'       => 'meta',
-		'settings'   => 'settings',
-		'site-health' => 'site-health',
-		'cache'      => 'cache',
-		'cron'       => 'cron',
-		'themes'     => 'themes',
-		'rest'       => 'rest',
-		'rewrite'    => 'rewrite',
-		'filesystem' => 'filesystem',
-	);
+	$category_to_module = abilities_for_ai_module_prefix_map();
 
 	$abilities = wp_get_abilities();
 	$enabled   = 0;
