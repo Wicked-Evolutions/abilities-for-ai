@@ -87,6 +87,7 @@ class Document {
 	 *     @type string $doc_type Filter by type.
 	 *     @type string $status   Filter by status. Default 'active'.
 	 *     @type string $search   Search title and excerpt.
+	 *     @type int[]  $tag_ids  Filter to documents tagged with ANY of the given tag IDs (OR-semantics).
 	 *     @type int    $per_page Items per page. Default 20.
 	 *     @type int    $page     Page number. Default 1.
 	 * }
@@ -120,6 +121,25 @@ class Document {
 			$where[]  = '(title LIKE %s OR excerpt LIKE %s)';
 			$values[] = $like;
 			$values[] = $like;
+		}
+
+		// Tag filter as a correlated EXISTS subquery against kl_taggables, so
+		// LIMIT/OFFSET applies to the filtered set (and the COUNT(*) reflects
+		// the true total of matching docs). OR-semantics across tag_ids
+		// matches the prior controller-side array_intersect behavior.
+		if ( ! empty( $args['tag_ids'] ) ) {
+			$tag_ids = array_values( array_filter( array_map( 'intval', (array) $args['tag_ids'] ) ) );
+			if ( ! empty( $tag_ids ) ) {
+				$taggable_table = $wpdb->prefix . 'kl_taggables';
+				$placeholders   = implode( ',', array_fill( 0, count( $tag_ids ), '%d' ) );
+				$where[]        = "EXISTS (SELECT 1 FROM {$taggable_table} kl_tg "
+					. "WHERE kl_tg.taggable_id = {$table}.id "
+					. "AND kl_tg.taggable_type = 'document' "
+					. "AND kl_tg.tag_id IN ({$placeholders}))";
+				foreach ( $tag_ids as $tid ) {
+					$values[] = $tid;
+				}
+			}
 		}
 
 		$per_page = min( 100, max( 1, intval( $args['per_page'] ?? 20 ) ) );
