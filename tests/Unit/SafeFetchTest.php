@@ -132,4 +132,49 @@ class SafeFetchTest extends TestCase {
 		$this->assertTrue( $args['reject_unsafe_urls'] );
 		$this->assertSame( 3, $args['redirection'] );
 	}
+
+	// ── DNS-rebind structural proof ──────────────────────────────────────────
+	//
+	// CURLOPT_RESOLVE pinning locks the IP at preflight time. Even if the
+	// authoritative DNS record flips between preflight and the actual TCP
+	// request (the textbook DNS-rebind attack), curl uses the pinned IP — the
+	// rebind cannot pivot the connection. These tests use a fake resolver
+	// (test-only seam on wp_abilities_prepare_safe_fetch) to model the rebind.
+
+	public function test_rebind_pin_uses_first_resolution_only() {
+		// Resolver returns a public IP first, then a private IP on subsequent calls
+		// — modelling a DNS rebind between preflight and the actual fetch.
+		$resolutions = array( '8.8.8.8', '127.0.0.1', '127.0.0.1' );
+		$resolver = function ( $host ) use ( &$resolutions ) {
+			return array_shift( $resolutions ) ?? $host;
+		};
+
+		$prep = wp_abilities_prepare_safe_fetch( 'https://test.example/path', $resolver );
+		$this->assertIsArray( $prep, 'Preflight should accept (first resolution was public).' );
+
+		// The pinned IP must be the first resolution (8.8.8.8), not a subsequent one.
+		$args = ( $prep['filter'] )( array() );
+		$this->assertContains( 'test.example:443:8.8.8.8', $args['curl'][ CURLOPT_RESOLVE ] );
+		$this->assertContains( 'test.example:80:8.8.8.8',  $args['curl'][ CURLOPT_RESOLVE ] );
+
+		// Crucially, the private IPs queued behind the first one were never
+		// consulted — the closure captures the preflight result by value.
+		$this->assertSame(
+			array( '127.0.0.1', '127.0.0.1' ),
+			$resolutions,
+			'Resolver should only have been called once during preflight; rebind targets remain in queue.'
+		);
+	}
+
+	public function test_rebind_caught_when_preflight_resolves_to_private() {
+		// If the rebind happens to land on the preflight call instead of the
+		// fetch call, the private-IP rejection at preflight blocks the request
+		// before any HTTP traffic. Together with the pin-at-preflight test
+		// above, this covers both halves of the rebind defense.
+		$resolver = function ( $host ) { return '127.0.0.1'; };
+
+		$result = wp_abilities_prepare_safe_fetch( 'https://test.example/', $resolver );
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'rest_forbidden', $result->get_error_code() );
+	}
 }

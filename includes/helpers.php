@@ -446,10 +446,15 @@ function abilities_for_ai_is_private_ip( string $ip ): bool {
  * or host resolves into a private/internal range).
  *
  * @internal
- * @param string $url URL to fetch.
+ * @param string         $url      URL to fetch.
+ * @param callable|null  $resolver Optional resolver, signature `function( string $host ): string`.
+ *                                 Defaults to PHP's gethostbyname(). Test-only seam — production
+ *                                 callers (wp_abilities_safe_remote_get / wp_abilities_safe_download_url)
+ *                                 always use the default.
  * @return array{filter: callable, url: string}|WP_Error
  */
-function wp_abilities_prepare_safe_fetch( string $url ) {
+function wp_abilities_prepare_safe_fetch( string $url, ?callable $resolver = null ) {
+    $resolver = $resolver ?? 'gethostbyname';
     $url    = esc_url_raw( $url );
     $parsed = wp_parse_url( $url );
     if ( ! $parsed || ! in_array( $parsed['scheme'] ?? '', array( 'http', 'https' ), true ) ) {
@@ -469,8 +474,8 @@ function wp_abilities_prepare_safe_fetch( string $url ) {
     if ( filter_var( $host_for_ip, FILTER_VALIDATE_IP ) ) {
         $resolved_ip = $host_for_ip;
     } else {
-        $resolved_ip = gethostbyname( $host );
-        if ( $resolved_ip === $host ) {
+        $resolved_ip = $resolver( $host );
+        if ( ! is_string( $resolved_ip ) || $resolved_ip === '' || $resolved_ip === $host ) {
             return new WP_Error( 'ability_invalid_input', 'Could not resolve hostname.' );
         }
     }
