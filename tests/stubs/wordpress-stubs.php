@@ -185,9 +185,15 @@ if ( ! function_exists( 'abilities_for_ai_pro_gate' ) ) {
 	}
 }
 
-// Stub: add_action() / apply_filters() — no-ops for unit tests.
+// Stub: add_action() / add_filter() / remove_filter() / apply_filters() — no-ops for unit tests.
 if ( ! function_exists( 'add_action' ) ) {
 	function add_action( $hook, $callback, $priority = 10, $args = 1 ) {}
+}
+if ( ! function_exists( 'add_filter' ) ) {
+	function add_filter( $hook, $callback, $priority = 10, $args = 1 ) {}
+}
+if ( ! function_exists( 'remove_filter' ) ) {
+	function remove_filter( $hook, $callback, $priority = 10 ) {}
 }
 if ( ! function_exists( 'apply_filters' ) ) {
 	function apply_filters( $hook, $value, ...$args ) {
@@ -197,5 +203,23 @@ if ( ! function_exists( 'apply_filters' ) ) {
 if ( ! function_exists( 'home_url' ) ) {
 	function home_url( $path = '' ) {
 		return 'https://example.com' . $path;
+	}
+}
+
+// Stub: esc_url_raw() — passthrough; preflight only needs the structural parse.
+if ( ! function_exists( 'esc_url_raw' ) ) {
+	function esc_url_raw( $url, $protocols = null ) {
+		return (string) $url;
+	}
+}
+
+// Stub: wp_parse_url() — delegates to PHP's parse_url() with array return shape.
+if ( ! function_exists( 'wp_parse_url' ) ) {
+	function wp_parse_url( $url, $component = -1 ) {
+		if ( $component === -1 ) {
+			$parts = parse_url( $url );
+			return is_array( $parts ) ? $parts : false;
+		}
+		return parse_url( $url, $component );
 	}
 }

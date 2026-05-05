@@ -513,37 +513,17 @@ add_action( 'wp_abilities_api_init', function() {
 				return wp_abilities_error( 'ability_invalid_input', 'File already exists. Set overwrite to true to replace it.' );
 			}
 
-			// --- URL validation ---
-			if ( ! preg_match( '#^https?://#i', $url ) ) {
-				return wp_abilities_error( 'ability_invalid_input', 'URL must start with http:// or https://.' );
-			}
-
-			$parsed = wp_parse_url( $url );
-			$host   = $parsed['host'] ?? '';
-			if ( empty( $host ) ) {
-				return wp_abilities_error( 'ability_invalid_input', 'Could not parse hostname from URL.' );
-			}
-
-			// If host is already an IP literal, use it directly; otherwise resolve DNS.
-			if ( filter_var( $host, FILTER_VALIDATE_IP ) ) {
-				$resolved_ip = $host;
-			} else {
-				$resolved_ip = gethostbyname( $host );
-				if ( $resolved_ip === $host ) {
-					return wp_abilities_error( 'ability_invalid_input', "Could not resolve hostname: {$host}" );
-				}
-			}
-			if ( wp_abilities_is_private_ip( $resolved_ip ) ) {
-				return wp_abilities_error( 'rest_forbidden', "URL resolves to a private/internal IP ({$resolved_ip}). Downloads from private networks are blocked to prevent SSRF." );
-			}
-
-			// --- Download ---
-			$response = wp_remote_get( $url, array(
+			// --- SSRF-guarded download (DNS pinning + reject_unsafe_urls on redirects) ---
+			$response = wp_abilities_safe_remote_get( $url, array(
 				'timeout'   => 30,
 				'sslverify' => true,
 			) );
 
 			if ( is_wp_error( $response ) ) {
+				$code = $response->get_error_code();
+				if ( $code === 'rest_forbidden' || $code === 'ability_invalid_input' ) {
+					return $response;
+				}
 				return wp_abilities_error( 'ability_invalid_input', 'Download failed: ' . $response->get_error_message() );
 			}
 

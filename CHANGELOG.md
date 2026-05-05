@@ -2,6 +2,14 @@
 
 All notable changes to Abilities for AI will be documented in this file.
 
+## [Unreleased]
+
+### Security
+- **#142: `filesystem/fetch-remote` SSRF guard bypassable via redirect / DNS rebinding.** The pre-call private-IP check resolved the host once, then `wp_remote_get()` was invoked with default redirects and no DNS pinning — a public URL could pass preflight and then redirect (or DNS-rebind) into `169.254/16`, `127.0.0.0/8`, or any other internal range, with the response written to disk and read back. Fixed by extracting the existing `media/upload-from-url` DNS-pinning pattern into two shared helpers in `includes/helpers.php` — `wp_abilities_safe_remote_get()` and `wp_abilities_safe_download_url()` — that pin `CURLOPT_RESOLVE` for the resolved IP, force `reject_unsafe_urls => true`, and cap `redirection => 3` for the duration of the request. Both `filesystem/fetch-remote` and `media/upload-from-url` now route through the same code path; the inline copy in `media-abilities.php` is removed. Preflight also fixed to handle bracketed IPv6 hosts (`[::1]`, `[fc00::1]`, `[::ffff:127.0.0.1]`) which previously fell through to the unresolvable-hostname branch instead of the private-IP branch. Sixteen new unit tests in `tests/Unit/SafeFetchTest.php` cover scheme rejection, IPv4 + IPv6 private-literal rejection, and the pinning filter shape; live four-case verification on wickedevolutions covered redirect-to-169.254, redirect-to-127.0.0.1, DNS-rebind to internal IP, and public-to-public redirect still allowed. (#142)
+
+### Maintenance
+- `composer.lock` refreshed against `composer.json`; `composer validate --strict` passes again. (Adjacent cleanup landing alongside #142.)
+
 ## [1.9.1] - 2026-05-02
 
 Stretch-to-Stable post-alpha stabilization release. Two schema-correctness fixes that close a class of Anthropic API tool-registration rejection, plus a cross-cutting CI validator that protects every future ability from the same class of bug. Companion releases: [abilities-mcp-adapter v1.4.4](https://github.com/Wicked-Evolutions/abilities-mcp-adapter/releases/tag/v1.4.4), [abilities-mcp v1.5.1](https://github.com/Wicked-Evolutions/abilities-mcp/releases/tag/v1.5.1).

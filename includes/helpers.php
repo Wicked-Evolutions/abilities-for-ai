@@ -436,3 +436,118 @@ function wp_abilities_is_private_ip( $ip ) {
 function abilities_for_ai_is_private_ip( string $ip ): bool {
     return wp_abilities_is_private_ip( $ip );
 }
+
+/**
+ * Validate a URL and prepare the SSRF-guarded HTTP arg filter used by
+ * wp_abilities_safe_remote_get() and wp_abilities_safe_download_url().
+ *
+ * Returns either a callable to register on `http_request_args` and the validated
+ * URL, or a WP_Error if the URL fails preflight (bad scheme, unresolvable host,
+ * or host resolves into a private/internal range).
+ *
+ * @internal
+ * @param string $url URL to fetch.
+ * @return array{filter: callable, url: string}|WP_Error
+ */
+function wp_abilities_prepare_safe_fetch( string $url ) {
+    $url    = esc_url_raw( $url );
+    $parsed = wp_parse_url( $url );
+    if ( ! $parsed || ! in_array( $parsed['scheme'] ?? '', array( 'http', 'https' ), true ) ) {
+        return new WP_Error( 'ability_invalid_input', 'Only http and https URLs are allowed.' );
+    }
+
+    $host = $parsed['host'] ?? '';
+    if ( $host === '' ) {
+        return new WP_Error( 'ability_invalid_input', 'Could not parse hostname from URL.' );
+    }
+
+    // wp_parse_url() returns bracketed IPv6 hosts ([::1]); strip for IP validation.
+    $host_for_ip = ( $host[0] === '[' && substr( $host, -1 ) === ']' )
+        ? substr( $host, 1, -1 )
+        : $host;
+
+    if ( filter_var( $host_for_ip, FILTER_VALIDATE_IP ) ) {
+        $resolved_ip = $host_for_ip;
+    } else {
+        $resolved_ip = gethostbyname( $host );
+        if ( $resolved_ip === $host ) {
+            return new WP_Error( 'ability_invalid_input', 'Could not resolve hostname.' );
+        }
+    }
+
+    if ( wp_abilities_is_private_ip( $resolved_ip ) ) {
+        return new WP_Error(
+            'rest_forbidden',
+            'URL resolves to a private/internal IP address. Requests to private networks are blocked to prevent SSRF.'
+        );
+    }
+
+    $pin_dns = function ( $args ) use ( $host, $resolved_ip, &$pin_dns ) {
+        remove_filter( 'http_request_args', $pin_dns, 1 );
+        if ( ! isset( $args['curl'] ) || ! is_array( $args['curl'] ) ) {
+            $args['curl'] = array();
+        }
+        $args['curl'][ CURLOPT_RESOLVE ] = array(
+            "{$host}:443:{$resolved_ip}",
+            "{$host}:80:{$resolved_ip}",
+        );
+        $args['reject_unsafe_urls'] = true;
+        if ( ! isset( $args['redirection'] ) ) {
+            $args['redirection'] = 3;
+        }
+        return $args;
+    };
+
+    return array( 'filter' => $pin_dns, 'url' => $url );
+}
+
+/**
+ * SSRF-guarded wp_remote_get().
+ *
+ * Resolves the host once, rejects private/internal IPs, then pins the resolved
+ * IP (CURLOPT_RESOLVE) and forces reject_unsafe_urls for the duration of the
+ * request — so redirects and DNS-rebind attempts cannot pivot into the internal
+ * network.
+ *
+ * @param string $url  Remote URL (http or https).
+ * @param array  $args Extra args forwarded to wp_remote_get().
+ * @return array|WP_Error wp_remote_get() response or WP_Error.
+ */
+function wp_abilities_safe_remote_get( string $url, array $args = array() ) {
+    $prep = wp_abilities_prepare_safe_fetch( $url );
+    if ( is_wp_error( $prep ) ) {
+        return $prep;
+    }
+
+    add_filter( 'http_request_args', $prep['filter'], 1 );
+    $response = wp_remote_get( $prep['url'], $args );
+    remove_filter( 'http_request_args', $prep['filter'], 1 );
+
+    return $response;
+}
+
+/**
+ * SSRF-guarded download_url().
+ *
+ * Same guard semantics as wp_abilities_safe_remote_get(). Returns a tmp file
+ * path on success — caller is responsible for unlinking it.
+ *
+ * @param string $url Remote URL (http or https).
+ * @return string|WP_Error Tmp file path or WP_Error.
+ */
+function wp_abilities_safe_download_url( string $url ) {
+    if ( ! function_exists( 'download_url' ) ) {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+    }
+
+    $prep = wp_abilities_prepare_safe_fetch( $url );
+    if ( is_wp_error( $prep ) ) {
+        return $prep;
+    }
+
+    add_filter( 'http_request_args', $prep['filter'], 1 );
+    $tmp = download_url( $prep['url'] );
+    remove_filter( 'http_request_args', $prep['filter'], 1 );
+
+    return $tmp;
+}
