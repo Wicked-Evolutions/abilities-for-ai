@@ -120,7 +120,7 @@ class SafeFetchTest extends TestCase {
 		$this->assertSame( 'https://8.8.8.8/', $result['url'] );
 	}
 
-	public function test_filter_pins_curlopt_resolve() {
+	public function test_filter_pins_curlopt_resolve_and_disables_native_redirects() {
 		$result = wp_abilities_prepare_safe_fetch( 'https://8.8.8.8/' );
 		$this->assertIsArray( $result );
 
@@ -130,7 +130,9 @@ class SafeFetchTest extends TestCase {
 		$this->assertContains( '8.8.8.8:443:8.8.8.8', $args['curl'][ CURLOPT_RESOLVE ] );
 		$this->assertContains( '8.8.8.8:80:8.8.8.8', $args['curl'][ CURLOPT_RESOLVE ] );
 		$this->assertTrue( $args['reject_unsafe_urls'] );
-		$this->assertSame( 3, $args['redirection'] );
+		// Native redirects must be off — the helper does manual per-hop validation.
+		$this->assertSame( 0, $args['redirection'] );
+		$this->assertFalse( $args['curl'][ CURLOPT_FOLLOWLOCATION ] );
 	}
 
 	// ── DNS-rebind structural proof ──────────────────────────────────────────

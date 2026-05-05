@@ -496,10 +496,12 @@ function wp_abilities_prepare_safe_fetch( string $url, ?callable $resolver = nul
             "{$host}:443:{$resolved_ip}",
             "{$host}:80:{$resolved_ip}",
         );
-        $args['reject_unsafe_urls'] = true;
-        if ( ! isset( $args['redirection'] ) ) {
-            $args['redirection'] = 3;
-        }
+        // We follow redirects manually in wp_abilities_safe_remote_get(), so
+        // disable curl's native CURLOPT_FOLLOWLOCATION as well as WP's outer
+        // redirection counter — both are set to 0 here, defensively.
+        $args['curl'][ CURLOPT_FOLLOWLOCATION ] = false;
+        $args['reject_unsafe_urls']             = true;
+        $args['redirection']                    = 0;
         return $args;
     };
 
@@ -507,52 +509,131 @@ function wp_abilities_prepare_safe_fetch( string $url, ?callable $resolver = nul
 }
 
 /**
- * SSRF-guarded wp_remote_get().
+ * Default maximum redirect hops for SSRF-guarded fetches.
  *
- * Resolves the host once, rejects private/internal IPs, then pins the resolved
- * IP (CURLOPT_RESOLVE) and forces reject_unsafe_urls for the duration of the
- * request — so redirects and DNS-rebind attempts cannot pivot into the internal
- * network.
+ * Mirrors the value used by WP core's wp_safe_remote_get() default redirect
+ * count, which is 5. Generous enough for legitimate URL-shortener and
+ * canonical-domain rewrite chains; tight enough to bound redirect-loop and
+ * resource-exhaustion abuse.
+ */
+const WP_ABILITIES_SAFE_FETCH_MAX_REDIRECTS = 5;
+
+/**
+ * SSRF-guarded wp_remote_get() with manual per-hop validation.
+ *
+ * On every hop (initial request and each Location redirect), runs
+ * wp_abilities_prepare_safe_fetch() — re-resolving the host, rejecting
+ * private/internal IPs (including 169.254/16 link-local and IPv6 ranges that
+ * WP core's reject_unsafe_urls misses), and re-pinning CURLOPT_RESOLVE for the
+ * resolved IP. Bails with `http_request_failed` if hops exceed
+ * WP_ABILITIES_SAFE_FETCH_MAX_REDIRECTS or if a Location is missing/relative-
+ * but-not-absolute-path.
  *
  * @param string $url  Remote URL (http or https).
- * @param array  $args Extra args forwarded to wp_remote_get().
+ * @param array  $args Extra args forwarded to wp_remote_get(). 'redirection' is
+ *                     overridden to 0 internally; the helper uses
+ *                     WP_ABILITIES_SAFE_FETCH_MAX_REDIRECTS for the cap.
  * @return array|WP_Error wp_remote_get() response or WP_Error.
  */
 function wp_abilities_safe_remote_get( string $url, array $args = array() ) {
-    $prep = wp_abilities_prepare_safe_fetch( $url );
-    if ( is_wp_error( $prep ) ) {
-        return $prep;
+    $hop_limit = WP_ABILITIES_SAFE_FETCH_MAX_REDIRECTS;
+    unset( $args['redirection'] );
+
+    for ( $hop = 0; $hop <= $hop_limit; $hop++ ) {
+        $prep = wp_abilities_prepare_safe_fetch( $url );
+        if ( is_wp_error( $prep ) ) {
+            return $prep;
+        }
+
+        add_filter( 'http_request_args', $prep['filter'], 1 );
+        $response = wp_remote_get( $prep['url'], $args );
+        remove_filter( 'http_request_args', $prep['filter'], 1 );
+
+        if ( is_wp_error( $response ) ) {
+            return $response;
+        }
+
+        $code = (int) wp_remote_retrieve_response_code( $response );
+        if ( $code < 300 || $code >= 400 ) {
+            return $response;
+        }
+
+        $location = wp_remote_retrieve_header( $response, 'location' );
+        if ( ! is_string( $location ) || $location === '' ) {
+            // 3xx without a Location header — return as-is for the caller to handle.
+            return $response;
+        }
+
+        // Resolve relative redirects against the prior URL. We only allow
+        // absolute-path relatives (`Location: /foo`) — anything else (e.g.
+        // `./foo`, bare `foo`) is rejected to avoid base-URL ambiguity bugs.
+        if ( ! preg_match( '#^https?://#i', $location ) ) {
+            if ( $location[0] !== '/' || ( isset( $location[1] ) && $location[1] === '/' ) ) {
+                return new WP_Error(
+                    'http_request_failed',
+                    'Redirect target is not an absolute URL or absolute path; refusing to follow.'
+                );
+            }
+            $base = wp_parse_url( $prep['url'] );
+            if ( ! is_array( $base ) || empty( $base['scheme'] ) || empty( $base['host'] ) ) {
+                return new WP_Error( 'http_request_failed', 'Could not resolve relative redirect.' );
+            }
+            $port_part = isset( $base['port'] ) ? ':' . $base['port'] : '';
+            $location  = $base['scheme'] . '://' . $base['host'] . $port_part . $location;
+        }
+
+        $url = $location;
     }
 
-    add_filter( 'http_request_args', $prep['filter'], 1 );
-    $response = wp_remote_get( $prep['url'], $args );
-    remove_filter( 'http_request_args', $prep['filter'], 1 );
-
-    return $response;
+    return new WP_Error(
+        'http_request_failed',
+        sprintf( 'Too many redirects (limit %d).', $hop_limit )
+    );
 }
 
 /**
- * SSRF-guarded download_url().
+ * SSRF-guarded equivalent of download_url().
  *
- * Same guard semantics as wp_abilities_safe_remote_get(). Returns a tmp file
- * path on success — caller is responsible for unlinking it.
+ * Routes through wp_abilities_safe_remote_get() so every redirect hop receives
+ * the same private-IP rejection + DNS pinning the initial request gets.
+ * Returns a tmp file path on success — caller is responsible for unlinking it.
  *
  * @param string $url Remote URL (http or https).
  * @return string|WP_Error Tmp file path or WP_Error.
  */
 function wp_abilities_safe_download_url( string $url ) {
-    if ( ! function_exists( 'download_url' ) ) {
+    if ( ! function_exists( 'wp_tempnam' ) ) {
         require_once ABSPATH . 'wp-admin/includes/file.php';
     }
 
-    $prep = wp_abilities_prepare_safe_fetch( $url );
-    if ( is_wp_error( $prep ) ) {
-        return $prep;
+    $response = wp_abilities_safe_remote_get( $url, array(
+        'timeout'   => 300,
+        'sslverify' => true,
+    ) );
+
+    if ( is_wp_error( $response ) ) {
+        return $response;
     }
 
-    add_filter( 'http_request_args', $prep['filter'], 1 );
-    $tmp = download_url( $prep['url'] );
-    remove_filter( 'http_request_args', $prep['filter'], 1 );
+    $code = (int) wp_remote_retrieve_response_code( $response );
+    if ( $code < 200 || $code >= 300 ) {
+        return new WP_Error(
+            'http_' . $code,
+            'HTTP error ' . $code . ': ' . wp_remote_retrieve_response_message( $response )
+        );
+    }
 
-    return $tmp;
+    $tmpfname = wp_tempnam( $url );
+    if ( ! $tmpfname ) {
+        return new WP_Error( 'http_no_file', 'Could not create temporary file for download.' );
+    }
+
+    $body    = wp_remote_retrieve_body( $response );
+    $written = @file_put_contents( $tmpfname, $body );
+    if ( $written === false ) {
+        @unlink( $tmpfname );
+        return new WP_Error( 'http_write_failed', 'Could not write download to temporary file.' );
+    }
+
+    return $tmpfname;
 }
