@@ -390,11 +390,6 @@ class DocumentsController extends \WP_REST_Controller {
 			'post_type'    => 'post',
 		);
 
-		// Author.
-		if ( ! empty( $body['post_author'] ) ) {
-			$post_data['post_author'] = (int) $body['post_author'];
-		}
-
 		// Category: use provided or auto-map from doc_type.
 		$category_ids = array();
 		if ( ! empty( $body['post_category'] ) ) {
@@ -411,6 +406,36 @@ class DocumentsController extends \WP_REST_Controller {
 
 		// Determine if create or update.
 		$is_update = ! empty( $doc->wp_post_id ) && get_post( $doc->wp_post_id );
+
+		// Per-post edit check on update path: the route's permission_callback
+		// only enforces publish_posts, but the linked WP post may be owned by a
+		// different user and require edit_others_posts to modify.
+		if ( $is_update && ! current_user_can( 'edit_post', $doc->wp_post_id ) ) {
+			return new \WP_Error(
+				'rest_forbidden',
+				__( 'You cannot edit the WordPress post linked to this document.', 'abilities-for-ai' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		// post_author handling: assigning a post to a different author requires
+		// edit_others_posts on either path. Same-author assignment (assigning to
+		// yourself) is the legitimate publish-my-own-doc path and stays
+		// unrestricted. On the update path, the edit_post check above has
+		// already gated access to the linked post.
+		if ( ! empty( $body['post_author'] ) ) {
+			$requested_author = (int) $body['post_author'];
+			if ( $requested_author > 0 && $requested_author !== get_current_user_id() ) {
+				if ( ! current_user_can( 'edit_others_posts' ) ) {
+					return new \WP_Error(
+						'rest_forbidden',
+						__( 'You cannot assign a post to another author.', 'abilities-for-ai' ),
+						array( 'status' => 403 )
+					);
+				}
+			}
+			$post_data['post_author'] = $requested_author;
+		}
 
 		if ( $is_update ) {
 			$post_data['ID'] = $doc->wp_post_id;
