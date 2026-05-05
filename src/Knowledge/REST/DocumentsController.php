@@ -135,22 +135,19 @@ class DocumentsController extends \WP_REST_Controller {
 			$args['search'] = $request->get_param( 'search' );
 		}
 
-		$result = Document::list_documents( $args );
-
-		// Enrich items with tags if requested or by default.
-		foreach ( $result['items'] as &$item ) {
-			$item->tags = Taggable::getFor( (int) $item->id, 'document' );
-		}
-
-		// Filter by tags if requested.
+		// Tag filter pushed into Document::list_documents so LIMIT/OFFSET applies
+		// to the filtered set (was previously a post-pagination filter, which
+		// dropped tagged docs on later pages and returned a page-local total).
 		$tag_filter = $request->get_param( 'tags' );
 		if ( ! empty( $tag_filter ) ) {
-			$tag_ids = array_map( 'intval', explode( ',', $tag_filter ) );
-			$result['items'] = array_values( array_filter( $result['items'], function( $item ) use ( $tag_ids ) {
-				$item_tag_ids = array_map( function( $t ) { return (int) $t->id; }, $item->tags );
-				return ! empty( array_intersect( $tag_ids, $item_tag_ids ) );
-			} ) );
-			$result['total'] = count( $result['items'] );
+			$args['tag_ids'] = array_filter( array_map( 'intval', explode( ',', $tag_filter ) ) );
+		}
+
+		$result = Document::list_documents( $args );
+
+		// Enrich items with tags.
+		foreach ( $result['items'] as &$item ) {
+			$item->tags = Taggable::getFor( (int) $item->id, 'document' );
 		}
 
 		$response = rest_ensure_response( $result['items'] );
