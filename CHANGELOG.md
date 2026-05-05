@@ -2,7 +2,7 @@
 
 All notable changes to Abilities for AI will be documented in this file.
 
-## [Unreleased]
+## [1.9.2] - 2026-05-05
 
 ### Fixed
 - **#145: Per-ability override sanitizer + ability counters silently dropped 7+ module prefixes.** `includes/permissions.php` carried three independently-maintained `$category_to_module` arrays — the sanitizer at lines 57-65, the counter at 117-138, and the enabled-count summary at 188-207 — all hardcoded copies of `array_keys( abilities_for_ai_permission_defaults() )`. They had drifted: sanitizer + counter were missing 7 (knowledge, diagnostic, editorial, astra, presto-player, spectra, surecart), enabled-count was missing 9 (those plus `revisions` and `multisite`). Net effect: per-ability override checkboxes for those modules' abilities silently vanished on save and execution fell back to module-level permissions. Fixed structurally with a single introspection helper `abilities_for_ai_module_prefix_map()` (in `includes/helpers.php`) that derives the prefix→module identity from `permission_defaults()`. All three call sites in `permissions.php` now use the helper — adding a new module to defaults automatically propagates to sanitizer + counter + summary, eliminating the drift bug class. Three unit tests lock the introspection contract + per-module override persistence + unknown-prefix rejection. (#145)
