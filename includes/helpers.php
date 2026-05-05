@@ -246,6 +246,27 @@ function abilities_for_ai_permission_defaults() {
 }
 
 /**
+ * Map of valid ability-name prefixes to their module slug.
+ *
+ * Built from registered module defaults — adding a module to
+ * abilities_for_ai_permission_defaults() automatically registers its prefix
+ * for the sanitizer, ability counter, and enabled-count summary in
+ * permissions.php. Eliminates the prior bug class where three hardcoded
+ * prefix→module maps in that file drifted independently from defaults().
+ *
+ * Convention: prefix === module slug. The first segment of every ability
+ * name (the part before `/`) matches the module identifier under which the
+ * ability's permissions are stored. If a future module breaks this 1:1
+ * convention, this helper is the place to encode the explicit mapping.
+ *
+ * @return array Identity map of module slugs (`['content' => 'content', ...]`).
+ */
+function abilities_for_ai_module_prefix_map() {
+	$modules = array_keys( abilities_for_ai_permission_defaults() );
+	return array_combine( $modules, $modules );
+}
+
+/**
  * Human-readable labels for each module.
  *
  * @return array Module slug => label.
