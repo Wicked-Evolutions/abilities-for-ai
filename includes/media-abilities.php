@@ -227,9 +227,6 @@ add_action( 'wp_abilities_api_init', function() {
 		) ),
 		'annotations' => array( 'readonly' => false, 'destructive' => false, 'idempotent' => false ),
 		'callback' => function( $input ) {
-			if ( ! function_exists( 'download_url' ) ) {
-				require_once ABSPATH . 'wp-admin/includes/file.php';
-			}
 			if ( ! function_exists( 'media_handle_sideload' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/media.php';
 			}
@@ -237,39 +234,8 @@ add_action( 'wp_abilities_api_init', function() {
 				require_once ABSPATH . 'wp-admin/includes/image.php';
 			}
 
-			$url    = esc_url_raw( $input['url'] );
-			$parsed = wp_parse_url( $url );
-			if ( ! $parsed || ! in_array( $parsed['scheme'] ?? '', array( 'http', 'https' ), true ) ) {
-				return new WP_Error( 'ability_invalid_input', 'Only http and https URLs are allowed.' );
-			}
-
-			$host        = $parsed['host'] ?? '';
-			$resolved_ip = gethostbyname( $host );
-			if ( $resolved_ip === $host ) {
-				return new WP_Error( 'ability_invalid_input', 'Could not resolve hostname.' );
-			}
-			if ( abilities_for_ai_is_private_ip( $resolved_ip ) ) {
-				return new WP_Error( 'ability_invalid_input', 'URLs pointing to private/internal IP addresses are not allowed.' );
-			}
-
-			$pin_dns = function( $args ) use ( $host, $resolved_ip, &$pin_dns ) {
-				remove_filter( 'http_request_args', $pin_dns, 1 );
-				if ( ! isset( $args['curl'] ) || ! is_array( $args['curl'] ) ) {
-					$args['curl'] = array();
-				}
-				$args['curl'][ CURLOPT_RESOLVE ] = array(
-					"{$host}:443:{$resolved_ip}",
-					"{$host}:80:{$resolved_ip}",
-				);
-				$args['reject_unsafe_urls'] = true;
-				$args['redirection']        = 3;
-				return $args;
-			};
-			add_filter( 'http_request_args', $pin_dns, 1 );
-
-			$tmp = download_url( $url );
-			remove_filter( 'http_request_args', $pin_dns, 1 );
-
+			$url = esc_url_raw( $input['url'] );
+			$tmp = wp_abilities_safe_download_url( $url );
 			if ( is_wp_error( $tmp ) ) {
 				return $tmp;
 			}
