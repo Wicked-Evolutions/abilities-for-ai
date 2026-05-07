@@ -2,6 +2,11 @@
 
 All notable changes to Abilities for AI will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- **#153: Permissions UI save could disable unrelated modules and OOM on multisite admin.** The explorer form posted to `options.php`, and `abilities_for_ai_sanitize_permissions()` rebuilt the entire option from form input — so any module not visible in the current filter was treated as unchecked and silently disabled. On `wickedevolutions` a save intended to enable `cron.delete` disabled `settings.read`, `filesystem.read`, `plugins.read`, `users.read`, `diagnostic.read`, and `content.read`. The same save surface also rendered every ability's full `input_schema` / `output_schema` inline, which triggered a 512 MB allocation OOM mid-save. Replaced with a plugin-owned admin-post handler (`admin_post_abilities_for_ai_save_permissions` + the `network_admin_post_*` mirror) that loads the existing option and patches only the modules submitted in this save — untouched modules remain byte-identical. Per-ability overrides are scoped the same way: an override is only dropped/replaced if its owning module is in the submitted set. Heavyweight schema bodies are no longer pre-rendered as part of the permissions surface; schemas remain available via `mcp-adapter-get-ability-info` and `GET /wp-json/wp-abilities/v1/abilities/{name}`. Capability + nonce checks preserve the prior authorization semantics (`manage_options` for site admin, `manage_network_options` for network admin). 11 regression tests in `tests/Unit/PermissionsPatchTest.php` lock the four-phase verification matrix (positive / negative-control / idempotent / behavior-reversal) plus override-scoping and option-shape preservation, using a captured `wickedevolutions` live fixture. (#153)
+
 ## [1.9.2] - 2026-05-05
 
 ### Fixed

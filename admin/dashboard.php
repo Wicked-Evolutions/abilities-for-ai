@@ -172,18 +172,21 @@ class Abilities_For_AI_Dashboard {
 			$source   = self::get_source( $category );
 			$readonly = ! empty( $meta['annotations']['readonly'] );
 
+			// Schema bodies are intentionally NOT collected here. Pre-rendering
+			// `input_schema` / `output_schema` for every registered ability as
+			// part of the permissions save surface caused 500MB+ allocation on
+			// large registries (issue #153). Schemas remain available via the
+			// discovery / introspection abilities; the explorer surface only
+			// needs the metadata it actually uses to render rows.
 			$result[ $name ] = array(
-				'label'         => $ability->get_label(),
-				'description'   => $ability->get_description(),
-				'category'      => $category,
-				'source'        => $source,
-				'readonly'      => $readonly,
-				'destructive'   => ! empty( $meta['annotations']['destructive'] ),
-				'idempotent'    => ! empty( $meta['annotations']['idempotent'] ),
-				'tier'          => ! empty( $meta['tier'] ) ? $meta['tier'] : 'free',
-				'input_schema'  => $ability->get_input_schema(),
-				'output_schema' => $ability->get_output_schema(),
-				'meta'          => $meta,
+				'label'       => $ability->get_label(),
+				'description' => $ability->get_description(),
+				'category'    => $category,
+				'source'      => $source,
+				'readonly'    => $readonly,
+				'destructive' => ! empty( $meta['annotations']['destructive'] ),
+				'idempotent'  => ! empty( $meta['annotations']['idempotent'] ),
+				'tier'        => ! empty( $meta['tier'] ) ? $meta['tier'] : 'free',
 			);
 		}
 
@@ -411,8 +414,15 @@ class Abilities_For_AI_Dashboard {
 		$module_labels = abilities_for_ai_module_labels();
 		$counts        = abilities_for_ai_get_ability_counts();
 		?>
-		<form method="post" action="options.php" id="wp-abilities-perm-form">
-			<?php settings_fields( 'abilities_for_ai_permissions_group' ); ?>
+		<?php
+		$is_network_admin = function_exists( 'is_network_admin' ) && is_network_admin();
+		$form_action      = $is_network_admin
+			? network_admin_url( 'admin-post.php' )
+			: admin_url( 'admin-post.php' );
+		?>
+		<form method="post" action="<?php echo esc_url( $form_action ); ?>" id="wp-abilities-perm-form">
+			<input type="hidden" name="action" value="<?php echo esc_attr( ABILITIES_FOR_AI_PERMISSIONS_ACTION ); ?>">
+			<?php wp_nonce_field( ABILITIES_FOR_AI_PERMISSIONS_ACTION ); ?>
 
 			<div class="wp-abilities-list">
 				<p class="abilities-count">
@@ -591,19 +601,12 @@ class Abilities_For_AI_Dashboard {
 											</p>
 											<p><?php echo esc_html( $ability['description'] ); ?></p>
 
-											<div class="schema-columns">
-												<div class="schema-column">
-													<h4>Input Schema</h4>
-													<pre><?php echo esc_html( wp_json_encode( $ability['input_schema'] ?? array(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></pre>
-												</div>
-												<div class="schema-column">
-													<h4>Output Schema</h4>
-													<pre><?php echo esc_html( wp_json_encode( $ability['output_schema'] ?? array(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></pre>
-												</div>
-											</div>
-
 											<p class="endpoint-hint">
 												<strong>MCP Tool:</strong> <code><?php echo esc_html( 'mcp__wordpress__' . str_replace( '/', '-', $name ) ); ?></code>
+												&nbsp;·&nbsp;
+												<span class="schema-hint">
+													Schemas are available via <code>mcp-adapter-get-ability-info</code> or <code>GET /wp-json/wp-abilities/v1/abilities/<?php echo esc_html( $name ); ?></code>.
+												</span>
 											</p>
 										</div>
 									</td>
