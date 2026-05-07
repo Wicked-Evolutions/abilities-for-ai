@@ -1,9 +1,25 @@
 <?php
 /**
- * Permission Toggles — Settings API Registration
+ * Permission Toggles — Admin-Post Patch Handler
  *
- * Handles WordPress Settings API registration, sanitization, and
- * ability count calculations for the permission toggles system.
+ * The permissions UI no longer round-trips through the Settings API. The
+ * legacy `options.php` flow rebuilt the entire permissions option from form
+ * input, which silently disabled any module that wasn't visible in the
+ * current filter (and bombed memory rendering per-ability schemas as part of
+ * the save surface). See issue #153.
+ *
+ * The new flow:
+ *   - Form posts to admin-post.php with a plugin-owned action.
+ *   - Handler patches the existing option intentionally — only modules
+ *     submitted in this save are touched. Untouched modules remain
+ *     byte-identical to whatever was previously stored.
+ *   - Per-ability overrides are scoped to the modules being saved, so a
+ *     filtered save cannot drop overrides for unrelated modules.
+ *
+ * Nonce + capability checks preserve the prior authorization semantics:
+ * `manage_options` for site admin, `manage_network_options` for network
+ * admin. The action is registered on both `admin_post_*` and
+ * `network_admin_post_*` so the same handler serves both surfaces.
  *
  * Copyright (C) 2026 Influencentricity | Wicked Evolutions
  * License: GPL-2.0-or-later
@@ -14,86 +30,158 @@
 
 defined( 'ABSPATH' ) || exit;
 
+const ABILITIES_FOR_AI_PERMISSIONS_OPTION = 'abilities_for_ai_permissions';
+const ABILITIES_FOR_AI_PERMISSIONS_ACTION = 'abilities_for_ai_save_permissions';
+
+add_action( 'admin_post_' . ABILITIES_FOR_AI_PERMISSIONS_ACTION, 'abilities_for_ai_handle_permissions_save' );
+add_action( 'network_admin_post_' . ABILITIES_FOR_AI_PERMISSIONS_ACTION, 'abilities_for_ai_handle_permissions_save' );
+
 /**
- * Register the permissions setting with WordPress Settings API.
+ * Handle the permissions form submission.
+ *
+ * Validates nonce + capability, then applies an intentional patch to the
+ * stored option so unrelated module permissions are never wiped by a
+ * filtered save.
  */
-add_action( 'admin_init', function() {
-	register_setting(
-		'abilities_for_ai_permissions_group',
-		'abilities_for_ai_permissions',
+function abilities_for_ai_handle_permissions_save() {
+	$is_network = function_exists( 'is_network_admin' ) && is_network_admin();
+	$capability = $is_network ? 'manage_network_options' : 'manage_options';
+
+	if ( ! current_user_can( $capability ) ) {
+		wp_die(
+			esc_html__( 'You do not have permission to save these settings.', 'abilities-for-ai' ),
+			'',
+			array( 'response' => 403 )
+		);
+	}
+
+	check_admin_referer( ABILITIES_FOR_AI_PERMISSIONS_ACTION );
+
+	$raw_input = array();
+	if ( isset( $_POST['abilities_for_ai_permissions'] ) && is_array( $_POST['abilities_for_ai_permissions'] ) ) {
+		$raw_input = wp_unslash( $_POST['abilities_for_ai_permissions'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized in patch function.
+	}
+
+	$defaults = abilities_for_ai_permission_defaults();
+	$existing = get_option( ABILITIES_FOR_AI_PERMISSIONS_OPTION, $defaults );
+	if ( ! is_array( $existing ) ) {
+		$existing = $defaults;
+	}
+
+	$patched = abilities_for_ai_patch_permissions( $existing, $raw_input );
+
+	update_option( ABILITIES_FOR_AI_PERMISSIONS_OPTION, $patched, true );
+
+	$redirect_base = $is_network ? network_admin_url( 'admin.php' ) : admin_url( 'admin.php' );
+	$redirect_url  = add_query_arg(
 		array(
-			'type'              => 'object',
-			'sanitize_callback' => 'abilities_for_ai_sanitize_permissions',
-			'default'           => abilities_for_ai_permission_defaults(),
-		)
+			'page'             => 'abilities-for-ai',
+			'tab'              => 'explorer',
+			'settings-updated' => 'true',
+		),
+		$redirect_base
 	);
-});
+
+	wp_safe_redirect( $redirect_url );
+	exit;
+}
 
 /**
- * Sanitize the permissions array on save.
+ * Apply an intentional patch to the permissions option.
  *
- * Ensures only valid modules and operation types are stored,
- * and all values are strict booleans.
+ * Only modules that appear in `$input` are rewritten. Modules absent from
+ * `$input` are preserved verbatim from `$existing`. Per-ability overrides
+ * are scoped the same way: an override is only dropped/replaced if its
+ * owning module is in the submitted set.
  *
- * @param mixed $input Raw POST input.
- * @return array Sanitized permissions.
+ * Pure function — no globals, no option reads. Suitable for unit testing
+ * against captured live fixtures.
+ *
+ * @param array $existing Previously stored option (or defaults on first save).
+ * @param array $input    Raw `$_POST['abilities_for_ai_permissions']` payload.
+ * @return array Patched option ready for `update_option()`.
  */
-function abilities_for_ai_sanitize_permissions( $input ) {
-	$defaults  = abilities_for_ai_permission_defaults();
-	$sanitized = array();
+function abilities_for_ai_patch_permissions( array $existing, array $input ) {
+	$defaults = abilities_for_ai_permission_defaults();
+	$patched  = $existing;
 
-	// Module-level permissions.
+	// Identify which modules the operator submitted (visible in this save).
+	$submitted_modules = array();
 	foreach ( $defaults as $module => $ops ) {
-		$sanitized[ $module ] = array();
-		foreach ( $ops as $op => $default_val ) {
-			// Checkbox: present in POST = checked (true), absent = unchecked (false).
-			$sanitized[ $module ][ $op ] = ! empty( $input[ $module ][ $op ] );
+		if ( isset( $input[ $module ] ) && is_array( $input[ $module ] ) ) {
+			$submitted_modules[ $module ] = true;
 		}
 	}
 
-	// Per-ability overrides.
-	// Only store overrides that DIFFER from the module-level permission.
-	// This prevents stale overrides when module toggles change.
+	// Patch each submitted module: rebuild ops from defaults shape, treat
+	// missing op keys as unchecked. Modules NOT in $submitted_modules are
+	// untouched.
+	foreach ( $submitted_modules as $module => $_ ) {
+		$patched[ $module ] = array();
+		foreach ( $defaults[ $module ] as $op => $_default_val ) {
+			$patched[ $module ][ $op ] = ! empty( $input[ $module ][ $op ] );
+		}
+	}
+
+	// Per-ability overrides are scoped to the modules being saved.
 	$category_to_module = abilities_for_ai_module_prefix_map();
-	$overrides = array();
-	if ( ! empty( $input['_overrides'] ) && is_array( $input['_overrides'] ) ) {
+	$existing_overrides = array();
+	if ( isset( $existing['_overrides'] ) && is_array( $existing['_overrides'] ) ) {
+		$existing_overrides = $existing['_overrides'];
+	}
+
+	// Drop existing overrides whose module is in the submitted set; the
+	// operator just made an authoritative decision for those modules.
+	$kept_overrides = array();
+	foreach ( $existing_overrides as $ability_name => $enabled ) {
+		$parts  = explode( '/', (string) $ability_name );
+		$module = $category_to_module[ $parts[0] ] ?? null;
+		if ( $module && isset( $submitted_modules[ $module ] ) ) {
+			continue;
+		}
+		$kept_overrides[ (string) $ability_name ] = (bool) $enabled;
+	}
+
+	// Apply newly submitted overrides — but only for submitted modules,
+	// and only when the override actually represents a deviation from the
+	// resulting module-level permission (otherwise it is dead weight).
+	$new_overrides = array();
+	if ( isset( $input['_overrides'] ) && is_array( $input['_overrides'] ) ) {
 		foreach ( $input['_overrides'] as $ability_name => $enabled ) {
-			$ability_name = preg_replace( '/[^a-z0-9\-\/]/', '', $ability_name );
-			if ( empty( $ability_name ) ) {
+			$ability_name = preg_replace( '/[^a-z0-9\-\/]/', '', (string) $ability_name );
+			if ( '' === $ability_name ) {
 				continue;
 			}
-			$ability_enabled = ! empty( $enabled );
 
-			// Determine the module for this ability from the name prefix.
 			$parts  = explode( '/', $ability_name );
 			$module = $category_to_module[ $parts[0] ] ?? null;
-			if ( ! $module ) {
+			if ( ! $module || ! isset( $submitted_modules[ $module ] ) ) {
 				continue;
 			}
 
-			// Get the module-level permission for this ability's operation type.
-			$module_perms   = $sanitized[ $module ] ?? array();
-			// We need to know the op type. Abilities registered via the form have their op
-			// embedded in their checkbox placement. Since we only have the name, we check
-			// all three ops — if module has the op enabled but ability is disabled, store override.
-			// Simplification: store only if ability is disabled AND module would allow it.
-			$module_has_read   = ! empty( $module_perms['read'] );
-			$module_has_write  = ! empty( $module_perms['write'] );
-			$module_has_delete = ! empty( $module_perms['delete'] );
-			$module_would_allow = $module_has_read || $module_has_write || $module_has_delete;
+			if ( ! empty( $enabled ) ) {
+				continue;
+			}
 
-			// Only store if ability is OFF but module is ON (actual override).
-			if ( ! $ability_enabled && $module_would_allow ) {
-				$overrides[ $ability_name ] = false;
+			$module_perms       = $patched[ $module ] ?? array();
+			$module_would_allow = ! empty( $module_perms['read'] )
+				|| ! empty( $module_perms['write'] )
+				|| ! empty( $module_perms['delete'] );
+
+			if ( $module_would_allow ) {
+				$new_overrides[ $ability_name ] = false;
 			}
 		}
 	}
 
-	if ( ! empty( $overrides ) ) {
-		$sanitized['_overrides'] = $overrides;
+	$merged_overrides = array_merge( $kept_overrides, $new_overrides );
+	if ( ! empty( $merged_overrides ) ) {
+		$patched['_overrides'] = $merged_overrides;
+	} else {
+		unset( $patched['_overrides'] );
 	}
 
-	return $sanitized;
+	return $patched;
 }
 
 /**
