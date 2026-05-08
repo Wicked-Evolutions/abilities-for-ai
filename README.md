@@ -1,10 +1,26 @@
 # Abilities for AI
 
+> **A word from J, the director of this creation.**
+>
+> Everything you see here is built by a single human who does not read or write code and is written by AI. Everything is in constant motion and by observing that movement we create the illusion of being still. Change happens at any given moment. It is simply a law of evolution. Stillness is an act of conscious awareness, not a reality of life.
+
+## Welcome, Wordpressnaut
+
+Here is the spaceship, now you'll have to learn how to fly and please do remember, humans make mistakes, humans created AI so AI makes mistakes. Learning to fly is your job and to do that you'll need structure, systems, checklists, principles and understanding you stand before a magical leap of a steep and wonderful learning curve. Be patient and do backup things.
+
+→ Knowledge layer (deeper traversal): [https://knowledge.wickedevolutions.com](https://knowledge.wickedevolutions.com)
+→ [https://wickedevolutions.com](https://wickedevolutions.com)
+→ [https://abilitiesforai.io](https://abilitiesforai.io)
+
+Our development aim is the *Official WordPress Compatibility Contract* — see [PRINCIPLES.md](PRINCIPLES.md) for the full binding principles across the four-repo suite.
+
+---
+
 Native WordPress abilities for AI agents. Powers AI control through the official [WordPress Abilities API](https://developer.wordpress.org/reference/functions/wp_register_ability/).
 
 | | |
 |---|---|
-| **Requires** | WordPress 6.9+, PHP 8.0+ |
+| **Requires** | WordPress 6.9+, PHP 8.1+ |
 | **License** | GPL-2.0-or-later |
 | **Author** | [Wicked Evolutions](https://wickedevolutions.com) |
 
@@ -29,16 +45,18 @@ git clone https://github.com/Wicked-Evolutions/abilities-for-ai.git
 
 ### You also need
 
-1. **[Abilities MCP Adapter](https://community.wickedevolutions.com/item/abilities-mcp-adapter/)** — exposes abilities as MCP tools via REST API
-2. **[Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp)** bridge — connects your AI client to WordPress (`npx @wickedevolutions/abilities-mcp`)
+1. **[Abilities MCP Adapter](https://community.wickedevolutions.com/item/abilities-mcp-adapter/)** — exposes abilities as MCP tools via REST API and runs the OAuth 2.1 resource server + authorization server
+2. **[Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp)** bridge — connects your AI client to WordPress
+   - Claude Desktop: drag `abilities-mcp.mcpb` from the [bridge's latest GitHub Release](https://github.com/Wicked-Evolutions/abilities-mcp/releases/latest), then upgrade to OAuth via `abilities-mcp upgrade-auth <site>` from terminal
+   - Terminal MCP clients (Claude Code, Cursor, Codex, etc.): `npm install -g @wickedevolutions/abilities-mcp`, then `abilities-mcp add-site <url>` — OAuth by default
 
 See [docs/getting-started.md](docs/getting-started.md) for the full setup guide.
 
 ## Free and Pro
 
-**Free** — full read access across all modules, plus a controlled write round-trip (create + delete) so AI agents can prove competence before a site owner commits to Pro.
+**Free** — full read access across all modules, plus a controlled write round-trip (create + delete) so AI agents can prove competence before a site owner moves to Pro.
 
-**Pro** — unlocks write and delete abilities: update content, modify blocks, bulk search-replace, manage themes, configure settings, assign taxonomies, reorder menus. The operations that turn an AI assistant into an AI operator.
+**Pro** — adds write and delete abilities: update content, modify blocks, bulk search-replace, manage themes, configure settings, assign taxonomies, reorder menus. The operations that turn an AI assistant into an AI operator.
 
 All abilities are registered and visible to AI regardless of license. Pro abilities return a clear 403 with an upgrade path at execution time. No hidden capabilities, no surprise walls.
 
@@ -112,6 +130,16 @@ These modules cover WordPress's native functionality. Available on every WordPre
 ### Status
 `suite/get-status`
 
+### Paired ability classes — architecture pattern
+
+The plugin registers compact-vs-full pairs across the API by design. Each ability description names its payload tradeoff. Pick the pair member that matches the traversal you intend:
+
+- **Bulk discovery (compact)** ↔ **targeted full inspection (full)**
+  - `content-list-structure` (id/title/slug/status/date/link, ~0.5KB/post) ↔ `content-list` (full block markup, ~50–200KB/post)
+  - `content-get-text` (plain text stripped, ~2–20KB) ↔ `content-get` (full block markup, ~50–200KB)
+
+The pattern recurs across other categories — read the description before reaching for the heavy member when a compact member is available.
+
 ## Supported Third-Party Plugins
 
 These modules register automatically when the corresponding plugin is active. No configuration needed.
@@ -134,6 +162,10 @@ Products, prices, orders, subscriptions, customers, coupons, bumps, shipping, ta
 
 - **Abilities Explorer** — browse all registered abilities with inline Read/Write/Delete toggles per module
 - **License** — enter and validate your Pro license key (network-wide for multisite)
+
+### Permissions UI save isolation (since v1.9.3)
+
+The Permissions UI patches only the modules submitted in a save action — toggling a single module's Read/Write/Delete tier preserves every other module's state byte-identically. Per-blog isolation continues to apply on multisite (each blog's permissions live in `wp_abilities_suite_permissions` independently). The admin-post handler shipped in v1.9.3 ([#153](https://github.com/Wicked-Evolutions/abilities-for-ai/issues/153)) replaces the prior Settings API save which rebuilt the entire option from form input on every submit.
 
 ## Boundary activity log
 
@@ -159,22 +191,31 @@ Compatible with Abilities MCP Adapter v1.4.0+ (the version that emits the events
 
 ## Security Model
 
-Every ability enforces WordPress capabilities at execution time. The WordPress user role assigned to your AI agent determines the baseline:
+Every ability enforces WordPress capabilities at execution time. The WordPress user role assigned to your AI agent is the baseline; the per-module Read/Write/Delete toggles in *Settings → Abilities for AI* compose on top of that capability check; OAuth scopes (handled by the [Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter)) compose on top of those — together this is the four-layer permissions model below.
 
 | Role | Access |
 |------|--------|
 | **Administrator** | All modules |
 | **Editor** | Content, Blocks, Taxonomies, Patterns, Meta, Media |
 
-Per-module Read/Write/Delete toggles provide additional control on top of WordPress capabilities. Pro abilities require both the permission toggle AND a valid license.
+### Four-layer permissions model
+
+When an ability is denied, the rejection comes from one of four independent layers. The runtime error names the layer:
+
+1. **Abilities for AI module permission** — per-blog Read/Write/Delete toggle in *WP Admin → Abilities for AI → Permissions*. The runtime returns `[ability_disabled]` with the module name and where to fix it. **This plugin is the layer that runs this check.**
+2. **WordPress capability** — the WordPress user the request authenticates as lacks the relevant capability. WordPress core REST returns `rest_forbidden` / `rest_cannot_*` codes.
+3. **OAuth scope** — the bearer token does not include the scope the ability requires. The adapter's `OAuthScopeEnforcer::check()` returns an `insufficient_scope` rejection at dispatch time.
+4. **Unclear** — generic 500, timeout, or malformed response. Check server logs.
+
+The four gates apply together by design (see [PRINCIPLES.md](PRINCIPLES.md), Principle 5 — *Permissions Stay Layered*). The runtime error tells you which gate fired so you can act at the right layer.
 
 ### Permission posture for the public alpha
 
 Read access is enabled by default for every module. Write and delete are enabled by default for most modules — including filesystem and cron. The alpha trusts early operators to know what they're doing; visibility through the [boundary activity log](#boundary-activity-log) is the safety surface, not closed defaults.
 
-Operators who want a stricter baseline disable per-module write or delete via the **Settings → Abilities for AI** UI. The choices are explicit: every module's permission state is shown, and changes are recorded in `kl_boundary` for audit.
+Operators who want a stricter baseline disable per-module Write or Delete via the **Settings → Abilities for AI** UI. The choices are explicit: every module's permission state is shown, and changes are recorded in `kl_boundary` for audit. Per-module saves are isolated — toggling one module no longer affects sibling modules' state ([#153](https://github.com/Wicked-Evolutions/abilities-for-ai/issues/153) shipped in v1.9.3).
 
-This posture pairs with [Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter)'s response redaction filter, which sits between ability output and the MCP wire — so even with permissive write defaults, sensitive fields (passwords, API keys, contact PII) are redacted by default before responses leave the site.
+This posture pairs with [Abilities MCP Adapter](https://github.com/Wicked-Evolutions/abilities-mcp-adapter)'s response redaction filter, which sits between ability output and the MCP wire — so even with permissive Write defaults, sensitive fields (passwords, API keys, contact PII) are redacted by default before responses leave the site.
 
 ## Documentation
 
@@ -187,9 +228,9 @@ This posture pairs with [Abilities MCP Adapter](https://github.com/Wicked-Evolut
 ## Links
 
 - [Product page](https://community.wickedevolutions.com/item/abilities-for-ai/)
-- [Abilities MCP Adapter](https://community.wickedevolutions.com/item/abilities-mcp-adapter/) — WordPress-side MCP protocol handler
-- [Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp) — MCP bridge for AI clients (`npx @wickedevolutions/abilities-mcp`)
-- [Abilities for Fluent Plugins](https://github.com/Wicked-Evolutions/abilities-for-fluent-plugins) — our continuously-enhanced translator for the Fluent suite (FluentCRM, FluentCommunity, FluentForms, FluentBooking, FluentSupport, FluentBoards, FluentSMTP, FluentAuth, FluentSnippets, FluentMessaging, FluentCart, FluentAffiliate)
+- [Abilities MCP Adapter](https://community.wickedevolutions.com/item/abilities-mcp-adapter/) — WordPress-side MCP protocol handler + OAuth resource server
+- [Abilities MCP](https://github.com/Wicked-Evolutions/abilities-mcp) — MCP bridge for AI clients (`npm install -g @wickedevolutions/abilities-mcp`)
+- [Abilities for Fluent Plugins](https://github.com/Wicked-Evolutions/abilities-for-fluent-plugins) — our continuously-enhanced first-party translator for the Fluent suite (FluentCRM, FluentCommunity, FluentForms, FluentBooking, FluentSupport, FluentBoards, FluentSMTP, FluentAuth, FluentSnippets, FluentMessaging, FluentCart, FluentAffiliate)
 
 ## Evolving Knowledge
 
@@ -198,12 +239,6 @@ We continuously add knowledge docs, skills, and agent patterns to [knowledge.wic
 ## Version History
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete version history.
-
-## Disclaimer
-
-Humans make mistakes — as we know from the present day and history. Humans trained AI. AI acts accordingly. AI predicts probability based on the context window it holds. It is trained to sound certain, as if everything is truth, and to "fix" everything so the human becomes satisfied.
-
-Learn how to communicate with AI. You are fully responsible for using AI in your life, business, and projects. Using these products is your personal responsibility to learn and own.
 
 ## License
 
