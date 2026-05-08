@@ -2,6 +2,30 @@
 
 All notable changes to Abilities for AI will be documented in this file.
 
+## [1.9.4] - 2026-05-08
+
+Documentation update — README rewrite for four-layer permissions framing + v1.9.3 save-isolation surface + Wordpressnaut welcome. Code unchanged from v1.9.3 except for a single corrective constant alignment (see *Corrections* below).
+
+### Documentation
+
+- README rewritten end-to-end:
+  - PHP version requirement corrected from 8.0+ to 8.1+ (matches `composer.json` `require.php` and plugin header `Requires PHP` set in v1.9.1)
+  - **Four-layer permissions model section** added — names the four layers (Abilities for AI module · WordPress capability · OAuth scope · unclear) and points operators at the runtime `[ability_disabled]` error as the layer indicator. The Abilities for AI plugin is named as the layer that runs the module-permission check.
+  - **Permissions UI save isolation** documented (the [#153](https://github.com/Wicked-Evolutions/abilities-for-ai/issues/153) fix shipped in v1.9.3) — operators benefit from knowing that toggling a single module no longer wipes other modules' state, and per-blog isolation continues to apply on multisite.
+  - **Paired ability classes architecture pattern** documented — compact-vs-full pairs across `list` (`content-list-structure` ↔ `content-list`) and `get` (`content-get-text` ↔ `content-get`); pick the pair member that matches the traversal.
+  - Bridge install commands updated — recommended paths are `.mcpb` for Claude Desktop and `npm install -g @wickedevolutions/abilities-mcp` for terminal MCP clients (replaces the prior `npx` pointer).
+  - Welcome block at top with verbatim *"Welcome, Wordpressnaut"* spaceship paragraph + 3 URL pointers (knowledge.wickedevolutions.com, wickedevolutions.com, abilitiesforai.io)
+  - Disclaimer block from J at the very top
+  - Pointer to [PRINCIPLES.md](PRINCIPLES.md) as the *Official WordPress Compatibility Contract* binding all four suite repos
+  - Existing bottom *Disclaimer* section retired (replaced by J's at top)
+- Security Model section reframed to lean into the four-layer model and explicitly mention v1.9.3's per-module save isolation
+
+### Corrections
+
+- `ABILITIES_FOR_AI_VERSION` constant in `abilities-for-ai.php` was set to `'1.9.2'` while the plugin header had been bumped to `1.9.3` in the v1.9.3 release. The constant is the value reported through `suite/get-status` and to AI clients querying runtime version. v1.9.4 corrects this drift by setting the constant to `'1.9.4'` to align with the plugin header (skipping `'1.9.3'` since that intermediate value would just be re-corrected immediately). Add a release-checklist item to bump both header + constant in the same change going forward.
+
+Closes [#163](https://github.com/Wicked-Evolutions/abilities-for-ai/issues/163).
+
 ## [1.9.3] - 2026-05-07
 
 ### Fixed
