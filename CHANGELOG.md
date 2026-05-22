@@ -2,6 +2,12 @@
 
 All notable changes to Abilities for AI will be documented in this file.
 
+## [1.9.5] - 2026-05-22
+
+### Fixed
+
+- **`suite/get-status` now exposes `show_in_rest` so the MCP server can reach it (Issue [#169](https://github.com/Wicked-Evolutions/abilities-for-ai/issues/169)).** The ability's `meta` block carried `mcp.public => true` but was missing `'show_in_rest' => true`. `show_in_rest` is the WordPress meta flag that lets an ability appear through the REST API — which is where the MCP server endpoint lives (`/wp-json/mcp/...`). Without it, the MCP server's exposure gate rejected the ability: `execute-ability { suite/get-status }` returned `-32008 Permission denied: Ability "suite/get-status" is not exposed via MCP`, even though the CSV library audit showed `mcp_public: true` (the misleading wording pointed at the wrong gate). A library-wide audit (`ability-library-ours.csv`, regenerated 2026-05-21) found this was the only ability with the defect — 1,537 abilities had `show_in_rest: true`, this one had `false`. Same meta-shape defect class as `Wicked-Evolutions/abilities-mcp-adapter#137`/#138. One-line fix: add `'show_in_rest' => true` inside the existing `meta` block in `includes/status-abilities.php`, alongside `annotations` / `tier` / `mcp` (no logic, schema, callback, or permission semantics changed). Closes [#169](https://github.com/Wicked-Evolutions/abilities-for-ai/issues/169).
+
 ## [1.9.4] - 2026-05-08
 
 Documentation update — README rewrite for four-layer permissions framing + v1.9.3 save-isolation surface + Wordpressnaut welcome. Code unchanged from v1.9.3 except for a single corrective constant alignment (see *Corrections* below).
