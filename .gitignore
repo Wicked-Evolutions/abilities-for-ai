@@ -42,3 +42,6 @@ dist/
 # PHPUnit
 .phpunit.cache/
 .phpunit.result.cache
+
+# Claude Code agent worktrees / local metadata (never committed)
+.claude/
