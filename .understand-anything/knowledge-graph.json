@@ -1394,7 +1394,8 @@
         "service",
         "abilities-api",
         "registration",
-        "core"
+        "core",
+        "tested"
       ],
       "complexity": "moderate"
     },
@@ -1938,7 +1939,8 @@
         "data-model",
         "validation",
         "serialization",
-        "security"
+        "security",
+        "tested"
       ],
       "complexity": "complex",
       "languageNotes": "Uses static helper methods (self::truncate_ip, self::build_detail_json) and the WordPress $wpdb global for prepared inserts and lookups."
@@ -6274,7 +6276,8 @@
         "utility",
         "helpers",
         "facade",
-        "pagination"
+        "pagination",
+        "tested"
       ],
       "complexity": "simple",
       "languageNotes": "Static methods delegating to global wp_abilities_* / abilities_for_ai_* procedural functions."
@@ -10756,6 +10759,27 @@
       "type": "calls",
       "direction": "forward",
       "weight": 0.8
+    },
+    {
+      "source": "file:src/Helpers/Helpers.php",
+      "target": "file:tests/Unit/HelpersTest.php",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/Core/Registrar.php",
+      "target": "file:tests/Unit/RegistrarTest.php",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/Knowledge/BoundaryEventLogger.php",
+      "target": "file:tests/Unit/BoundaryEventLoggerTest.php",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
     }
   ],
   "layers": [
