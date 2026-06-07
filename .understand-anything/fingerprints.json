@@ -1,0 +1,6156 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "da3c53149852e958ff9ff17a9f27859f84d5f69e",
+  "generatedAt": "2026-06-07T03:50:19.658Z",
+  "files": {
+    ".distignore": {
+      "filePath": ".distignore",
+      "contentHash": "1d2bf3f0359a043463aa91feb09bd1a2439d2417b02b46f3623c1ef31e5c8371",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": false
+    },
+    ".github/ISSUE_TEMPLATE/ability-gap.yml": {
+      "filePath": ".github/ISSUE_TEMPLATE/ability-gap.yml",
+      "contentHash": "7d51652a4f2285e257cadd3720ebde7831e188634448be2b884a84c4daa027e6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 50,
+      "hasStructuralAnalysis": true
+    },
+    ".github/ISSUE_TEMPLATE/bug-report.yml": {
+      "filePath": ".github/ISSUE_TEMPLATE/bug-report.yml",
+      "contentHash": "cbac9299e494ee95e23a12b21b7da13d7413975ac318cba081581c53776e25a5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 64,
+      "hasStructuralAnalysis": true
+    },
+    ".github/ISSUE_TEMPLATE/dev-brief.yml": {
+      "filePath": ".github/ISSUE_TEMPLATE/dev-brief.yml",
+      "contentHash": "3387d620ae4e17660cd7fc9f0e23f8a4f6c183b84334d8676b3a43b2c7e65bd3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 46,
+      "hasStructuralAnalysis": true
+    },
+    ".github/PULL_REQUEST_TEMPLATE.md": {
+      "filePath": ".github/PULL_REQUEST_TEMPLATE.md",
+      "contentHash": "df80a9caa0b0d94fc8b436d80335078c98409cd6918d5a69f1b256ca695cfb3a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": true
+    },
+    ".github/workflows/ci.yml": {
+      "filePath": ".github/workflows/ci.yml",
+      "contentHash": "03ebfa6f4fe4e38650eb930d2e343e19fb06141426dbaa2ee6d4748c8dbde543",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 67,
+      "hasStructuralAnalysis": true
+    },
+    ".understand-anything/.understandignore": {
+      "filePath": ".understand-anything/.understandignore",
+      "contentHash": "6591e8e60ffb75e0cadca7549a1ec7a99d66e265f3fdef28408984f4052f954c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 42,
+      "hasStructuralAnalysis": false
+    },
+    "abilities-for-ai.php": {
+      "filePath": "abilities-for-ai.php",
+      "contentHash": "dd526017bb67937f4c755586f0fb75bf8ae97b9611b01df386ccd2c380fc020b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 210,
+      "hasStructuralAnalysis": true
+    },
+    "admin/css/dashboard.css": {
+      "filePath": "admin/css/dashboard.css",
+      "contentHash": "012e92bd55a56cfa925c6ffeb99dbb973add26ed5cd47e1ebf83d70b556ab28e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 545,
+      "hasStructuralAnalysis": false
+    },
+    "admin/dashboard.php": {
+      "filePath": "admin/dashboard.php",
+      "contentHash": "1e299c983b5849aa6b6fc6663f4cfeba6b367384dcdb894684eb236e4aceed42",
+      "functions": [
+        {
+          "name": "__construct",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "add_menu_pages",
+          "params": [],
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "enqueue_assets",
+          "params": [
+            "$hook"
+          ],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "handle_license_actions",
+          "params": [],
+          "exported": false,
+          "lineCount": 31
+        },
+        {
+          "name": "get_source",
+          "params": [
+            "$category"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_source_css",
+          "params": [
+            "$source"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_abilities_array",
+          "params": [],
+          "exported": false,
+          "lineCount": 41
+        },
+        {
+          "name": "get_ability_op",
+          "params": [
+            "$ability"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "render_page",
+          "params": [],
+          "exported": false,
+          "lineCount": 33
+        },
+        {
+          "name": "render_explorer_tab",
+          "params": [],
+          "exported": false,
+          "lineCount": 68
+        },
+        {
+          "name": "render_stats",
+          "params": [
+            "$abilities",
+            "$sources",
+            "$categories",
+            "$enabled_info"
+          ],
+          "exported": false,
+          "lineCount": 26
+        },
+        {
+          "name": "render_filter_bar",
+          "params": [
+            "$sources",
+            "$categories",
+            "$source_filter",
+            "$category_filter",
+            "$type_filter",
+            "$search_filter"
+          ],
+          "exported": false,
+          "lineCount": 45
+        },
+        {
+          "name": "render_explorer_table",
+          "params": [
+            "$abilities",
+            "$source_filter",
+            "$category_filter",
+            "$type_filter"
+          ],
+          "exported": false,
+          "lineCount": 221
+        },
+        {
+          "name": "get_ability_module",
+          "params": [
+            "$category"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "render_license_tab",
+          "params": [],
+          "exported": false,
+          "lineCount": 70
+        },
+        {
+          "name": "render_pro_breakdown",
+          "params": [],
+          "exported": false,
+          "lineCount": 56
+        },
+        {
+          "name": "render_debug_info",
+          "params": [
+            "$abilities"
+          ],
+          "exported": false,
+          "lineCount": 100
+        }
+      ],
+      "classes": [
+        {
+          "name": "Abilities_For_AI_Dashboard",
+          "methods": [
+            "__construct",
+            "add_menu_pages",
+            "enqueue_assets",
+            "handle_license_actions",
+            "get_source",
+            "get_source_css",
+            "get_abilities_array",
+            "get_ability_op",
+            "render_page",
+            "render_explorer_tab",
+            "render_stats",
+            "render_filter_bar",
+            "render_explorer_table",
+            "get_ability_module",
+            "render_license_tab",
+            "render_pro_breakdown",
+            "render_debug_info"
+          ],
+          "properties": [
+            "source_map",
+            "source_css"
+          ],
+          "exported": true,
+          "lineCount": 867
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Abilities_For_AI_Dashboard"
+      ],
+      "totalLines": 886,
+      "hasStructuralAnalysis": true
+    },
+    "admin/kl/css/style.css": {
+      "filePath": "admin/kl/css/style.css",
+      "contentHash": "b64c9ab7c076ea4e7711ef042fde0278942d3385da99856e695afa4e4d7fdb6e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": false
+    },
+    "admin/kl/js/app.js": {
+      "filePath": "admin/kl/js/app.js",
+      "contentHash": "6009db512fd275491809fd11eae5cfc19ee435f850b349543c1f6f9aa96233fb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 95,
+      "hasStructuralAnalysis": true
+    },
+    "admin/knowledge-layer.php": {
+      "filePath": "admin/knowledge-layer.php",
+      "contentHash": "294efc2b62f7c717564ac7b66a1224d24a86b7561ee6669eb113838842a09c87",
+      "functions": [
+        {
+          "name": "__construct",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "add_submenu",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "render_page",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "enqueue_assets",
+          "params": [
+            "$hook"
+          ],
+          "exported": false,
+          "lineCount": 39
+        }
+      ],
+      "classes": [
+        {
+          "name": "Abilities_For_AI_Knowledge_Layer",
+          "methods": [
+            "__construct",
+            "add_submenu",
+            "render_page",
+            "enqueue_assets"
+          ],
+          "properties": [
+            "hook_suffix"
+          ],
+          "exported": true,
+          "lineCount": 83
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Abilities_For_AI_Knowledge_Layer"
+      ],
+      "totalLines": 98,
+      "hasStructuralAnalysis": true
+    },
+    "CHANGELOG.md": {
+      "filePath": "CHANGELOG.md",
+      "contentHash": "271eaf3530ad92b68b24126d0482e0b7524c2bb106bcdbf3c17f0654e3e9bd8a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 464,
+      "hasStructuralAnalysis": true
+    },
+    "composer.json": {
+      "filePath": "composer.json",
+      "contentHash": "773cdee3aac0d59e0c046f6b0e58403f1325055cb5c1b50f9a1ec36a4fce2593",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": true
+    },
+    "CONTRIBUTING.md": {
+      "filePath": "CONTRIBUTING.md",
+      "contentHash": "2ed6aa33d7cb5843ac9e1bee7cabb51e99285053d7d0aa6d0706be26a35b492b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 77,
+      "hasStructuralAnalysis": true
+    },
+    "docs/abilities-api-architecture.md": {
+      "filePath": "docs/abilities-api-architecture.md",
+      "contentHash": "c3acbf6b3de97b0f77c6e2a5df26771261894c92526606454839c260e6b23580",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 168,
+      "hasStructuralAnalysis": true
+    },
+    "docs/getting-started.md": {
+      "filePath": "docs/getting-started.md",
+      "contentHash": "3776c341a78be42547bbad0edf462c3ddf41ba24e4605c9ac11582f7ee098c87",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 161,
+      "hasStructuralAnalysis": true
+    },
+    "docs/glossary.md": {
+      "filePath": "docs/glossary.md",
+      "contentHash": "cae91ef2c16be850a95376c43eaafe7b3edf67ff91dab1a91e18fdaaedd62cf5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 76,
+      "hasStructuralAnalysis": true
+    },
+    "docs/gotchas/empty-properties-schema.md": {
+      "filePath": "docs/gotchas/empty-properties-schema.md",
+      "contentHash": "88b489544481a582572df8011ad4e86ef9ac0c354cf48a8022fc99410b88467e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": true
+    },
+    "docs/gotchas/silent-validation-failures.md": {
+      "filePath": "docs/gotchas/silent-validation-failures.md",
+      "contentHash": "74fd763287e55f437af87556c715f6599a56da29bb16c23c4b6e72a8ec2f45f0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 43,
+      "hasStructuralAnalysis": true
+    },
+    "docs/guides/register-a-category.md": {
+      "filePath": "docs/guides/register-a-category.md",
+      "contentHash": "779b3a1f2a333274a51df34d0382f0831175d861cec5096ec1d983b20bfd5deb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 70,
+      "hasStructuralAnalysis": true
+    },
+    "docs/guides/register-an-ability.md": {
+      "filePath": "docs/guides/register-an-ability.md",
+      "contentHash": "3203cd753ca40f48398974d1b6183ad959449cfd86af4c53bceafc023b4991e2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 134,
+      "hasStructuralAnalysis": true
+    },
+    "docs/plugin-architecture.md": {
+      "filePath": "docs/plugin-architecture.md",
+      "contentHash": "7b8e11752e9a041c649cf67c269d29c1b20be8851dcb62fb12496387b0b08e1d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 175,
+      "hasStructuralAnalysis": true
+    },
+    "docs/suites/astra.md": {
+      "filePath": "docs/suites/astra.md",
+      "contentHash": "7c3c555dff2584d45689f785edd09f8914066c16cc2b70db51fa078f5b55822e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": true
+    },
+    "docs/suites/presto-player.md": {
+      "filePath": "docs/suites/presto-player.md",
+      "contentHash": "f0ebcd8bcca6ca9929182258edc1a36da12374ba8043d2ea48677152b8a958a5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": true
+    },
+    "docs/suites/spectra.md": {
+      "filePath": "docs/suites/spectra.md",
+      "contentHash": "cdb7d21b69a31937817b9c14bd5f27a36ea3687c0aae6297152956d2afa641c0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": true
+    },
+    "docs/suites/surecart.md": {
+      "filePath": "docs/suites/surecart.md",
+      "contentHash": "1efe73a6272a383b8e331a1e049f5570b0df6193e9879748c51136ab4f457663",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": true
+    },
+    "includes/ability-categories.php": {
+      "filePath": "includes/ability-categories.php",
+      "contentHash": "63d639b9335c5ea1c6e61601d0b76b324f2da769fee9b47b22fd3fe1b19f6bc3",
+      "functions": [
+        {
+          "name": "abilities_for_ai_register_categories",
+          "params": [],
+          "exported": true,
+          "lineCount": 159
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_for_ai_register_categories"
+      ],
+      "totalLines": 181,
+      "hasStructuralAnalysis": true
+    },
+    "includes/activity-logger.php": {
+      "filePath": "includes/activity-logger.php",
+      "contentHash": "ed527514f95e1a630b38ccef96483fbad4f6acb35552b5cc43eab7b09ad903d3",
+      "functions": [
+        {
+          "name": "abilities_kl_detect_caller_origin",
+          "params": [],
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "abilities_kl_detect_is_compiled",
+          "params": [
+            "$ability_name",
+            "$result"
+          ],
+          "exported": true,
+          "lineCount": 47
+        },
+        {
+          "name": "abilities_kl_get_replaced_surface",
+          "params": [
+            "$ability_name"
+          ],
+          "exported": true,
+          "lineCount": 19
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_kl_detect_caller_origin",
+        "abilities_kl_detect_is_compiled",
+        "abilities_kl_get_replaced_surface"
+      ],
+      "totalLines": 283,
+      "hasStructuralAnalysis": true
+    },
+    "includes/block-helpers.php": {
+      "filePath": "includes/block-helpers.php",
+      "contentHash": "d4f808914045380b86176595975d3b80611891b42ab40da0aab60795641136fc",
+      "functions": [
+        {
+          "name": "abilities_for_ai_normalize_block",
+          "params": [
+            "$block"
+          ],
+          "exported": true,
+          "lineCount": 47
+        },
+        {
+          "name": "abilities_for_ai_get_block_at_path",
+          "params": [
+            "$blocks",
+            "$path"
+          ],
+          "exported": true,
+          "lineCount": 59
+        },
+        {
+          "name": "abilities_for_ai_set_block_at_path",
+          "params": [
+            "$blocks",
+            "$path",
+            "$replacement"
+          ],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "_abilities_for_ai_set_recursive",
+          "params": [
+            "$blocks",
+            "$path",
+            "$depth",
+            "$replacement"
+          ],
+          "exported": true,
+          "lineCount": 61
+        },
+        {
+          "name": "abilities_for_ai_find_blocks_recursive",
+          "params": [
+            "$blocks",
+            "$criteria",
+            "$current_path"
+          ],
+          "exported": true,
+          "lineCount": 51
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_for_ai_normalize_block",
+        "abilities_for_ai_get_block_at_path",
+        "abilities_for_ai_set_block_at_path",
+        "_abilities_for_ai_set_recursive",
+        "abilities_for_ai_find_blocks_recursive"
+      ],
+      "totalLines": 300,
+      "hasStructuralAnalysis": true
+    },
+    "includes/blocks-abilities.php": {
+      "filePath": "includes/blocks-abilities.php",
+      "contentHash": "b8bca385331547f1ff89f584a11793665328b66fe407db1b1aa8b1a752bf41be",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 718,
+      "hasStructuralAnalysis": true
+    },
+    "includes/boundary-logger.php": {
+      "filePath": "includes/boundary-logger.php",
+      "contentHash": "0b6e4d9393059db6239b20c5761b6ab5e733b1e46c269272895f518ff81f6f0b",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\BoundaryEventLogger",
+          "specifiers": [
+            "BoundaryEventLogger"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Schema",
+          "specifiers": [
+            "Schema"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 134,
+      "hasStructuralAnalysis": true
+    },
+    "includes/class-multisite-ability.php": {
+      "filePath": "includes/class-multisite-ability.php",
+      "contentHash": "8890e2e48d0be17726fff15057d437f0b65a3936cb711dda5d0db65d5702e74a",
+      "functions": [
+        {
+          "name": "do_execute",
+          "params": [
+            "$input"
+          ],
+          "exported": false,
+          "lineCount": 14
+        }
+      ],
+      "classes": [
+        {
+          "name": "WE_Multisite_Ability",
+          "methods": [
+            "do_execute"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 27
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "WE_Multisite_Ability"
+      ],
+      "totalLines": 48,
+      "hasStructuralAnalysis": true
+    },
+    "includes/comment-abilities.php": {
+      "filePath": "includes/comment-abilities.php",
+      "contentHash": "2bdc43d9f8c0d0d745c432d86e80f7f625125749634d02447c64fd5de9bbc72a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 381,
+      "hasStructuralAnalysis": true
+    },
+    "includes/compat.php": {
+      "filePath": "includes/compat.php",
+      "contentHash": "5d52fcd54e1309d24c47a1b9660089dc43d0a57f82159be4f0c5f76e3e91ae4a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": true
+    },
+    "includes/content-abilities.php": {
+      "filePath": "includes/content-abilities.php",
+      "contentHash": "834ba01dc80753359ff2e65601e7f87ef41e04090045942611472c3cb9d3d945",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1898,
+      "hasStructuralAnalysis": true
+    },
+    "includes/cron-abilities.php": {
+      "filePath": "includes/cron-abilities.php",
+      "contentHash": "b38a2da142162ac1ce91ed12414d3f3161fdeed2e5561fce19ec2c465b932b78",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 339,
+      "hasStructuralAnalysis": true
+    },
+    "includes/diagnostic-abilities.php": {
+      "filePath": "includes/diagnostic-abilities.php",
+      "contentHash": "60dc40fba82922a8c2051f981dc166e71abe596c3f8022630d2f0af2d4ec57e4",
+      "functions": [
+        {
+          "name": "abilities_for_ai_diagnostic_gather_sections",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 124
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_site_overview",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_network_overview",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 59
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_network_info",
+          "params": [
+            "$diagnosed_count"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_network_flags",
+          "params": [
+            "$sites"
+          ],
+          "exported": true,
+          "lineCount": 99
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_theme_audit",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 243
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_security_posture",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 177
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_multisite_map",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 185
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_site_role",
+          "params": [
+            "$content_count",
+            "$active_slugs",
+            "$content_counts"
+          ],
+          "exported": true,
+          "lineCount": 32
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_content_health",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 325
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_content_narrative",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 261
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_taxonomy_health",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 114
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_environment",
+          "params": [],
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_health",
+          "params": [],
+          "exported": true,
+          "lineCount": 57
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_plugins",
+          "params": [],
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_theme",
+          "params": [],
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_cache",
+          "params": [],
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_cron",
+          "params": [],
+          "exported": true,
+          "lineCount": 49
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_settings",
+          "params": [],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_content",
+          "params": [],
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_abilities",
+          "params": [],
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_environment_info",
+          "params": [],
+          "exported": true,
+          "lineCount": 54
+        },
+        {
+          "name": "abilities_for_ai_diagnostic_registered_assets",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 60
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_for_ai_diagnostic_gather_sections",
+        "abilities_for_ai_diagnostic_site_overview",
+        "abilities_for_ai_diagnostic_network_overview",
+        "abilities_for_ai_diagnostic_network_info",
+        "abilities_for_ai_diagnostic_network_flags",
+        "abilities_for_ai_diagnostic_theme_audit",
+        "abilities_for_ai_diagnostic_security_posture",
+        "abilities_for_ai_diagnostic_multisite_map",
+        "abilities_for_ai_diagnostic_site_role",
+        "abilities_for_ai_diagnostic_content_health",
+        "abilities_for_ai_diagnostic_content_narrative",
+        "abilities_for_ai_diagnostic_taxonomy_health",
+        "abilities_for_ai_diagnostic_environment",
+        "abilities_for_ai_diagnostic_health",
+        "abilities_for_ai_diagnostic_plugins",
+        "abilities_for_ai_diagnostic_theme",
+        "abilities_for_ai_diagnostic_cache",
+        "abilities_for_ai_diagnostic_cron",
+        "abilities_for_ai_diagnostic_settings",
+        "abilities_for_ai_diagnostic_content",
+        "abilities_for_ai_diagnostic_abilities",
+        "abilities_for_ai_diagnostic_environment_info",
+        "abilities_for_ai_diagnostic_registered_assets"
+      ],
+      "totalLines": 2437,
+      "hasStructuralAnalysis": true
+    },
+    "includes/editorial-abilities.php": {
+      "filePath": "includes/editorial-abilities.php",
+      "contentHash": "3ab50cc30249d2a3ba89aafe6d74a5c1656980760058bfa22fd46fa8067a4806",
+      "functions": [
+        {
+          "name": "abilities_for_ai_editorial_strip",
+          "params": [
+            "$content"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "abilities_for_ai_editorial_site_voice",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 316
+        },
+        {
+          "name": "abilities_for_ai_editorial_content_samples",
+          "params": [
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 188
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_for_ai_editorial_strip",
+        "abilities_for_ai_editorial_site_voice",
+        "abilities_for_ai_editorial_content_samples"
+      ],
+      "totalLines": 630,
+      "hasStructuralAnalysis": true
+    },
+    "includes/filesystem-abilities.php": {
+      "filePath": "includes/filesystem-abilities.php",
+      "contentHash": "3eadec6bc50affd3452ea40d7cde8eab5923b2b91913ff4a555c975ec3fe8e40",
+      "functions": [
+        {
+          "name": "wp_abilities_filesystem_validate_path",
+          "params": [
+            "$relative_path",
+            "$must_exist"
+          ],
+          "exported": true,
+          "lineCount": 61
+        },
+        {
+          "name": "wp_abilities_filesystem_check_extension",
+          "params": [
+            "$path"
+          ],
+          "exported": true,
+          "lineCount": 14
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "wp_abilities_filesystem_validate_path",
+        "wp_abilities_filesystem_check_extension"
+      ],
+      "totalLines": 608,
+      "hasStructuralAnalysis": true
+    },
+    "includes/helpers.php": {
+      "filePath": "includes/helpers.php",
+      "contentHash": "b0d128a9fc2a3221f19465b35185b58b130a9664f49fed8c72c258b75199f92f",
+      "functions": [
+        {
+          "name": "wp_abilities_pagination",
+          "params": [
+            "$input",
+            "$default_per_page"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "wp_abilities_pagination_schema",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "wp_abilities_error",
+          "params": [
+            "$code",
+            "$message",
+            "$data"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "abilities_for_ai_require_editable_post",
+          "params": [
+            "$post_id",
+            "$capability"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "abilities_for_ai_safe_value",
+          "params": [
+            "$value"
+          ],
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "menu_abilities_build_tree",
+          "params": [
+            "$items"
+          ],
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "menu_abilities_format_item",
+          "params": [
+            "$item"
+          ],
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "menu_abilities_get_location_assignments",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "abilities_for_ai_permission_defaults",
+          "params": [],
+          "exported": true,
+          "lineCount": 31
+        },
+        {
+          "name": "abilities_for_ai_module_prefix_map",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "abilities_for_ai_module_labels",
+          "params": [],
+          "exported": true,
+          "lineCount": 31
+        },
+        {
+          "name": "abilities_for_ai_get_permissions",
+          "params": [
+            "$module"
+          ],
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "abilities_for_ai_ability_enabled",
+          "params": [
+            "$ability_name",
+            "$module",
+            "$op"
+          ],
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "abilities_for_ai_can",
+          "params": [
+            "$module",
+            "$op"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "wp_abilities_is_private_ip",
+          "params": [
+            "$ip"
+          ],
+          "exported": true,
+          "lineCount": 73
+        },
+        {
+          "name": "abilities_for_ai_is_private_ip",
+          "params": [
+            "$ip"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "wp_abilities_prepare_safe_fetch",
+          "params": [
+            "$url",
+            "$resolver"
+          ],
+          "exported": true,
+          "lineCount": 54
+        },
+        {
+          "name": "wp_abilities_safe_remote_get",
+          "params": [
+            "$url",
+            "$args"
+          ],
+          "exported": true,
+          "lineCount": 55
+        },
+        {
+          "name": "wp_abilities_safe_download_url",
+          "params": [
+            "$url"
+          ],
+          "exported": true,
+          "lineCount": 36
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "wp_abilities_pagination",
+        "wp_abilities_pagination_schema",
+        "wp_abilities_error",
+        "abilities_for_ai_require_editable_post",
+        "abilities_for_ai_safe_value",
+        "menu_abilities_build_tree",
+        "menu_abilities_format_item",
+        "menu_abilities_get_location_assignments",
+        "abilities_for_ai_permission_defaults",
+        "abilities_for_ai_module_prefix_map",
+        "abilities_for_ai_module_labels",
+        "abilities_for_ai_get_permissions",
+        "abilities_for_ai_ability_enabled",
+        "abilities_for_ai_can",
+        "wp_abilities_is_private_ip",
+        "abilities_for_ai_is_private_ip",
+        "wp_abilities_prepare_safe_fetch",
+        "wp_abilities_safe_remote_get",
+        "wp_abilities_safe_download_url"
+      ],
+      "totalLines": 661,
+      "hasStructuralAnalysis": true
+    },
+    "includes/knowledge-abilities.php": {
+      "filePath": "includes/knowledge-abilities.php",
+      "contentHash": "e3e701af9d77c9701cdc21102bd36c180e4a0a807677ea735547968ac6e163bc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 131,
+      "hasStructuralAnalysis": true
+    },
+    "includes/knowledge-layer-abilities.php": {
+      "filePath": "includes/knowledge-layer-abilities.php",
+      "contentHash": "6bc8d42753a0196c863775cd92c697366c6d430641921f664df69c4c9552e9f2",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Core\\Registrar",
+          "specifiers": [
+            "Registrar"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Document",
+          "specifiers": [
+            "Document"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Session",
+          "specifiers": [
+            "Session"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Observation",
+          "specifiers": [
+            "Observation"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Revision",
+          "specifiers": [
+            "Revision"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Schema",
+          "specifiers": [
+            "Schema"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Search\\Fulltext_Search_Provider",
+          "specifiers": [
+            "Fulltext_Search_Provider"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Search\\KL_Search_Provider",
+          "specifiers": [
+            "KL_Search_Provider"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 705,
+      "hasStructuralAnalysis": true
+    },
+    "includes/knowledge-rest.php": {
+      "filePath": "includes/knowledge-rest.php",
+      "contentHash": "300c8bf28dd8963bf5419a70d0d1b06749ae5977aee515eb1f088e1268da11e8",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\REST\\DocumentsController",
+          "specifiers": [
+            "DocumentsController"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\REST\\SessionsController",
+          "specifiers": [
+            "SessionsController"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\REST\\ObservationsController",
+          "specifiers": [
+            "ObservationsController"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\REST\\TagsController",
+          "specifiers": [
+            "TagsController"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\REST\\DashboardController",
+          "specifiers": [
+            "DashboardController"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\REST\\ActivityController",
+          "specifiers": [
+            "ActivityController"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\REST\\BoundaryController",
+          "specifiers": [
+            "BoundaryController"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Schema",
+          "specifiers": [
+            "Schema"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 46,
+      "hasStructuralAnalysis": true
+    },
+    "includes/knowledge-tag-abilities.php": {
+      "filePath": "includes/knowledge-tag-abilities.php",
+      "contentHash": "b50abd6152167d3fe892a62c67f796a212c19c859ae47046b6ead4920b7ee22c",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Core\\Registrar",
+          "specifiers": [
+            "Registrar"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Tag",
+          "specifiers": [
+            "Tag"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Taggable",
+          "specifiers": [
+            "Taggable"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Schema",
+          "specifiers": [
+            "Schema"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 232,
+      "hasStructuralAnalysis": true
+    },
+    "includes/license-manager.php": {
+      "filePath": "includes/license-manager.php",
+      "contentHash": "7c6b22457289f5c3821608623268ce50145af3f44c8001c07eaf17613bb3e89a",
+      "functions": [
+        {
+          "name": "get_license_key",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_product_id",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "is_pro_active",
+          "params": [],
+          "exported": false,
+          "lineCount": 29
+        },
+        {
+          "name": "activate",
+          "params": [
+            "$license_key"
+          ],
+          "exported": false,
+          "lineCount": 46
+        },
+        {
+          "name": "deactivate",
+          "params": [],
+          "exported": false,
+          "lineCount": 23
+        },
+        {
+          "name": "pro_required_error",
+          "params": [
+            "$ability_name"
+          ],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "get_status",
+          "params": [],
+          "exported": false,
+          "lineCount": 28
+        },
+        {
+          "name": "is_network_license",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "get_opt",
+          "params": [
+            "$key",
+            "$default"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "update_opt",
+          "params": [
+            "$key",
+            "$value"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "delete_opt",
+          "params": [
+            "$key"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "remote_check",
+          "params": [
+            "$license_key"
+          ],
+          "exported": false,
+          "lineCount": 22
+        },
+        {
+          "name": "remote_request",
+          "params": [
+            "$action",
+            "$payload"
+          ],
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "is_within_grace_period",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        }
+      ],
+      "classes": [
+        {
+          "name": "Abilities_For_AI_License_Manager",
+          "methods": [
+            "get_license_key",
+            "get_product_id",
+            "is_pro_active",
+            "activate",
+            "deactivate",
+            "pro_required_error",
+            "get_status",
+            "is_network_license",
+            "get_opt",
+            "update_opt",
+            "delete_opt",
+            "remote_check",
+            "remote_request",
+            "is_within_grace_period"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 381
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Abilities_For_AI_License_Manager"
+      ],
+      "totalLines": 410,
+      "hasStructuralAnalysis": true
+    },
+    "includes/media-abilities.php": {
+      "filePath": "includes/media-abilities.php",
+      "contentHash": "20a5b2e85dba04795cb1be73a8e444e167321dee26597cf15d11480a4a1e8669",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 517,
+      "hasStructuralAnalysis": true
+    },
+    "includes/menu-abilities.php": {
+      "filePath": "includes/menu-abilities.php",
+      "contentHash": "4572d4ac3c46f7bd0298cf22cdbfd23491179466edac503aaf4cd1b91a5a4925",
+      "functions": [
+        {
+          "name": "abilities_for_ai_menu_build_tree",
+          "params": [
+            "$items"
+          ],
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "abilities_for_ai_menu_format_item",
+          "params": [
+            "$item"
+          ],
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_for_ai_menu_build_tree",
+        "abilities_for_ai_menu_format_item"
+      ],
+      "totalLines": 597,
+      "hasStructuralAnalysis": true
+    },
+    "includes/meta-abilities.php": {
+      "filePath": "includes/meta-abilities.php",
+      "contentHash": "cb88c31f58049662f255809ba8471fadb50f6beaea8e60e689a7ad9eae1e80d4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 480,
+      "hasStructuralAnalysis": true
+    },
+    "includes/multisite-abilities.php": {
+      "filePath": "includes/multisite-abilities.php",
+      "contentHash": "b871287a5a10145163ca14c2e670ef00d4ac5a343d499f7a87360183d1a7ccf6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 426,
+      "hasStructuralAnalysis": true
+    },
+    "includes/patterns-abilities.php": {
+      "filePath": "includes/patterns-abilities.php",
+      "contentHash": "d39a70bcec5c49328331eb860fb73f7b06683625ced89d046ff6c9f10d0ae616",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 245,
+      "hasStructuralAnalysis": true
+    },
+    "includes/permissions.php": {
+      "filePath": "includes/permissions.php",
+      "contentHash": "acd1d7ff9fdcf73afc85cd912786d7ae904def815ad3826f83b2000ae0c122fc",
+      "functions": [
+        {
+          "name": "abilities_for_ai_handle_permissions_save",
+          "params": [],
+          "exported": true,
+          "lineCount": 42
+        },
+        {
+          "name": "abilities_for_ai_patch_permissions",
+          "params": [
+            "$existing",
+            "$input"
+          ],
+          "exported": true,
+          "lineCount": 82
+        },
+        {
+          "name": "abilities_for_ai_get_ability_counts",
+          "params": [],
+          "exported": true,
+          "lineCount": 40
+        },
+        {
+          "name": "abilities_for_ai_enabled_count",
+          "params": [],
+          "exported": true,
+          "lineCount": 35
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_for_ai_handle_permissions_save",
+        "abilities_for_ai_patch_permissions",
+        "abilities_for_ai_get_ability_counts",
+        "abilities_for_ai_enabled_count"
+      ],
+      "totalLines": 276,
+      "hasStructuralAnalysis": true
+    },
+    "includes/plugin-abilities.php": {
+      "filePath": "includes/plugin-abilities.php",
+      "contentHash": "b27b61310d97b39dc777f0738ff293efb877c595be1b92b7fc17d333df168167",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 586,
+      "hasStructuralAnalysis": true
+    },
+    "includes/rest-discovery-abilities.php": {
+      "filePath": "includes/rest-discovery-abilities.php",
+      "contentHash": "e4323c34c6deca4820c454f1bed68efe2087fc0e7e1d78cc2cb4e155f2a4d7cd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 160,
+      "hasStructuralAnalysis": true
+    },
+    "includes/revision-abilities.php": {
+      "filePath": "includes/revision-abilities.php",
+      "contentHash": "04fe5bddc6cbc83ba2052f22512bb5896e40278e5bd3a7965d6da671cc3be6b1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 245,
+      "hasStructuralAnalysis": true
+    },
+    "includes/rewrite-abilities.php": {
+      "filePath": "includes/rewrite-abilities.php",
+      "contentHash": "c377addf56d7d7063c38db8c0db3000d6ff8881a81eb64de7385665b27005a58",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 127,
+      "hasStructuralAnalysis": true
+    },
+    "includes/schemas.php": {
+      "filePath": "includes/schemas.php",
+      "contentHash": "a26a4863a5696338bfc6a62a8de07d51b720a84bea006ff5f1527d9b7d542da1",
+      "functions": [
+        {
+          "name": "abilities_for_ai_schema_pagination",
+          "params": [
+            "$default_per_page"
+          ],
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "abilities_for_ai_schema_post_type",
+          "params": [
+            "$description"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "abilities_for_ai_schema_search",
+          "params": [
+            "$description"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "abilities_for_ai_schema_orderby",
+          "params": [
+            "$options",
+            "$default",
+            "$description"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "abilities_for_ai_schema_list_output",
+          "params": [
+            "$items_key",
+            "$item_props"
+          ],
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "abilities_for_ai_schema_collection_output",
+          "params": [
+            "$items_key",
+            "$item_props"
+          ],
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "abilities_for_ai_schema_success_output",
+          "params": [
+            "$extra_props"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "abilities_for_ai_schema_item_output",
+          "params": [
+            "$item_props"
+          ],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_for_ai_schema_pagination",
+        "abilities_for_ai_schema_post_type",
+        "abilities_for_ai_schema_search",
+        "abilities_for_ai_schema_orderby",
+        "abilities_for_ai_schema_list_output",
+        "abilities_for_ai_schema_collection_output",
+        "abilities_for_ai_schema_success_output",
+        "abilities_for_ai_schema_item_output"
+      ],
+      "totalLines": 193,
+      "hasStructuralAnalysis": true
+    },
+    "includes/settings-abilities.php": {
+      "filePath": "includes/settings-abilities.php",
+      "contentHash": "561951d8f649f561fba435197e14b2953802505808118d0e205002d6344260b9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 221,
+      "hasStructuralAnalysis": true
+    },
+    "includes/site-health-abilities.php": {
+      "filePath": "includes/site-health-abilities.php",
+      "contentHash": "c30bf5f3accc1fdfede6604af29828e1c79f22fdd790ad4181ec338f389af445",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 337,
+      "hasStructuralAnalysis": true
+    },
+    "includes/status-abilities.php": {
+      "filePath": "includes/status-abilities.php",
+      "contentHash": "51faa41eaf53c76b957274f1f1f7af19f064af2d7869ea7710d8a4a5309bd680",
+      "functions": [
+        {
+          "name": "abilities_for_ai_get_status",
+          "params": [],
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "abilities_for_ai_get_permissions_summary",
+          "params": [],
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_for_ai_get_status",
+        "abilities_for_ai_get_permissions_summary"
+      ],
+      "totalLines": 115,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/astra/blog-archive-abilities.php": {
+      "filePath": "includes/suites/astra/blog-archive-abilities.php",
+      "contentHash": "73698664f46d0bd874b9944c6a2e256b2ab675ea123f5232b615dfc2ce33d660",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 348,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/astra/breadcrumb-scroll-perf-abilities.php": {
+      "filePath": "includes/suites/astra/breadcrumb-scroll-perf-abilities.php",
+      "contentHash": "ddb653cad5e9c77c60658297223be96089eb22cdede672f71f249ecdc8285ccf",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 268,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/astra/custom-layout-abilities.php": {
+      "filePath": "includes/suites/astra/custom-layout-abilities.php",
+      "contentHash": "10253e33a9af32b1b2c670892bf3cbede4071bbca645a38c2bc44c5968c2b32f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 403,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/astra/global-styles-abilities.php": {
+      "filePath": "includes/suites/astra/global-styles-abilities.php",
+      "contentHash": "a7150f24d058a9cd42ca26f388ee5c68c11ad8bb749c614d2d67bfbe5ba9efbe",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 196,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/astra/header-footer-abilities.php": {
+      "filePath": "includes/suites/astra/header-footer-abilities.php",
+      "contentHash": "cc534ff427f225e2607b8ecab80e7dc2d39ccab77c38a4c327e35d1c447b012a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 343,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/astra/helpers.php": {
+      "filePath": "includes/suites/astra/helpers.php",
+      "contentHash": "47447e79f9f13a513f8788bae41f7d1a6604eb8469165c2ac97b98649a1cb2d1",
+      "functions": [
+        {
+          "name": "astra_abilities_is_pro_active",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "astra_abilities_get_pro_modules",
+          "params": [],
+          "exported": true,
+          "lineCount": 52
+        },
+        {
+          "name": "astra_abilities_resolve_page_layout",
+          "params": [
+            "$post_id"
+          ],
+          "exported": true,
+          "lineCount": 38
+        },
+        {
+          "name": "astra_abilities_deep_merge",
+          "params": [
+            "$base",
+            "$override"
+          ],
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "astra_abilities_map_input_to_meta",
+          "params": [
+            "$input",
+            "$layout_type",
+            "$is_update"
+          ],
+          "exported": true,
+          "lineCount": 71
+        },
+        {
+          "name": "astra_abilities_page_meta_keys",
+          "params": [],
+          "exported": true,
+          "lineCount": 32
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "astra_abilities_is_pro_active",
+        "astra_abilities_get_pro_modules",
+        "astra_abilities_resolve_page_layout",
+        "astra_abilities_deep_merge",
+        "astra_abilities_map_input_to_meta",
+        "astra_abilities_page_meta_keys"
+      ],
+      "totalLines": 271,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/astra/layout-abilities.php": {
+      "filePath": "includes/suites/astra/layout-abilities.php",
+      "contentHash": "d0a0454616046378df11914a3156a44dcd312d9ad37b0168a418bb2de8f424e6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 214,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/astra/loader.php": {
+      "filePath": "includes/suites/astra/loader.php",
+      "contentHash": "4d1e1751e73d22564766ff04dd35d3a34e1d95fab1437e692011d68dcdb06ee3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 51,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/astra/page-header-abilities.php": {
+      "filePath": "includes/suites/astra/page-header-abilities.php",
+      "contentHash": "d8c3edbbd6387a28bd8a2255c77beaf3810702ade7dbfb714ae40a132ab8b91e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 409,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/astra/pro-abilities.php": {
+      "filePath": "includes/suites/astra/pro-abilities.php",
+      "contentHash": "8fd1ecdfd435772c3e1b8a78d201774085de36b826643c1a593e825d672945e8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 387,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/astra/settings-abilities.php": {
+      "filePath": "includes/suites/astra/settings-abilities.php",
+      "contentHash": "4cd67c578362e244bb04fe6951af521c5460c4dc4fd712f6e33923edcb0d4cd1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 412,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/presto-player/analytics-abilities.php": {
+      "filePath": "includes/suites/presto-player/analytics-abilities.php",
+      "contentHash": "2f6d9505255e6caff43590b6054e172b2028f9e12c6660e9c27d67c19fc82e2a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 197,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/presto-player/audio-preset-abilities.php": {
+      "filePath": "includes/suites/presto-player/audio-preset-abilities.php",
+      "contentHash": "88d63c9450478d1ce90e8b079143dc0f4b268284fc5677fd6c9530dc67f558b2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 317,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/presto-player/bunny-abilities.php": {
+      "filePath": "includes/suites/presto-player/bunny-abilities.php",
+      "contentHash": "4eeff4c9ccd835896bb60f4c2e70f9e617ca2ebb9f90044fad0a8362f37f272f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 61,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/presto-player/email-collection-abilities.php": {
+      "filePath": "includes/suites/presto-player/email-collection-abilities.php",
+      "contentHash": "b34403a5a046220c5bc28fd0880b2f3276b31e3737c4a8958221a50f9083ffbd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 215,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/presto-player/loader.php": {
+      "filePath": "includes/suites/presto-player/loader.php",
+      "contentHash": "d87e4adf14970c701a6b4a5a2bcee53698c053f483835796716b94564d1c231c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 47,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/presto-player/preset-abilities.php": {
+      "filePath": "includes/suites/presto-player/preset-abilities.php",
+      "contentHash": "4bafaa0b278bca8d913115fc92511c245f7c15b0ccdf8deed7c7fff7b376be8b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 337,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/presto-player/settings-abilities.php": {
+      "filePath": "includes/suites/presto-player/settings-abilities.php",
+      "contentHash": "0f8715a979e0d60381d9f421f74b38fc96c2add08af4d0258cb56e3130fdec0b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 128,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/presto-player/video-abilities.php": {
+      "filePath": "includes/suites/presto-player/video-abilities.php",
+      "contentHash": "73b54b839d3d88d857bc355b5199cd7f368e9f2e5a754495dac82124cf12e97c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 314,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/presto-player/webhook-abilities.php": {
+      "filePath": "includes/suites/presto-player/webhook-abilities.php",
+      "contentHash": "37b3f90ed77ba2e09ab13c6a0c02a82bfbb67e6b6a9762a3057d9d14485ee690",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 82,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/spectra/asset-abilities.php": {
+      "filePath": "includes/suites/spectra/asset-abilities.php",
+      "contentHash": "1317db3bac1696b62c01c2fbc2920ef349133b312de3b33800a66b94732c2007",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 216,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/spectra/block-operations-abilities.php": {
+      "filePath": "includes/suites/spectra/block-operations-abilities.php",
+      "contentHash": "d238897446420d2356d20850acd9418e7320ff58ec333c3fb04dfced6ffa242d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 307,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/spectra/block-parser-abilities.php": {
+      "filePath": "includes/suites/spectra/block-parser-abilities.php",
+      "contentHash": "80a7525793f2fc08e0fde09a732f414378a30d4f306a1318926a7e4751c0eaa2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 317,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/spectra/helpers.php": {
+      "filePath": "includes/suites/spectra/helpers.php",
+      "contentHash": "2c33626bb7e7b0fade17f2a655a03bcc6664e68e239af23dd0b4e5a47145400b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 338,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/spectra/image-abilities.php": {
+      "filePath": "includes/suites/spectra/image-abilities.php",
+      "contentHash": "299e9b1cd924e9862eb1f339c0e924918e84a72e4a21cfa3508603a021e49325",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 172,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/spectra/inspection-abilities.php": {
+      "filePath": "includes/suites/spectra/inspection-abilities.php",
+      "contentHash": "6cdb09c90dfdcd2e9dc2620b032facbf3f53ec5f4a89a8a8da6c6b19de224801",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 331,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/spectra/loader.php": {
+      "filePath": "includes/suites/spectra/loader.php",
+      "contentHash": "b09dc544f387a1563943d2bb55ac2724a45e8d10588b5514ac7241faac51c548",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 46,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/spectra/reusable-block-abilities.php": {
+      "filePath": "includes/suites/spectra/reusable-block-abilities.php",
+      "contentHash": "bc29bba888597fdc4e35d8142ba640af9e7eba79f2431bc65c29d5fc58b60fae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 383,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/spectra/settings-abilities.php": {
+      "filePath": "includes/suites/spectra/settings-abilities.php",
+      "contentHash": "57aafa83183f6b0c74459777e88912a7410c09860f8af2ba878533e6064b08e6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 247,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/spectra/validation-abilities.php": {
+      "filePath": "includes/suites/spectra/validation-abilities.php",
+      "contentHash": "310ca0ea878510d9da8dd68655639d8ea3b1b213d42c5b6d4be63614fa0bad53",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 380,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/coupon-abilities.php": {
+      "filePath": "includes/suites/surecart/coupon-abilities.php",
+      "contentHash": "53156d79b30d6575c45da625d7c03df35531b54471dcf8d287da3637d66728c6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 262,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/customer-abilities.php": {
+      "filePath": "includes/suites/surecart/customer-abilities.php",
+      "contentHash": "f732a68239b3f0f86e59a2d32e3a3c6de9f9ea21f8c92546c2081134d94a2127",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 233,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/extras-abilities.php": {
+      "filePath": "includes/suites/surecart/extras-abilities.php",
+      "contentHash": "ef94a1dd1b64d70d9606ca38b857374b107d13e37300eb737c6309562a8e486c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 169,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/fulfillment-abilities.php": {
+      "filePath": "includes/suites/surecart/fulfillment-abilities.php",
+      "contentHash": "dbbaaa0aa9c1c05134a5b2bc137acb3e24b127dac5be1eb61a3c0a928dd1da6f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 194,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/helpers.php": {
+      "filePath": "includes/suites/surecart/helpers.php",
+      "contentHash": "2a47cad8caf6e6583f58d0dac7442858ee7242de590c536c1cdf784e6a9450b4",
+      "functions": [
+        {
+          "name": "abilities_for_ai_surecart_call",
+          "params": [
+            "$callback",
+            "$context"
+          ],
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "abilities_for_ai_surecart_pagination_schema",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "abilities_for_ai_surecart_format_paginated",
+          "params": [
+            "$collection"
+          ],
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "abilities_for_ai_surecart_format_model",
+          "params": [
+            "$model"
+          ],
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_for_ai_surecart_call",
+        "abilities_for_ai_surecart_pagination_schema",
+        "abilities_for_ai_surecart_format_paginated",
+        "abilities_for_ai_surecart_format_model"
+      ],
+      "totalLines": 88,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/license-abilities.php": {
+      "filePath": "includes/suites/surecart/license-abilities.php",
+      "contentHash": "7d3f7c3dff205f99ab39b1d19c9aefc56bea47d7d1f7f21167bf15025e79fdc6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 147,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/loader.php": {
+      "filePath": "includes/suites/surecart/loader.php",
+      "contentHash": "50d916290b0125c61c637dd96b04b78fb68588cf4e63dd32a7979a485bd6760d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 43,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/order-abilities.php": {
+      "filePath": "includes/suites/surecart/order-abilities.php",
+      "contentHash": "7c24fafd4494dc1ac3eea4aa11c00ab5ca96cc9a8d113eb9fae02e734866b97f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 241,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/payment-abilities.php": {
+      "filePath": "includes/suites/surecart/payment-abilities.php",
+      "contentHash": "507e7226030495ebeae5d450b92e280504c5862ad31bb49c3923d53824badc37",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 250,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/product-abilities.php": {
+      "filePath": "includes/suites/surecart/product-abilities.php",
+      "contentHash": "634a2b369ce472ff4906df5451c8856f3388b41ad0416cbb5367ea0b8e031b80",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 590,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/settings-abilities.php": {
+      "filePath": "includes/suites/surecart/settings-abilities.php",
+      "contentHash": "a3e6e0b25504043cb257da9457e6b804c32969ffa133419fcd779bcdef47b2b2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 165,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/shipping-abilities.php": {
+      "filePath": "includes/suites/surecart/shipping-abilities.php",
+      "contentHash": "69a3df55c5b68223556b3cb89a7e2db1c52cdfb2447329f9fedb8a5817319b5d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 118,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/subscription-abilities.php": {
+      "filePath": "includes/suites/surecart/subscription-abilities.php",
+      "contentHash": "b36da7615f375be051b31ebbc39592c2f59882d801e38a666ecb86462bd1f87b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 328,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/surecart/webhook-abilities.php": {
+      "filePath": "includes/suites/surecart/webhook-abilities.php",
+      "contentHash": "2bfa767e4f36a72dc6e1431054b494d3856c607d85c6a9891ccd8a79ed011568",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 128,
+      "hasStructuralAnalysis": true
+    },
+    "includes/suites/TEMPLATE-loader.php": {
+      "filePath": "includes/suites/TEMPLATE-loader.php",
+      "contentHash": "02f7a95388f3673567c58317c456ebeb2d3b778646a0a91aeb8c5642583fd929",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": true
+    },
+    "includes/taxonomy-abilities.php": {
+      "filePath": "includes/taxonomy-abilities.php",
+      "contentHash": "6ff203bb9650298788791f5a3088b1f407a14d9eb11ddd06ea3d6629d7442562",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 608,
+      "hasStructuralAnalysis": true
+    },
+    "includes/theme-enqueue-abilities.php": {
+      "filePath": "includes/theme-enqueue-abilities.php",
+      "contentHash": "62799eefab7a0131acc38ca3d3bd2bf43acc71e3490691ad630c01c462ee3d64",
+      "functions": [
+        {
+          "name": "abilities_for_ai_evaluate_enqueue_condition",
+          "params": [
+            "$condition"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 15
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_for_ai_evaluate_enqueue_condition"
+      ],
+      "totalLines": 334,
+      "hasStructuralAnalysis": true
+    },
+    "includes/themes-abilities.php": {
+      "filePath": "includes/themes-abilities.php",
+      "contentHash": "fc8b2dbea174e597625cff78e8417671827874af726957856cc809e6e83545a4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 582,
+      "hasStructuralAnalysis": true
+    },
+    "includes/tier-gate.php": {
+      "filePath": "includes/tier-gate.php",
+      "contentHash": "30e528bf9cfb0226284622e036e2db38fca58a9e9c02ce353f4268c6b862c285",
+      "functions": [
+        {
+          "name": "abilities_for_ai_pro_gate",
+          "params": [
+            "$ability_name",
+            "$callback"
+          ],
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "abilities_for_ai_pro_gate"
+      ],
+      "totalLines": 32,
+      "hasStructuralAnalysis": true
+    },
+    "includes/transients-abilities.php": {
+      "filePath": "includes/transients-abilities.php",
+      "contentHash": "ad23343a97b18807e6a49afdc01d391da8771cc77d36937be2e8919f26bc80cb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 322,
+      "hasStructuralAnalysis": true
+    },
+    "includes/updater/class-plugin-updater.php": {
+      "filePath": "includes/updater/class-plugin-updater.php",
+      "contentHash": "d2f98ef782cfcd68dad83eeb8fe9226d72254f448c38adf8dc18313cb06e1454",
+      "functions": [
+        {
+          "name": "__construct",
+          "params": [
+            "$config"
+          ],
+          "exported": false,
+          "lineCount": 18
+        },
+        {
+          "name": "init_hooks",
+          "params": [],
+          "exported": false,
+          "lineCount": 51
+        },
+        {
+          "name": "check_plugin_update",
+          "params": [
+            "$transient_data"
+          ],
+          "exported": false,
+          "lineCount": 28
+        },
+        {
+          "name": "plugins_api_filter",
+          "params": [
+            "$data",
+            "$action",
+            "$args"
+          ],
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "pre_download",
+          "params": [
+            "$reply",
+            "$package",
+            "$upgrader"
+          ],
+          "exported": false,
+          "lineCount": 22
+        },
+        {
+          "name": "get_version_info",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "get_cached_version_info",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "set_cached_version_info",
+          "params": [
+            "$value"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "get_remote_version_info",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "get_fluentcart_version_info",
+          "params": [],
+          "exported": false,
+          "lineCount": 48
+        },
+        {
+          "name": "get_github_version_info",
+          "params": [],
+          "exported": false,
+          "lineCount": 51
+        },
+        {
+          "name": "normalize_version_info",
+          "params": [
+            "$version_info"
+          ],
+          "exported": false,
+          "lineCount": 22
+        }
+      ],
+      "classes": [
+        {
+          "name": "Abilities_For_AI_Plugin_Updater",
+          "methods": [
+            "__construct",
+            "init_hooks",
+            "check_plugin_update",
+            "plugins_api_filter",
+            "pre_download",
+            "get_version_info",
+            "get_cached_version_info",
+            "set_cached_version_info",
+            "get_remote_version_info",
+            "get_fluentcart_version_info",
+            "get_github_version_info",
+            "normalize_version_info"
+          ],
+          "properties": [
+            "cache_key",
+            "config"
+          ],
+          "exported": true,
+          "lineCount": 412
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Abilities_For_AI_Plugin_Updater"
+      ],
+      "totalLines": 429,
+      "hasStructuralAnalysis": true
+    },
+    "includes/user-abilities.php": {
+      "filePath": "includes/user-abilities.php",
+      "contentHash": "269d377d395024fbbf01a4b3cd8ade815c3a0823f8477f7549160f7a6a5821dc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 632,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/index.html": {
+      "filePath": "kl-admin/index.html",
+      "contentHash": "41ef4dd4221c175efa774e346c313a750488f47277719c0c0a81048652471181",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/package.json": {
+      "filePath": "kl-admin/package.json",
+      "contentHash": "f3d943d414ca90ff77fe9f93850fcc367a7c76484d8babfa21c71eec32898676",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 21,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/src/api.js": {
+      "filePath": "kl-admin/src/api.js",
+      "contentHash": "2c41038623ae7f114cdd37170d829386099328eb1579799b34edaa8e1dec2050",
+      "functions": [
+        {
+          "name": "request",
+          "params": [
+            "endpoint"
+          ],
+          "exported": false,
+          "lineCount": 25
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "api"
+      ],
+      "totalLines": 45,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/src/App.vue": {
+      "filePath": "kl-admin/src/App.vue",
+      "contentHash": "21927e23243a3a8a01d1416540808fe8049f7bf4cedecc97ba2403830e4ddac8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1002,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/components/AppNav.vue": {
+      "filePath": "kl-admin/src/components/AppNav.vue",
+      "contentHash": "049da7795ec431e245918745d4711c26ba36c71a1de779db00c4228e2ceaedb3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 59,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/components/Pagination.vue": {
+      "filePath": "kl-admin/src/components/Pagination.vue",
+      "contentHash": "e8fe2e3ea0f7c00c9280e487c68fda85b82f0e8afe144093bf4eec38d4286f92",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/components/StatusBadge.vue": {
+      "filePath": "kl-admin/src/components/StatusBadge.vue",
+      "contentHash": "a5afefedcefd5ae8f6e6d772653799845e193a1e3fb77c94e0b885b61c8eea11",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/components/TagChip.vue": {
+      "filePath": "kl-admin/src/components/TagChip.vue",
+      "contentHash": "53dace51b2273bcdfe5ba08693554022860fe5df66c1870da06caf21f8e3586a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 18,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/components/TypeBadge.vue": {
+      "filePath": "kl-admin/src/components/TypeBadge.vue",
+      "contentHash": "20972960dcb2adf517602d5bb165fbfdc01c57eeac9fbd70d067f925e762f614",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/main.js": {
+      "filePath": "kl-admin/src/main.js",
+      "contentHash": "535c5f2c8811f3dbeeff5bebc13a62dcdbcc6e253d27809b582e47895b3673e2",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "vue",
+          "specifiers": [
+            "createApp"
+          ]
+        },
+        {
+          "source": "pinia",
+          "specifiers": [
+            "createPinia"
+          ]
+        },
+        {
+          "source": "element-plus",
+          "specifiers": [
+            "ElementPlus"
+          ]
+        },
+        {
+          "source": "element-plus/dist/index.css",
+          "specifiers": []
+        },
+        {
+          "source": "./App.vue",
+          "specifiers": [
+            "App"
+          ]
+        },
+        {
+          "source": "./router.js",
+          "specifiers": [
+            "router"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/src/router.js": {
+      "filePath": "kl-admin/src/router.js",
+      "contentHash": "53fe155accb2b548d8b2a570b3de24bb2d0fd592a87e2505d6b25870d6d878c5",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "vue-router",
+          "specifiers": [
+            "createRouter",
+            "createWebHashHistory"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 18,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/src/stores/activity.js": {
+      "filePath": "kl-admin/src/stores/activity.js",
+      "contentHash": "84940a2766cfce2a2409bca979bdac8205ea072e44f3341f1621a179f0ca10e0",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pinia",
+          "specifiers": [
+            "defineStore"
+          ]
+        },
+        {
+          "source": "../api.js",
+          "specifiers": [
+            "api"
+          ]
+        }
+      ],
+      "exports": [
+        "useActivityStore"
+      ],
+      "totalLines": 81,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/src/stores/boundary.js": {
+      "filePath": "kl-admin/src/stores/boundary.js",
+      "contentHash": "1a4ef2b7106337383301e16cb4ac66ab0b20bc0581d93d93f90f44f9b8dc7e92",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pinia",
+          "specifiers": [
+            "defineStore"
+          ]
+        },
+        {
+          "source": "../api.js",
+          "specifiers": [
+            "api"
+          ]
+        }
+      ],
+      "exports": [
+        "useBoundaryStore"
+      ],
+      "totalLines": 55,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/src/stores/documents.js": {
+      "filePath": "kl-admin/src/stores/documents.js",
+      "contentHash": "4b7016d19bc916bb9ca43316d1c7c7110f54f8364ba1d023b9f8fc572d0bb774",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pinia",
+          "specifiers": [
+            "defineStore"
+          ]
+        },
+        {
+          "source": "../api.js",
+          "specifiers": [
+            "api"
+          ]
+        }
+      ],
+      "exports": [
+        "useDocumentsStore"
+      ],
+      "totalLines": 106,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/src/stores/index.js": {
+      "filePath": "kl-admin/src/stores/index.js",
+      "contentHash": "11b170bd5963732f09705c64cc96385fcde30f0fb4ad73024ec4c04263e66001",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "useDocumentsStore",
+        "useSessionsStore",
+        "useObservationsStore",
+        "useTagsStore",
+        "useActivityStore",
+        "useBoundaryStore"
+      ],
+      "totalLines": 7,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/src/stores/observations.js": {
+      "filePath": "kl-admin/src/stores/observations.js",
+      "contentHash": "d53216f712ab9cdc3b9ce4e4e8dd2ff609588a47db9981d53b407fde5344d8b4",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pinia",
+          "specifiers": [
+            "defineStore"
+          ]
+        },
+        {
+          "source": "../api.js",
+          "specifiers": [
+            "api"
+          ]
+        }
+      ],
+      "exports": [
+        "useObservationsStore"
+      ],
+      "totalLines": 55,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/src/stores/sessions.js": {
+      "filePath": "kl-admin/src/stores/sessions.js",
+      "contentHash": "1b2b1b6dad71733c9247ba851009be4a3c1aa964938c966dce50c9b71b42edbf",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pinia",
+          "specifiers": [
+            "defineStore"
+          ]
+        },
+        {
+          "source": "../api.js",
+          "specifiers": [
+            "api"
+          ]
+        }
+      ],
+      "exports": [
+        "useSessionsStore"
+      ],
+      "totalLines": 43,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/src/stores/tags.js": {
+      "filePath": "kl-admin/src/stores/tags.js",
+      "contentHash": "4ddd55804516ffefc50c50d431e2e8cd70c87d4c75c343a872fbdbd62ec5a1fc",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pinia",
+          "specifiers": [
+            "defineStore"
+          ]
+        },
+        {
+          "source": "../api.js",
+          "specifiers": [
+            "api"
+          ]
+        }
+      ],
+      "exports": [
+        "useTagsStore"
+      ],
+      "totalLines": 47,
+      "hasStructuralAnalysis": true
+    },
+    "kl-admin/src/views/Activity.vue": {
+      "filePath": "kl-admin/src/views/Activity.vue",
+      "contentHash": "d57735528c7a6c391d709876cdd098d97e8ae214253a3e53f0c15db8b6a3f523",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 549,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/views/Dashboard.vue": {
+      "filePath": "kl-admin/src/views/Dashboard.vue",
+      "contentHash": "87079184be84f5ab112b0bbe7ddceda98673b6c900c48514f6363d66e310fad3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 276,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/views/DocumentDetail.vue": {
+      "filePath": "kl-admin/src/views/DocumentDetail.vue",
+      "contentHash": "6543684bea2e38134f9d007c2f352bcebfaef01325de5af9b7a3e7bcfdbd361c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 482,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/views/Documents.vue": {
+      "filePath": "kl-admin/src/views/Documents.vue",
+      "contentHash": "d93099173a88e93beef5aa21e9858965e0daaa84c91a6e00905ed92cc24261ea",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 359,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/views/Observations.vue": {
+      "filePath": "kl-admin/src/views/Observations.vue",
+      "contentHash": "78b3f1de6eba1afaea84151e179333203a1239007372832ac7572d01da4febcd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 234,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/views/Sessions.vue": {
+      "filePath": "kl-admin/src/views/Sessions.vue",
+      "contentHash": "c631982a41b18494432e1767b1cb83f2006e34d96707e671586ba08763855514",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 132,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/src/views/Tags.vue": {
+      "filePath": "kl-admin/src/views/Tags.vue",
+      "contentHash": "866a53aa80b3e203736445f2878ed2f18d2c43bf2294996e019334b4be4c7fcf",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 164,
+      "hasStructuralAnalysis": false
+    },
+    "kl-admin/vite.config.js": {
+      "filePath": "kl-admin/vite.config.js",
+      "contentHash": "9f978e2108c39018d4e365eb70929787f9893fdb79846359892dd31e682ef162",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "vite",
+          "specifiers": [
+            "defineConfig"
+          ]
+        },
+        {
+          "source": "@vitejs/plugin-vue",
+          "specifiers": [
+            "vue"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": true
+    },
+    "knowledge/getting-started.md": {
+      "filePath": "knowledge/getting-started.md",
+      "contentHash": "7b9dde5ca33123926b78fca8c357cd9f56f71a5c4776841d1636ac31338c1c4c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": true
+    },
+    "knowledge/gutenberg-blocks.md": {
+      "filePath": "knowledge/gutenberg-blocks.md",
+      "contentHash": "5c5cafe8b5c4a89247eed1d8a3586f9a6ff70e0a52a699e14f4cf29ccda9fcc5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 211,
+      "hasStructuralAnalysis": true
+    },
+    "phpunit.xml.dist": {
+      "filePath": "phpunit.xml.dist",
+      "contentHash": "16f612f1fc6c861898f373df25fc8b6e5657a117dc4c4078d66171ecb5bef9b2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 26,
+      "hasStructuralAnalysis": false
+    },
+    "PRINCIPLES.md": {
+      "filePath": "PRINCIPLES.md",
+      "contentHash": "7a213435486b28cbacbe0f0b4579b87f5003e72d3f27e45075d8b7fe0f4875e4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 182,
+      "hasStructuralAnalysis": true
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "50b721b64290d5253f318befd399d629b0ffbf7fc02b194402510793bc9df0ff",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 248,
+      "hasStructuralAnalysis": true
+    },
+    "readme.txt": {
+      "filePath": "readme.txt",
+      "contentHash": "f5c56a0ca3a9e928679e7dbd0ea1e8f5050a676b9f0e64e13dc0057c74675151",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 149,
+      "hasStructuralAnalysis": false
+    },
+    "SECURITY.md": {
+      "filePath": "SECURITY.md",
+      "contentHash": "85cd63b3b05a5e5aa53e95d7febffdec03e1cd6ddd9285309b4c1803ce1f37eb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": true
+    },
+    "seed-content/skills/content-structure.md": {
+      "filePath": "seed-content/skills/content-structure.md",
+      "contentHash": "0ff4d93a656ca110ffc368e3da399e8449966b130ff31d5cc64439b645b5b51c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 88,
+      "hasStructuralAnalysis": true
+    },
+    "seed-content/skills/end-session.md": {
+      "filePath": "seed-content/skills/end-session.md",
+      "contentHash": "34cac796bbd1ad40c4b712e9e6746e08cc7135cd43fcd3e0e045b6f572d576d9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 114,
+      "hasStructuralAnalysis": true
+    },
+    "seed-content/skills/health-check.md": {
+      "filePath": "seed-content/skills/health-check.md",
+      "contentHash": "e276bc9f8e509fe1ec7ea430c7bc9cc2c0e7c9e139c9c791001d6e8d1efe24e0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 75,
+      "hasStructuralAnalysis": true
+    },
+    "seed-content/skills/initial-read.md": {
+      "filePath": "seed-content/skills/initial-read.md",
+      "contentHash": "fa43a1b22072d908151284c284ba463de7c22e4e3171b91ef06c5ac05aeacb6c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 198,
+      "hasStructuralAnalysis": true
+    },
+    "seed-content/skills/plugin-audit.md": {
+      "filePath": "seed-content/skills/plugin-audit.md",
+      "contentHash": "da7a364c59c9a203e33536e3c3c4827b08cc374afe33fedae8b30fa93641f264",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 78,
+      "hasStructuralAnalysis": true
+    },
+    "seed-content/skills/scheduled-tasks.md": {
+      "filePath": "seed-content/skills/scheduled-tasks.md",
+      "contentHash": "e3879f3c89f839ab8f2dd2724743528dffa2cf1ebbcb3f74dab279a906aad06e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 69,
+      "hasStructuralAnalysis": true
+    },
+    "seed-content/skills/theme-and-design.md": {
+      "filePath": "seed-content/skills/theme-and-design.md",
+      "contentHash": "26ff8412efac9ce5be4154377f8f4624bce2c487c1aaf1637849bd6519e2a451",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 78,
+      "hasStructuralAnalysis": true
+    },
+    "src/Core/LicenseManager.php": {
+      "filePath": "src/Core/LicenseManager.php",
+      "contentHash": "b422c5ce22de7777216eddb28915fc9a8d6afaf071427f13a91db1a042548755",
+      "functions": [
+        {
+          "name": "is_pro_active",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "activate",
+          "params": [
+            "$license_key"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "deactivate",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "pro_required_error",
+          "params": [
+            "$ability_name"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_status",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "LicenseManager",
+          "methods": [
+            "is_pro_active",
+            "activate",
+            "deactivate",
+            "pro_required_error",
+            "get_status"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 49
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "LicenseManager"
+      ],
+      "totalLines": 69,
+      "hasStructuralAnalysis": true
+    },
+    "src/Core/Registrar.php": {
+      "filePath": "src/Core/Registrar.php",
+      "contentHash": "ce1780f8c735c3cc6da2646f407017bbb1e19a0b3ed240bc932088e8a8cfe50c",
+      "functions": [
+        {
+          "name": "__construct",
+          "params": [
+            "$module",
+            "$capability"
+          ],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "read",
+          "params": [
+            "$name",
+            "$config"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "write",
+          "params": [
+            "$name",
+            "$config"
+          ],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "delete",
+          "params": [
+            "$name",
+            "$config"
+          ],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "register",
+          "params": [
+            "$name",
+            "$config",
+            "$op_type"
+          ],
+          "exported": false,
+          "lineCount": 92
+        }
+      ],
+      "classes": [
+        {
+          "name": "Registrar",
+          "methods": [
+            "__construct",
+            "read",
+            "write",
+            "delete",
+            "register"
+          ],
+          "properties": [
+            "module",
+            "capability",
+            "perms"
+          ],
+          "exported": true,
+          "lineCount": 159
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Registrar"
+      ],
+      "totalLines": 189,
+      "hasStructuralAnalysis": true
+    },
+    "src/Helpers/Helpers.php": {
+      "filePath": "src/Helpers/Helpers.php",
+      "contentHash": "68f553ccdccdda754b5afca76da28c14fc830a713600e7cc8902a68879e5348c",
+      "functions": [
+        {
+          "name": "pagination",
+          "params": [
+            "$input",
+            "$default_per_page"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "pagination_schema",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "is_pro",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_permissions",
+          "params": [
+            "$module"
+          ],
+          "exported": false,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "Helpers",
+          "methods": [
+            "pagination",
+            "pagination_schema",
+            "is_pro",
+            "get_permissions"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 41
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Helpers"
+      ],
+      "totalLines": 61,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/BoundaryEventLogger.php": {
+      "filePath": "src/Knowledge/BoundaryEventLogger.php",
+      "contentHash": "848a365ef32fcfa7dcbb237ae9dd7df416e3b4b885732a2cd3ed931ec69dc92a",
+      "functions": [
+        {
+          "name": "record_event",
+          "params": [
+            "$event",
+            "$tags",
+            "$duration_ms"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "persist",
+          "params": [
+            "$event",
+            "$tags",
+            "$duration_ms"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 87
+        },
+        {
+          "name": "build_detail_json",
+          "params": [
+            "$tags"
+          ],
+          "returnType": "?string",
+          "exported": false,
+          "lineCount": 44
+        },
+        {
+          "name": "truncate_ip",
+          "params": [
+            "$ip"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 29
+        }
+      ],
+      "classes": [
+        {
+          "name": "BoundaryEventLogger",
+          "methods": [
+            "record_event",
+            "persist",
+            "build_detail_json",
+            "truncate_ip"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 268
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "BoundaryEventLogger"
+      ],
+      "totalLines": 295,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/Document.php": {
+      "filePath": "src/Knowledge/Document.php",
+      "contentHash": "4295dc5dc239116ec4fa78a58365eaac69a040b91686c766d631017e17f9a033",
+      "functions": [
+        {
+          "name": "table",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "find",
+          "params": [
+            "$id"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "find_by_slug",
+          "params": [
+            "$doc_type",
+            "$slug"
+          ],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "list_documents",
+          "params": [
+            "$args"
+          ],
+          "exported": false,
+          "lineCount": 70
+        },
+        {
+          "name": "create",
+          "params": [
+            "$data"
+          ],
+          "exported": false,
+          "lineCount": 49
+        },
+        {
+          "name": "update",
+          "params": [
+            "$id",
+            "$data"
+          ],
+          "exported": false,
+          "lineCount": 42
+        },
+        {
+          "name": "archive",
+          "params": [
+            "$id"
+          ],
+          "exported": false,
+          "lineCount": 19
+        },
+        {
+          "name": "fork",
+          "params": [
+            "$id",
+            "$overrides"
+          ],
+          "exported": false,
+          "lineCount": 25
+        },
+        {
+          "name": "set_wp_post_id",
+          "params": [
+            "$id",
+            "$wp_post_id"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "decode",
+          "params": [
+            "$row"
+          ],
+          "exported": false,
+          "lineCount": 12
+        }
+      ],
+      "classes": [
+        {
+          "name": "Document",
+          "methods": [
+            "table",
+            "find",
+            "find_by_slug",
+            "list_documents",
+            "create",
+            "update",
+            "archive",
+            "fork",
+            "set_wp_post_id",
+            "decode"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 348
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Document"
+      ],
+      "totalLines": 367,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/MarkdownToBlocks.php": {
+      "filePath": "src/Knowledge/MarkdownToBlocks.php",
+      "contentHash": "ea37921344509be0adfc2bb394e8c1b7450109a5a3f6b0bb0620bb043ae45a60",
+      "functions": [
+        {
+          "name": "convert",
+          "params": [
+            "$markdown"
+          ],
+          "exported": false,
+          "lineCount": 132
+        },
+        {
+          "name": "inline",
+          "params": [
+            "$text"
+          ],
+          "exported": false,
+          "lineCount": 15
+        }
+      ],
+      "classes": [
+        {
+          "name": "MarkdownToBlocks",
+          "methods": [
+            "convert",
+            "inline"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 163
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "MarkdownToBlocks"
+      ],
+      "totalLines": 182,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/Observation.php": {
+      "filePath": "src/Knowledge/Observation.php",
+      "contentHash": "9ffda62296c2556ee681c07f43e5e06b291df131ee4bad434f1b5a20097e657a",
+      "functions": [
+        {
+          "name": "table",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "find",
+          "params": [
+            "$id"
+          ],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "list_observations",
+          "params": [
+            "$args"
+          ],
+          "exported": false,
+          "lineCount": 51
+        },
+        {
+          "name": "add",
+          "params": [
+            "$data"
+          ],
+          "exported": false,
+          "lineCount": 30
+        },
+        {
+          "name": "resolve",
+          "params": [
+            "$id",
+            "$status",
+            "$note"
+          ],
+          "exported": false,
+          "lineCount": 25
+        },
+        {
+          "name": "count_open",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        }
+      ],
+      "classes": [
+        {
+          "name": "Observation",
+          "methods": [
+            "table",
+            "find",
+            "list_observations",
+            "add",
+            "resolve",
+            "count_open"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 183
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Observation"
+      ],
+      "totalLines": 202,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/REST/ActivityController.php": {
+      "filePath": "src/Knowledge/REST/ActivityController.php",
+      "contentHash": "7c34e5a085775ab84813c891070d38dc85c3d53939842a212a0c01ef82c78482",
+      "functions": [
+        {
+          "name": "register_routes",
+          "params": [],
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "admin_check",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_items",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 107
+        },
+        {
+          "name": "get_stats",
+          "params": [],
+          "exported": false,
+          "lineCount": 180
+        },
+        {
+          "name": "get_collection_params",
+          "params": [],
+          "exported": false,
+          "lineCount": 20
+        }
+      ],
+      "classes": [
+        {
+          "name": "ActivityController",
+          "methods": [
+            "register_routes",
+            "admin_check",
+            "get_items",
+            "get_stats",
+            "get_collection_params"
+          ],
+          "properties": [
+            "namespace",
+            "rest_base"
+          ],
+          "exported": true,
+          "lineCount": 346
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "ActivityController"
+      ],
+      "totalLines": 364,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/REST/BoundaryController.php": {
+      "filePath": "src/Knowledge/REST/BoundaryController.php",
+      "contentHash": "3b9673ae00246831f68247855cfff2bfc9c7b6bbb0fa783bee79e307f36b063b",
+      "functions": [
+        {
+          "name": "register_routes",
+          "params": [],
+          "exported": false,
+          "lineCount": 24
+        },
+        {
+          "name": "admin_check",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_items",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 67
+        },
+        {
+          "name": "get_stats",
+          "params": [],
+          "exported": false,
+          "lineCount": 37
+        },
+        {
+          "name": "get_timeline",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 88
+        },
+        {
+          "name": "get_collection_params",
+          "params": [],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "get_timeline_params",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        }
+      ],
+      "classes": [
+        {
+          "name": "BoundaryController",
+          "methods": [
+            "register_routes",
+            "admin_check",
+            "get_items",
+            "get_stats",
+            "get_timeline",
+            "get_collection_params",
+            "get_timeline_params"
+          ],
+          "properties": [
+            "namespace",
+            "rest_base"
+          ],
+          "exported": true,
+          "lineCount": 269
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "BoundaryController"
+      ],
+      "totalLines": 291,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/REST/DashboardController.php": {
+      "filePath": "src/Knowledge/REST/DashboardController.php",
+      "contentHash": "c6f4f4f0b98bd1208cf71af47763e1ba8e90e5c8ca475407653c0bf347b8a260",
+      "functions": [
+        {
+          "name": "register_routes",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "admin_check",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_stats",
+          "params": [],
+          "exported": false,
+          "lineCount": 134
+        },
+        {
+          "name": "key_counts",
+          "params": [
+            "$rows",
+            "$key_field"
+          ],
+          "exported": false,
+          "lineCount": 7
+        }
+      ],
+      "classes": [
+        {
+          "name": "DashboardController",
+          "methods": [
+            "register_routes",
+            "admin_check",
+            "get_stats",
+            "key_counts"
+          ],
+          "properties": [
+            "namespace",
+            "rest_base"
+          ],
+          "exported": true,
+          "lineCount": 167
+        }
+      ],
+      "imports": [
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Document",
+          "specifiers": [
+            "Document"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Session",
+          "specifiers": [
+            "Session"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Observation",
+          "specifiers": [
+            "Observation"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Tag",
+          "specifiers": [
+            "Tag"
+          ]
+        }
+      ],
+      "exports": [
+        "DashboardController"
+      ],
+      "totalLines": 190,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/REST/DocumentsController.php": {
+      "filePath": "src/Knowledge/REST/DocumentsController.php",
+      "contentHash": "870469e95047bf30ab0ecc9c83941671342c24d565194ff5407d5092fa335423",
+      "functions": [
+        {
+          "name": "register_routes",
+          "params": [],
+          "exported": false,
+          "lineCount": 82
+        },
+        {
+          "name": "admin_check",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_items",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 37
+        },
+        {
+          "name": "get_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "create_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 19
+        },
+        {
+          "name": "update_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 19
+        },
+        {
+          "name": "delete_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "fork_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "get_revisions",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 18
+        },
+        {
+          "name": "restore_version",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "bulk_action",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 55
+        },
+        {
+          "name": "publish_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 119
+        },
+        {
+          "name": "get_category_for_type",
+          "params": [
+            "$doc_type"
+          ],
+          "exported": false,
+          "lineCount": 34
+        },
+        {
+          "name": "get_collection_params",
+          "params": [],
+          "exported": false,
+          "lineCount": 12
+        }
+      ],
+      "classes": [
+        {
+          "name": "DocumentsController",
+          "methods": [
+            "register_routes",
+            "admin_check",
+            "get_items",
+            "get_item",
+            "create_item",
+            "update_item",
+            "delete_item",
+            "fork_item",
+            "get_revisions",
+            "restore_version",
+            "bulk_action",
+            "publish_item",
+            "get_category_for_type",
+            "get_collection_params"
+          ],
+          "properties": [
+            "namespace",
+            "rest_base"
+          ],
+          "exported": true,
+          "lineCount": 516
+        }
+      ],
+      "imports": [
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Document",
+          "specifiers": [
+            "Document"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\MarkdownToBlocks",
+          "specifiers": [
+            "MarkdownToBlocks"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Revision",
+          "specifiers": [
+            "Revision"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Tag",
+          "specifiers": [
+            "Tag"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Taggable",
+          "specifiers": [
+            "Taggable"
+          ]
+        }
+      ],
+      "exports": [
+        "DocumentsController"
+      ],
+      "totalLines": 540,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/REST/ObservationsController.php": {
+      "filePath": "src/Knowledge/REST/ObservationsController.php",
+      "contentHash": "edad5fdb9f624866a6f408afd3eabbd9537de8b715a6244854badd6bf57b1b2f",
+      "functions": [
+        {
+          "name": "register_routes",
+          "params": [],
+          "exported": false,
+          "lineCount": 23
+        },
+        {
+          "name": "admin_check",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_items",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "resolve_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "bulk_action",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 34
+        },
+        {
+          "name": "get_collection_params",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        }
+      ],
+      "classes": [
+        {
+          "name": "ObservationsController",
+          "methods": [
+            "register_routes",
+            "admin_check",
+            "get_items",
+            "resolve_item",
+            "bulk_action",
+            "get_collection_params"
+          ],
+          "properties": [
+            "namespace",
+            "rest_base"
+          ],
+          "exported": true,
+          "lineCount": 133
+        }
+      ],
+      "imports": [
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Observation",
+          "specifiers": [
+            "Observation"
+          ]
+        }
+      ],
+      "exports": [
+        "ObservationsController"
+      ],
+      "totalLines": 153,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/REST/SessionsController.php": {
+      "filePath": "src/Knowledge/REST/SessionsController.php",
+      "contentHash": "6c56651115b9afc47a6abb61809981b3a0e1b70d81cd1883a985c2d0e1904fbe",
+      "functions": [
+        {
+          "name": "register_routes",
+          "params": [],
+          "exported": false,
+          "lineCount": 28
+        },
+        {
+          "name": "admin_check",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_items",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "get_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 35
+        },
+        {
+          "name": "update_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 23
+        },
+        {
+          "name": "delete_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 22
+        },
+        {
+          "name": "get_collection_params",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        }
+      ],
+      "classes": [
+        {
+          "name": "SessionsController",
+          "methods": [
+            "register_routes",
+            "admin_check",
+            "get_items",
+            "get_item",
+            "update_item",
+            "delete_item",
+            "get_collection_params"
+          ],
+          "properties": [
+            "namespace",
+            "rest_base"
+          ],
+          "exported": true,
+          "lineCount": 167
+        }
+      ],
+      "imports": [
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Session",
+          "specifiers": [
+            "Session"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Observation",
+          "specifiers": [
+            "Observation"
+          ]
+        }
+      ],
+      "exports": [
+        "SessionsController"
+      ],
+      "totalLines": 188,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/REST/TagsController.php": {
+      "filePath": "src/Knowledge/REST/TagsController.php",
+      "contentHash": "8ca9b5091a0d34e4aa461fa82ecab5b979f9da94550e635f7ab273aa06a736da",
+      "functions": [
+        {
+          "name": "register_routes",
+          "params": [],
+          "exported": false,
+          "lineCount": 37
+        },
+        {
+          "name": "admin_check",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_items",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 40
+        },
+        {
+          "name": "create_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "update_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "delete_item",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "bulk_create",
+          "params": [
+            "$request"
+          ],
+          "exported": false,
+          "lineCount": 24
+        },
+        {
+          "name": "get_collection_params",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        }
+      ],
+      "classes": [
+        {
+          "name": "TagsController",
+          "methods": [
+            "register_routes",
+            "admin_check",
+            "get_items",
+            "create_item",
+            "update_item",
+            "delete_item",
+            "bulk_create",
+            "get_collection_params"
+          ],
+          "properties": [
+            "namespace",
+            "rest_base"
+          ],
+          "exported": true,
+          "lineCount": 175
+        }
+      ],
+      "imports": [
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Tag",
+          "specifiers": [
+            "Tag"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Taggable",
+          "specifiers": [
+            "Taggable"
+          ]
+        }
+      ],
+      "exports": [
+        "TagsController"
+      ],
+      "totalLines": 196,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/Revision.php": {
+      "filePath": "src/Knowledge/Revision.php",
+      "contentHash": "5b94af5eaeebd1d8d56ef7f7beb72155a473c1ce5c0ea0756abdc099efda516e",
+      "functions": [
+        {
+          "name": "table",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "create_from_document",
+          "params": [
+            "$doc",
+            "$change_summary"
+          ],
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "list_for_document",
+          "params": [
+            "$document_id",
+            "$per_page",
+            "$page"
+          ],
+          "exported": false,
+          "lineCount": 29
+        },
+        {
+          "name": "get_version",
+          "params": [
+            "$document_id",
+            "$version"
+          ],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "restore",
+          "params": [
+            "$document_id",
+            "$version"
+          ],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "prune",
+          "params": [
+            "$document_id"
+          ],
+          "exported": false,
+          "lineCount": 24
+        }
+      ],
+      "classes": [
+        {
+          "name": "Revision",
+          "methods": [
+            "table",
+            "create_from_document",
+            "list_for_document",
+            "get_version",
+            "restore",
+            "prune"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 150
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Revision"
+      ],
+      "totalLines": 168,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/Schema.php": {
+      "filePath": "src/Knowledge/Schema.php",
+      "contentHash": "0db9e2714a3edb22969536e7a9acc0309c87ef5a1cf7190c6a5cef9b03239850",
+      "functions": [
+        {
+          "name": "up",
+          "params": [],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "maybe_migrate",
+          "params": [],
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "run_migrations",
+          "params": [
+            "$from_version"
+          ],
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "add_fulltext_index",
+          "params": [],
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "tables_exist",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "get_sql",
+          "params": [
+            "$prefix",
+            "$charset_collate"
+          ],
+          "exported": false,
+          "lineCount": 195
+        }
+      ],
+      "classes": [
+        {
+          "name": "Schema",
+          "methods": [
+            "up",
+            "maybe_migrate",
+            "run_migrations",
+            "add_fulltext_index",
+            "tables_exist",
+            "get_sql"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 317
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Schema"
+      ],
+      "totalLines": 338,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/Search/Fulltext_Search_Provider.php": {
+      "filePath": "src/Knowledge/Search/Fulltext_Search_Provider.php",
+      "contentHash": "2e9d12e3dba4798f7d9a94150e3cf25d88061d9f1914d345c7b218d8eace0b68",
+      "functions": [
+        {
+          "name": "search",
+          "params": [
+            "$query",
+            "$args"
+          ],
+          "returnType": "array",
+          "exported": false,
+          "lineCount": 101
+        },
+        {
+          "name": "get_name",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "resolve_tag_ids",
+          "params": [
+            "$slugs"
+          ],
+          "returnType": "array|false",
+          "exported": false,
+          "lineCount": 23
+        }
+      ],
+      "classes": [
+        {
+          "name": "Fulltext_Search_Provider",
+          "methods": [
+            "search",
+            "get_name",
+            "resolve_tag_ids"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 148
+        }
+      ],
+      "imports": [
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\Document",
+          "specifiers": [
+            "Document"
+          ]
+        }
+      ],
+      "exports": [
+        "Fulltext_Search_Provider"
+      ],
+      "totalLines": 171,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/Search/KL_Search_Provider.php": {
+      "filePath": "src/Knowledge/Search/KL_Search_Provider.php",
+      "contentHash": "ee388badf41352997e6eb4fd02135665897d4792364e9deedb95e09d1f810a17",
+      "functions": [],
+      "classes": [
+        {
+          "name": "KL_Search_Provider",
+          "methods": [
+            "search",
+            "get_name"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 31
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "KL_Search_Provider"
+      ],
+      "totalLines": 51,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/Seeder.php": {
+      "filePath": "src/Knowledge/Seeder.php",
+      "contentHash": "183621680b3c171247a8d62505a14ddadecace43a912ae9ac8496de697d64db6",
+      "functions": [
+        {
+          "name": "seed",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "seed_doc",
+          "params": [
+            "$data"
+          ],
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "seed_boot",
+          "params": [],
+          "exported": false,
+          "lineCount": 19
+        },
+        {
+          "name": "seed_agents",
+          "params": [],
+          "exported": false,
+          "lineCount": 68
+        },
+        {
+          "name": "seed_skills",
+          "params": [],
+          "exported": false,
+          "lineCount": 104
+        },
+        {
+          "name": "load_seed_content",
+          "params": [
+            "$relative_path"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "seed_knowledge",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "seed_courses",
+          "params": [],
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "seed_config",
+          "params": [],
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "seed_templates",
+          "params": [],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "seed_tags",
+          "params": [],
+          "exported": false,
+          "lineCount": 45
+        },
+        {
+          "name": "update_seeds",
+          "params": [],
+          "exported": false,
+          "lineCount": 33
+        },
+        {
+          "name": "migrate_v001",
+          "params": [],
+          "exported": false,
+          "lineCount": 46
+        },
+        {
+          "name": "boot_content",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "getting_started_content",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "Seeder",
+          "methods": [
+            "seed",
+            "seed_doc",
+            "seed_boot",
+            "seed_agents",
+            "seed_skills",
+            "load_seed_content",
+            "seed_knowledge",
+            "seed_courses",
+            "seed_config",
+            "seed_templates",
+            "seed_tags",
+            "update_seeds",
+            "migrate_v001",
+            "boot_content",
+            "getting_started_content"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 504
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Seeder"
+      ],
+      "totalLines": 522,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/Session.php": {
+      "filePath": "src/Knowledge/Session.php",
+      "contentHash": "d87b2a747f22e5139bc4f0f7ee6c8c196fe05ac9cc7bb1f255c42dfb758bd651",
+      "functions": [
+        {
+          "name": "table",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "find",
+          "params": [
+            "$session_id"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "list_sessions",
+          "params": [
+            "$args"
+          ],
+          "exported": false,
+          "lineCount": 40
+        },
+        {
+          "name": "log",
+          "params": [
+            "$data"
+          ],
+          "exported": false,
+          "lineCount": 35
+        },
+        {
+          "name": "update",
+          "params": [
+            "$session_id",
+            "$data"
+          ],
+          "exported": false,
+          "lineCount": 37
+        },
+        {
+          "name": "delete",
+          "params": [
+            "$session_id"
+          ],
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "latest",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "count",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "decode",
+          "params": [
+            "$row"
+          ],
+          "exported": false,
+          "lineCount": 12
+        }
+      ],
+      "classes": [
+        {
+          "name": "Session",
+          "methods": [
+            "table",
+            "find",
+            "list_sessions",
+            "log",
+            "update",
+            "delete",
+            "latest",
+            "count",
+            "decode"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 235
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Session"
+      ],
+      "totalLines": 253,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/Tag.php": {
+      "filePath": "src/Knowledge/Tag.php",
+      "contentHash": "3b14e001567934399aae5f14f3b51793bb16768409f9fc9d8596b7b358e3f23f",
+      "functions": [
+        {
+          "name": "table",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "find",
+          "params": [
+            "$id"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "findBySlug",
+          "params": [
+            "$slug"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "all",
+          "params": [
+            "$args"
+          ],
+          "exported": false,
+          "lineCount": 34
+        },
+        {
+          "name": "count",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "create",
+          "params": [
+            "$data"
+          ],
+          "exported": false,
+          "lineCount": 35
+        },
+        {
+          "name": "update",
+          "params": [
+            "$id",
+            "$data"
+          ],
+          "exported": false,
+          "lineCount": 37
+        },
+        {
+          "name": "delete",
+          "params": [
+            "$id"
+          ],
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "generateSlug",
+          "params": [
+            "$title"
+          ],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "cast",
+          "params": [
+            "$row"
+          ],
+          "exported": false,
+          "lineCount": 4
+        }
+      ],
+      "classes": [
+        {
+          "name": "Tag",
+          "methods": [
+            "table",
+            "find",
+            "findBySlug",
+            "all",
+            "count",
+            "create",
+            "update",
+            "delete",
+            "generateSlug",
+            "cast"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 240
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Tag"
+      ],
+      "totalLines": 258,
+      "hasStructuralAnalysis": true
+    },
+    "src/Knowledge/Taggable.php": {
+      "filePath": "src/Knowledge/Taggable.php",
+      "contentHash": "e363ee06d47541a93b7344795340defce01bab2bb4e93af09e088c304c237c81",
+      "functions": [
+        {
+          "name": "table",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "validate_type",
+          "params": [
+            "$type"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "assign",
+          "params": [
+            "$tag_ids",
+            "$taggable_id",
+            "$taggable_type"
+          ],
+          "exported": false,
+          "lineCount": 34
+        },
+        {
+          "name": "unassign",
+          "params": [
+            "$tag_ids",
+            "$taggable_id",
+            "$taggable_type"
+          ],
+          "exported": false,
+          "lineCount": 26
+        },
+        {
+          "name": "getFor",
+          "params": [
+            "$taggable_id",
+            "$taggable_type"
+          ],
+          "exported": false,
+          "lineCount": 24
+        },
+        {
+          "name": "getEntities",
+          "params": [
+            "$tag_id",
+            "$taggable_type"
+          ],
+          "exported": false,
+          "lineCount": 17
+        },
+        {
+          "name": "sync",
+          "params": [
+            "$tag_ids",
+            "$taggable_id",
+            "$taggable_type"
+          ],
+          "exported": false,
+          "lineCount": 17
+        }
+      ],
+      "classes": [
+        {
+          "name": "Taggable",
+          "methods": [
+            "table",
+            "validate_type",
+            "assign",
+            "unassign",
+            "getFor",
+            "getEntities",
+            "sync"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 196
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "Taggable"
+      ],
+      "totalLines": 214,
+      "hasStructuralAnalysis": true
+    },
+    "tests/bootstrap.php": {
+      "filePath": "tests/bootstrap.php",
+      "contentHash": "484fd2c5beda4873a05302f609d960556dd4e3da246d5366b65dd541f05550f4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 65,
+      "hasStructuralAnalysis": true
+    },
+    "tests/stubs/wordpress-stubs.php": {
+      "filePath": "tests/stubs/wordpress-stubs.php",
+      "contentHash": "2a688bb34cd788ec425dc367785fe84ecd726701e3442522e409676f5458a3d3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 226,
+      "hasStructuralAnalysis": true
+    },
+    "tests/Unit/AnnotationLinterTest.php": {
+      "filePath": "tests/Unit/AnnotationLinterTest.php",
+      "contentHash": "2f42800905854325beab697a3bed22b6aeb5d64b9e02c8247f407209f8eed81c",
+      "functions": [
+        {
+          "name": "test_every_ability_has_compiled_and_replaces_annotations",
+          "params": [],
+          "exported": false,
+          "lineCount": 39
+        },
+        {
+          "name": "extract_registrar_calls",
+          "params": [
+            "$source"
+          ],
+          "returnType": "array",
+          "exported": false,
+          "lineCount": 28
+        },
+        {
+          "name": "find_matching_paren",
+          "params": [
+            "$source",
+            "$open_pos"
+          ],
+          "returnType": "int",
+          "exported": false,
+          "lineCount": 35
+        },
+        {
+          "name": "extract_ability_name",
+          "params": [
+            "$args"
+          ],
+          "returnType": "?string",
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "config_has_key",
+          "params": [
+            "$args",
+            "$key"
+          ],
+          "returnType": "bool",
+          "exported": false,
+          "lineCount": 4
+        }
+      ],
+      "classes": [
+        {
+          "name": "AnnotationLinterTest",
+          "methods": [
+            "test_every_ability_has_compiled_and_replaces_annotations",
+            "extract_registrar_calls",
+            "find_matching_paren",
+            "extract_ability_name",
+            "config_has_key"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 137
+        }
+      ],
+      "imports": [
+        {
+          "source": "PHPUnit\\Framework\\TestCase",
+          "specifiers": [
+            "TestCase"
+          ]
+        }
+      ],
+      "exports": [
+        "AnnotationLinterTest"
+      ],
+      "totalLines": 156,
+      "hasStructuralAnalysis": true
+    },
+    "tests/Unit/BoundaryEventLoggerTest.php": {
+      "filePath": "tests/Unit/BoundaryEventLoggerTest.php",
+      "contentHash": "80c76c700b2615a8b7616524e46d3d1242a385b3026c157c6f37ea3e2ef72d16",
+      "functions": [
+        {
+          "name": "test_event_severity_table_lists_v01_taxonomy",
+          "params": [],
+          "exported": false,
+          "lineCount": 20
+        },
+        {
+          "name": "test_settings_audit_events_default_to_info_severity",
+          "params": [],
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "test_settings_audit_events_pass_the_allowlist_gate",
+          "params": [],
+          "exported": false,
+          "lineCount": 30
+        },
+        {
+          "name": "test_record_event_ignores_non_boundary_events",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "test_record_event_ignores_unknown_boundary_events",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "test_truncate_ipv4_zeros_last_octet",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "test_truncate_ipv4_already_truncated",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "test_truncate_ipv6_zeros_past_48_bits",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "test_truncate_invalid_ip_returns_empty",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_build_detail_json_allowlists_safe_fields",
+          "params": [],
+          "exported": false,
+          "lineCount": 18
+        },
+        {
+          "name": "test_build_detail_json_drops_non_allowlisted_keys",
+          "params": [],
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "test_build_detail_json_returns_null_when_empty_after_filter",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "test_build_detail_json_drops_non_scalar_array_elements",
+          "params": [],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "test_build_detail_json_caps_oversized_payload",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "prepare",
+          "params": [
+            "$query"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_var",
+          "params": [
+            "$query"
+          ],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "insert",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "BoundaryEventLoggerTest",
+          "methods": [
+            "test_event_severity_table_lists_v01_taxonomy",
+            "test_settings_audit_events_default_to_info_severity",
+            "test_settings_audit_events_pass_the_allowlist_gate",
+            "test_record_event_ignores_non_boundary_events",
+            "test_record_event_ignores_unknown_boundary_events",
+            "test_truncate_ipv4_zeros_last_octet",
+            "test_truncate_ipv4_already_truncated",
+            "test_truncate_ipv6_zeros_past_48_bits",
+            "test_truncate_invalid_ip_returns_empty",
+            "test_build_detail_json_allowlists_safe_fields",
+            "test_build_detail_json_drops_non_allowlisted_keys",
+            "test_build_detail_json_returns_null_when_empty_after_filter",
+            "test_build_detail_json_drops_non_scalar_array_elements",
+            "test_build_detail_json_caps_oversized_payload"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 196
+        },
+        {
+          "name": "BoundaryEventLoggerTest_FakeWpdb",
+          "methods": [
+            "prepare",
+            "get_var",
+            "insert"
+          ],
+          "properties": [
+            "prefix",
+            "table_check_calls"
+          ],
+          "exported": true,
+          "lineCount": 19
+        }
+      ],
+      "imports": [
+        {
+          "source": "PHPUnit\\Framework\\TestCase",
+          "specifiers": [
+            "TestCase"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Knowledge\\BoundaryEventLogger",
+          "specifiers": [
+            "BoundaryEventLogger"
+          ]
+        }
+      ],
+      "exports": [
+        "BoundaryEventLoggerTest",
+        "BoundaryEventLoggerTest_FakeWpdb"
+      ],
+      "totalLines": 258,
+      "hasStructuralAnalysis": true
+    },
+    "tests/Unit/HelpersTest.php": {
+      "filePath": "tests/Unit/HelpersTest.php",
+      "contentHash": "218a47167dad96e70dd95b072aa4f2c25490d913facfdbf2fdb384829ca93880",
+      "functions": [
+        {
+          "name": "test_pagination_defaults",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "test_pagination_page_2",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "test_pagination_clamps_per_page_to_100",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "test_pagination_clamps_per_page_min_to_1",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "test_pagination_clamps_page_min_to_1",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "test_pagination_custom_default_per_page",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "test_pagination_offset_calculation",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "test_error_returns_wp_error",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "test_module_prefix_map_matches_defaults_keys",
+          "params": [],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "test_module_prefix_map_includes_v1_9_2_added_modules",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "test_private_ip_loopback",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "test_private_ip_rfc1918_10",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "test_private_ip_rfc1918_172",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "test_private_ip_rfc1918_192",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "test_public_ip_not_private",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "test_public_ip_not_private_2",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "test_permission_defaults_returns_array",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "test_permission_defaults_content_read_on",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "test_permission_defaults_filesystem_write_on",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "test_permission_defaults_cron_write_on",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "test_get_permissions_merges_saved_with_defaults",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "test_get_permissions_unknown_module_defaults_to_read",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        }
+      ],
+      "classes": [
+        {
+          "name": "HelpersTest",
+          "methods": [
+            "test_pagination_defaults",
+            "test_pagination_page_2",
+            "test_pagination_clamps_per_page_to_100",
+            "test_pagination_clamps_per_page_min_to_1",
+            "test_pagination_clamps_page_min_to_1",
+            "test_pagination_custom_default_per_page",
+            "test_pagination_offset_calculation",
+            "test_error_returns_wp_error",
+            "test_module_prefix_map_matches_defaults_keys",
+            "test_module_prefix_map_includes_v1_9_2_added_modules",
+            "test_private_ip_loopback",
+            "test_private_ip_rfc1918_10",
+            "test_private_ip_rfc1918_172",
+            "test_private_ip_rfc1918_192",
+            "test_public_ip_not_private",
+            "test_public_ip_not_private_2",
+            "test_permission_defaults_returns_array",
+            "test_permission_defaults_content_read_on",
+            "test_permission_defaults_filesystem_write_on",
+            "test_permission_defaults_cron_write_on",
+            "test_get_permissions_merges_saved_with_defaults",
+            "test_get_permissions_unknown_module_defaults_to_read"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 154
+        }
+      ],
+      "imports": [
+        {
+          "source": "PHPUnit\\Framework\\TestCase",
+          "specifiers": [
+            "TestCase"
+          ]
+        }
+      ],
+      "exports": [
+        "HelpersTest"
+      ],
+      "totalLines": 167,
+      "hasStructuralAnalysis": true
+    },
+    "tests/Unit/InputSchemaDraft202012Test.php": {
+      "filePath": "tests/Unit/InputSchemaDraft202012Test.php",
+      "contentHash": "b714d1b85a132e3cf12fd3fe686493842d08ec93857feb51a8ccc3818651c4db",
+      "functions": [
+        {
+          "name": "discover_ability_files",
+          "params": [],
+          "returnType": "array",
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "extract_registrar_calls",
+          "params": [
+            "$source"
+          ],
+          "returnType": "array",
+          "exported": false,
+          "lineCount": 35
+        },
+        {
+          "name": "find_matching_paren",
+          "params": [
+            "$source",
+            "$open_pos"
+          ],
+          "returnType": "int",
+          "exported": false,
+          "lineCount": 35
+        },
+        {
+          "name": "extract_input_schema_literal",
+          "params": [
+            "$args"
+          ],
+          "returnType": "?string",
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "evaluate_literal",
+          "params": [
+            "$literal",
+            "$file_scope"
+          ],
+          "returnType": "array",
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "extract_file_scope",
+          "params": [
+            "$source"
+          ],
+          "returnType": "array",
+          "exported": false,
+          "lineCount": 68
+        },
+        {
+          "name": "lint_anthropic_profile",
+          "params": [
+            "$node",
+            "$path"
+          ],
+          "returnType": "array",
+          "exported": false,
+          "lineCount": 45
+        },
+        {
+          "name": "to_json_value",
+          "params": [
+            "$value"
+          ],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "is_assoc_or_empty",
+          "params": [
+            "$arr"
+          ],
+          "returnType": "bool",
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "all_strings",
+          "params": [
+            "$arr"
+          ],
+          "returnType": "bool",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "parse_under_2020_12",
+          "params": [
+            "$schema_object"
+          ],
+          "returnType": "?string",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "test_every_ability_input_schema_is_valid_draft_2020_12",
+          "params": [],
+          "exported": false,
+          "lineCount": 85
+        },
+        {
+          "name": "test_lint_rejects_array_form_type",
+          "params": [],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "test_lint_rejects_empty_properties",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "test_lint_accepts_one_of_with_string_types",
+          "params": [],
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "test_lint_accepts_object_without_properties_key",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        }
+      ],
+      "classes": [
+        {
+          "name": "InputSchemaDraft202012Test",
+          "methods": [
+            "discover_ability_files",
+            "extract_registrar_calls",
+            "find_matching_paren",
+            "extract_input_schema_literal",
+            "evaluate_literal",
+            "extract_file_scope",
+            "lint_anthropic_profile",
+            "to_json_value",
+            "is_assoc_or_empty",
+            "all_strings",
+            "parse_under_2020_12",
+            "test_every_ability_input_schema_is_valid_draft_2020_12",
+            "test_lint_rejects_array_form_type",
+            "test_lint_rejects_empty_properties",
+            "test_lint_accepts_one_of_with_string_types",
+            "test_lint_accepts_object_without_properties_key"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 489
+        }
+      ],
+      "imports": [
+        {
+          "source": "Opis\\JsonSchema\\SchemaLoader",
+          "specifiers": [
+            "SchemaLoader"
+          ]
+        },
+        {
+          "source": "Opis\\JsonSchema\\Parsers\\SchemaParser",
+          "specifiers": [
+            "SchemaParser"
+          ]
+        },
+        {
+          "source": "Opis\\JsonSchema\\Resolvers\\SchemaResolver",
+          "specifiers": [
+            "SchemaResolver"
+          ]
+        },
+        {
+          "source": "PHPUnit\\Framework\\TestCase",
+          "specifiers": [
+            "TestCase"
+          ]
+        }
+      ],
+      "exports": [
+        "InputSchemaDraft202012Test"
+      ],
+      "totalLines": 543,
+      "hasStructuralAnalysis": true
+    },
+    "tests/Unit/PermissionsPatchTest.php": {
+      "filePath": "tests/Unit/PermissionsPatchTest.php",
+      "contentHash": "3e2fab8cc2c7c71141857247fb97d7c7794f0c935487c68adb764504c5e4c7a4",
+      "functions": [
+        {
+          "name": "setUpBeforeClass",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "live_fixture_wickedevolutions",
+          "params": [],
+          "returnType": "array",
+          "exported": false,
+          "lineCount": 31
+        },
+        {
+          "name": "test_phase_1_submitted_module_permissions_reflect_input",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 18
+        },
+        {
+          "name": "test_phase_2_unrelated_modules_are_byte_identical_after_filtered_save",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 23
+        },
+        {
+          "name": "test_phase_2_specific_modules_from_issue_evidence_remain_enabled",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 20
+        },
+        {
+          "name": "test_phase_3_resaving_same_input_is_byte_identical",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "test_phase_3_empty_input_does_not_modify_existing",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "test_phase_4_saving_module_b_does_not_wipe_prior_module_a_save",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 37
+        },
+        {
+          "name": "test_overrides_for_unsubmitted_modules_are_preserved",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 36
+        },
+        {
+          "name": "test_new_overrides_persist_only_for_submitted_modules",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 28
+        },
+        {
+          "name": "test_override_dropped_when_module_disabled",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 17
+        },
+        {
+          "name": "test_option_shape_keys_are_preserved_for_untouched_modules",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "test_full_unfiltered_save_preserves_all_module_keys",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 27
+        }
+      ],
+      "classes": [
+        {
+          "name": "PermissionsPatchTest",
+          "methods": [
+            "setUpBeforeClass",
+            "live_fixture_wickedevolutions",
+            "test_phase_1_submitted_module_permissions_reflect_input",
+            "test_phase_2_unrelated_modules_are_byte_identical_after_filtered_save",
+            "test_phase_2_specific_modules_from_issue_evidence_remain_enabled",
+            "test_phase_3_resaving_same_input_is_byte_identical",
+            "test_phase_3_empty_input_does_not_modify_existing",
+            "test_phase_4_saving_module_b_does_not_wipe_prior_module_a_save",
+            "test_overrides_for_unsubmitted_modules_are_preserved",
+            "test_new_overrides_persist_only_for_submitted_modules",
+            "test_override_dropped_when_module_disabled",
+            "test_option_shape_keys_are_preserved_for_untouched_modules",
+            "test_full_unfiltered_save_preserves_all_module_keys"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 316
+        }
+      ],
+      "imports": [
+        {
+          "source": "PHPUnit\\Framework\\TestCase",
+          "specifiers": [
+            "TestCase"
+          ]
+        }
+      ],
+      "exports": [
+        "PermissionsPatchTest"
+      ],
+      "totalLines": 343,
+      "hasStructuralAnalysis": true
+    },
+    "tests/Unit/PrestoPlayerSchemaTest.php": {
+      "filePath": "tests/Unit/PrestoPlayerSchemaTest.php",
+      "contentHash": "909a5aca6aa12c8d6705bb7dc5d69bd06ec3c561323226c147a44a63afff5e1c",
+      "functions": [
+        {
+          "name": "load_update_setting_schema",
+          "params": [],
+          "returnType": "array",
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "find_matching_paren",
+          "params": [
+            "$source",
+            "$open_pos"
+          ],
+          "returnType": "int",
+          "exported": false,
+          "lineCount": 35
+        },
+        {
+          "name": "test_update_setting_value_property_exists",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_update_setting_value_type_is_not_array_form",
+          "params": [],
+          "exported": false,
+          "lineCount": 30
+        }
+      ],
+      "classes": [
+        {
+          "name": "PrestoPlayerSchemaTest",
+          "methods": [
+            "load_update_setting_schema",
+            "find_matching_paren",
+            "test_update_setting_value_property_exists",
+            "test_update_setting_value_type_is_not_array_form"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 112
+        }
+      ],
+      "imports": [
+        {
+          "source": "PHPUnit\\Framework\\TestCase",
+          "specifiers": [
+            "TestCase"
+          ]
+        }
+      ],
+      "exports": [
+        "PrestoPlayerSchemaTest"
+      ],
+      "totalLines": 127,
+      "hasStructuralAnalysis": true
+    },
+    "tests/Unit/RegistrarTest.php": {
+      "filePath": "tests/Unit/RegistrarTest.php",
+      "contentHash": "2568256938d6cf9faff2b944a7c4c41d02728c7ee2801681c451294a45438c6b",
+      "functions": [
+        {
+          "name": "setUp",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "test_legacy_class_alias_exists",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "test_legacy_alias_is_same_as_namespaced",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "test_read_registers_ability",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "test_read_sets_readonly_annotation",
+          "params": [],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "test_read_sets_free_tier",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "test_read_sets_show_in_rest",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "test_read_uses_module_as_default_category",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "test_read_allows_category_override",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "test_write_sets_pro_tier",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "test_write_sets_write_annotation",
+          "params": [],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "test_delete_sets_destructive_annotation",
+          "params": [],
+          "exported": false,
+          "lineCount": 19
+        },
+        {
+          "name": "test_annotation_override_idempotent_false",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "test_output_schema_included_when_provided",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "test_output_schema_omitted_when_not_provided",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "test_no_arg_ability_default_schema_omits_properties",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "test_meta_compiled_flag_persisted_as_bool",
+          "params": [],
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "test_meta_compiled_false_is_persisted",
+          "params": [],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "test_meta_replaces_string_persisted",
+          "params": [],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "test_meta_replaces_null_persisted",
+          "params": [],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "test_meta_compiled_omitted_when_not_provided",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        }
+      ],
+      "classes": [
+        {
+          "name": "RegistrarTest",
+          "methods": [
+            "setUp",
+            "test_legacy_class_alias_exists",
+            "test_legacy_alias_is_same_as_namespaced",
+            "test_read_registers_ability",
+            "test_read_sets_readonly_annotation",
+            "test_read_sets_free_tier",
+            "test_read_sets_show_in_rest",
+            "test_read_uses_module_as_default_category",
+            "test_read_allows_category_override",
+            "test_write_sets_pro_tier",
+            "test_write_sets_write_annotation",
+            "test_delete_sets_destructive_annotation",
+            "test_annotation_override_idempotent_false",
+            "test_output_schema_included_when_provided",
+            "test_output_schema_omitted_when_not_provided",
+            "test_no_arg_ability_default_schema_omits_properties",
+            "test_meta_compiled_flag_persisted_as_bool",
+            "test_meta_compiled_false_is_persisted",
+            "test_meta_replaces_string_persisted",
+            "test_meta_replaces_null_persisted",
+            "test_meta_compiled_omitted_when_not_provided"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 265
+        }
+      ],
+      "imports": [
+        {
+          "source": "PHPUnit\\Framework\\TestCase",
+          "specifiers": [
+            "TestCase"
+          ]
+        },
+        {
+          "source": "WickedEvolutions\\AbilitiesForAI\\Core\\Registrar",
+          "specifiers": [
+            "Registrar"
+          ]
+        }
+      ],
+      "exports": [
+        "RegistrarTest"
+      ],
+      "totalLines": 280,
+      "hasStructuralAnalysis": true
+    },
+    "tests/Unit/SafeFetchTest.php": {
+      "filePath": "tests/Unit/SafeFetchTest.php",
+      "contentHash": "a6e4e2a86d62f01426f60636585fddbea9989052d2d341f508892015ee64670e",
+      "functions": [
+        {
+          "name": "test_rejects_ftp_scheme",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_javascript_scheme",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_file_scheme",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_missing_scheme",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_loopback_ipv4_literal",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_link_local_metadata_ip",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_rfc1918_10",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_rfc1918_192",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_rfc1918_172",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_zero_network",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_ipv6_loopback",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_ipv6_unique_local",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_ipv4_mapped_loopback",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_rejects_empty_host",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_accepts_public_ip_literal",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "test_filter_pins_curlopt_resolve_and_disables_native_redirects",
+          "params": [],
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "test_rebind_pin_uses_first_resolution_only",
+          "params": [],
+          "exported": false,
+          "lineCount": 24
+        },
+        {
+          "name": "test_rebind_caught_when_preflight_resolves_to_private",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        }
+      ],
+      "classes": [
+        {
+          "name": "SafeFetchTest",
+          "methods": [
+            "test_rejects_ftp_scheme",
+            "test_rejects_javascript_scheme",
+            "test_rejects_file_scheme",
+            "test_rejects_missing_scheme",
+            "test_rejects_loopback_ipv4_literal",
+            "test_rejects_link_local_metadata_ip",
+            "test_rejects_rfc1918_10",
+            "test_rejects_rfc1918_192",
+            "test_rejects_rfc1918_172",
+            "test_rejects_zero_network",
+            "test_rejects_ipv6_loopback",
+            "test_rejects_ipv6_unique_local",
+            "test_rejects_ipv4_mapped_loopback",
+            "test_rejects_empty_host",
+            "test_accepts_public_ip_literal",
+            "test_filter_pins_curlopt_resolve_and_disables_native_redirects",
+            "test_rebind_pin_uses_first_resolution_only",
+            "test_rebind_caught_when_preflight_resolves_to_private"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 166
+        }
+      ],
+      "imports": [
+        {
+          "source": "PHPUnit\\Framework\\TestCase",
+          "specifiers": [
+            "TestCase"
+          ]
+        }
+      ],
+      "exports": [
+        "SafeFetchTest"
+      ],
+      "totalLines": 183,
+      "hasStructuralAnalysis": true
+    },
+    "tests/Unit/SchemasTest.php": {
+      "filePath": "tests/Unit/SchemasTest.php",
+      "contentHash": "1bebab47e9cd968293a84b70a2e2bd722cab08575a82b7fb41f6064b346a0d2b",
+      "functions": [
+        {
+          "name": "test_pagination_schema_returns_page_and_per_page",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_pagination_schema_types_are_integer",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_pagination_schema_per_page_maximum_100",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "test_pagination_schema_custom_default_per_page",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "test_post_type_schema_has_pattern",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "test_post_type_schema_default_is_post",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "test_post_type_schema_custom_description",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "test_success_output_schema_has_success_boolean",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        }
+      ],
+      "classes": [
+        {
+          "name": "SchemasTest",
+          "methods": [
+            "test_pagination_schema_returns_page_and_per_page",
+            "test_pagination_schema_types_are_integer",
+            "test_pagination_schema_per_page_maximum_100",
+            "test_pagination_schema_custom_default_per_page",
+            "test_post_type_schema_has_pattern",
+            "test_post_type_schema_default_is_post",
+            "test_post_type_schema_custom_description",
+            "test_success_output_schema_has_success_boolean"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 56
+        }
+      ],
+      "imports": [
+        {
+          "source": "PHPUnit\\Framework\\TestCase",
+          "specifiers": [
+            "TestCase"
+          ]
+        }
+      ],
+      "exports": [
+        "SchemasTest"
+      ],
+      "totalLines": 66,
+      "hasStructuralAnalysis": true
+    }
+  }
+}
